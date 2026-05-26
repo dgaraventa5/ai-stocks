@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<ownershipDocument>
+
+    <schemaVersion>X0508</schemaVersion>
+
+    <documentType>4</documentType>
+
+    <periodOfReport>2026-01-07</periodOfReport>
+
+    <issuer>
+        <issuerCik>0001868275</issuerCik>
+        <issuerName>Constellation Energy Corp</issuerName>
+        <issuerTradingSymbol>CEG</issuerTradingSymbol>
+    </issuer>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001697866</rptOwnerCik>
+            <rptOwnerName>Novotny Andrew R.</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>1310 POINT STREET</rptOwnerStreet1>
+            <rptOwnerStreet2></rptOwnerStreet2>
+            <rptOwnerCity>BALTIMORE</rptOwnerCity>
+            <rptOwnerState>MD</rptOwnerState>
+            <rptOwnerZipCode>21231</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isOfficer>true</isOfficer>
+            <officerTitle>See Remarks</officerTitle>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <aff10b5One>false</aff10b5One>
+
+    <nonDerivativeTable>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-01-07</value>
+            </transactionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>A</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+                <footnoteId id="F1"/>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>298853</value>
+                    <footnoteId id="F2"/>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <footnoteId id="F1"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>A</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>298853</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+    </nonDerivativeTable>
+
+    <footnotes>
+        <footnote id="F1">On January 7, 2026, upon consummation of the mergers and internal reorganization set forth in the Agreement and Plan of Merger, dated as of January 10, 2025 (the &quot;Merger Agreement&quot;), by and among the Issuer, Calpine Corporation, a Delaware corporation (&quot;Calpine&quot;), various direct and indirect wholly owned subsidiaries of each of the Issuer and Calpine, and a representative of the stockholders of Calpine, Calpine became an indirect, wholly owned subsidiary of the Issuer.  In connection therewith,  each common share of Calpine held by the reporting person was converted into the right to receive the Per Share Cash Consideration and Per Share Stock Consideration, each as defined in the Merger Agreement, with cash paid in lieu of any fractional share of the Issuer's Common Stock payable under the Per Share Stock Consideration.</footnote>
+        <footnote id="F2">These shares of Common Stock are subject to various restrictions, including lock-up agreements and time-based vesting conditions.</footnote>
+    </footnotes>
+
+    <remarks>Senior Executive Vice President, Constellation Power Operations, and President and CEO of Calpine</remarks>
+
+    <ownerSignature>
+        <signatureName>/s/ Brian Buck, Attorney-in-Fact for Andrew Novotny</signatureName>
+        <signatureDate>2026-01-09</signatureDate>
+    </ownerSignature>
+</ownershipDocument>

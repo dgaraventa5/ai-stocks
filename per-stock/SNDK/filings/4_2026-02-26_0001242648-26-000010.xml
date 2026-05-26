@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<ownershipDocument>
+
+    <schemaVersion>X0508</schemaVersion>
+
+    <documentType>4</documentType>
+
+    <periodOfReport>2026-02-25</periodOfReport>
+
+    <notSubjectToSection16>0</notSubjectToSection16>
+
+    <issuer>
+        <issuerCik>0002023554</issuerCik>
+        <issuerName>Sandisk Corp</issuerName>
+        <issuerTradingSymbol>SNDK</issuerTradingSymbol>
+    </issuer>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001867852</rptOwnerCik>
+            <rptOwnerName>Suzuki Miyuki</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>C/O SANDISK CORPORATION</rptOwnerStreet1>
+            <rptOwnerStreet2>951 SANDISK DRIVE</rptOwnerStreet2>
+            <rptOwnerCity>MILPITAS</rptOwnerCity>
+            <rptOwnerState>CA</rptOwnerState>
+            <rptOwnerZipCode>95035</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>1</isDirector>
+            <isOfficer>0</isOfficer>
+            <isTenPercentOwner>0</isTenPercentOwner>
+            <isOther>0</isOther>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <aff10b5One>0</aff10b5One>
+
+    <nonDerivativeTable>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-02-25</value>
+            </transactionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>S</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+                <footnoteId id="F1"/>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>3500</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>627.5313</value>
+                    <footnoteId id="F2"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>9907</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+    </nonDerivativeTable>
+
+    <footnotes>
+        <footnote id="F1">Represents shares of common stock sold to satisfy tax obligations resulting from the vesting of equity awards in the tax year ended December 31, 2025 and capital gains incurred with respect to such sales in the tax year ending December 31, 2026. The Reporting Person is subject to a lock-up agreement, expiring March 19, 2026, which prohibits transfers, sales or other dispositions of shares of common stock during the applicable restricted period, subject to certain exceptions, including an exception for the sales reported on this Form 4.</footnote>
+        <footnote id="F2">Represents the weighted average sale price per share. The shares were sold in multiple transactions at prices ranging from $627.39 to $627.5351. The Reporting Person undertakes to provide the Issuer, any security holder, or the SEC staff, upon request, full information regarding the number of shares sold at each individual price.</footnote>
+    </footnotes>
+
+    <ownerSignature>
+        <signatureName>By: /s/ Sharon Spehar Attorney-in-Fact For: Miyuki Suzuki</signatureName>
+        <signatureDate>2026-02-26</signatureDate>
+    </ownerSignature>
+</ownershipDocument>

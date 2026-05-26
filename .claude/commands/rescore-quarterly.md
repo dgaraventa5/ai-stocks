@@ -1,0 +1,34 @@
+---
+description: Quarterly rescore of all stale Watchlist rows (designed for /goal mode)
+---
+
+Run the quarterly rescore for the AI Supply Chain Research project. Refer to CLAUDE.md.
+
+**This command is designed for `/goal` mode.**
+
+## Completion criteria
+
+- [ ] Every Watchlist row with Last Updated > 90 days has refreshed financial inputs
+- [ ] Last Updated set to today for each refreshed row
+- [ ] No subjective 1-5 columns modified
+- [ ] `/tracking/quarterly-rescore-{YYYY}-Q{N}.md` exists with these sections:
+  - Tier changes (e.g., ✓ → ✓✓, or ? → ✓) with score decomposition for each
+  - Top 10 score increases (with which category drove it)
+  - Top 10 score decreases (with which category drove it)
+  - New names to consider (from recent 13F adds or news mentions)
+  - Names to drop (✗ tier for 2 quarters running)
+  - Top 15 by current Total Score
+- [ ] No formula errors in the spreadsheet after save
+
+## Execution
+
+0. **For any row with Tier ✓✓ or ✓✓✓: MANDATORY invoke /refresh-context $TICKER.** The high-conviction names get a fresh-research pass at every quarterly rescore — these are the names where stale models cost real money. Lower-tier names can skip the research pass (objective input refresh is enough). See `.claude/commands/refresh-context.md`.
+1. Identify stale rows (Last Updated > 90 days ago)
+2. Re-pull financial inputs ticker by ticker. Respect SEC EDGAR rate limits (10 req/sec). yfinance can run more freely but throttle if errors appear.
+3. Update Last Updated to today for each refreshed row
+4. Compare current scores against the prior quarterly-rescore report
+5. Write the rescore report — note any rating changes that came out of /refresh-context briefings, with citations
+
+## Report
+
+When goal is met, print the top 15 tickers by Total Score so I see my priority queue for the next quarter.

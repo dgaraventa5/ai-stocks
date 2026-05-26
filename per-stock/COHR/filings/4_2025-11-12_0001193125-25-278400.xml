@@ -1,0 +1,401 @@
+<?xml version="1.0"?>
+<ownershipDocument>
+
+    <schemaVersion>X0508</schemaVersion>
+
+    <documentType>4</documentType>
+
+    <periodOfReport>2025-11-07</periodOfReport>
+
+    <issuer>
+        <issuerCik>0000820318</issuerCik>
+        <issuerName>COHERENT CORP.</issuerName>
+        <issuerTradingSymbol>COHR</issuerTradingSymbol>
+    </issuer>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001040508</rptOwnerCik>
+            <rptOwnerName>BAIN CAPITAL INVESTORS LLC</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>200 CLARENDON STREET</rptOwnerStreet1>
+            <rptOwnerStreet2></rptOwnerStreet2>
+            <rptOwnerCity>BOSTON</rptOwnerCity>
+            <rptOwnerState>MA</rptOwnerState>
+            <rptOwnerZipCode>02116</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>false</isDirector>
+            <isOfficer>false</isOfficer>
+            <isTenPercentOwner>true</isTenPercentOwner>
+            <isOther>false</isOther>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001706270</rptOwnerCik>
+            <rptOwnerName>Bain Capital Fund XII, LP</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>200 CLARENDON STREET</rptOwnerStreet1>
+            <rptOwnerStreet2></rptOwnerStreet2>
+            <rptOwnerCity>BOSTON</rptOwnerCity>
+            <rptOwnerState>MA</rptOwnerState>
+            <rptOwnerZipCode>02116</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>false</isDirector>
+            <isOfficer>false</isOfficer>
+            <isTenPercentOwner>true</isTenPercentOwner>
+            <isOther>false</isOther>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001830424</rptOwnerCik>
+            <rptOwnerName>Bain Capital Partners XII, LLC</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>200 CLARENDON STREET</rptOwnerStreet1>
+            <rptOwnerStreet2></rptOwnerStreet2>
+            <rptOwnerCity>BOSTON</rptOwnerCity>
+            <rptOwnerState>MA</rptOwnerState>
+            <rptOwnerZipCode>02116</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>false</isDirector>
+            <isOfficer>false</isOfficer>
+            <isTenPercentOwner>true</isTenPercentOwner>
+            <isOther>false</isOther>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001911154</rptOwnerCik>
+            <rptOwnerName>BCPE Watson (DE) Aggregator GP, LLC</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>200 CLARENDON STREET</rptOwnerStreet1>
+            <rptOwnerStreet2></rptOwnerStreet2>
+            <rptOwnerCity>BOSTON</rptOwnerCity>
+            <rptOwnerState>MA</rptOwnerState>
+            <rptOwnerZipCode>02116</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>false</isDirector>
+            <isOfficer>false</isOfficer>
+            <isTenPercentOwner>true</isTenPercentOwner>
+            <isOther>false</isOther>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001911143</rptOwnerCik>
+            <rptOwnerName>BCPE Watson (DE) Aggregator, LP</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>200 CLARENDON STREET</rptOwnerStreet1>
+            <rptOwnerStreet2></rptOwnerStreet2>
+            <rptOwnerCity>BOSTON</rptOwnerCity>
+            <rptOwnerState>MA</rptOwnerState>
+            <rptOwnerZipCode>02116</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>false</isDirector>
+            <isOfficer>false</isOfficer>
+            <isTenPercentOwner>true</isTenPercentOwner>
+            <isOther>false</isOther>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001910886</rptOwnerCik>
+            <rptOwnerName>BCPE Watson (DE) BML GP, LLC</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>200 CLARENDON STREET</rptOwnerStreet1>
+            <rptOwnerStreet2></rptOwnerStreet2>
+            <rptOwnerCity>BOSTON</rptOwnerCity>
+            <rptOwnerState>MA</rptOwnerState>
+            <rptOwnerZipCode>02116</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>false</isDirector>
+            <isOfficer>false</isOfficer>
+            <isTenPercentOwner>true</isTenPercentOwner>
+            <isOther>false</isOther>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001910890</rptOwnerCik>
+            <rptOwnerName>BCPE Watson (DE) BML, LP</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerStreet1>200 CLARENDON STREET</rptOwnerStreet1>
+            <rptOwnerStreet2></rptOwnerStreet2>
+            <rptOwnerCity>BOSTON</rptOwnerCity>
+            <rptOwnerState>MA</rptOwnerState>
+            <rptOwnerZipCode>02116</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>false</isDirector>
+            <isOfficer>false</isOfficer>
+            <isTenPercentOwner>true</isTenPercentOwner>
+            <isOther>false</isOther>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <aff10b5One>false</aff10b5One>
+
+    <nonDerivativeTable>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2025-11-07</value>
+            </transactionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>C</transactionCode>
+                <equitySwapInvolved>false</equitySwapInvolved>
+                <footnoteId id="F1"/>
+                <footnoteId id="F2"/>
+                <footnoteId id="F3"/>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>7754252</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <footnoteId id="F1"/>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>A</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>7754252</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>I</value>
+                </directOrIndirectOwnership>
+                <natureOfOwnership>
+                    <value>See footnotes</value>
+                    <footnoteId id="F4"/>
+                    <footnoteId id="F5"/>
+                </natureOfOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2025-11-07</value>
+            </transactionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>S</transactionCode>
+                <equitySwapInvolved>false</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>7500000</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>143.37</value>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>254252</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>I</value>
+                </directOrIndirectOwnership>
+                <natureOfOwnership>
+                    <value>See footnotes</value>
+                    <footnoteId id="F4"/>
+                    <footnoteId id="F5"/>
+                </natureOfOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2025-11-10</value>
+            </transactionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>J</transactionCode>
+                <equitySwapInvolved>false</equitySwapInvolved>
+                <footnoteId id="F6"/>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>254252</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <footnoteId id="F6"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>0</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>I</value>
+                </directOrIndirectOwnership>
+                <natureOfOwnership>
+                    <value>See footnotes</value>
+                    <footnoteId id="F4"/>
+                    <footnoteId id="F5"/>
+                </natureOfOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+    </nonDerivativeTable>
+
+    <derivativeTable>
+        <derivativeTransaction>
+            <securityTitle>
+                <value>Series B-1 Convertible Preferred Stock</value>
+            </securityTitle>
+            <conversionOrExercisePrice>
+                <footnoteId id="F1"/>
+                <footnoteId id="F2"/>
+                <footnoteId id="F3"/>
+            </conversionOrExercisePrice>
+            <transactionDate>
+                <value>2025-11-07</value>
+            </transactionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>C</transactionCode>
+                <equitySwapInvolved>false</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>54023</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <footnoteId id="F1"/>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <exerciseDate>
+                <footnoteId id="F1"/>
+                <footnoteId id="F2"/>
+                <footnoteId id="F3"/>
+            </exerciseDate>
+            <expirationDate>
+                <footnoteId id="F1"/>
+                <footnoteId id="F2"/>
+                <footnoteId id="F3"/>
+            </expirationDate>
+            <underlyingSecurity>
+                <underlyingSecurityTitle>
+                    <value>Common Stock</value>
+                </underlyingSecurityTitle>
+                <underlyingSecurityShares>
+                    <value>7754252</value>
+                </underlyingSecurityShares>
+            </underlyingSecurity>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>20977</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>I</value>
+                </directOrIndirectOwnership>
+                <natureOfOwnership>
+                    <value>See footnotes</value>
+                    <footnoteId id="F4"/>
+                    <footnoteId id="F5"/>
+                </natureOfOwnership>
+            </ownershipNature>
+        </derivativeTransaction>
+    </derivativeTable>
+
+    <footnotes>
+        <footnote id="F1">On November 7, 2025, the Reporting Persons converted 54,023 shares of Series B-1 Convertible Preferred Stock (&quot;Series B-1 Preferred Stock&quot; and, together with the Series B-2 Convertible Preferred Stock, the &quot;Series B Preferred Stock&quot;) into 7,754,253 shares of Common Stock.  Series B-1 Preferred Stock was issued on March 31, 2021 pursuant to the Statement with Respect to Shares setting forth the terms of the Series B Convertible Preferred Stock filed with the Pennsylvania Department of State Corporations Bureau and effective March 30, 2021 (the &quot;Statement with Respect to Shares&quot;). Subject to adjustments set forth in the Statement with Respect to Shares, from the issuance date of such share, dividends accrue daily on the applicable stated value of each share of the Series B Preferred Stock at 5% per annum with an initial stated value of $10,000 per share.</footnote>
+        <footnote id="F2">Until the fourth anniversary of the applicable issuance date, all dividend payments are compounded and added to the applicable stated value on a quarterly basis (a &quot;PIK Dividend&quot;). Following the fourth anniversary of the applicable issuance date, dividends will be payable in the form of, at the Issuer's sole discretion, (i) cash, (ii) a PIK Dividend or (iii) any combination of both. Commencing on July 1, 2022, each share of Series B Preferred Stock became convertible, at the option of the holder, into a number of shares of the Issuer's common stock equal to the then-applicable stated value divided by the then-applicable conversion price. The conversion price of the Series B Preferred Stock is initially $85.00 per share, subject to adjustments set forth in the Statement with Respect to Shares.</footnote>
+        <footnote id="F3">In addition, at any time after the third anniversary of the applicable issuance date, if the closing sale price of the Issuer's common stock exceeds 150% of the then-applicable conversion price for 20 trading days in any 30 consecutive trading day period, the Issuer may elect to convert all of the shares of the applicable series of Series B Preferred Stock into a number of shares of the Issuer's common stock equal to the then-applicable stated value divided by the then-applicable conversion price in accordance with the Statement with Respect to Shares.</footnote>
+        <footnote id="F4">Directly held by BCPE Watson (DE) BML, LP (&quot;BML&quot;). BCPE Watson (DE) BML GP, LLC (&quot;BML GP&quot;) is the general partner of BML. As a result, BML GP may be deemed to share voting and dispositive power with respect to the securities held by BML. BML GP disclaims beneficial ownership of such securities, except to the extent of its pecuniary interest therein.</footnote>
+        <footnote id="F5">Bain Capital Investors, LLC (&quot;BCI&quot;) is the manager of Bain Capital Partners XII, LLC (&quot;Partners XII&quot;), which is the general partner of Bain Capital Fund XII, L.P. (&quot;Fund XII&quot;). Fund XII is the sole member of BCPE Watson (DE) Aggregator GP, LLC (&quot;Aggregator GP&quot;), which is the general partner of BCPE Watson (DE) Aggregator, LP (&quot;Aggregator&quot;). Aggregator is the sole member of BML GP. As a result, each of BCI, Partners XII, Fund XII, Aggregator GP and Aggregator may be deemed to share voting and dispositive power with respect to the securities held by  BML. Each of BCI, Partners XII, Fund XII, Aggregator GP and Aggregator disclaims beneficial ownership of such securities, except to the extent of its pecuniary interest therein.</footnote>
+        <footnote id="F6">On November 10, 2025, BML, distributed 254,252 shares of Common Stock to one or more members or partners of BML in connection with certain charitable gifts to be made by such members or partners or their direct or indirect owners.</footnote>
+    </footnotes>
+
+    <ownerSignature>
+        <signatureName>Bain Capital Investors, LLC, By: /s/ Joseph Robbins, Title: Authorized Signatory</signatureName>
+        <signatureDate>2025-11-12</signatureDate>
+    </ownerSignature>
+
+    <ownerSignature>
+        <signatureName>Bain Capital Fund XII, L.P., By: Bain Capital Partners XII, LLC, its general partner, By: Bain Capital Investors, LLC, its manager, By: /s/ Joseph Robbins, Title: Authorized Signatory</signatureName>
+        <signatureDate>2025-11-12</signatureDate>
+    </ownerSignature>
+
+    <ownerSignature>
+        <signatureName>Bain Capital Partners XII, LLC, By: Bain Capital Investors, LLC, its manager, By: /s/ Joseph Robbins, Title: Authorized Signatory</signatureName>
+        <signatureDate>2025-11-12</signatureDate>
+    </ownerSignature>
+
+    <ownerSignature>
+        <signatureName>BCPE Watson (DE) Aggregator GP, LLC, By: /s/ Joseph Robbins, Title: Authorized Signatory</signatureName>
+        <signatureDate>2025-11-12</signatureDate>
+    </ownerSignature>
+
+    <ownerSignature>
+        <signatureName>BCPE Watson (DE) Aggregator, LP, By: BCPE Watson (DE) Aggregator GP, LLC, its general partner, By: /s/ Joseph Robbins, Title: Authorized Signatory</signatureName>
+        <signatureDate>2025-11-12</signatureDate>
+    </ownerSignature>
+
+    <ownerSignature>
+        <signatureName>BCPE Watson (DE) BML GP, LLC, By: /s/ Joseph Robbins, Title: Authorized Signatory</signatureName>
+        <signatureDate>2025-11-12</signatureDate>
+    </ownerSignature>
+
+    <ownerSignature>
+        <signatureName>BCPE Watson (DE) BML, LP, By: BCPE Watson (DE) BML GP, LLC, its general partner, By: /s/ Joseph Robbins, Title: Authorized Signatory</signatureName>
+        <signatureDate>2025-11-12</signatureDate>
+    </ownerSignature>
+</ownershipDocument>
