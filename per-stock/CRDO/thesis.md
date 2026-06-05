@@ -1,20 +1,22 @@
-# CRDO — {Company Name}
+# CRDO — Credo Technology Group Holding Ltd.
 
-**Layer:** {e.g., Power Generation / IPPs}
-**Last reviewed:** 2026-05-25
+**Layer:** 07 — Optical Networking / Connectivity
+**Last reviewed:** 2026-06-05
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
 **Thesis-break trigger:** {what single development would force exit}
 
+> **NOTE (2026-06-05):** This file is an unfilled template. Q4 FY2026 earnings processed — see `context-2026-06-05.md` and `transcripts/Q4-2026-delta.md` for data to populate sections below. All sections flagged [STALE - revisit] await Dom's input.
+
 ---
 
-## 1. One-line thesis
+## 1. One-line thesis [STALE - revisit]
 
 > {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
 
 ---
 
-## 2. Position in the AI supply chain
+## 2. Position in the AI supply chain [STALE - revisit]
 
 - **What they do:** {2-3 sentences}
 - **Where they sit:** {layer in supply chain, role}
@@ -23,7 +25,7 @@
 
 ---
 
-## 3. Customers
+## 3. Customers [STALE - revisit]
 
 | Customer | % revenue | Source / date |
 |---|---|---|
@@ -35,7 +37,7 @@
 
 ---
 
-## 4. Pricing & demand
+## 4. Pricing & demand [STALE - revisit]
 
 - **Pricing trend:** {ASPs rising/flat/falling, last 8 quarters}
 - **Lead times / backlog:** {are they widening or compressing?}
@@ -44,7 +46,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit]
 
 (See `financials.xlsx` for detail)
 
@@ -75,7 +77,7 @@
 
 ---
 
-## 7. Valuation
+## 7. Valuation [STALE - revisit]
 
 - **Current multiple:** {P/E, EV/EBITDA, EV/Sales — pick the right one for the business}
 - **Peer comparison:** {how does it trade vs. comparables}
@@ -86,7 +88,7 @@
 
 ---
 
-## 8. Catalysts (next 4 quarters)
+## 8. Catalysts (next 4 quarters) [STALE - revisit]
 
 | Date | Event | Why it matters |
 |---|---|---|
@@ -98,7 +100,7 @@
 
 ---
 
-## 9. Risks
+## 9. Risks [STALE - revisit]
 
 - **Thesis-killer #1:** {single development that would force exit}
 - **Thesis-killer #2:** {second-most concerning risk}
