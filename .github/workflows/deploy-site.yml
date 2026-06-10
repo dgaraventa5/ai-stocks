@@ -5,6 +5,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  # GitHub forces Node 24 for actions from 2026-06-16; opt in early so a
+  # breakage surfaces in an attended run, not an unattended Friday deploy.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
