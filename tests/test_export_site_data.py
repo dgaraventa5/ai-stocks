@@ -143,9 +143,12 @@ def test_main_writes_all_files(repo):
 
 def test_privacy_no_real_dollars_anywhere(repo):
     """THE regression test: planted real-dollar values must never leak."""
+    import re as _re
     from conftest import REAL_DOLLARS
     ex.main(repo)
     for p in (repo / 'site' / 'data').glob('*.json'):
         text = p.read_text()
         for planted in REAL_DOLLARS:
-            assert planted not in text, f'{planted} leaked into {p.name}'
+            pattern = r'(?<![\d.])' + _re.escape(planted)
+            assert not _re.search(pattern, text), \
+                f'{planted} leaked into {p.name}'

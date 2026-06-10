@@ -59,7 +59,8 @@ def export_positions(root: Path) -> list[dict]:
     names = _company_names(root)
     out = []
     for row in ws.iter_rows(min_row=3, values_only=True):
-        if not row[0] or row[6] != 'Y':
+        include = str(row[6]).strip().upper() if row[6] is not None else ''
+        if not row[0] or include != 'Y':
             continue
         layer_num = str(row[1])[:2]
         if layer_num not in LAYERS:
@@ -173,6 +174,8 @@ def export_changes(root: Path) -> list[dict]:
             continue
         key = (str(date)[:10], ticker)
         g = grouped.setdefault(key, {'dims': [], 'rationale': rationale})
+        if not g['rationale'] and rationale:
+            g['rationale'] = rationale
         g['dims'].append(str(dim))
     for (date, ticker), g in grouped.items():
         note = (g['rationale'] or '').strip()
@@ -242,7 +245,7 @@ def main(root: Path | None = None) -> None:
         'as_of': performance['as_of'],
         'last_rebalance': cfg['events'][-1]['date'],
         'holdings': len(positions),
-        'notional': NOTIONAL,
+        'notional': int(NOTIONAL),
     }
     for name, data in (('positions', positions), ('performance', performance),
                        ('changes', changes), ('theses', theses),
@@ -252,5 +255,9 @@ def main(root: Path | None = None) -> None:
 
 
 if __name__ == '__main__':
-    main(Path(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[1] == '--root'
-         else None)
+    if len(sys.argv) == 1:
+        main()
+    elif len(sys.argv) == 3 and sys.argv[1] == '--root':
+        main(Path(sys.argv[2]))
+    else:
+        fail(f'usage: export_site_data.py [--root DIR] (got {sys.argv[1:]})')

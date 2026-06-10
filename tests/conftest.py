@@ -13,7 +13,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'scripts'))
 
-REAL_DOLLARS = ['13800', '824.7', '13386.55']   # planted; must never leak
+REAL_DOLLARS = ['13800', '824.7', '13386.55', '13903.5',
+                '900.0', '700.0', '500.0', '71.72', '50.0']   # planted; must never leak
 
 
 @pytest.fixture
