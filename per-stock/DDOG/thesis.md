@@ -8,13 +8,13 @@
 
 ---
 
-## 1. One-line thesis
+## 1. One-line thesis [STALE - revisit: thesis template still blank; Q1 2026 data now available to populate]
 
 > {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
 
 ---
 
-## 2. Position in the AI supply chain
+## 2. Position in the AI supply chain [STALE - revisit: Q1 2026 shows 6,500 AI integration customers, GPU Monitoring launched, 7-8 figure AI lab deals; need to fill in]
 
 - **What they do:** {2-3 sentences}
 - **Where they sit:** {layer in supply chain, role}
@@ -44,7 +44,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit: Q1 2026 reported $1.006B revenue, 32% YoY, 22% non-GAAP op margin, 29% FCF margin; populate table]
 
 (See `financials.xlsx` for detail)
 
@@ -75,7 +75,7 @@
 
 ---
 
-## 7. Valuation
+## 7. Valuation [STALE - revisit: EV/EBITDA of 2,184x is GAAP distortion from SBC; use Fwd P/E ~79x, EV/Revenue ~18x, EV/FCF ~65x instead; see Q1-2026-delta.md]
 
 - **Current multiple:** {P/E, EV/EBITDA, EV/Sales — pick the right one for the business}
 - **Peer comparison:** {how does it trade vs. comparables}
@@ -86,7 +86,7 @@
 
 ---
 
-## 8. Catalysts (next 4 quarters)
+## 8. Catalysts (next 4 quarters) [STALE - revisit: DASH conference June 9-10 2026, Q2 earnings ~Aug 2026; populate]
 
 | Date | Event | Why it matters |
 |---|---|---|

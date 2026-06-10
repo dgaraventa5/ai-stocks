@@ -8,13 +8,13 @@
 
 ---
 
-## 1. One-line thesis
+## 1. One-line thesis [STALE - revisit]
 
 > {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
 
 ---
 
-## 2. Position in the AI supply chain
+## 2. Position in the AI supply chain [STALE - revisit]
 
 - **What they do:** {2-3 sentences}
 - **Where they sit:** {layer in supply chain, role}
@@ -23,7 +23,7 @@
 
 ---
 
-## 3. Customers
+## 3. Customers [STALE - revisit]
 
 | Customer | % revenue | Source / date |
 |---|---|---|
@@ -35,7 +35,7 @@
 
 ---
 
-## 4. Pricing & demand
+## 4. Pricing & demand [STALE - revisit]
 
 - **Pricing trend:** {ASPs rising/flat/falling, last 8 quarters}
 - **Lead times / backlog:** {are they widening or compressing?}
@@ -44,7 +44,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit]
 
 (See `financials.xlsx` for detail)
 
@@ -75,7 +75,7 @@
 
 ---
 
-## 7. Valuation
+## 7. Valuation [STALE - revisit]
 
 - **Current multiple:** {P/E, EV/EBITDA, EV/Sales — pick the right one for the business}
 - **Peer comparison:** {how does it trade vs. comparables}
@@ -86,7 +86,7 @@
 
 ---
 
-## 8. Catalysts (next 4 quarters)
+## 8. Catalysts (next 4 quarters) [STALE - revisit]
 
 | Date | Event | Why it matters |
 |---|---|---|
@@ -98,7 +98,7 @@
 
 ---
 
-## 9. Risks
+## 9. Risks [STALE - revisit]
 
 - **Thesis-killer #1:** {single development that would force exit}
 - **Thesis-killer #2:** {second-most concerning risk}

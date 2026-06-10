@@ -38,6 +38,16 @@ from batch_score import compute_inputs
 # update the row
 ```
 
+### 2b. FCF conversion red-flag check (added 2026-06-09)
+
+Earnings-quality screen, run on the same yfinance pull: compute **FCF conversion = TTM FCF ÷ TTM net income**. Flag in the context briefing if **conversion < 60% for 2+ consecutive fiscal years AND receivables + inventory are growing faster than revenue** — that combination is the accrual-games signature (reported profits not turning into cash while working capital balloons).
+
+This is a **qualitative red flag, not a scored metric** — it was deliberately kept out of the Watchlist because it misfires on this universe in both directions:
+- High-SBC names mechanically show conversion >100% (SBC adds back to OCF) — the metric *flatters* aggressive non-GAAP names
+- Heavy growth-capex names (memory, power, data center buildouts) mechanically show low conversion — penalizes investment, not accounting
+
+So interpret with judgment: a low conversion number only matters if the working-capital condition also holds. Note the finding (or "clean") in the briefing's Section 2.
+
 ### 3. WebSearch with current year in the query
 
 The current year is **mandatory** in search queries — Claude's bias is to assume "latest" means 2024 or 2025. Always include the actual current year.

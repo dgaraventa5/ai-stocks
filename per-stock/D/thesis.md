@@ -8,13 +8,13 @@
 
 ---
 
-## 1. One-line thesis
+## 1. One-line thesis [STALE - revisit: NEE merger (2026-05-18) fundamentally changes D's thesis — D shareholders become 25.5% of combined NEE/D entity]
 
 > {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
 
 ---
 
-## 2. Position in the AI supply chain
+## 2. Position in the AI supply chain [STALE - revisit: combined NEE/D entity becomes world's largest regulated utility with 130+ GW large-load pipeline and 51 GW contracted DC capacity]
 
 - **What they do:** {2-3 sentences}
 - **Where they sit:** {layer in supply chain, role}
@@ -23,7 +23,7 @@
 
 ---
 
-## 3. Customers
+## 3. Customers [STALE - revisit: merger combines D's Virginia data center customer base with NEE's FL/renewables customer base; hyperscaler concentration profile changes]
 
 | Customer | % revenue | Source / date |
 |---|---|---|
@@ -44,7 +44,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit: post-close financials will reflect combined entity; share count changes dramatically via 0.8138 exchange ratio]
 
 (See `financials.xlsx` for detail)
 
@@ -63,7 +63,7 @@
 
 ---
 
-## 6. Moat
+## 6. Moat [STALE - revisit: combined entity has dramatically larger scale advantage and regulatory/geographic footprint across FL, VA, NC, SC]
 
 - **IP / process know-how:** {patents, trade secrets, technical lead}
 - **Scale advantage:** {unit cost vs. competitors at volume}
@@ -75,7 +75,7 @@
 
 ---
 
-## 7. Valuation
+## 7. Valuation [STALE - revisit: D share price is now anchored to NEE via 0.8138 exchange ratio; standalone valuation is less relevant until deal-break scenario]
 
 - **Current multiple:** {P/E, EV/EBITDA, EV/Sales — pick the right one for the business}
 - **Peer comparison:** {how does it trade vs. comparables}
@@ -86,7 +86,7 @@
 
 ---
 
-## 8. Catalysts (next 4 quarters)
+## 8. Catalysts (next 4 quarters) [STALE - revisit: merger approval milestones are now the dominant catalyst path for next 12-18 months]
 
 | Date | Event | Why it matters |
 |---|---|---|
@@ -98,7 +98,7 @@
 
 ---
 
-## 9. Risks
+## 9. Risks [STALE - revisit: merger adds regulatory approval risk (FERC, VA SCC, NRC, NC UC, SC PSC), deal-break risk, integration risk; thesis-killer framework needs to incorporate merger scenarios]
 
 - **Thesis-killer #1:** {single development that would force exit}
 - **Thesis-killer #2:** {second-most concerning risk}

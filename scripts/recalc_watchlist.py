@@ -69,6 +69,14 @@ def score_ps(v):
         if v <= t: return s
     return 5
 
+def score_peg(v):
+    # PEG added to Value 2026-05-25. Mirrors Watchlist col I band.
+    v = _num(v)
+    if v is None: return None
+    for t, s in [(0.5, 100), (1, 90), (1.5, 75), (2, 60), (2.5, 45), (3, 30)]:
+        if v <= t: return s
+    return 15
+
 def score_roic(v):
     v = _num(v)
     if v is None: return None
@@ -100,7 +108,7 @@ def score_nd_ebitda(v):
 def score_rev_cagr(v):
     v = _num(v)
     if v is None: return None
-    for t, s in [(40, 100), (30, 90), (20, 75), (10, 60), (5, 45), (0, 30)]:
+    for t, s in [(40, 100), (30, 90), (20, 75), (15, 60), (10, 45), (5, 30)]:
         if v >= t: return s
     return 15
 
@@ -117,6 +125,15 @@ def score_eps_yoy(v):
     for t, s in [(40, 100), (30, 90), (20, 75), (10, 60), (0, 45), (-10, 30)]:
         if v >= t: return s
     return 15
+
+def score_50dma(v):
+    # % of last 120 trading days with close > 50-day SMA. Added 2026-06-09.
+    # Mirrors Watchlist col AC band inside the Momentum Score formula.
+    v = _num(v)
+    if v is None: return None
+    for t, s in [(85, 100), (70, 90), (55, 75), (40, 60), (25, 40)]:
+        if v >= t: return s
+    return 20
 
 
 def avg_nonnull(vals):
@@ -135,14 +152,16 @@ def recalc():
         if row[0] and row[1] is not None:
             weights[row[0]] = row[1]
 
-    # Default if Weights sheet uses different schema — fall back to rubric
+    # Defaults match the 2026-05-25 reweight. Weights sheet labels the AI row
+    # "AI Thesis" (not "AI"), so read that key explicitly or the get() silently
+    # falls back to the pre-reweight 30%.
     w = {
-        'Value': weights.get('Value', 0.15),
+        'Value': weights.get('Value', 0.20),
         'Quality': weights.get('Quality', 0.20),
         'Growth': weights.get('Growth', 0.15),
-        'AI': weights.get('AI', 0.30),
+        'AI': weights.get('AI Thesis', weights.get('AI', 0.20)),
         'Momentum': weights.get('Momentum', 0.10),
-        'Risk': weights.get('Risk', 0.10),
+        'Risk': weights.get('Risk', 0.15),
     }
 
     results = []
@@ -151,34 +170,43 @@ def recalc():
         if not ticker: continue
         layer = ws.cell(row=r, column=3).value
 
-        # Objective inputs
-        fwd_pe = ws.cell(row=r, column=5).value
-        ev_ebitda = ws.cell(row=r, column=6).value
-        fcf_yield = ws.cell(row=r, column=7).value
-        ps = ws.cell(row=r, column=8).value
-        roic = ws.cell(row=r, column=10).value
-        gm = ws.cell(row=r, column=11).value
-        fcf_mgn = ws.cell(row=r, column=12).value
-        nd_eb = ws.cell(row=r, column=13).value
-        rev_cagr = ws.cell(row=r, column=15).value
-        rev_yoy = ws.cell(row=r, column=16).value
-        eps_yoy = ws.cell(row=r, column=17).value
+        # Objective inputs (current layout: PEG inserted at col I=9 on 2026-05-25,
+        # which shifts ROIC..EPS-YoY one column right vs the pre-PEG schema).
+        fwd_pe = ws.cell(row=r, column=5).value       # E
+        ev_ebitda = ws.cell(row=r, column=6).value    # F
+        fcf_yield = ws.cell(row=r, column=7).value    # G
+        ps = ws.cell(row=r, column=8).value           # H
+        # PEG (col I) is a formula; openpyxl can't read its value, so recompute it
+        # the same way as the Watchlist formula: E/R when both valid, R>0, E>=0.
+        E, R = _num(fwd_pe), _num(ws.cell(row=r, column=18).value)
+        peg = (E / R) if (E is not None and R is not None and R > 0 and E >= 0) else None
+        roic = ws.cell(row=r, column=11).value        # K
+        gm = ws.cell(row=r, column=12).value          # L
+        fcf_mgn = ws.cell(row=r, column=13).value     # M
+        nd_eb = ws.cell(row=r, column=14).value       # N
+        rev_cagr = ws.cell(row=r, column=16).value    # P
+        rev_yoy = ws.cell(row=r, column=17).value     # Q
+        eps_yoy = ws.cell(row=r, column=18).value     # R
 
-        # Subjective
-        ai_inputs = [ws.cell(row=r, column=c).value for c in [19, 20, 21, 22, 23]]
-        mom_inputs = [ws.cell(row=r, column=c).value for c in [25, 26, 27]]
-        risk_inputs = [ws.cell(row=r, column=c).value for c in [29, 30, 31, 32]]
+        # Subjective (AI: T-X, Momentum: Z-AB, Risk: AE-AH) + objective 50DMA %
+        # (AC, inserted 2026-06-09 — shifts Risk/Score columns one right).
+        ai_inputs = [ws.cell(row=r, column=c).value for c in [20, 21, 22, 23, 24]]
+        mom_inputs = [ws.cell(row=r, column=c).value for c in [26, 27, 28]]
+        dma_pct = ws.cell(row=r, column=29).value
+        risk_inputs = [ws.cell(row=r, column=c).value for c in [31, 32, 33, 34]]
 
         # Subscores
         value = avg_nonnull([score_fwd_pe(fwd_pe), score_ev_ebitda(ev_ebitda),
-                             score_fcf_yield(fcf_yield), score_ps(ps)])
-        # ND/EBITDA: only include if EBITDA positive — proxy: include only when nd_eb is sensibly numeric
+                             score_fcf_yield(fcf_yield), score_ps(ps), score_peg(peg)])
+        # ROIC/ND-EBITDA may be blank (yfinance gap / non-positive EBITDA); AVERAGE skips blanks.
         quality = avg_nonnull([score_roic(roic), score_gm(gm), score_fcf_mgn(fcf_mgn),
                                score_nd_ebitda(nd_eb)])
         growth = avg_nonnull([score_rev_cagr(rev_cagr), score_rev_yoy(rev_yoy),
                               score_eps_yoy(eps_yoy)])
         ai = (sum(x for x in ai_inputs if x is not None) / sum(1 for x in ai_inputs if x is not None) * 20) if any(x is not None for x in ai_inputs) else None
-        momentum = (sum(x for x in mom_inputs if x is not None) / sum(1 for x in mom_inputs if x is not None) * 20) if any(x is not None for x in mom_inputs) else None
+        # Momentum blends 3 subjective ratings (×20) with the banded 50DMA %.
+        momentum = avg_nonnull([x * 20 if x is not None else None for x in mom_inputs]
+                               + [score_50dma(dma_pct)])
         risk = (sum(x for x in risk_inputs if x is not None) / sum(1 for x in risk_inputs if x is not None) * 20) if any(x is not None for x in risk_inputs) else None
 
         # TOTAL

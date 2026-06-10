@@ -132,11 +132,11 @@ The goal of this rubric: replace vibes with checkable criteria so two informed p
 
 ---
 
-#### D5. Hyperscaler Exposure
+#### D5. Hyperscaler Exposure / AI Infrastructure Commitment
 
-**What it measures:** Direct, material revenue from MSFT, GOOGL, AMZN, META, ORCL. This is binary in nature — either hyperscalers are anchor customers or they aren't.
+**What it measures:** For supply chain companies (Layers 1-8): direct, material revenue from hyperscaler customers. For hyperscalers and cloud providers (Layer 9): intensity of AI infrastructure investment commitment. Two frameworks, same dimension — both measure how deeply tied the company is to the AI infrastructure buildout.
 
-**Criteria:**
+**Criteria — Layers 1-8 (supplier framework):**
 | Rating | Definition |
 |---|---|
 | **5** | Multiple hyperscalers as anchor customers, combined >30% of revenue. Disclosed as "concentrated with major cloud providers." |
@@ -145,16 +145,26 @@ The goal of this rubric: replace vibes with checkable criteria so two informed p
 | **2** | Indirect exposure — selling to mid-tier customers who sell to hyperscalers. |
 | **1** | No meaningful hyperscaler revenue. |
 
+**Criteria — Layer 9 (hyperscaler/cloud framework, added 2026-05-26):**
+| Rating | Definition |
+|---|---|
+| **5** | $30B+/yr AI capex, multi-year committed buildout, clear strategic priority. Signed multi-year infrastructure deals (GPU supply, power PPAs). |
+| **4** | $10-30B/yr AI capex, growing commitment, disclosed AI infrastructure roadmap. |
+| **3** | $5-10B/yr AI infrastructure investment. |
+| **2** | Some AI investment but not primary strategic focus. |
+| **1** | Minimal AI infrastructure commitment. |
+
+**Why two frameworks:** D5 was originally designed to score supply chain companies on hyperscaler demand exposure. But when applied to the hyperscalers themselves, it penalized companies like META (D5=1) for not selling cloud compute, even though META spends $40B+/yr on AI infrastructure and drives massive upstream demand. The Layer 9 framework measures the same underlying signal — how tied is this company to the AI buildout — from the buyer's side rather than the seller's side. (Methodology change approved 2026-05-26.)
+
 **Anchor examples:**
-- CoreWeave (Microsoft is anchor), Vertiv: 5
-- Coherent, Lumentum: 4
-- Most semi-equipment: 3-4
-- Utilities serving data center load: 2-3 (indirect)
+- *Supplier framework:* CoreWeave (Microsoft is anchor), Vertiv: 5. Coherent, Lumentum: 4. Most semi-equipment: 3-4. Utilities with DC load: 2-3.
+- *Hyperscaler framework:* META ($40B+ capex, $100B AMD deal, multi-GW nuclear PPAs): 5. MSFT ($80B+ capex, OpenAI partnership): 5. ORCL (growing but smaller scale): 4-5.
 
 **Common failure modes:**
 - Counting "data center" exposure as hyperscaler exposure (data centers include enterprise, gov, second-tier clouds)
 - Rating high based on a single recent customer announcement
 - Ignoring that hyperscaler concentration is BOTH a positive (anchor demand) and a risk (single-customer dependency) — it's worth a 5 on Hyperscaler Exposure AND a 1 on Customer Concentration Risk
+- *For Layer 9:* Rating based on announced capex alone without checking for committed deals (signed PPAs, binding GPU supply agreements) that demonstrate follow-through
 
 ---
 
@@ -219,6 +229,13 @@ The goal of this rubric: replace vibes with checkable criteria so two informed p
 | **3** | Routine selling, <15% of holdings over 12 months. No discretionary buying. (This is the "diversification" default for post-rally situations.) |
 | **2** | Discretionary selling 15-30% of holdings over 12 months across multiple executives. |
 | **1** | Heavy selling >30% of senior holdings, OR executive resignations following sales, OR insider selling concentrated immediately before negative news. |
+
+**Decision procedure (apply in this order — do not skip steps):**
+
+1. **Find open-market BUYS first.** If ≥2 insiders made open-market discretionary buys in the last 12 months → **5**, full stop. If exactly 1 did → **4**. Dollar size does NOT downgrade this: the only dollar threshold in the rubric is the *single-buyer* path to 5 (a lone buy >$1M). Multiple buyers = 5 regardless of dollar amounts. (Established 2026-05-28 after CEVA was wrongly rated 4 — CEO+CFO+Director all bought but the rating was discounted on "modest" dollar size, which is a flagged failure mode.)
+2. **If no buys, classify the SELLS by type before scoring.** Sales that are 10b5-1 pre-scheduled, GRAT transfers, or option-exercise-plus-same-day-sale are **routine** → default **3**, even if they total >15% or >30% of holdings. The 15-30% (band 2) and >30% (band 1) thresholds apply ONLY to *discretionary open-market* selling. Do not push a name to 2 or 1 on the size of 10b5-1 sales. (Established 2026-05-28 after AIP was wrongly rated 2 — two directors sold 28% and 48% via 10b5-1 plans, which the rubric says to treat as routine.)
+3. **Only discretionary open-market sells reach bands 2 and 1.** Size them by % of holdings (never absolute share counts): 15-30% across multiple execs → 2; >30%, or resignations-after-sales, or selling right before bad news → 1.
+4. **Default when there's neither buying nor discretionary selling = 3** (the post-rally diversification baseline).
 
 **Sourcing rule:** SEC EDGAR Form 4 filings. Critical distinctions:
 - **10b5-1 pre-scheduled trades** = much less informative. Treat as routine.
