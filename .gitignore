@@ -27,3 +27,6 @@ venv/
 ~$*
 .superpowers/
 site/data/
+
+# Wrangler local dev cache
+.wrangler/
