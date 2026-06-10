@@ -48,3 +48,36 @@ def test_performance_summary_and_monthly(repo):
     assert abs(s['vs_smh'] - (s['total_return'] - (-0.02))) < 1e-6
     assert perf['monthly'][0]['month'] == '2026-05'
     assert perf['as_of'] == '2026-05-28'
+
+
+def test_performance_missing_series_fails_loudly(repo):
+    (repo / 'tracking' / 'performance-series.json').unlink()
+    with pytest.raises(SystemExit):
+        ex.export_performance(repo)
+
+
+def test_performance_missing_bench_key_fails_loudly(repo):
+    sp = repo / 'tracking' / 'performance-series.json'
+    raw = json.loads(sp.read_text())
+    del raw['bench']['EW']
+    sp.write_text(json.dumps(raw))
+    with pytest.raises(SystemExit):
+        ex.export_performance(repo)
+
+
+def test_performance_monthly_chaining_across_months(repo):
+    sp = repo / 'tracking' / 'performance-series.json'
+    series = {
+        'start': '2026-05-26', 'as_of': '2026-06-02',
+        'dates': ['2026-05-26', '2026-05-29', '2026-06-01', '2026-06-02'],
+        'model': [13800.0, 14076.0, 13938.0, 14214.0],
+        'bench': {'SMH': [1.0, 1.02, 1.01, 1.03],
+                  'QQQ': [1.0, 1.01, 1.0, 1.02],
+                  'EW': [1.0, 1.0, 1.0, 1.0]},
+    }
+    sp.write_text(json.dumps(series))
+    perf = ex.export_performance(repo)
+    assert [m['month'] for m in perf['monthly']] == ['2026-05', '2026-06']
+    # June chains off May's close, not off inception
+    assert perf['monthly'][1]['model'] == round(14214.0 / 14076.0 - 1, 6)
+    assert perf['monthly'][1]['SMH'] == round(1.03 / 1.02 - 1, 6)

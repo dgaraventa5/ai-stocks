@@ -89,6 +89,16 @@ def export_performance(root: Path) -> dict:
     raw = json.loads(sp.read_text())
     cfg = json.loads(
         (root / 'tracking' / 'performance-config.json').read_text())
+    for key in ('dates', 'model', 'bench', 'as_of'):
+        if key not in raw:
+            fail(f'performance-series.json missing key {key!r}')
+    for b in ('SMH', 'QQQ', 'EW'):
+        if b not in raw['bench']:
+            fail(f'performance-series.json bench missing {b!r}')
+    if not raw['model']:
+        fail('performance-series.json has an empty series')
+    if 'capital' not in cfg:
+        fail('performance-config.json missing capital')
     capital = float(cfg['capital'])
     k = NOTIONAL / capital
     model = [round(v * k, 2) for v in raw['model']]
