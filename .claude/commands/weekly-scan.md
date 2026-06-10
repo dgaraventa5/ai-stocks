@@ -30,10 +30,45 @@ Run the weekly news scan per CLAUDE.md.
 
 5. **Also check** for new 13F-HR filings from tracked funds in the past 7 days. If found, note them — these can be followed up with `/thirteenf-delta`.
 
+6. **Earnings-triggered objective refresh (Rule #9).** For any ticker where the 8-K scan surfaced quarterly earnings results (Item 2.02 "Results of Operations and Financial Condition"):
+
+   a. Pull fresh yfinance data and update the Watchlist row's objective inputs (Fwd P/E, EV/EBITDA, FCF Yield, P/S, ROIC, Gross Margin, FCF Margin, ND/EBITDA, Rev 3yr CAGR, Rev YoY, EPS YoY). Update "Last Updated" to today.
+
+   b. **Priority triage:** If the earnings beat/miss revenue or EPS estimates by >15%, or gross margin moved >500bps sequentially, flag with 📊 in the output — these are the names where stale inputs cost the most. Consider recommending a full `/earnings-update` for these names.
+
+   c. **TTM check:** If yfinance TTM gross margin or FCF margin is >10 score points below the MRQ value (i.e., the most recent quarter is dramatically better than the trailing average), note the MRQ values in the output so the TTM limitation is visible.
+
+   d. Compute the before/after Total Score for refreshed names. If any name's score moves by >5 points or crosses a tier boundary, flag with ⚠️ — this is a potential portfolio-level signal.
+
+   **Why this exists:** During the 2026-05-26 MU review, 2-month-stale objective inputs after Q2 earnings caused a 14-point scoring error and a full tier miss (#23 → #4). The weekly scan already touches every name's 8-Ks; catching earnings and refreshing inputs in the same pass prevents this class of miss. If `/earnings-update` was already run on a name during the week, skip the refresh — don't duplicate work.
+
+7. **Portfolio pipeline + weekly mark (added 2026-06-09).** After any score refreshes from Step 6:
+
+   a. Refresh the 50DMA momentum inputs, then run the portfolio pipeline and the performance mark:
+   ```bash
+   python3 scripts/momentum_50dma.py
+   python3 scripts/refresh_targets.py
+   python3 scripts/track_performance.py
+   ```
+
+   b. Report every pipeline FLAG in the output: ENTER/EXIT/EXIT PENDING/BLOCKED names, dead tickers, layer-cap or concentration warnings, manual-override collisions. EXIT PENDING names confirm on the *next* weekly run — call out anything confirming next week so it isn't a surprise.
+
+   c. Include the weekly mark (model value, returns vs SMH/QQQ/equal-weight universe) in the output. The model is the portfolio of record — membership changes logged by refresh_targets.py are rebalance events Dom mirrors in his account.
+
+8. **Subjective-rating integrity (Rule #12, added 2026-06-10).** Run the gate + staleness audit:
+   ```bash
+   python3 scripts/audit_rating_integrity.py --summary
+   python3 scripts/audit_rating_integrity.py   # full, if the summary shows any violations
+   ```
+   Report GATE violations (names carrying AI ratings with no thesis and no research briefing — their ratings are unbacked and should not be trusted) and STALE names (>90d since last research-backed review). These don't block the scan, but a GATE violation in a *portfolio holding* is a flag to surface prominently. The biweekly scheduled refresh routine handles the rotation; this step is the weekly check that it's keeping up.
+
 ## Output
 
-Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with three sections:
+Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **⚠️ Material events** (full one-sentence summary per item, plus ticker)
+- **📊 Earnings refreshed** (tickers that reported this week: before/after score, TTM vs MRQ flags, any tier changes)
+- **💼 Portfolio pipeline** (ENTER/EXIT/pending/blocked changes, weekly mark vs benchmarks, any concentration flags)
+- **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
 - **Routine filings** (one-line each: ticker, filing type, generic descriptor)
 - **New 13F activity** (only if any)
 

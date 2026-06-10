@@ -70,6 +70,8 @@ Six categories, current weights (reweighted 2026-05-25):
 
 Value category includes 5 metrics: Forward P/E, EV/EBITDA, FCF Yield %, P/S, and PEG Ratio (Fwd P/E ÷ EPS Growth %). PEG was added 2026-05-25 to penalize stocks that are expensive relative to their growth rate.
 
+Momentum category includes 4 metrics: three subjective 1-5 ratings (EPS Revisions, Relative Strength, Insider Activity) plus one objective metric, "50DMA %" — the share of the last 120 trading days with close > 50-day SMA, added 2026-06-09 (see rule 11).
+
 Previous weights (pre-2026-05-25): Value 15%, Quality 20%, Growth 15%, AI Thesis 30%, Momentum 10%, Risk 10%. Reweight rationale: within an AI-only watchlist, AI Thesis at 30% was circular (every name was selected for AI exposure). Higher Value and Risk weights better serve capital allocation decisions vs. pure triage.
 
 Each stock gets a Total Score (0-100) and Tier:
@@ -119,6 +121,68 @@ Earnings call transcripts go in `/per-stock/{TICKER}/transcripts/Q{N}-{YYYY}.md`
 
 ### 8. Don't drift the methodology
 The scoring band thresholds in `ai_supply_chain_scoring.xlsx` Methodology tab are calibrated. Don't modify them as part of a routine task — propose changes explicitly and require my approval.
+
+### 9. Earnings-triggered objective refresh (added 2026-05-26)
+
+**Context:** During the MU review, stale objective inputs (gross margin, FCF margin, ROIC) caused a 14-point scoring error and a full tier miss (#23 → #4). The data was 2 months stale after a quarter where fundamentals shifted dramatically. Quarterly rescores are too infrequent for high-momentum names.
+
+**Rule:** When any watchlist name reports quarterly earnings, refresh its objective inputs within one week. Priority order:
+
+1. **Immediate (within 1 session):** Any name that beats/misses revenue or EPS estimates by >15%, OR where gross margin moves >500bps sequentially. These are the names where staleness costs the most.
+2. **Within 1 week:** All other watchlist names that reported earnings.
+3. **Exception:** If `/earnings-update` is run on the name, the objective refresh is already included — don't duplicate.
+
+**Primary enforcement:** The `/weekly-scan` skill (Step 6) now includes earnings-triggered refresh as a built-in step. Any 8-K with Item 2.02 (quarterly results) triggers an objective input refresh in the same pass. This is the expected catch-all — `/earnings-update` handles deep single-name processing, but the weekly scan ensures nothing slips through even if `/earnings-update` wasn't run.
+
+**How to refresh:** Pull yfinance data and update the Watchlist row. For fast-ramp names where TTM averages understate the current business (e.g., 4 quarters spanning a margin ramp), note the MRQ values in the context briefing so the TTM limitation is visible.
+
+**TTM limitation (known issue):** yfinance provides TTM (trailing twelve months) data. For companies with rapidly improving fundamentals, TTM averages include lower quarters and systematically understate the current run-rate. This biases scores DOWN for high-momentum names — exactly the ones where staleness matters most. When TTM and MRQ diverge by >10 points on any quality metric, flag it in the per-stock context file. We may eventually want an MRQ-adjusted scoring option, but for now the TTM approach maintains cross-name comparability.
+
+### 10. Layer 10 SaaS: EV/FCF replaces EV/EBITDA (added 2026-05-26)
+
+**Context:** yfinance GAAP EBITDA for high-SBC SaaS names is near-zero or negative (SBC at 15-25% of revenue crushes GAAP operating income). This produced scores like EV/EBITDA = 2,184x for DDOG, dragging it down an entire tier on a garbage input. The metric provided zero differentiation across the entire Layer 10 cohort — all scored 5 (minimum).
+
+**Rule:** For Layer 10 (Models, Software & Applications) names, the EV/EBITDA column in the Watchlist tab contains **EV/FCF** instead, scored on SaaS-calibrated bands:
+
+| EV/FCF | Score |
+|---|---|
+| ≤20 | 100 |
+| ≤30 | 90 |
+| ≤40 | 75 |
+| ≤55 | 60 |
+| ≤75 | 45 |
+| ≤100 | 30 |
+| >100 | 15 |
+
+**Why EV/FCF:** FCF is a real cash number (not adjusted by non-GAAP games), preserves the EV-based leverage signal that's the point of the metric, and yfinance provides the inputs. SBC dilution hits shareholders through share count, not through cash outflow, so FCF isn't distorted the way EBITDA is.
+
+**Current Layer 10 names affected:** PLTR, SNOW, NOW, CRM, DDOG, CRWD, MDB, PATH. When adding new Layer 10 names, use EV/FCF with these bands. The column header in the spreadsheet still says "EV/EBITDA" — for Layer 10 names, read it as EV/FCF.
+
+### 11. Momentum: objective 50DMA % metric (added 2026-06-09)
+
+**Context:** Momentum was the only category with zero objective inputs — three subjective 1-5 ratings with no defined measurement procedure. External feedback (reviewed 2026-06-09) suggested several momentum additions; this one was adopted because it objectifies trend consistency cheaply from free data. (Declined from the same review: P/B, operating margin, volume confirmation, institutional ownership delta, analyst PT upgrades — see Rating Audit 2026-06-09 entry.)
+
+**Metric:** "50DMA %" (Watchlist col AC) = % of the last 120 trading days where close > 50-day SMA, from yfinance price history. Distinguishes consistent uptrends from one-gap bounces. Bands: ≥85→100, ≥70→90, ≥55→75, ≥40→60, ≥25→40, <25→20. Momentum Score averages the three subjective ratings (×20) with this banded score.
+
+**How to refresh:** `python3 scripts/momentum_50dma.py` (all names) or with ticker args for a subset. Refresh alongside any objective input refresh (rule 9) and at quarterly rescores. Names with <60 days of price history are flagged and left blank (the Momentum average just skips them).
+
+**Companion change (same review):** FCF conversion (TTM FCF ÷ TTM net income) was added to `/refresh-context` as a qualitative red-flag check — NOT a scored metric, because it misfires on high-SBC names (flatters them) and heavy-capex names (penalizes investment). See refresh-context.md Step 2b for the conditional flag definition.
+
+### 12. Subjective-rating refresh discipline + thesis gate (added 2026-06-10)
+
+**Context:** The 2026-06-10 Layer 1 directness re-rating found that names carried high AI-Thesis ratings with `thesis.md` files that were the untouched template — ratings assigned by sub-layer pattern-match, never backed by per-name research (123 of 136 rated names had no populated thesis). This is the same failure that hit Layer 2 in May (see [[feedback_per_name_research]]). Objective inputs have an earnings-triggered refresh (rule 9); subjective ratings had **no trigger and no gate**, so they were set once in a batch and frozen. Root cause: a ranking system is self-consistent but not self-correcting — uniform bias across a cohort cancels out of the sort order and is invisible to relative ranking. Only an absolute standard, applied from outside, exposes it.
+
+**The gate (hard):** A watchlist name may not be trusted to carry subjective AI/Momentum/Risk ratings unless it is research-backed — defined as a populated `thesis.md` **or** a `context-{YYYY-MM-DD}.md` briefing within the staleness window. Enforced by `scripts/audit_rating_integrity.py`, which exits nonzero on any gate violation. Run it before trusting a scoring pass; `/score-stock` and batch scoring should treat a gate violation as "research first, then rate."
+
+**Refresh triggers (subjective ratings):**
+1. **On earnings** — when a rated name reports, re-examine its D-dimensions in the same pass as the rule-9 objective refresh. A beat/miss or a new customer/PPA/contract often moves D1/D2/D5.
+2. **Rolling staleness** — no rated name should go >90 days without a research-backed review. `audit_rating_integrity.py` flags STALE names; the scheduled routine (below) feeds the stalest into `/refresh-context` on rotation.
+3. **Absolute-lens stress test** — periodically test a *whole layer* against one external standard (e.g. the "directness" lens that drove the Layer 1 re-rate). This is the only thing that catches uniform bias, so it must be done deliberately, not left to relative ranking.
+
+**Enforcement (so the refreshes actually happen — not just the logic):**
+- **Weekly:** `/weekly-scan` Step 8 runs the integrity audit and surfaces gate + stale names.
+- **Biweekly (scheduled):** a cloud routine runs `audit_rating_integrity.py --stalest` and then `/refresh-context` on the stalest rated names by layer rotation, writing fresh briefings for a collaborative rating session. The routine does the research legwork; rating changes stay in the human loop.
+- **Quarterly:** `/rescore-quarterly` does a full pass and should fail loudly on any gate violation.
 
 ## Common tools and libraries (pre-approved for installation)
 

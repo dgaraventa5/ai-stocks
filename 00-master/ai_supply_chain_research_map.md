@@ -49,6 +49,9 @@ The most under-appreciated bottleneck. AI training clusters are siting decisions
 - **Generac (GNRC)** — backup power, distributed generation
 - **GE Vernova (GEV)** — gas turbines (huge backlog), wind, grid
 
+### Solar & renewables equipment (behind-the-meter DC power)
+- **Nextracker (NXT)** — solar trackers for utility-scale + behind-the-meter data-center power
+
 ---
 
 ## Layer 2 — Grid & Power Equipment
@@ -78,6 +81,7 @@ The transformer shortage is real. Lead times for large power transformers have s
 - **Comfort Systems USA (FIX)** — mechanical contractor, heavy DC exposure
 - **EMCOR Group (EME)** — electrical/mechanical contractor
 - **Modine Manufacturing (MOD)** — liquid cooling for DCs
+- **AAON (AAON)** — data-center-specific HVAC + liquid-cooling coils; smaller play vs VRT/MOD
 - **Carrier Global (CARR)** — HVAC, cooling
 - **Trane Technologies (TT)** — HVAC, cooling
 - **Johnson Controls (JCI)** — HVAC, building systems
@@ -98,15 +102,18 @@ The capital equipment that enables every AI chip.
 - **Onto Innovation (ONTO)** — metrology
 - **Camtek (CAMT)** — inspection, advanced packaging
 - **Kulicke & Soffa (KLIC)** — packaging equipment
+- **BE Semiconductor (BESIY)** — hybrid bonding & die-attach; the enabling tool for HBM4 / advanced packaging (Dutch FPI, US ADR)
 
 ### Test & measurement
 - **Keysight Technologies (KEYS)** — electronic test equipment for chips, optical, 800G/1.6T networking, PCIe Gen6
+- **FormFactor (FORM)** — probe cards for wafer sort; rising HBM / known-good-die test intensity
 
 ### Materials & consumables
 - **Entegris (ENTG)** — specialty materials
 - **MKS Instruments (MKSI)** — vacuum, photonics
 - **Photronics (PLAB)** — photomasks
 - **Ultra Clean Holdings (UCTT)** — equipment subsystems
+- **Advanced Energy (AEIS)** — precision power-delivery subsystems for etch/deposition tools + data-center power
 
 ### PCB / substrates
 - **TTM Technologies (TTMI)** — high-layer-count PCBs for AI servers, networking switches, defense
@@ -142,9 +149,14 @@ The capital equipment that enables every AI chip.
 
 ### Power management silicon
 - **Monolithic Power Systems (MPWR)** — voltage regulators and power modules for AI accelerator boards
+- **Navitas Semiconductor (NVTS)** — GaN/SiC power ICs; design-in for 800VDC data-center power architecture (speculative)
+
+### Programmable logic
+- **Lattice Semiconductor (LSCC)** — low-power FPGAs for server platform management / control plane
 
 ### Memory (HBM is the bottleneck)
 - **Micron (MU)** — HBM3E, HBM4 ramping
+- **Rambus (RMBS)** — memory interface chips (RCD/MRDIMM clock drivers) + DDR5/HBM IP licensing; direct memory-bottleneck leverage
 - **SanDisk (SNDK)** — NAND/storage spun from WD
 - **SK Hynix** — HBM leader (Korea-listed, ADR limited)
 - **Samsung** — Korea-listed
@@ -192,6 +204,7 @@ Bandwidth is becoming as important as compute. 800G → 1.6T transitions are mas
 
 ### Storage infrastructure
 - **Pure Storage (PSTG)** — all-flash arrays (FlashBlade) for AI training data pipelines
+- **Seagate Technology (STX)** — nearline mass-capacity HDD for AI data lakes; HAMR ramp tightening supply
 
 ---
 
@@ -218,7 +231,7 @@ The thesis here: stranded power contracts + interconnect rights + cheap land = c
 - **CleanSpark (CLSK)** — mining-focused, less AI pivot
 - **BitDeer (BTDR)** — Singapore-listed equivalent, mining + AI
 - **Hut 8 (HUT)** — Canadian, HPC ambitions
-- **Bitfarms (BITF)** — mining + AI exploration
+- **Keel Infrastructure (KEEL, fka Bitfarms/BITF until 2026-04-06)** — full HPC/AI pivot, exited new BTC mining investment
 - **Riot Platforms (RIOT)** — Texas mining giant
 - **TeraWulf (WULF)** — nuclear-powered mining + HPC
 
@@ -246,6 +259,9 @@ Most foundation model labs are private (OpenAI, Anthropic, xAI, Mistral). Public
 
 ### AI-powered automation
 - **UiPath (PATH)** — robotic process automation + agentic AI capabilities
+
+### AI-native vertical applications
+- **Tempus AI (TEM)** — AI-native precision-medicine data + diagnostics platform
 
 ---
 

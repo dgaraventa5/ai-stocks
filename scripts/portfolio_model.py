@@ -1,0 +1,111 @@
+"""Model-portfolio state shared by refresh_targets.py and track_performance.py.
+
+Per Dom's 2026-06-09 decision, the MODEL is the portfolio of record (the
+Positions sheet is unused). The model is event-sourced in
+tracking/performance-config.json:
+
+  events[0]   initial deployment (2026-05-26, $13,800)
+  events[n]   a rebalance: the portfolio marked to that day's value, then
+              re-allocated across the pipeline's new target weights
+
+refresh_targets.py logs an event automatically whenever MEMBERSHIP changes
+(enter/exit) — weight drift within the same names does NOT rebalance the
+model, matching the hysteresis philosophy. The standing assumption, accepted
+with the model-only decision: Dom mirrors each membership-changing refresh in
+his account around the day it runs. If that slips, the model is a strategy
+benchmark rather than an account mirror.
+
+Valuation chains automatically: each event's allocations embed all growth
+before it, so marking only the latest event prices the whole history.
+Returns use dividend-adjusted closes (~total return). Names with no price
+data are carried at their event-date value and flagged, never guessed.
+"""
+from __future__ import annotations
+
+import datetime as dt
+import json
+import time
+
+import yfinance as yf
+
+from common import ROOT, flag
+
+CONFIG = ROOT / 'tracking' / 'performance-config.json'
+
+_series_cache: dict[str, object] = {}
+
+
+def load_cfg() -> dict:
+    cfg = json.loads(CONFIG.read_text())
+    if 'events' not in cfg:
+        # Migrate the original flat schema: deployment becomes event 0.
+        cfg['events'] = [{
+            'date': cfg['inception'],
+            'reason': 'initial deployment (trade plan, prices 2026-05-26)',
+            'allocations': {t: m['alloc'] for t, m in cfg.pop('model').items()},
+            'cash': cfg['cash'],
+        }]
+    return cfg
+
+
+def save_cfg(cfg: dict) -> None:
+    CONFIG.write_text(json.dumps(cfg, indent=2) + '\n')
+
+
+def _series(ticker: str, earliest: str):
+    """Dividend-adjusted close series from `earliest`, cached per run."""
+    if ticker not in _series_cache:
+        start = (dt.date.fromisoformat(earliest) - dt.timedelta(days=5)).isoformat()
+        hist = yf.Ticker(ticker).history(start=start, auto_adjust=True)
+        time.sleep(0.2)
+        _series_cache[ticker] = (None if hist is None or hist.empty
+                                 else hist['Close'].dropna())
+    return _series_cache[ticker]
+
+
+def ret_since(ticker: str, frm: str, earliest: str) -> float | None:
+    """Total return from the first close on/after `frm` to the latest close."""
+    s = _series(ticker, earliest)
+    if s is None:
+        return None
+    sub = s[s.index.date >= dt.date.fromisoformat(frm)]
+    if sub.empty:
+        return None
+    return float(s.iloc[-1] / sub.iloc[0] - 1)
+
+
+def mark(cfg: dict) -> tuple[float, dict[str, float], list[str]]:
+    """(model value now, per-name P&L since last event, names missing prices)."""
+    ev = cfg['events'][-1]
+    value = float(ev.get('cash', 0))
+    pnl: dict[str, float] = {}
+    missing: list[str] = []
+    for t, alloc in ev['allocations'].items():
+        r = ret_since(t, ev['date'], cfg['inception'])
+        if r is None:
+            missing.append(t)
+            value += alloc          # carried at event-date value
+            flag(f'{t}: no price data — carried at last event value')
+        else:
+            pnl[t] = alloc * r
+            value += alloc * (1 + r)
+    return value, pnl, missing
+
+
+def log_rebalance(cfg: dict, weights: dict[str, float], reason: str) -> dict:
+    """Mark the model, re-allocate at today's value, append (or same-day
+    replace) the event, and persist. `weights` are fractions of total value
+    (summing to 1 - cash buffer, as refresh_targets produces them)."""
+    today = dt.date.today().isoformat()
+    value, _, missing = mark(cfg)
+    if missing:
+        flag(f'rebalance marked with carried values for: {", ".join(missing)}')
+    alloc = {t: round(w * value, 2) for t, w in weights.items()}
+    event = {'date': today, 'reason': reason, 'allocations': alloc,
+             'cash': round(value - sum(alloc.values()), 2)}
+    if cfg['events'] and cfg['events'][-1]['date'] == today:
+        cfg['events'][-1] = event       # idempotent same-day re-runs
+    else:
+        cfg['events'].append(event)
+    save_cfg(cfg)
+    return event

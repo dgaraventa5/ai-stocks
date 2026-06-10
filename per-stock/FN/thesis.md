@@ -1,10 +1,12 @@
-# FN — {Company Name}
+# FN — Fabrinet
 
-**Layer:** {e.g., Power Generation / IPPs}
+**Layer:** Layer 7 — Optical, Networking & Interconnect
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
 **Thesis-break trigger:** {what single development would force exit}
+
+> **[STALE - revisit]** This thesis file is an unfilled template. Q3 FY2026 earnings (reported 2026-05-04) provide sufficient data to populate Sections 1-10. Key inputs available in `transcripts/Q3-FY2026.md` and `transcripts/Q3-FY2026-delta.md`. Revenue $1.21B (+39% YoY), non-GAAP EPS $3.72, DCI +90% YoY, two new hyperscaler 800G programs ramping, Building 10 fast-tracked for Jan 2027 completion, CPO investment in Raytech.
 
 ---
 
@@ -35,7 +37,7 @@
 
 ---
 
-## 4. Pricing & demand
+## 4. Pricing & demand [STALE - revisit: Q3 FY2026 shows DCI +90% YoY, datacom supply-constrained, gross margin 12.1%, Building 10 capacity expansion fast-tracked]
 
 - **Pricing trend:** {ASPs rising/flat/falling, last 8 quarters}
 - **Lead times / backlog:** {are they widening or compressing?}
@@ -44,7 +46,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit: Q3 FY2026 revenue $1,214M, GM 12.1%, OM 10.7%, GAAP NI $125.2M, FCF -$11M (capacity build), zero debt, $946M cash]
 
 (See `financials.xlsx` for detail)
 
@@ -75,7 +77,7 @@
 
 ---
 
-## 7. Valuation
+## 7. Valuation [STALE - revisit: trading at ~$713, P/E ~69x trailing, 229% 12-month gain; Q4 guidance $1.25-1.29B implies ~40% YoY growth continuing]
 
 - **Current multiple:** {P/E, EV/EBITDA, EV/Sales — pick the right one for the business}
 - **Peer comparison:** {how does it trade vs. comparables}
@@ -86,7 +88,7 @@
 
 ---
 
-## 8. Catalysts (next 4 quarters)
+## 8. Catalysts (next 4 quarters) [STALE - revisit: Building 10 floor 1 June 2026, merchant transceiver launches H2 CY2026, 1.6T steep ramp FY2027, HPC $150M milestone ~Q2 FY2027]
 
 | Date | Event | Why it matters |
 |---|---|---|

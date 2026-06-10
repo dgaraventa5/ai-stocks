@@ -1,10 +1,12 @@
-# AMAT — {Company Name}
+# AMAT — Applied Materials
 
-**Layer:** {e.g., Power Generation / IPPs}
+**Layer:** Layer 4 — Semiconductor Equipment
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
 **Thesis-break trigger:** {what single development would force exit}
+
+> **[STALE - revisit]** This thesis file is unpopulated (template only). Q2 FY2026 earnings (May 14, 2026) provided substantial data to fill all sections. See `transcripts/Q2-FY2026.md` and `transcripts/Q2-FY2026-delta.md` for source material. A full thesis buildout session is needed.
 
 ---
 
@@ -35,7 +37,7 @@
 
 ---
 
-## 4. Pricing & demand
+## 4. Pricing & demand [STALE - revisit: Q2 FY2026 shows 50% GM (25-yr high), 8-quarter rolling customer forecasts, supply-chain-constrained]
 
 - **Pricing trend:** {ASPs rising/flat/falling, last 8 quarters}
 - **Lead times / backlog:** {are they widening or compressing?}
@@ -44,7 +46,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit: Q2 FY2026 record revenue $7.91B, GM 50%, FCF $210M (anomalous — working capital + BIS payment)]
 
 (See `financials.xlsx` for detail)
 
@@ -86,7 +88,7 @@
 
 ---
 
-## 8. Catalysts (next 4 quarters)
+## 8. Catalysts (next 4 quarters) [STALE - revisit: Q3 FY2026 guide $8.95B/~$3.36 EPS, EPIC Center launch fall 2026, NEXX acquisition closing]
 
 | Date | Event | Why it matters |
 |---|---|---|
@@ -98,7 +100,7 @@
 
 ---
 
-## 9. Risks
+## 9. Risks [STALE - revisit: China now 24% (declining), BIS $252.5M penalty settled, ICAPS in digestion phase]
 
 - **Thesis-killer #1:** {single development that would force exit}
 - **Thesis-killer #2:** {second-most concerning risk}

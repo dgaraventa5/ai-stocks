@@ -1,10 +1,12 @@
-# TLN — {Company Name}
+# TLN — Talen Energy Corporation
 
-**Layer:** {e.g., Power Generation / IPPs}
+**Layer:** 01 — Power Generation / IPPs
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
 **Thesis-break trigger:** {what single development would force exit}
+
+> **[STALE - revisit]** This thesis file is the blank template and has never been populated. Q1 2026 earnings (May 5, 2026) provide substantial data to fill it. See `/per-stock/TLN/transcripts/Q1-2026-delta.md` for the earnings delta summary. Key sections that need population based on Q1 data: Sections 1-10 (all).
 
 ---
 
@@ -14,7 +16,7 @@
 
 ---
 
-## 2. Position in the AI supply chain
+## 2. Position in the AI supply chain [STALE - revisit: AWS PPA now ramping FTM after spring 2026 outage; 35% gross margin contracted; up to $1.4B/yr at full ramp]
 
 - **What they do:** {2-3 sentences}
 - **Where they sit:** {layer in supply chain, role}
@@ -23,7 +25,7 @@
 
 ---
 
-## 3. Customers
+## 3. Customers [STALE - revisit: AWS is the anchor tenant; at full 1,920 MW ramp, AWS PPA = ~$1.4B/yr revenue vs. Q1 2026 run-rate ~$4.5B]
 
 | Customer | % revenue | Source / date |
 |---|---|---|
@@ -35,7 +37,7 @@
 
 ---
 
-## 4. Pricing & demand
+## 4. Pricing & demand [STALE - revisit: PJM spark spreads +$5/MWh since 3/31; PJM demand +3% YoY weather-adjusted; PPL basis widening is a watch item]
 
 - **Pricing trend:** {ASPs rising/flat/falling, last 8 quarters}
 - **Lead times / backlog:** {are they widening or compressing?}
@@ -44,7 +46,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit: Q1 2026 revenue $1.13B, adj EBITDA $473M (>2x YoY), adj FCF $350M (~4x YoY); 2026 guidance $1.75-2.05B EBITDA, $980M-$1.18B FCF; 2028 FCF/share ~$36-41]
 
 (See `financials.xlsx` for detail)
 
@@ -75,7 +77,7 @@
 
 ---
 
-## 7. Valuation
+## 7. Valuation [STALE - revisit: stock at ~$385; ~11% implied 2028 FCF yield; management raised 2028 FCF/share 30% vs. Jan guidance]
 
 - **Current multiple:** {P/E, EV/EBITDA, EV/Sales — pick the right one for the business}
 - **Peer comparison:** {how does it trade vs. comparables}
@@ -86,19 +88,19 @@
 
 ---
 
-## 8. Catalysts (next 4 quarters)
+## 8. Catalysts (next 4 quarters) [STALE - revisit: Cornerstone close summer 2026; PJM RBP procurement fall 2026; AWS PPA ramp milestones]
 
 | Date | Event | Why it matters |
 |---|---|---|
-| | Earnings | |
-| | Product launch | |
-| | Customer announcement | |
-| | Capacity online | |
-| | Industry conference | |
+| Summer 2026 | Cornerstone acquisition close | Adds 2.45 GW gas, diversifies fleet, FCF accretive |
+| Fall 2026 | PJM RBP procurement | Could underwrite new gen projects for up to 15 years |
+| Aug 2026 (est.) | Q2 2026 earnings | First quarter with Cornerstone contribution if closed |
+| 2026-2029 | AWS PPA ramp to 840-1,200 MW | Revenue ramp toward $1.4B/yr at full volume |
+| | New 1+ GW PPA announcement | Would lift contracted margin from 35% toward 50% |
 
 ---
 
-## 9. Risks
+## 9. Risks [STALE - revisit: PPL basis widening, FERC/PJM co-location rule evolution, Cornerstone integration risk, AWS concentration]
 
 - **Thesis-killer #1:** {single development that would force exit}
 - **Thesis-killer #2:** {second-most concerning risk}

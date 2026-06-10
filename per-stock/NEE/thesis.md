@@ -8,13 +8,13 @@
 
 ---
 
-## 1. One-line thesis
+## 1. One-line thesis [STALE - revisit: NEE acquiring Dominion for $67B transforms NEE from renewables leader into world's largest regulated utility; AI power thesis changes from indirect to direct via D's 51 GW DC pipeline]
 
 > {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
 
 ---
 
-## 2. Position in the AI supply chain
+## 2. Position in the AI supply chain [STALE - revisit: post-merger, NEE would own the Northern Virginia data center franchise + 130 GW large-load pipeline; position moves from renewables-developer-for-AI to direct-utility-counterparty-to-hyperscalers]
 
 - **What they do:** {2-3 sentences}
 - **Where they sit:** {layer in supply chain, role}
@@ -23,7 +23,7 @@
 
 ---
 
-## 3. Customers
+## 3. Customers [STALE - revisit: acquiring D brings Northern Virginia hyperscaler customer base directly onto NEE's books; customer concentration and hyperscaler exposure profile changes materially]
 
 | Customer | % revenue | Source / date |
 |---|---|---|
@@ -44,7 +44,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit: $67B all-stock deal materially changes balance sheet, share count, and per-share economics; NEE stock is the deal currency]
 
 (See `financials.xlsx` for detail)
 
@@ -63,7 +63,7 @@
 
 ---
 
-## 6. Moat
+## 6. Moat [STALE - revisit: combined entity spans FL + VA + NC + SC with largest US regulated utility footprint; scale advantage and regulatory/geographic moat both change]
 
 - **IP / process know-how:** {patents, trade secrets, technical lead}
 - **Scale advantage:** {unit cost vs. competitors at volume}
@@ -75,7 +75,7 @@
 
 ---
 
-## 7. Valuation
+## 7. Valuation [STALE - revisit: NEE is using its premium-valuation stock as acquisition currency; market reacted negatively (NEE down on announcement); need to evaluate combined-entity valuation vs standalone]
 
 - **Current multiple:** {P/E, EV/EBITDA, EV/Sales — pick the right one for the business}
 - **Peer comparison:** {how does it trade vs. comparables}
@@ -86,7 +86,7 @@
 
 ---
 
-## 8. Catalysts (next 4 quarters)
+## 8. Catalysts (next 4 quarters) [STALE - revisit: merger regulatory milestones (FERC, VA SCC, NRC, shareholder votes) dominate the catalyst path for 12-18 months]
 
 | Date | Event | Why it matters |
 |---|---|---|
@@ -98,7 +98,7 @@
 
 ---
 
-## 9. Risks
+## 9. Risks [STALE - revisit: NEE as acquirer takes on integration risk, balance sheet risk ($67B all-stock), regulatory approval risk across 5+ jurisdictions, and deal-break reputational risk]
 
 - **Thesis-killer #1:** {single development that would force exit}
 - **Thesis-killer #2:** {second-most concerning risk}

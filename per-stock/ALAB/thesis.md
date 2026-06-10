@@ -1,20 +1,20 @@
 # ALAB — {Company Name}
 
 **Layer:** {e.g., Power Generation / IPPs}
-**Last reviewed:** 2026-05-17
+**Last reviewed:** 2026-05-17 [STALE - revisit: Q1 2026 earnings reported May 5; Scorpio pivot accelerating, margin guide declining, 2027 pipeline significantly de-risked]
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
 **Thesis-break trigger:** {what single development would force exit}
 
 ---
 
-## 1. One-line thesis
+## 1. One-line thesis [STALE - revisit: company is pivoting from retimer/cable positioning to full AI fabric platform; Scorpio to become largest product line by year-end 2026]
 
 > {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
 
 ---
 
-## 2. Position in the AI supply chain
+## 2. Position in the AI supply chain [STALE - revisit: Scorpio fabric switches now in production volume; company embedded in ~90% of global AI computing servers; PCIe Gen 6 >1/3 of revenue; 320-lane X-Series shipping]
 
 - **What they do:** {2-3 sentences}
 - **Where they sit:** {layer in supply chain, role}
@@ -23,7 +23,7 @@
 
 ---
 
-## 3. Customers
+## 3. Customers [STALE - revisit: Q1 2026 10-Q shows 5 customers at 12%+ each, top-5 = ~90% revenue; Customer A (likely Amazon per warrant) surged to 29%; two new top-5 entrants; geographic mix: Taiwan 30%/Singapore 30%/China 29%]
 
 | Customer | % revenue | Source / date |
 |---|---|---|
@@ -35,7 +35,7 @@
 
 ---
 
-## 4. Pricing & demand
+## 4. Pricing & demand [STALE - revisit: Q1 GM 76.4% was peak; Q2 guide ~73% (-340bps) due to Amazon warrant (200bps) + Scorpio hardware mix (140bps); silicon content >$1,000/XPU; inventory days 75; supply adequate through year-end]
 
 - **Pricing trend:** {ASPs rising/flat/falling, last 8 quarters}
 - **Lead times / backlog:** {are they widening or compressing?}
@@ -44,7 +44,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit: Q1 2026 revenue $308.4M (+93% YoY), GAAP NI $80.3M, Non-GAAP NI $110.1M, FCF ~$67M, cash $1.18B, TTM revenue ~$852.5M, TTM FCF ~$245.7M]
 
 (See `financials.xlsx` for detail)
 
@@ -63,7 +63,7 @@
 
 ---
 
-## 6. Moat
+## 6. Moat [STALE - revisit: hardware-accelerated Hypercast and in-network compute engines are differentiated IP; embedded in ~90% of AI servers; NVLink Fusion + UALink lock-in with NVIDIA/AMD/Amazon ecosystems; context-2026-05-18 already upgraded D3 Moat from 3 to 4]
 
 - **IP / process know-how:** {patents, trade secrets, technical lead}
 - **Scale advantage:** {unit cost vs. competitors at volume}
@@ -75,7 +75,7 @@
 
 ---
 
-## 7. Valuation
+## 7. Valuation [STALE - revisit: ~49x NTM EV/EBITDA vs NVDA 21x, MRVL 39x, semi peer mean ~31x; premium justified only if Scorpio ramps, 50%+ growth into 2027, and GM stabilizes >70%]
 
 - **Current multiple:** {P/E, EV/EBITDA, EV/Sales — pick the right one for the business}
 - **Peer comparison:** {how does it trade vs. comparables}
@@ -86,7 +86,7 @@
 
 ---
 
-## 8. Catalysts (next 4 quarters)
+## 8. Catalysts (next 4 quarters) [STALE - revisit: Computex 2026 June 2-5 (320-lane demo); Q2 earnings ~Aug 4; Scorpio becoming largest product line by year-end; two new hyperscaler P-Series customers late 2026; NVLink Fusion/UALink/optical revenue 2027]
 
 | Date | Event | Why it matters |
 |---|---|---|
@@ -98,7 +98,7 @@
 
 ---
 
-## 9. Risks
+## 9. Risks [STALE - revisit: China manufacturing exposure (29% of revenue geo); margin compression as Scorpio ramps; 49x EV/EBITDA leaves zero room for execution miss; simultaneous new-product execution risk (NVLink Fusion + UALink + optical + KV cache all targeting 2027); Broadcom competition in fabric switching]
 
 - **Thesis-killer #1:** {single development that would force exit}
 - **Thesis-killer #2:** {second-most concerning risk}
