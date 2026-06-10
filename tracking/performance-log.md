@@ -39,3 +39,27 @@ Model: **$13,386** (-3.00% since 2026-05-26) — 16 positions, last rebalance 20
 - Top contributors since last rebalance: SNDK +0$, EME +0$, TSM +0$
 - Bottom contributors since last rebalance: SNDK +0$, EME +0$, TSM +0$
 
+## 2026-06-10
+
+Model: **$13,386** (-3.00% since 2026-05-26) — 16 positions, last rebalance 2026-06-10 (membership change: -AR, -CRM, -EXE, -RRC)
+
+**Since inception (2026-05-26) — strategy paper record:**
+
+| Benchmark | Return | Model alpha |
+|---|---|---|
+| SMH | -5.19% | +2.19% |
+| QQQ | -5.01% | +2.01% |
+| Equal-weight universe (35 names) | -3.28% | +0.29% |
+
+**Since latest rebalance (2026-06-10) — current portfolio from its own start (= a real-money entry baseline):**
+
+| Benchmark | Return | Model alpha |
+|---|---|---|
+| SMH | +0.00% | +0.00% |
+| QQQ | +0.00% | +0.00% |
+| Equal-weight universe | +0.00% | +0.00% |
+| **Model** | **+0.00%** | — |
+
+- Top contributors since last rebalance: SNDK +0$, EME +0$, TSM +0$
+- Bottom contributors since last rebalance: SNDK +0$, EME +0$, TSM +0$
+

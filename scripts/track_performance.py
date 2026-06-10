@@ -28,7 +28,7 @@ import argparse
 import datetime as dt
 
 from common import ROOT
-from portfolio_model import load_cfg, mark, ret_since
+from portfolio_model import build_daily_series, load_cfg, mark, ret_since
 
 LOG = ROOT / 'tracking' / 'performance-log.md'
 
@@ -111,6 +111,7 @@ def main() -> None:
 
     print(text)
     if not args.dry_run:
+        build_daily_series(cfg)
         if not LOG.exists():
             LOG.write_text(
                 '# Portfolio performance log\n\n'
