@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> A NAND-flash and storage maker spun out of Western Digital that rides the cyclical memory upswing, with enterprise SSDs into data centers as its direct AI hook (only roughly a seventh of revenue today) and next-generation high-bandwidth flash still in customer qualification.
 
 ---
 

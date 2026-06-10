@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> A premier electrical and mechanical contractor riding the AI data-center buildout: roughly 30% of revenue now comes from data-center construction, with a record backlog up about a third year-over-year as hyperscalers race to build out new compute campuses.
 
 ---
 

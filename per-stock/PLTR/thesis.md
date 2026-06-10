@@ -10,10 +10,9 @@
 
 ---
 
-## 1. One-line thesis [STALE - revisit]
+## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
-> **Candidate thesis (post Q1-2026):** Palantir is the dominant enterprise AI orchestration platform with uniquely defensible ontology/security infrastructure, delivering 85% revenue growth at 60% adjusted operating margins — the question is whether the valuation (97x forward P/E) already prices in years of this execution.
+> Owned as the operating system for enterprise and government AI: its Ontology and AIP platform turn AI into production decisions on top of deeply entrenched federal contracts, making Palantir an AI infrastructure peer rather than a downstream app consumer.
 
 ---
 

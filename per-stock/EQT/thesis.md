@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> The largest US natural gas producer, held as an indirect, second-derivative bet on AI power demand: its gas-supply deals for the Homer City and Shippingport power campuses are index-priced and will not generate revenue until 2026-2028, so the AI payoff today is mainly a tailwind on in-basin gas prices rather than any direct AI revenue.
 
 ---
 

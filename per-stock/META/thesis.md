@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> Owned as one of the largest sources of AI infrastructure demand: rather than selling AI as a cloud service, Meta pours record capex and its own MTIA silicon into AI that lifts ad-targeting and feed-recommendation returns across its dominant social networks.
 
 ---
 
