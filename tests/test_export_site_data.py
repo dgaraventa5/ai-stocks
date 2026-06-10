@@ -29,3 +29,22 @@ def test_positions_schema_surprise_fails_loudly(repo):
     wb.save(repo / '00-master' / 'portfolio.xlsx')
     with pytest.raises(SystemExit):
         ex.export_positions(repo)
+
+
+def test_performance_scaled_to_notional(repo):
+    perf = ex.export_performance(repo)
+    assert perf['dates'][0] == '2026-05-26'
+    assert perf['model'][0] == 10000.0
+    # 13386.55 / 13800 * 10000
+    assert abs(perf['model'][-1] - 9700.4) < 0.1
+    assert perf['bench']['SMH'][0] == 10000.0
+    assert abs(perf['bench']['SMH'][-1] - 9800.0) < 0.1
+
+
+def test_performance_summary_and_monthly(repo):
+    perf = ex.export_performance(repo)
+    s = perf['summary']
+    assert abs(s['total_return'] - (13386.55 / 13800 - 1)) < 1e-6
+    assert abs(s['vs_smh'] - (s['total_return'] - (-0.02))) < 1e-6
+    assert perf['monthly'][0]['month'] == '2026-05'
+    assert perf['as_of'] == '2026-05-28'

@@ -79,3 +79,46 @@ def export_positions(root: Path) -> list[dict]:
     if not out:
         fail('no included positions found in Targets')
     return out
+
+
+def export_performance(root: Path) -> dict:
+    sp = root / 'tracking' / 'performance-series.json'
+    if not sp.exists():
+        fail('tracking/performance-series.json missing — run '
+             'scripts/track_performance.py first')
+    raw = json.loads(sp.read_text())
+    cfg = json.loads(
+        (root / 'tracking' / 'performance-config.json').read_text())
+    capital = float(cfg['capital'])
+    k = NOTIONAL / capital
+    model = [round(v * k, 2) for v in raw['model']]
+    bench = {name: [round(g * NOTIONAL, 2) for g in series]
+             for name, series in raw['bench'].items()}
+
+    def total(series):
+        return series[-1] / series[0] - 1
+
+    summary = {
+        'total_return': total(model),
+        'vs_smh': total(model) - total(bench['SMH']),
+        'vs_qqq': total(model) - total(bench['QQQ']),
+        'vs_ew': total(model) - total(bench['EW']),
+    }
+
+    monthly: list[dict] = []
+    by_month: dict[str, list[int]] = {}
+    for i, d in enumerate(raw['dates']):
+        by_month.setdefault(d[:7], []).append(i)
+    prev_close = {'model': model[0], 'SMH': bench['SMH'][0],
+                  'QQQ': bench['QQQ'][0]}
+    for month in sorted(by_month):
+        last = by_month[month][-1]
+        row = {'month': month}
+        for key, series in (('model', model), ('SMH', bench['SMH']),
+                            ('QQQ', bench['QQQ'])):
+            row[key] = round(series[last] / prev_close[key] - 1, 6)
+            prev_close[key] = series[last]
+        monthly.append(row)
+
+    return {'dates': raw['dates'], 'model': model, 'bench': bench,
+            'summary': summary, 'monthly': monthly, 'as_of': raw['as_of']}
