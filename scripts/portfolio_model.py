@@ -142,7 +142,10 @@ def build_daily_series(cfg: dict) -> dict | None:
 
     ew_parts = [g.reindex(idx).ffill()
                 for t in cfg['ew_universe'] if (g := growth(t)) is not None]
-    ew = sum(ew_parts) / len(ew_parts)
+    if not ew_parts:
+        flag('series: no EW universe price data — series not built')
+        return None
+    ew = pd.concat(ew_parts, axis=1).mean(axis=1)
 
     model = pd.Series(0.0, index=idx)
     events = cfg['events']
@@ -177,5 +180,9 @@ def build_daily_series(cfg: dict) -> dict | None:
             'EW': [round(float(v), 6) for v in ew],
         },
     }
+    if any(v != v for series in (out['model'], *out['bench'].values())
+           for v in series):
+        flag('series: NaN in output — series not written')
+        return None
     SERIES.write_text(json.dumps(out) + '\n')
     return out
