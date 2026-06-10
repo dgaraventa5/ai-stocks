@@ -17,7 +17,7 @@ function loginPage(msg) {
 body{margin:0;background:#0d1117;color:#e6edf3;font-family:Menlo,monospace;
 display:flex;align-items:center;justify-content:center;min-height:100vh}
 form{background:#161b22;border:1px solid #30363d;border-radius:6px;
-padding:28px;width:300px}
+padding:28px;width:min(300px,90vw)}
 h1{font-size:14px;letter-spacing:1px;margin:0 0 16px}
 input{width:100%;box-sizing:border-box;background:#0d1117;color:#e6edf3;
 border:1px solid #30363d;border-radius:6px;padding:8px;font-family:inherit}
