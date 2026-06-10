@@ -128,3 +128,24 @@ def test_scans_passthrough_and_orphan_warning(repo, capsys):
                       'title': 'Weekly News Scan — 2026-06-05',
                       'url': 'https://www.notion.so/abc123'}]
     assert '2026-05-29' in capsys.readouterr().err   # scan md with no link
+
+
+def test_main_writes_all_files(repo):
+    ex.main(repo)
+    names = {p.name for p in (repo / 'site' / 'data').glob('*.json')}
+    assert names == {'positions.json', 'performance.json', 'changes.json',
+                     'theses.json', 'scans.json', 'meta.json'}
+    meta = json.loads((repo / 'site' / 'data' / 'meta.json').read_text())
+    assert meta['as_of'] == '2026-05-28'
+    assert meta['last_rebalance'] == '2026-06-10'
+    assert meta['holdings'] == 2
+
+
+def test_privacy_no_real_dollars_anywhere(repo):
+    """THE regression test: planted real-dollar values must never leak."""
+    from conftest import REAL_DOLLARS
+    ex.main(repo)
+    for p in (repo / 'site' / 'data').glob('*.json'):
+        text = p.read_text()
+        for planted in REAL_DOLLARS:
+            assert planted not in text, f'{planted} leaked into {p.name}'

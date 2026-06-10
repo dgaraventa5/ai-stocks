@@ -222,3 +222,35 @@ def export_scans(root: Path) -> list[dict]:
         if date not in linked:
             warn(f'scan {date} has no Notion link entry — omitted from site')
     return sorted(scans, key=lambda s: s['date'], reverse=True)
+
+
+def main(root: Path | None = None) -> None:
+    root = root or Path(__file__).resolve().parent.parent
+    out_dir = root / 'site' / 'data'
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    positions = export_positions(root)
+    performance = export_performance(root)
+    changes = export_changes(root)
+    theses = export_theses(root, [p['ticker'] for p in positions])
+    scans = export_scans(root)
+    cfg = json.loads(
+        (root / 'tracking' / 'performance-config.json').read_text())
+    meta = {
+        'generated_at': dt.datetime.now(dt.timezone.utc).isoformat(
+            timespec='seconds'),
+        'as_of': performance['as_of'],
+        'last_rebalance': cfg['events'][-1]['date'],
+        'holdings': len(positions),
+        'notional': NOTIONAL,
+    }
+    for name, data in (('positions', positions), ('performance', performance),
+                       ('changes', changes), ('theses', theses),
+                       ('scans', scans), ('meta', meta)):
+        (out_dir / f'{name}.json').write_text(json.dumps(data) + '\n')
+        print(f'wrote site/data/{name}.json')
+
+
+if __name__ == '__main__':
+    main(Path(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[1] == '--root'
+         else None)
