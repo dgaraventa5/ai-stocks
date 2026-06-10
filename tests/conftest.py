@@ -77,6 +77,7 @@ def repo(tmp_path):
         'dates': ['2026-05-26', '2026-05-27', '2026-05-28'],
         'model': [13800.0, 13903.5, 13386.55],
         'bench': {'SMH': [1.0, 1.01, 0.98], 'QQQ': [1.0, 1.005, 0.99],
+                  'SPY': [1.0, 1.002, 0.95],
                   'EW': [1.0, 1.02, 0.97]},
     }
     (tmp_path / 'tracking' / 'performance-series.json').write_text(

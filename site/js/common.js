@@ -45,7 +45,7 @@ function renderNav(active) {
   ).join('');
 }
 
-const CHART_COLORS = { model: '#3fb950', SMH: '#58a6ff', QQQ: '#bc8cff', EW: '#8b949e' };
+const CHART_COLORS = { model: '#3fb950', SMH: '#58a6ff', QQQ: '#bc8cff', SPY: '#e3b341', EW: '#8b949e' };
 
 function lineDataset(label, data, color, emphasized = false) {
   return { label, data, borderColor: color, backgroundColor: color,

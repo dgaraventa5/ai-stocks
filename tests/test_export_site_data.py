@@ -46,6 +46,7 @@ def test_performance_summary_and_monthly(repo):
     s = perf['summary']
     assert abs(s['total_return'] - (13386.55 / 13800 - 1)) < 1e-6
     assert abs(s['vs_smh'] - (s['total_return'] - (-0.02))) < 1e-6
+    assert abs(s['vs_spy'] - (s['total_return'] - (-0.05))) < 1e-6
     assert perf['monthly'][0]['month'] == '2026-05'
     assert perf['as_of'] == '2026-05-28'
 
@@ -73,6 +74,7 @@ def test_performance_monthly_chaining_across_months(repo):
         'model': [13800.0, 14076.0, 13938.0, 14214.0],
         'bench': {'SMH': [1.0, 1.02, 1.01, 1.03],
                   'QQQ': [1.0, 1.01, 1.0, 1.02],
+                  'SPY': [1.0, 1.01, 1.02, 1.04],
                   'EW': [1.0, 1.0, 1.0, 1.0]},
     }
     sp.write_text(json.dumps(series))
@@ -81,6 +83,7 @@ def test_performance_monthly_chaining_across_months(repo):
     # June chains off May's close, not off inception
     assert perf['monthly'][1]['model'] == round(14214.0 / 14076.0 - 1, 6)
     assert perf['monthly'][1]['SMH'] == round(1.03 / 1.02 - 1, 6)
+    assert perf['monthly'][1]['SPY'] == round(1.04 / 1.01 - 1, 6)
 
 
 def test_changes_from_events_and_audit(repo):

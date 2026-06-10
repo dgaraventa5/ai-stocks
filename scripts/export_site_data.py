@@ -93,7 +93,7 @@ def export_performance(root: Path) -> dict:
     for key in ('dates', 'model', 'bench', 'as_of'):
         if key not in raw:
             fail(f'performance-series.json missing key {key!r}')
-    for b in ('SMH', 'QQQ', 'EW'):
+    for b in ('SMH', 'QQQ', 'SPY', 'EW'):
         if b not in raw['bench']:
             fail(f'performance-series.json bench missing {b!r}')
     if not raw['model']:
@@ -113,6 +113,7 @@ def export_performance(root: Path) -> dict:
         'total_return': total(model),
         'vs_smh': total(model) - total(bench['SMH']),
         'vs_qqq': total(model) - total(bench['QQQ']),
+        'vs_spy': total(model) - total(bench['SPY']),
         'vs_ew': total(model) - total(bench['EW']),
     }
 
@@ -121,12 +122,12 @@ def export_performance(root: Path) -> dict:
     for i, d in enumerate(raw['dates']):
         by_month.setdefault(d[:7], []).append(i)
     prev_close = {'model': model[0], 'SMH': bench['SMH'][0],
-                  'QQQ': bench['QQQ'][0]}
+                  'QQQ': bench['QQQ'][0], 'SPY': bench['SPY'][0]}
     for month in sorted(by_month):
         last = by_month[month][-1]
         row = {'month': month}
         for key, series in (('model', model), ('SMH', bench['SMH']),
-                            ('QQQ', bench['QQQ'])):
+                            ('QQQ', bench['QQQ']), ('SPY', bench['SPY'])):
             row[key] = round(series[last] / prev_close[key] - 1, 6)
             prev_close[key] = series[last]
         monthly.append(row)

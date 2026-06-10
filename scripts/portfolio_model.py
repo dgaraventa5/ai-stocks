@@ -134,8 +134,8 @@ def build_daily_series(cfg: dict) -> dict | None:
         s = s[s.index.date >= inc_date]
         return None if s.empty else s / s.iloc[0]
 
-    smh, qqq = growth('SMH'), growth('QQQ')
-    if smh is None or qqq is None:
+    smh, qqq, spy = growth('SMH'), growth('QQQ'), growth('SPY')
+    if smh is None or qqq is None or spy is None:
         flag('series: benchmark price data unavailable — series not built')
         return None
     idx = smh.index
@@ -177,6 +177,7 @@ def build_daily_series(cfg: dict) -> dict | None:
         'bench': {
             'SMH': [round(float(v), 6) for v in smh.reindex(idx).ffill()],
             'QQQ': [round(float(v), 6) for v in qqq.reindex(idx).ffill()],
+            'SPY': [round(float(v), 6) for v in spy.reindex(idx).ffill()],
             'EW': [round(float(v), 6) for v in ew],
         },
     }

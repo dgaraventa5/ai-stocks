@@ -7,6 +7,7 @@ renderNav('performance.html');
       ['Model', perf.model, CHART_COLORS.model, true],
       ['SMH', perf.bench.SMH, CHART_COLORS.SMH, false],
       ['QQQ', perf.bench.QQQ, CHART_COLORS.QQQ, false],
+      ['S&P 500', perf.bench.SPY, CHART_COLORS.SPY, false],
     ];
     const chart = new Chart(document.getElementById('chart'), {
       type: 'line',
@@ -26,10 +27,11 @@ renderNav('performance.html');
 
     document.getElementById('monthly').innerHTML =
       '<tr><th>Month</th><th class="num">Model</th><th class="num">SMH</th>' +
-      '<th class="num">QQQ</th></tr>' +
+      '<th class="num">QQQ</th><th class="num">S&amp;P 500</th></tr>' +
       perf.monthly.map(m => `<tr><td>${esc(m.month)}</td>
         <td class="num ${pctClass(m.model)}">${fmtPct(m.model)}</td>
         <td class="num ${pctClass(m.SMH)}">${fmtPct(m.SMH)}</td>
-        <td class="num ${pctClass(m.QQQ)}">${fmtPct(m.QQQ)}</td></tr>`).join('');
+        <td class="num ${pctClass(m.QQQ)}">${fmtPct(m.QQQ)}</td>
+        <td class="num ${pctClass(m.SPY)}">${fmtPct(m.SPY)}</td></tr>`).join('');
   } catch (e) { showError('main', e.message); }
 })();
