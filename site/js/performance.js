@@ -28,7 +28,7 @@ renderNav('performance.html');
     document.getElementById('monthly').innerHTML =
       '<tr><th>Month</th><th class="num">Model</th><th class="num">SMH</th>' +
       '<th class="num">QQQ</th></tr>' +
-      perf.monthly.map(m => `<tr><td>${m.month}</td>
+      perf.monthly.map(m => `<tr><td>${esc(m.month)}</td>
         <td class="num ${pctClass(m.model)}">${fmtPct(m.model)}</td>
         <td class="num ${pctClass(m.SMH)}">${fmtPct(m.SMH)}</td>
         <td class="num ${pctClass(m.QQQ)}">${fmtPct(m.QQQ)}</td></tr>`).join('');

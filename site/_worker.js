@@ -35,31 +35,48 @@ border-radius:6px;padding:8px;font-family:inherit;cursor:pointer}
 export default {
   async fetch(request, env) {
     if (!env.SITE_PASSWORD) {
-      return new Response('SITE_PASSWORD not configured', { status: 500 });
+      return new Response('SITE_PASSWORD not configured', {
+        status: 500, headers: { 'Cache-Control': 'no-store' } });
     }
     const url = new URL(request.url);
     const expected = await token(env);
     const cookies = request.headers.get('Cookie') || '';
 
     if (cookies.includes(`${COOKIE}=${expected}`)) {
-      return env.ASSETS.fetch(request);
+      const res = await env.ASSETS.fetch(request);
+      if (url.pathname.startsWith('/data/')) {
+        const h = new Headers(res.headers);
+        h.set('Cache-Control', 'private, no-store');
+        return new Response(res.body, { status: res.status, headers: h });
+      }
+      return res;
     }
     if (request.method === 'POST' && url.pathname === '/login') {
-      const form = await request.formData();
+      let form;
+      try {
+        form = await request.formData();
+      } catch {
+        return new Response(loginPage(''), {
+          status: 401,
+          headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' } });
+      }
       if (form.get('password') === env.SITE_PASSWORD) {
         return new Response(null, {
           status: 302,
           headers: {
             'Location': '/',
+            'Cache-Control': 'no-store',
             'Set-Cookie': `${COOKIE}=${expected}; HttpOnly; Secure; ` +
                           'SameSite=Lax; Max-Age=31536000; Path=/',
           },
         });
       }
       return new Response(loginPage('wrong password'), {
-        status: 401, headers: { 'Content-Type': 'text/html' } });
+        status: 401,
+        headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' } });
     }
     return new Response(loginPage(''), {
-      status: 401, headers: { 'Content-Type': 'text/html' } });
+      status: 401,
+      headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' } });
   },
 };

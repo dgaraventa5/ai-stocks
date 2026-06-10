@@ -67,9 +67,9 @@ Theme: terminal dark — dark background (GitHub-dark palette range), monospace 
 | `changes.html` | Full reverse-chronological change log, client-side filter by type |
 | `scans.html` | Dated list of weekly scans, each linking out to its Notion page |
 
-### 3. Auth — Cloudflare Pages Function
+### 3. Auth — Cloudflare Pages worker
 
-`site/functions/_middleware.js` (~30 lines): checks a signed cookie; if absent/invalid, serves a styled password form. Password compared against a Cloudflare environment variable (`SITE_PASSWORD`) — never in the repo. Successful login sets a long-lived cookie; friends authenticate once per browser. All routes gated, including `/data/*.json`.
+`site/_worker.js` (Pages "advanced mode" — reliably bundled by `wrangler pages deploy site`): checks a signed cookie; if absent/invalid, serves a styled password form. Password compared against a Cloudflare environment variable (`SITE_PASSWORD`) — never in the repo. Successful login sets a long-lived cookie; friends authenticate once per browser. All routes gated, including `/data/*.json`.
 
 ### 4. CI — GitHub Action
 

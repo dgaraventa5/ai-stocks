@@ -14,7 +14,7 @@ renderNav('index.html');
       [fmtPct(s.total_return), 'Since inception', pctClass(s.total_return)],
       [fmtPct(s.vs_smh), 'vs SMH', pctClass(s.vs_smh)],
       [String(meta.holdings), 'Holdings', ''],
-      [meta.as_of, 'Data as of', 'dim'],
+      [esc(meta.as_of), 'Data as of', 'dim'],
     ].map(([v, k, cls]) =>
       `<div class="stat"><div class="v ${cls}">${v}</div><div class="k">${k}</div></div>`
     ).join('');
@@ -40,7 +40,7 @@ renderNav('index.html');
 
     document.getElementById('recent-changes').innerHTML =
       changes.slice(0, 3).map(c => `<tr>
-        <td class="dim">${c.date}</td><td><b>${esc(c.ticker || '—')}</b></td>
+        <td class="dim">${esc(c.date)}</td><td><b>${esc(c.ticker || '—')}</b></td>
         <td>${esc(c.type)}${c.detail ? ' <span class="dim">' + esc(c.detail) + '</span>' : ''}</td>
         <td class="dim">${esc(c.note || '')}</td></tr>`).join('');
 

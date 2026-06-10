@@ -38,13 +38,19 @@ if pos_file.exists():
 perf_file = SITE / 'data' / 'performance.json'
 if perf_file.exists():
     perf = json.loads(perf_file.read_text())
-    n = len(perf['dates'])
-    for key in ('model',):
-        if len(perf[key]) != n:
-            errors.append(f'performance.{key} length mismatch')
-    for bname, series in perf['bench'].items():
-        if len(series) != n:
-            errors.append(f'performance.bench.{bname} length mismatch')
+    for key in ('dates', 'model', 'bench', 'summary', 'monthly', 'as_of'):
+        if key not in perf:
+            errors.append(f'performance.json missing key {key}')
+    if not all(k in perf for k in ('dates', 'model', 'bench')):
+        perf = None
+    if perf is not None:
+        n = len(perf['dates'])
+        for key in ('model',):
+            if len(perf[key]) != n:
+                errors.append(f'performance.{key} length mismatch')
+        for bname, series in perf['bench'].items():
+            if len(series) != n:
+                errors.append(f'performance.bench.{bname} length mismatch')
 
 # Dead-reference scan: every local src/href in the HTML must exist.
 for html in SITE.glob('*.html'):
