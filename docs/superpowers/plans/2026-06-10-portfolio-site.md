@@ -172,10 +172,11 @@ git commit -m "feat(site): persist daily performance series for site exporter"
 
 **Files:**
 - Create: `tests/conftest.py`
-- Create: `tests/__init__.py` (empty)
 - Modify: `.gitignore` (append `site/data/`)
 
-- [ ] **Step 1: Create `tests/__init__.py`** (empty file) **and `tests/conftest.py`:**
+Do NOT create `tests/__init__.py` — making `tests` a package breaks Task 7's `from conftest import REAL_DOLLARS` (pytest puts rootdir, not `tests/`, on sys.path).
+
+- [ ] **Step 1: Create `tests/conftest.py`:**
 
 ```python
 """Fixture data for export_site_data tests.
@@ -300,7 +301,7 @@ Expected: `no tests ran` (collects without import errors).
 - [ ] **Step 4: Commit**
 
 ```bash
-git add tests/__init__.py tests/conftest.py .gitignore
+git add tests/conftest.py .gitignore
 git commit -m "test(site): fixture repo for exporter tests"
 ```
 
