@@ -25,3 +25,4 @@ venv/
 
 # Excel lock files
 ~$*
+.superpowers/
