@@ -42,6 +42,8 @@ AI-Supply-Chain/
   templates/
     per-stock-template.md
     quarterly-update-checklist.md
+  site/                               # Friend-facing static site (see §Portfolio site)
+  tests/                              # pytest suite (site exporter)
   CLAUDE.md                           # This file
 ```
 
@@ -197,6 +199,22 @@ For 13F XML parsing, use `lxml`. For HTML scraping (IR pages), use `beautifulsou
 When running batch tasks (e.g., score 10 new tickers), prefer parallel subagents over sequential. Each subagent handles one ticker end-to-end, writes its row to the spreadsheet, returns. The orchestrator merges results.
 
 Exception: when scraping rate-limited sources (SEC EDGAR, yfinance backend), serialize to avoid throttling.
+
+## Portfolio site (added 2026-06-10)
+
+A password-gated static site for close friends: `site/` on Cloudflare Pages,
+deployed by `.github/workflows/deploy-site.yml` on push to `main`.
+
+- **Privacy boundary:** `scripts/export_site_data.py` is the ONLY path from
+  repo data to `site/data/`. All dollars are scaled to a $10,000 notional
+  base; real capital, share counts, and cost basis are excluded by design.
+  `tests/test_export_site_data.py::test_privacy_no_real_dollars_anywhere` is
+  the regression gate — never weaken it.
+- **Performance series:** `tracking/performance-series.json` is written by
+  `track_performance.py` (weekly pipeline) so CI needs no network/yfinance.
+- **Scan links:** `tracking/notion-scan-links.json` maps scan dates to Notion
+  URLs; the Cowork weekly routine appends to it.
+- The spec lives at `docs/superpowers/specs/2026-06-10-portfolio-site-design.md`.
 
 ## What I'm NOT trying to optimize for
 
