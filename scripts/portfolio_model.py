@@ -109,3 +109,80 @@ def log_rebalance(cfg: dict, weights: dict[str, float], reason: str) -> dict:
         cfg['events'].append(event)
     save_cfg(cfg)
     return event
+
+
+SERIES = ROOT / 'tracking' / 'performance-series.json'
+
+
+def build_daily_series(cfg: dict) -> dict | None:
+    """Daily valuation series since inception, written to SERIES.
+
+    Model values are DOLLARS (event-sourced walk: within each event period,
+    value = cash + sum(alloc * price/price_at_event_start), missing-price
+    names carried flat). Benchmarks are growth-of-1 from inception. The site
+    exporter rescales both to the $10k notional base.
+    """
+    import pandas as pd
+
+    inception = cfg['inception']
+    inc_date = dt.date.fromisoformat(inception)
+
+    def growth(t):
+        s = _series(t, inception)
+        if s is None:
+            return None
+        s = s[s.index.date >= inc_date]
+        return None if s.empty else s / s.iloc[0]
+
+    smh, qqq = growth('SMH'), growth('QQQ')
+    if smh is None or qqq is None:
+        flag('series: benchmark price data unavailable — series not built')
+        return None
+    idx = smh.index
+
+    ew_parts = [g.reindex(idx).ffill()
+                for t in cfg['ew_universe'] if (g := growth(t)) is not None]
+    if not ew_parts:
+        flag('series: no EW universe price data — series not built')
+        return None
+    ew = pd.concat(ew_parts, axis=1).mean(axis=1)
+
+    model = pd.Series(0.0, index=idx)
+    events = cfg['events']
+    for i, ev in enumerate(events):
+        start = dt.date.fromisoformat(ev['date'])
+        end = (dt.date.fromisoformat(events[i + 1]['date'])
+               if i + 1 < len(events) else None)
+        mask = (idx.date >= start)
+        if end is not None:
+            mask &= (idx.date < end)
+        if not mask.any():
+            continue
+        seg = pd.Series(float(ev.get('cash', 0)), index=idx[mask])
+        for t, alloc in ev['allocations'].items():
+            s = _series(t, inception)
+            sub = None if s is None else s[s.index.date >= start]
+            if sub is None or sub.empty:
+                seg += alloc            # carried flat (no price data)
+                continue
+            seg += alloc * (sub.reindex(idx[mask]).ffill()
+                            / sub.iloc[0]).fillna(1.0)
+        model[idx[mask]] = seg
+
+    out = {
+        'start': inception,
+        'as_of': str(idx[-1].date()),
+        'dates': [str(d.date()) for d in idx],
+        'model': [round(float(v), 2) for v in model],
+        'bench': {
+            'SMH': [round(float(v), 6) for v in smh.reindex(idx).ffill()],
+            'QQQ': [round(float(v), 6) for v in qqq.reindex(idx).ffill()],
+            'EW': [round(float(v), 6) for v in ew],
+        },
+    }
+    if any(v != v for series in (out['model'], *out['bench'].values())
+           for v in series):
+        flag('series: NaN in output — series not written')
+        return None
+    SERIES.write_text(json.dumps(out) + '\n')
+    return out

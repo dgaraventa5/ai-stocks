@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> Broadcom is the leading designer of the custom AI chips hyperscalers build to reduce dependence on Nvidia (Google's TPU, Meta's MTIA, plus Anthropic and OpenAI) and supplies the high-end networking silicon that ties AI clusters together, a business growing fast toward $100B+.
 
 ---
 

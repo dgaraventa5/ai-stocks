@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> TSMC is the sole manufacturer that can fabricate leading-edge AI chips at scale, making roughly 90% of the world's AI accelerator wafers for Nvidia, AMD, and every hyperscaler's custom silicon; its 2nm and advanced-packaging capacity is sold out years ahead.
 
 ---
 

@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> Owned as the most vertically integrated AI player: its custom TPU silicon, fastest-growing major cloud, and Gemini stack sit behind a Search, ad-tech, and YouTube moat, making it the one hyperscaler outrunning the broad market on AI execution.
 
 ---
 

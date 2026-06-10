@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> A leader in chip test equipment whose growth is now driven by AI silicon: roughly 70% of revenue is AI-related, testing the custom hyperscaler ASICs, high-bandwidth memory, and GPUs that power AI, though it sells to chipmakers and assembly houses rather than to hyperscalers directly.
 
 ---
 

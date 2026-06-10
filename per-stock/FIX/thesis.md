@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> A mechanical and electrical contractor that has become a core picks-and-shovels play on AI infrastructure: nearly half its revenue is data-center work, backlog has more than doubled, and it does the cooling and buildout for essentially every major hyperscaler.
 
 ---
 

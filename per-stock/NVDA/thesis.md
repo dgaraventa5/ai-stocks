@@ -12,7 +12,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> NVIDIA is the core holding for AI training compute: it commands roughly 80% of the AI accelerator market, and its CUDA software ecosystem plus InfiniBand/NVLink networking lock in customers so deeply that nearly all large AI clusters are built on its chips.
 
 ---
 

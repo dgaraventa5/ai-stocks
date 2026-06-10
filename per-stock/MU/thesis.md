@@ -1,7 +1,7 @@
-# CRDO — {Company Name}
+# MU — Micron Technology
 
 **Layer:** {e.g., Power Generation / IPPs}
-**Last reviewed:** 2026-05-25
+**Last reviewed:** {YYYY-MM-DD}
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
 **Thesis-break trigger:** {what single development would force exit}
@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> A fabless connectivity specialist whose revenue is almost entirely AI infrastructure: its Active Electrical Cables and proprietary SerDes chips link GPU to GPU inside hyperscaler clusters, with five hyperscaler customers and rivals licensing rather than designing around its IP.
+> One of three memory makers and a key bottleneck for AI accelerators: its high-bandwidth memory is sold out under multi-year fixed-price contracts, and cloud plus data center is now a majority of revenue, so memory feeds directly into the GPU buildout.
 
 ---
 

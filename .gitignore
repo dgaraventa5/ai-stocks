@@ -25,3 +25,8 @@ venv/
 
 # Excel lock files
 ~$*
+.superpowers/
+site/data/
+
+# Wrangler local dev cache
+.wrangler/

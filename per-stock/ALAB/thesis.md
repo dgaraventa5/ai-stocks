@@ -8,9 +8,9 @@
 
 ---
 
-## 1. One-line thesis [STALE - revisit: company is pivoting from retimer/cable positioning to full AI fabric platform; Scorpio to become largest product line by year-end 2026]
+## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> Astera Labs is a near pure-play on AI cluster connectivity, making the retimers and switches that move data between accelerators inside AI servers; its Scorpio fabric is becoming the connectivity standard outside Nvidia's ecosystem and is set to be its largest product line.
 
 ---
 

@@ -8,10 +8,11 @@
 
 ---
 
+[STALE - revisit: Q1 2026 data available. AI networking target raised to $3.5B for FY2026. 100+ AI customers. Fourth customer migrated from InfiniBand to Ethernet.]
+
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
-> [STALE - revisit: Q1 2026 data available. AI networking target raised to $3.5B for FY2026. 100+ AI customers. Fourth customer migrated from InfiniBand to Ethernet.]
+> The premier high-end data center switching vendor whose Ethernet fabric and EOS software are winning AI back-end networks away from InfiniBand at the largest hyperscalers, with AI now a fast-growing chunk of revenue anchored by Microsoft and Meta.
 
 ---
 

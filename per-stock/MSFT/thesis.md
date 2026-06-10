@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> Owned for its enterprise distribution of AI: the Azure-plus-OpenAI partnership and Copilot ride on top of Office and Active Directory lock-in, turning a fast-growing AI revenue run rate into the largest disclosed single-company AI buildout.
 
 ---
 
