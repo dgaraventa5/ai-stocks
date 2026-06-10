@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>AI Supply Chain — Dashboard</title>
+<link rel="stylesheet" href="css/terminal.css">
+</head>
+<body>
+<div class="wrap">
+  <nav></nav>
+  <div id="main">
+    <div class="stat-row" id="stats"></div>
+    <div class="panel">
+      <h2>Performance — $10k model vs SMH (since inception)</h2>
+      <div class="chart-box compact"><canvas id="chart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h2>Top positions</h2>
+      <table id="top-positions"></table>
+      <p style="margin:8px 0 0"><a href="positions.html">all positions →</a></p>
+    </div>
+    <div class="panel">
+      <h2>Recent changes</h2>
+      <table id="recent-changes"></table>
+      <p style="margin:8px 0 0"><a href="changes.html">full change log →</a></p>
+    </div>
+  </div>
+  <div class="footer" id="footer"></div>
+</div>
+<script src="js/vendor/chart.umd.js"></script>
+<script src="js/common.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>
