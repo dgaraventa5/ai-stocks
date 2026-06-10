@@ -7,7 +7,6 @@ renderNav('performance.html');
       ['Model', perf.model, CHART_COLORS.model, true],
       ['SMH', perf.bench.SMH, CHART_COLORS.SMH, false],
       ['QQQ', perf.bench.QQQ, CHART_COLORS.QQQ, false],
-      ['EW universe', perf.bench.EW, CHART_COLORS.EW, false],
     ];
     const chart = new Chart(document.getElementById('chart'), {
       type: 'line',
