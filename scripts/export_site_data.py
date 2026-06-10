@@ -132,3 +132,52 @@ def export_performance(root: Path) -> dict:
 
     return {'dates': raw['dates'], 'model': model, 'bench': bench,
             'summary': summary, 'monthly': monthly, 'as_of': raw['as_of']}
+
+
+def export_changes(root: Path) -> list[dict]:
+    cfg = json.loads(
+        (root / 'tracking' / 'performance-config.json').read_text())
+    out: list[dict] = []
+    events = cfg['events']
+    for i, ev in enumerate(events):
+        if i == 0:
+            out.append({'date': ev['date'], 'type': 'inception',
+                        'ticker': None, 'note': ev['reason']})
+            continue
+        prev, curr = set(events[i - 1]['allocations']), set(ev['allocations'])
+        for t in sorted(curr - prev):
+            out.append({'date': ev['date'], 'type': 'add', 'ticker': t,
+                        'note': ev['reason']})
+        for t in sorted(prev - curr):
+            out.append({'date': ev['date'], 'type': 'drop', 'ticker': t,
+                        'note': ev['reason']})
+        if curr == prev:
+            out.append({'date': ev['date'], 'type': 'resize', 'ticker': None,
+                        'note': ev['reason']})
+
+    wb = openpyxl.load_workbook(
+        root / '00-master' / 'ai_supply_chain_scoring.xlsx', data_only=True)
+    ws = wb['Rating Audit']
+    grouped: dict[tuple[str, str], dict] = {}
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        date, ticker, dim, _rating, rationale, _src, _conf, typ = row[:8]
+        if not date or not typ or str(typ).strip().lower() == 'initial':
+            continue
+        if rationale is not None and not isinstance(rationale, str):
+            # Column-shifted legacy row (an extra rating column pushed
+            # Rationale→Source and the real Type into col 9). The Type slot
+            # here holds a misaligned Confidence value, so the row can't be
+            # trusted as a re-rate record. Skip rather than crash/mislabel.
+            warn(f'Rating Audit row for {ticker} on {date} looks '
+                 f'column-shifted (non-text rationale); skipping')
+            continue
+        key = (str(date)[:10], ticker)
+        g = grouped.setdefault(key, {'dims': [], 'rationale': rationale})
+        g['dims'].append(str(dim))
+    for (date, ticker), g in grouped.items():
+        note = (g['rationale'] or '').strip()
+        out.append({'date': date, 'type': 'rerate', 'ticker': ticker,
+                    'detail': ', '.join(sorted(g['dims'])),
+                    'note': note[:200] + ('…' if len(note) > 200 else '')})
+
+    return sorted(out, key=lambda c: (c['date'], c['type']), reverse=True)

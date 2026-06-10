@@ -81,3 +81,28 @@ def test_performance_monthly_chaining_across_months(repo):
     # June chains off May's close, not off inception
     assert perf['monthly'][1]['model'] == round(14214.0 / 14076.0 - 1, 6)
     assert perf['monthly'][1]['SMH'] == round(1.03 / 1.02 - 1, 6)
+
+
+def test_changes_from_events_and_audit(repo):
+    ch = ex.export_changes(repo)
+    kinds = {(c['date'], c['type'], c.get('ticker')) for c in ch}
+    assert ('2026-05-26', 'inception', None) in kinds
+    assert ('2026-06-10', 'add', 'TSM') in kinds
+    assert ('2026-06-10', 'drop', 'ARM') in kinds
+    rerates = [c for c in ch if c['type'] == 'rerate']
+    assert len(rerates) == 1                       # grouped by (date, ticker)
+    assert rerates[0]['ticker'] == 'NVDA'
+    assert rerates[0]['detail'] == 'D2, D3'
+    assert 'Initial baseline' not in json.dumps(ch)   # Type==Initial excluded
+
+
+def test_changes_no_dollar_amounts(repo):
+    text = json.dumps(ex.export_changes(repo))
+    for planted in ('824.7', '13800', '900.0', '700.0'):
+        assert planted not in text
+
+
+def test_changes_sorted_newest_first(repo):
+    ch = ex.export_changes(repo)
+    assert [c['date'] for c in ch] == sorted(
+        (c['date'] for c in ch), reverse=True)
