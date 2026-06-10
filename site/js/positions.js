@@ -5,6 +5,10 @@ renderNav('positions.html');
     const [positions, theses] = await Promise.all([
       loadJSON('data/positions.json'), loadJSON('data/theses.json')]);
     const rows = [...positions].sort((a, b) => b.weight - a.weight);
+    if (rows.some(p => theses[p.ticker])) {
+      document.getElementById('positions-title').textContent =
+        'All holdings — click a row (▸) for the thesis';
+    }
     const table = document.getElementById('positions');
     table.innerHTML =
       '<tr><th>Ticker</th><th>Company</th><th>Layer</th>' +
