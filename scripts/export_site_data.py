@@ -181,3 +181,44 @@ def export_changes(root: Path) -> list[dict]:
                     'note': note[:200] + ('…' if len(note) > 200 else '')})
 
     return sorted(out, key=lambda c: (c['date'], c['type']), reverse=True)
+
+
+THESIS_SECTION = re.compile(
+    r'^## 1\. One-line thesis\s*$(.*?)(?=^## |\Z)', re.M | re.S)
+
+
+def export_theses(root: Path, tickers: list[str]) -> dict[str, str | None]:
+    out: dict[str, str | None] = {}
+    for t in tickers:
+        path = root / 'per-stock' / t / 'thesis.md'
+        if not path.exists():
+            warn(f'{t}: no thesis.md — snippet omitted')
+            out[t] = None
+            continue
+        m = THESIS_SECTION.search(path.read_text())
+        body = '' if not m else m.group(1)
+        lines = [ln.lstrip('> ').strip() for ln in body.splitlines()]
+        text = ' '.join(ln for ln in lines if ln and ln != '---').strip()
+        if not text or re.search(r'\{.+?\}', text):
+            warn(f'{t}: thesis.md is still the template — snippet omitted')
+            out[t] = None
+        else:
+            out[t] = text
+    return out
+
+
+def export_scans(root: Path) -> list[dict]:
+    lp = root / 'tracking' / 'notion-scan-links.json'
+    if not lp.exists():
+        warn('tracking/notion-scan-links.json missing — scans page empty')
+        return []
+    scans = json.loads(lp.read_text())
+    for s in scans:
+        if not all(s.get(k) for k in ('date', 'title', 'url')):
+            fail(f'malformed scan link entry: {s}')
+    linked = {s['date'] for s in scans}
+    for md in sorted(root.glob('tracking/weekly-news-scan-*.md')):
+        date = md.stem.replace('weekly-news-scan-', '')
+        if date not in linked:
+            warn(f'scan {date} has no Notion link entry — omitted from site')
+    return sorted(scans, key=lambda s: s['date'], reverse=True)

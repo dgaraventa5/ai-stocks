@@ -106,3 +106,25 @@ def test_changes_sorted_newest_first(repo):
     ch = ex.export_changes(repo)
     assert [c['date'] for c in ch] == sorted(
         (c['date'] for c in ch), reverse=True)
+
+
+def test_theses_extracts_populated_and_nulls_template(repo, capsys):
+    th = ex.export_theses(repo, ['NVDA', 'TSM'])
+    assert th['NVDA'] == ('The compute layer toll booth: every training run '
+                          'pays NVDA.')
+    assert th['TSM'] is None
+    assert 'TSM' in capsys.readouterr().err     # warned
+
+
+def test_theses_missing_file_is_null(repo, capsys):
+    th = ex.export_theses(repo, ['NVDA', 'XYZ'])
+    assert th['XYZ'] is None
+    assert 'XYZ' in capsys.readouterr().err
+
+
+def test_scans_passthrough_and_orphan_warning(repo, capsys):
+    scans = ex.export_scans(repo)
+    assert scans == [{'date': '2026-06-05',
+                      'title': 'Weekly News Scan — 2026-06-05',
+                      'url': 'https://www.notion.so/abc123'}]
+    assert '2026-05-29' in capsys.readouterr().err   # scan md with no link
