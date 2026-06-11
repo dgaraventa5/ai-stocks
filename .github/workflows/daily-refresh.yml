@@ -1,0 +1,66 @@
+name: Daily site refresh
+
+on:
+  schedule:
+    # ~5:45pm ET during EDT, 4:45pm ET during EST — after close, adjusted
+    # closes settled. Weekdays only; holidays self-skip via the
+    # commit-if-changed guard (series is byte-identical when markets are shut).
+    - cron: '45 21 * * 1-5'
+  workflow_dispatch:
+
+env:
+  # Match deploy-site.yml: GitHub forces Node 24 for actions from 2026-06-16.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install yfinance pandas openpyxl pytest
+
+      - name: Rebuild performance series (3 attempts — Yahoo throttles CI IPs)
+        run: |
+          for i in 1 2 3; do
+            python scripts/track_performance.py --series-only && exit 0
+            echo "attempt $i failed; retrying in 60s"
+            sleep 60
+          done
+          echo "::error::yfinance failed after 3 attempts — site keeps yesterday's data"
+          exit 1
+
+      - name: Commit series if changed
+        id: commit
+        run: |
+          if git diff --quiet tracking/performance-series.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "series unchanged (holiday / no new data) — skipping deploy"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git add tracking/performance-series.json
+            git commit -m "chore(data): daily performance series $(date -u +%F)"
+            git pull --rebase origin main
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Inline deploy: a GITHUB_TOKEN push cannot trigger deploy-site.yml.
+      - run: python -m pytest tests -q
+        if: steps.commit.outputs.changed == 'true'
+      - run: python scripts/export_site_data.py
+        if: steps.commit.outputs.changed == 'true'
+      - run: python scripts/check_site.py
+        if: steps.commit.outputs.changed == 'true'
+      - uses: cloudflare/wrangler-action@v3
+        if: steps.commit.outputs.changed == 'true'
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=ai-supply-chain
