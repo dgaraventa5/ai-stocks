@@ -211,7 +211,11 @@ deployed by `.github/workflows/deploy-site.yml` on push to `main`.
   `tests/test_export_site_data.py::test_privacy_no_real_dollars_anywhere` is
   the regression gate — never weaken it.
 - **Performance series:** `tracking/performance-series.json` is written by
-  `track_performance.py` (weekly pipeline) so CI needs no network/yfinance.
+  `track_performance.py`. `deploy-site.yml` needs no network/yfinance;
+  `daily-refresh.yml` (weekday cron 21:45 UTC) rebuilds it with
+  `--series-only`, commits if changed (holidays self-skip), and redeploys
+  inline — dashboard/performance pages stay daily-fresh. The weekly Cowork
+  routine still owns the narrative `performance-log.md`.
 - **Scan links:** `tracking/notion-scan-links.json` maps scan dates to Notion
   URLs; the Cowork weekly routine appends to it.
 - The spec lives at `docs/superpowers/specs/2026-06-10-portfolio-site-design.md`.
