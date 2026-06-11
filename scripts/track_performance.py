@@ -36,9 +36,15 @@ LOG = ROOT / 'tracking' / 'performance-log.md'
 def main() -> None:
     ap = argparse.ArgumentParser(description='Mark model portfolio vs benchmarks')
     ap.add_argument('--dry-run', action='store_true')
+    ap.add_argument('--series-only', action='store_true',
+                    help='rebuild tracking/performance-series.json and exit; '
+                         'no log append (daily site-refresh path)')
     args = ap.parse_args()
 
     cfg = load_cfg()
+    if args.series_only:
+        build_daily_series(cfg)
+        return
     inception, capital = cfg['inception'], cfg['capital']
     today = dt.date.today().isoformat()
 
