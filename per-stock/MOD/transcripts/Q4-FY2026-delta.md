@@ -1,8 +1,8 @@
 # MOD — Q4 FY2026 Delta Summary
 
 **Prepared:** 2026-05-26
-**Source:** Q4 FY2026 press release, $4B LTA announcement, analyst coverage, Q3 FY2026 transcript (prior context)
-**Note:** Earnings call transcript not yet available (call 2026-05-27, transcript posts 2026-05-28+). Revisit after transcript posts.
+**Updated:** 2026-06-12 (/earnings-update) — earnings call (2026-05-27) and 10-K (filed 2026-05-27) now processed; see §7 for post-call/10-K confirmations and corrections. Call content sourced from Investing.com transcript coverage; Motley Fool had NOT published a Q4 FY2026 transcript as of 2026-06-12 (flag: replace quotes with verbatim transcript if/when Fool or Modine IR posts one).
+**Source:** Q4 FY2026 press release (SEC EX-99.1), $4B LTA announcement, 10-K FY2026, Investing.com call transcript article, analyst coverage, Q3 FY2026 transcript (prior context)
 
 ---
 
@@ -23,7 +23,7 @@ The $165M upfront payment is particularly notable as a tone signal: the hypersca
 ### What we know
 - $4B+ in committed chiller purchases, 2027–2029 (3-year term)
 - ~$1.33B/year implied run rate
-- $165M upfront payment received (not refundable — goes to fund Franklin, OH expansion)
+- $165M upfront payment received (CORRECTED 2026-06-12: this is a customer *deposit* booked as a contract liability — $170.6M noncurrent + portion of $23.9M current contract liabilities at 3/31/26 — to fund the U.S. capacity expansion broadly: Franklin **WI** (not OH as previously written), Grand Prairie TX, Grenada MS, Jefferson City MO; 10-K FY2026, Notes — Revenue Recognition, contract balances)
 - Customer unnamed; described as "major hyperscale customer" and "strategic data center customer"
 - Products: Airedale chillers, liquid cooling, indoor air systems, intelligent controls
 
@@ -141,3 +141,38 @@ Per DataCenterKnowledge reporting: cooling has joined power, transformers, GPUs,
 | FCF | -18.5% YoY ($105.4M) despite record revenue | Negative (capex surge; expected to normalize) |
 
 **Net thesis read:** Q4 FY2026 is a significant positive development. The $4B LTA represents a qualitative step-change in revenue visibility and customer relationship depth that was not priced into the prior thesis. The margin compression is a real headwind but appears predominantly temporary. The spin-off removes the biggest structural discount on the business.
+
+---
+
+## 7. Post-call + 10-K update (2026-06-12, /earnings-update)
+
+The 2026-05-27 earnings call and the FY2026 10-K (filed 2026-05-27) answer several open questions from §2 and add new facts:
+
+### LTA — what the call and 10-K confirmed
+- **Scope:** "The agreement is specific for our chillers" (Brinker, Q4 call per Investing.com) — chillers only, not the full Airedale product suite as the LTA press release implied.
+- **Customer:** an **existing** strategic customer under a confidentiality agreement (Brinker, Q4 call; 10-K Risk Factors). Identity still undisclosed. Likely the same "one global technology customer in our Climate Solutions segment" that was **~11% of FY2026 consolidated sales (~$350M)** — the first time any customer exceeded 10% of sales (FY2025/FY2024 largest customer <10%) (10-K, Customer Dependence). Concentration is therefore already material *before* the LTA ramp.
+- **Cadence:** $4B+ over CY2027–2029 with "no more than $2 billion in any one year" (Lucareli, Q4 call) — so not necessarily ratable at $1.33B/yr; could be back-loaded up to $2B in a peak year.
+- **Economics:** LTA margins "would definitely be accretive to where we are today... absolutely within the target margins of where we want the data center business to be" (Lucareli, Q4 call). No unit pricing disclosed.
+- **Accounting:** agreement entered **March 2026**; the $165.0M deposit is a contract liability (not revenue), driving the $159.4M YoY increase in contract liabilities to $194.5M at 3/31/26 (10-K, contract balances note). 10-K risk factor explicitly states "there can be no assurance that this customer will purchase the amounts projected."
+- **Capacity consumed:** a "high degree" of existing/under-construction chiller capacity supports the LTA; no specific share given (Brinker, Q&A). Chiller capacity expected to double by end of FY2027 (analyst coverage of guidance, Stocktitan/Seeking Alpha).
+
+### Data Centers actuals (replaces §2's $770–850M estimate)
+- **FY2026 Data Centers revenue ≈ $1.1B, +73% YoY** (CEO, Q4 call); consistent with 10-K product-group disclosure: Data Centers = 35% of FY2026 net sales (vs 25% FY2025) → ~$1,113M on $3,181.1M, and DC product sales +$468M YoY (10-K MD&A, Climate Solutions).
+- **Q4 DC sales exceeded $400M** (+$246M, +158% YoY; Q4 call + press release) → >$1.6B annualized exiting FY2026.
+- North America chiller production up **fivefold** YoY (Brinker, Q4 call), despite ~20 lost production shifts from severe weather.
+- New product: 3-megawatt chiller — +50% cooling capacity in +9% footprint (Brinker, Q4 call).
+
+### FY2027 guidance — call additions beyond the press release
+- **Data Centers growth guided +60–80% in FY2027** — RAISED from the prior "50–70% per year" framing; management layered "a 50–70% growth rate" for the following year (FY2028) on top (Lucareli, Q&A per Investing.com). At +60–80%, FY2027 DC revenue ≈ $1.76–1.98B.
+- **FCF guided to 4–6% of sales** in FY2027 (Lucareli) — i.e., ~$153–258M on guided revenue, vs $105.4M (3.3% of sales) in FY2026.
+- Guidance includes PT for all of FY2027; to be updated when spin timing is final (press release, Outlook).
+
+### Negative-FCF flag resolved (watchlist showed FCF yield −0.71% / FCF margin −3.19%)
+- **Company-defined FY2026 FCF was POSITIVE $105.4M** = OCF $248.7M − capex $143.3M (press release; 10-K cash flow statement). The negative watchlist values came from yfinance `info.freeCashflow` = **−$101.45M** (Yahoo's "levered FCF"-style estimate), which does not reconcile to the statements — known yfinance data quirk, flag per CLAUDE.md rule 3.
+- The negative sign is directionally honest, though: OCF includes the one-time $165M LTA deposit (contract-liabilities line contributed +$159.0M to OCF; 10-K cash flow statement). **Ex-deposit, underlying FCF ≈ −$55 to −$60M** — negative because of (a) the capex surge to $143.3M from $84.0M (CS capex $113M, DC capacity expansion) and (b) working-capital build (inventory + receivables for the DC ramp). Separately, $182.4M went to acquisitions (L.B. White, Climate by Design, AbsolutAire) below the FCF line, pushing net debt to $362.8M (+$83.6M) (10-K MD&A; press release).
+- Read-through: this is **growth capex + customer-funded expansion**, not deteriorating cash conversion — and the customer is co-funding it. FY2027 FCF guide of 4–6% of sales implies normalization.
+
+### New risks surfaced post-call
+1. **Component supply shortages** began Q4 FY2026 ("demand for certain key components is currently outpacing supplier capacity") and are "negatively impacting our production schedules for the first quarter of fiscal 2027"; management expects "no impact on our full-year outlook" (10-K MD&A; Lucareli, Q4 call). Watch Q1 FY2027 print for whether containment held.
+2. **Severe weather** cost ~20 production shifts and 50–100bps of Climate gross margin in Q4 (Lucareli) — explains part of the §3 margin miss vs Q3 guidance.
+3. Customer >10% concentration now an explicit 10-K disclosure (first time), before the LTA even ramps.

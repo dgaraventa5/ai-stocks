@@ -50,7 +50,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit]
 
 (See `financials.xlsx` for detail)
 
@@ -83,7 +83,7 @@
 
 ---
 
-## 7. Valuation
+## 7. Valuation [STALE - revisit]
 
 - **Current multiple:** {P/E, EV/EBITDA, EV/Sales — pick the right one for the business}
 - **Peer comparison:** {how does it trade vs. comparables}

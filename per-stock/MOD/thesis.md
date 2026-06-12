@@ -68,7 +68,8 @@
 
 ---
 
-## 6. Moat
+## 6. Moat [STALE - revisit]
+> **Flag (2026-06-12):** Q4 FY2026 produced direct moat evidence to incorporate: (1) the $4B LTA is a capacity-reservation contract with a $165M customer prepay — a switching-cost/lock-in data point (10-K FY2026, contract balances note); (2) new 3MW chiller (+50% cooling capacity, +9% footprint) is a product-lead claim (Q4 call, 2026-05-27); (3) counterpoint: LTA is chillers-only and Vertiv's backlog (>$15B) dwarfs MOD's — scale gap persists.
 
 - **IP / process know-how:** {patents, trade secrets, technical lead}
 - **Scale advantage:** {unit cost vs. competitors at volume}
