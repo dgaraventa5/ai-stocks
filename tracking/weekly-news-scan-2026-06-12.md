@@ -178,19 +178,20 @@ checked — no 13F-HR/A filings June 5–12 (between filing seasons; next cluste
 ## Follow-up Items
 
 **New this week:**
-1. **AVGO** — full `/earnings-update` (📊 priority: GM +846bps, EPS +87.5% — TTM still understates run-rate)
-2. **SMCI** — pull 424B5 prospectus supplements for raise sizes/instruments next scan
-3. **GOOGL/MSFT** — `/refresh-context` while this week's filings are fresh (also clears 2 of 7 portfolio gate violations)
-4. **Layer 3/9 BS Risk** — revisit balance-sheet ratings at next rescore given the $40B+ debt-financing wave (HUT, APLD, CIFR, CRWV, KEEL leverage all stepped up this week)
+1. ~~**AVGO** — full `/earnings-update`~~ ✅ DONE 2026-06-12 (transcript + delta + briefing; score 78.5 post rating session)
+2. ~~**SMCI** — pull 424B5s for raise sizes~~ ✅ DONE 2026-06-12: **$6.3B+ multi-instrument raise** — $3.75B (up to $4.3B) 7.00% mandatory convertible preferred + $1.33B common + $1.25B ATM. Week's AI-financing total → ~$46B+.
+3. ~~**GOOGL/MSFT** — `/refresh-context`~~ ✅ DONE 2026-06-12 (all 7 portfolio gate violations cleared; rating session completed, 20 changes + 3 overrides)
+4. **Layer 3/9 BS Risk** — revisit at next rescore given the financing wave (portfolio L9 names re-rated 2026-06-12; non-portfolio HUT/APLD/CIFR/CRWV/KEEL still pending)
 5. **ETN** — track Dana RMT regulatory/close timeline; post-separation Eaton is more thesis-direct
-6. **MRVL** — objective inputs post-earnings stale; fold into next rescore at latest
+6. ~~**MRVL** — objective inputs stale~~ ✅ REFRESHED 2026-06-12: now 65.0 (✓). ⚠️ Tier unreliable — GAAP EPS YoY −80.6% is a one-time-charge artifact (Apr-26 qtr NI $34.5M on record revenue); without it MRVL ≈ ✓✓ boundary. Identify the charge in the 10-Q at next pass.
 
-**Carried from 2026-05-26 scan, still open:**
-7. **ONTO** — use-of-proceeds disclosure (30-day window from 2026-05-21 close — expires ~6/20, check next scan)
-8. **WULF** — anchor tenant at Muskie Data Campus (1 GW; no tenant announced; annual-meeting 8-K this week had no disclosure)
-9. **D/NEE** — first FERC merger filing (425 comms cadence normal this week)
-10. **KEYS** — re-pull yfinance (April quarter)
-11. **NVDA / MOD** — full `/earnings-update` still recommended
+**Carried from 2026-05-26 scan:**
+7. ~~**ONTO** — use-of-proceeds window~~ ✅ CLOSED 2026-06-12: disclosure was in the 5/21 8-K itself ($205M concurrent buyback @ $254.53 + capped calls; remainder GCP). Passive watch for deployment of remaining ~$1.2B.
+8. **WULF** — Muskie anchor tenant: still none disclosed (verified 2026-06-12; KBW expects first 500MW lease as early as 1H 2027). Passive watch.
+9. **D/NEE** — deal now signed: NextEra acquiring Dominion ~$67B (2026-05-15), close guided 12-18mo; FERC application not yet filed (verified 2026-06-12). Passive watch for the FERC docket.
+10. ~~**KEYS** — re-pull yfinance~~ ✅ DONE 2026-06-12 (April quarter populated; 70.9 ✓✓)
+11. **NVDA / MOD** — full `/earnings-update` still recommended (the two remaining actionable items)
 
 **Rating integrity backlog:**
-12. `/refresh-context` on remaining portfolio gate violations: TSM → META → MSFT → GOOGL → EME → FIX → TER
+12. ~~Portfolio gate violations~~ ✅ CLEARED 2026-06-12 (71 → 64; all remaining are non-portfolio, biweekly rotation)
+13. **R2 review flags** (new rubric, 2026-06-12): CAMT asset-leg, KLIC China mix, AVGO two-leg — research-first at next refresh/rescore (see rubric-calibration-notes.md)
