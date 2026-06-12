@@ -58,6 +58,13 @@ AI-Supply-Chain/
 
 **Do not use** paid sources (Bloomberg, FactSet, LSEG, FMP paid tier) — this project is free-tools-only.
 
+**Remote/cloud sessions (egress allowlist):** sandboxed environments must allowlist
+`data.sec.gov`, `www.sec.gov`, `efts.sec.gov`, `query1.finance.yahoo.com`,
+`query2.finance.yahoo.com`, `fc.yahoo.com`, `guce.yahoo.com`, `consent.yahoo.com`
+(or `*.sec.gov` + `*.yahoo.com`). Without these, the 8-K scan and all yfinance
+refreshes fail — the 2026-06-12 scan had to be re-run locally for this reason.
+If blocked, complete what runs locally, flag the gap, and do not fabricate data.
+
 ## Scoring system reference
 
 The scoring spreadsheet at `00-master/ai_supply_chain_scoring.xlsx` has 5 sheets:

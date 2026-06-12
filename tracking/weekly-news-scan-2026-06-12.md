@@ -50,7 +50,7 @@ remains open — no new data this week.
 
 | Ticker | Event |
 |--------|-------|
-| **GOOGL** 💼 | 8-K 6/05 (1.01): Sold ~$16.75B of 6.25% Series A+B **mandatory convertible preferred** (incl. full overallotment) — Alphabet's first large external AI-capex financing; structurally significant for the whole capex-cycle thesis. |
+| **GOOGL** 💼 | 8-K 6/05 (1.01): Sold **$19.25B of 6.25% mandatory convertible preferred** ($16.75B base + overallotments) — part of an **$84.75B June equity package**: $18B common, $19.25B preferred, $40B ATM, **$10B private placement to Berkshire Hathaway** (8-Ks 6/04-05; corrected from initial ~$16.75B read during 6/12 /refresh-context). Alphabet's first large external AI-capex financing; buybacks halted (zero in Q1 vs $15.1B yr-ago). |
 | **ETN** | 8-K 6/11 (7.01/8.01): **Separating vehicle Mobility segment** to Dana Inc. via Reverse Morris Trust — Eaton gets ~$1.1B cash, shareholders ≥50.1% of SpinCo+Dana. Post-close Eaton is a cleaner electrical/data-center pure-play. Positive for Layer 2 thesis directness. |
 | **MRVL** | 8-K 6/11 (5.02): **CFO Willem Meintjes resigned** eff. 6/15; replaced by board member Daniel Durn (ex-Adobe, ex-AMAT CFO). High-caliber replacement, orderly handoff — watch for any restatement/timing signals anyway. |
 | **P** (fka PSTG) | **Pure Storage renamed Everpure, Inc., ticker PSTG → P.** Watchlist, research map, and per-stock dir updated. Q1 FY27 reported 5/27 (scan gap); Rule-9 refresh done — FCF margin 16.8%→6.8%, score now 59.5 (✓). Also DEFA14A 6/02: founder Scott Dietzen off Nom/Gov committee under shareholder pressure. |

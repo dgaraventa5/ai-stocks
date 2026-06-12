@@ -1,14 +1,14 @@
 # AVGO — {Company Name}
 
 **Layer:** {e.g., Power Generation / IPPs}
-**Last reviewed:** 2026-05-17
+**Last reviewed:** 2026-05-17 *(Q2 FY26 earnings 2026-06-03 → sections flagged [STALE - revisit] on 2026-06-12)*
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
 **Thesis-break trigger:** {what single development would force exit}
 
 ---
 
-## 1. One-line thesis
+## 1. One-line thesis [STALE - revisit]
 
 > Broadcom is the leading designer of the custom AI chips hyperscalers build to reduce dependence on Nvidia (Google's TPU, Meta's MTIA, plus Anthropic and OpenAI) and supplies the high-end networking silicon that ties AI clusters together, a business growing fast toward $100B+.
 
@@ -23,7 +23,7 @@
 
 ---
 
-## 3. Customers
+## 3. Customers [STALE - revisit]
 
 | Customer | % revenue | Source / date |
 |---|---|---|
@@ -35,7 +35,7 @@
 
 ---
 
-## 4. Pricing & demand
+## 4. Pricing & demand [STALE - revisit]
 
 - **Pricing trend:** {ASPs rising/flat/falling, last 8 quarters}
 - **Lead times / backlog:** {are they widening or compressing?}
@@ -98,7 +98,7 @@
 
 ---
 
-## 9. Risks
+## 9. Risks [STALE - revisit]
 
 - **Thesis-killer #1:** {single development that would force exit}
 - **Thesis-killer #2:** {second-most concerning risk}
