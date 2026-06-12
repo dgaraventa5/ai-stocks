@@ -103,6 +103,26 @@ def _is_missing(v) -> bool:
     return False
 
 
+def statement_fcf(t: yf.Ticker) -> float | None:
+    """TTM FCF from the cash-flow statement: sum of last 4 quarters OCF - |capex|.
+
+    Added 2026-06-12: yfinance info.freeCashflow is Yahoo's *levered* FCF
+    estimate and does not reconcile to the statements (it printed NVDA's 47%
+    TTM FCF margin as 18% and MOD's positive FCF as negative). Statement-based
+    is the source of truth; callers fall back to info.freeCashflow only when
+    fewer than 4 quarters are available, and must flag the fallback.
+    """
+    try:
+        cf = t.quarterly_cashflow
+        ocf = cf.loc["Operating Cash Flow"].dropna()
+        capex = cf.loc["Capital Expenditure"].dropna()
+        if len(ocf) >= 4 and len(capex) >= 4:
+            return float(ocf.iloc[:4].sum()) - abs(float(capex.iloc[:4].sum()))
+    except Exception:
+        pass
+    return None
+
+
 def compute_inputs(ticker: str, t: yf.Ticker, info: dict) -> tuple[dict, list[str]]:
     """Return the 11 objective inputs + a list of gap messages for the log."""
     gaps: list[str] = []
@@ -115,7 +135,13 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict) -> tuple[dict, list[st
     # ----- Value -----
     inp["fwd_pe"]    = info.get("forwardPE")
     inp["ev_ebitda"] = info.get("enterpriseToEbitda")
-    mcap = info.get("marketCap"); fcf = info.get("freeCashflow")
+    mcap = info.get("marketCap")
+    fcf = statement_fcf(t)
+    if fcf is None:
+        fcf = info.get("freeCashflow")
+        if fcf is not None:
+            gaps.append("FCF: statement TTM unavailable (<4 quarters) — fell back to "
+                        "yfinance info.freeCashflow (levered estimate, known to diverge)")
     if fcf is not None and mcap and not _is_missing(fcf) and not _is_missing(mcap):
         inp["fcf_yield"] = round(fcf / mcap * 100, 2)
     else:

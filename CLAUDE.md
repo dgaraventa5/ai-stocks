@@ -50,7 +50,7 @@ AI-Supply-Chain/
 ## Data sources (in priority order)
 
 1. **SEC EDGAR** (https://data.sec.gov, https://www.sec.gov/edgar) — primary source of truth for filings. Use User-Agent header `Dom Researcher dom@example.com` (replace with real email). Rate limit: 10 req/sec max, throttle with `time.sleep(0.1)`.
-2. **yfinance Python library** — fundamentals, market data. Install if missing: `pip install yfinance`. Has occasional rate limits and incomplete data on small-caps.
+2. **yfinance Python library** — fundamentals, market data. Install if missing: `pip install yfinance`. Has occasional rate limits and incomplete data on small-caps. **Known trap (fixed 2026-06-12):** `info.freeCashflow` is Yahoo's *levered* FCF estimate and does not reconcile to the cash-flow statements (printed NVDA's 47% TTM FCF margin as 18%). All FCF inputs must use statement-based TTM OCF − |capex| via `batch_score.statement_fcf()`; the info field is fallback-only and must be flagged.
 3. **Company IR pages** — earnings calls, investor presentations. Fall back to motleyfool.com if IR doesn't publish transcripts.
 4. **FRED** (https://fred.stlouisfed.org) — macro/rates/electricity data.
 5. **EIA** (https://www.eia.gov) — energy and electricity data.

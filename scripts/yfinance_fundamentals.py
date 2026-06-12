@@ -98,7 +98,15 @@ def build_financials(ticker: str, out_path: Path | None = None) -> Path:
     put("Revenue growth (YoY)", info.get("revenueGrowth"), "yfinance info.revenueGrowth")
     put("Total cash ($)", info.get("totalCash"), "yfinance info.totalCash")
     put("Total debt ($)", info.get("totalDebt"), "yfinance info.totalDebt")
-    put("FCF (TTM, $)", info.get("freeCashflow"), "yfinance info.freeCashflow")
+    # Statement-based TTM FCF (2026-06-12): info.freeCashflow is Yahoo's
+    # levered estimate and does not reconcile to the cash-flow statements.
+    from batch_score import statement_fcf
+    _fcf = statement_fcf(t)
+    if _fcf is not None:
+        put("FCF (TTM, $)", _fcf, "statement: TTM OCF - |capex| (yfinance quarterly_cashflow)")
+    else:
+        put("FCF (TTM, $)", info.get("freeCashflow"),
+            "yfinance info.freeCashflow (FALLBACK levered estimate — statement TTM unavailable)")
     put("Shares outstanding", info.get("sharesOutstanding"), "yfinance info.sharesOutstanding")
     put("Current price ($)", info.get("currentPrice") or info.get("regularMarketPrice"),
         "yfinance info.currentPrice")
