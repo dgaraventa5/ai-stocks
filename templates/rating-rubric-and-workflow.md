@@ -274,16 +274,44 @@ This is inverted from the others. **5 means the stock has LOW risk on this dimen
 
 #### R2. Geographic / Export Risk
 
+**Revised 2026-06-12 (approved by Dom).** The original bands were written in China/export-control
+language only, which left shipment-geography concentration (e.g., TER at 41% Taiwan + 19% Korea)
+and asset-location risk unscored by the text — forcing case-law judgment calls. These bands codify
+the risk-leg tiering that the 2026-06-12 calibration review found already implicit in the sheet.
+(Pre-revision bands: see git history for this file.)
+
+**The three risk legs (assess each from filings):**
+- **Demand leg** — revenue shipped to a risk geography (Taiwan/Korea strait exposure, etc.).
+  Substitutable in principle if the customer survives the shock.
+- **Policy leg** — China/trade-policy exposure: meaningful China revenue under current or
+  plausible restrictions.
+- **Asset leg** — production assets physically located in a risk geography (fabs in Taiwan,
+  plants in a conflict zone). Not substitutable.
+
 **Criteria:**
 | Rating | Definition |
 |---|---|
-| **5** | US/domestic-focused. No China revenue, no export-controlled tech. |
-| **4** | Some international but no problematic exposure. Diversified. |
-| **3** | Meaningful China revenue but no export-control overhang. |
-| **2** | China revenue with potential export-control exposure. Risk of tightened rules. |
-| **1** | Direct export-control restrictions actively impacting revenue. |
+| **5** | No legs. Domestic/diversified — no single geographic or trade-policy shock plausibly impairs >10% of revenue. |
+| **4** | One leg, demand only. Shipment concentration to a risk geography (>25% of revenue), no material China/policy overhang. |
+| **3** | Two legs. Shipment concentration PLUS China/trade-policy overhang (current or plausible restrictions; past impacts absorbed/stabilized). |
+| **2** | Asset leg, OR policy currently impairing material revenue (e.g., China DC revenue = $0, procurement bans) but not existential. |
+| **1** | Active, material, unmitigated impairment underway — geographic/policy shock with existential-scale revenue impact. |
 
-**Sourcing rule:** Geographic revenue breakout in 10-K. Plus current BIS Entity List status (entity-list.com or BIS website).
+**Rationale requirement (mandatory, added with this revision):** every R2 rating must name
+(a) the single worst plausible shock for this name and (b) the % of revenue exposed to it,
+with the filing citation. "Diversified" without a named shock is not a rationale.
+
+**Scope note:** supply-side foundry dependence (a fabless company's chips made at TSMC) is NOT
+an R2 leg — it is industry-systemic and belongs in the thesis narrative, not this rating.
+R2 scores the company's own revenue geography and asset footprint.
+
+**Anchor examples (as of 2026-06-12):** EME, FIX (US-only): 5. TER, ONTO, FORM, CAMT
+(Asia-shipment concentration, limited China overhang): 4. AMAT, LRCX, KLAC, ASML, AMD
+(shipment concentration + absorbed export-control impact): 3. TSM (fabs in Taiwan), NVDA
+(China DC = $0), MU (China procurement ban): 2.
+
+**Sourcing rule:** Geographic revenue breakout in 10-K/10-Q. Property/asset locations from
+10-K Item 2. Current BIS Entity List status (entity-list.com or BIS website).
 
 ---
 

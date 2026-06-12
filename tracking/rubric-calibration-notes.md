@@ -595,3 +595,25 @@ CTRA (Coterra Energy) delisted from NYSE. Removed from portfolio Include set. Ru
 - AR target weight: 5.75%
 
 **Capital efficiency:** AMD now the binding constraint at $471 (it rallied past MSFT). ±1% tolerance requires ~$23.6k; ±2% tolerance requires ~$11.8k. Slight tightening vs prior basket.
+
+---
+
+## R2 rubric revision (Option A) — 2026-06-12
+
+**What changed:** R2 (Geographic/Export Risk) bands rewritten from China-export-centric text to
+explicit risk-leg tiering (demand leg / policy leg / asset leg) in
+`templates/rating-rubric-and-workflow.md`. Approved by Dom 2026-06-12 after the TER R2 debate
+(TER at exactly the 73.0 exit threshold; the old band text forced a judgment call that looked
+like it could decide the position). New mandatory rationale: every R2 rating names the worst
+plausible shock + % of revenue exposed, with citation.
+
+**Consistency pass (Layers 4/5/6/7 vs. new bands):** existing ratings conform by construction —
+the new bands codify the calibration already revealed in the sheet (Asia-shipment-only = 4;
+shipment + China overhang = 3: AMAT/LRCX/KLAC/ASML/AEIS/AMD; asset-leg or active impairment = 2:
+TSM/NVDA/MU). **Zero rating changes from the revision itself.**
+
+**Flagged for review at next /refresh-context or quarterly rescore (research first, no blind moves):**
+- **CAMT (R2=4):** Israel-located production may constitute an asset leg (conflict-zone) → candidate 2-3. Verify manufacturing footprint in latest 20-F.
+- **KLIC (R2=4):** historically large China revenue (ball bonders) → possible policy leg → candidate 3. Verify current geographic mix.
+- **AVGO (R2=4):** meaningful China revenue + 2024-25 SAMR antitrust probe history + networking export rules → possible two legs → candidate 3. Verify in next AVGO pass.
+- **Interpretation note (billing vs end-demand):** the demand leg counts *end-demand* geography where determinable, not billing address. TER's 41% Taiwan is genuine end-demand (testers bought/used by Taiwan fabs/OSATs). CRDO billing Taiwan ODMs that build for US hyperscalers is US end-demand → CRDO R2=4 stands. Apply this distinction consistently for fabless names.
