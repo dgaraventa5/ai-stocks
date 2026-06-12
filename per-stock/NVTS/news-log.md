@@ -5,3 +5,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | Date | Source | Summary |
 |---|---|---|
 | 2026-06-05 | Data QA (yfinance) | **Objective-input override:** nulled FCF Yield (G) and FCF Margin (M) in Watchlist row 133. yfinance reported freeCashflow=+$43.8M, which contradicts operatingCashflow=−$45.7M and EBITDA=−$64M (company is burning ~$16M/qtr). Bad positive FCF would have inflated Quality ~20pts on a garbage input (CLAUDE.md §3/§9). True picture: cash burn funded by serial dilution. |
+
+- **2026-06-12** (weekly scan, SEC EDGAR): 8-K 2026-06-09 (Item 5.02): director Ranbir Singh resigned, company pointedly references his Apr/May Schedule 13D filings — activist/governance tension.

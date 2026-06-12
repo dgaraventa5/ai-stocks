@@ -2,17 +2,13 @@
 
 **Scope:** 135 watchlist tickers. Scan date: 2026-06-12 (covering June 5–12).
 
-**⛔ NETWORK BLOCKER — PARTIAL SCAN:** The remote execution environment blocks outbound
-access to `www.sec.gov`, `data.sec.gov`, and `query2.finance.yahoo.com`. As a result:
-- SEC EDGAR 8-K scan (Steps 1–4) **could not run** — no 8-K data for June 5–12
-- Objective input refresh via yfinance **could not run** (Rule 9)
-- `scripts/momentum_50dma.py`, `scripts/refresh_targets.py`, `scripts/track_performance.py` **all blocked**
+**Note on execution:** The morning remote run was blocked on network egress (SEC EDGAR +
+yfinance unreachable) — see git history for the partial version. This file is the **completed
+scan**, re-run locally the same day with full network access. All steps completed.
 
-**What completed:** Local score recalculation (all 135 names), portfolio pipeline status from
-existing spreadsheet data, and the Rule-12 integrity audit.
-
-**Resolution needed:** Add `data.sec.gov`, `www.sec.gov`, and `query2.finance.yahoo.com` to
-the environment's network egress allowlist (Settings → Egress), then re-run this scan.
+**Unresolved tickers (no SEC CIK):** SBGSY, TOELY, BESIY — foreign ADRs that do not file with
+EDGAR (Schneider, Tokyo Electron, BESI report via home-market disclosures; not covered by the
+8-K scan, known limitation). PSTG resolved — see ⚠️ Everpure rename below.
 
 ---
 
@@ -40,132 +36,161 @@ Mental models below are for the 16 portfolio holdings (all ✓✓).
 | EQT | 73.8 | Largest US nat gas producer. Thesis: AI data centers → electricity demand → gas demand. Score barely above exit threshold (73.0). No AI moat — pure macro beneficiary of demand growth. Held on hysteresis; next adverse score move would trigger EXIT PENDING. |
 | TER | 73.0 | Teradyne, semiconductor test equipment. AI chips (HBM, complex logic) require significantly more test time per die. Structurally higher ATE demand. **Score exactly at exit threshold (73.0) — hairline above EXIT PENDING.** Any score deterioration on next refresh triggers the 2-run exit process. **Gate violation** — no thesis.md. |
 
-**Thesis diff vs. prior model:** No material model-shifting signals surfaced from local data since the 2026-06-10 rebalance. The biggest open question remains the ANET/NVDA Spectrum-X competitive dynamic — no new data this week given the blocker.
+**Thesis diff vs. articulated model (post-scan):** Two genuine model updates this week.
+(1) **AVGO** — the mental model said "VMware integration ongoing but AI revenue is the re-rating
+driver"; the Q2 FY26 refresh shows the re-rating is *already in the numbers* (TTM GM +846bps,
+EPS +87.5% YoY) and the model had not priced how fast margins are ramping. (2) **GOOGL** — the
+model framed Alphabet as a self-funding hyperscaler; the $16.75B mandatory convertible preferred
+raise breaks that frame — even Alphabet now taps external capital for AI capex. ANET/Spectrum-X
+remains open — no new data this week.
 
 ---
 
 ## ⚠️ Material Events
 
-**SEC EDGAR 8-K scan could not run — no material events to report this week.**
+| Ticker | Event |
+|--------|-------|
+| **GOOGL** 💼 | 8-K 6/05 (1.01): Sold ~$16.75B of 6.25% Series A+B **mandatory convertible preferred** (incl. full overallotment) — Alphabet's first large external AI-capex financing; structurally significant for the whole capex-cycle thesis. |
+| **ETN** | 8-K 6/11 (7.01/8.01): **Separating vehicle Mobility segment** to Dana Inc. via Reverse Morris Trust — Eaton gets ~$1.1B cash, shareholders ≥50.1% of SpinCo+Dana. Post-close Eaton is a cleaner electrical/data-center pure-play. Positive for Layer 2 thesis directness. |
+| **MRVL** | 8-K 6/11 (5.02): **CFO Willem Meintjes resigned** eff. 6/15; replaced by board member Daniel Durn (ex-Adobe, ex-AMAT CFO). High-caliber replacement, orderly handoff — watch for any restatement/timing signals anyway. |
+| **P** (fka PSTG) | **Pure Storage renamed Everpure, Inc., ticker PSTG → P.** Watchlist, research map, and per-stock dir updated. Q1 FY27 reported 5/27 (scan gap); Rule-9 refresh done — FCF margin 16.8%→6.8%, score now 59.5 (✓). Also DEFA14A 6/02: founder Scott Dietzen off Nom/Gov committee under shareholder pressure. |
+| **HUT** | 8-K 6/10 (1.01): Closed **$4.25B 6.129% senior secured notes due 2042** funding a 352MW six-hall turnkey DC (Nueces County, TX) leased to a tenant rated **AA- or higher** — strongest confirmation yet of the miner→IG-tenant-DC conversion thesis. |
+| **APLD** | 8-Ks 6/09: **Delta Forge 2 long-term lease signed** (second AI Factory campus, new southern state); priced $1.59B 7.00% notes for 150MW ELN-04 at Polaris Forge 1; $350M revolver; MOU to assign ELN-04 lease to a **CoreWeave** subsidiary if it reaches IG rating. |
+| **CIEN** | 8-K 6/08+6/11 (1.01/2.03/3.02): Priced **$2.0B convertible notes due 2031** + hedge/warrants (~7.7M shares max). Big raise for Ciena's size — check use of proceeds in next 10-Q. |
+| **KEEL** | 8-K 6/10 (1.01): **$458M 1.25% converts due 2032** (upsized from $350M) to accelerate DC development (Panther Creek, Sharon, Moses Lake). |
+| **CRWV** | 8-K 6/11 (7.01): Launching **$3.5B USD+EUR senior notes due 2032** — partly refinancing; leverage stack keeps compounding. |
+| **NVTS** | 8-K 6/09 (5.02): Director **Ranbir Singh resigned**; company pointedly references his April/May Schedule 13Ds — activist/governance fight in progress. |
+| **VRT** | 8-K 6/12 (7.01): **Closed ThermoKey S.p.A. acquisition** (Italian heat exchangers) — thermal bolt-on, consistent with cooling-attach thesis. VRT at 73.7, still below entry (74.5). |
+| **MSFT** | 8-K 6/05 (5.02): **Reid Hoffman not standing for re-election** (director since 2017). No disagreement cited; board-composition note, not thesis-moving. |
+| **TSM** | 6-K 6/10: **May revenue NT$416.98B, +30.1% YoY** (+1.5% MoM); Jan–May +30.0% YoY — momentum intact, thesis-confirming. |
+| **CIFR** | 8-K 6/08-09: Stingray Compute priced **$810M 6.00% senior secured notes due 2031** — HPC project financing. |
+| **HUBB** | 8-K 6/08-09: $1.9B 3-tranche senior notes; **closed NSI Industries acquisition** (electrical fittings). |
+| **AMZN** | FWP/424B5 6/08: **C$14.0B five-tranche maple bond** (3.40% '29 → 5.00% '56) + new term loan — hyperscaler debt-funding theme continues. |
+| **SMCI** | 8-K 6/09 (8.01) + S-3ASR + 424B5 ×5 (6/09–6/12): risk-factor refresh ahead of a **large multi-instrument capital raise** — sizes TBD; pull prospectus supplements next scan. |
 
-[FLAG] All material event identification for June 5–12 is missing. This is a process gap.
-High-priority items to manually check when network access is restored:
-- **ONTO**: $1.7B convertible proceeds — use-of-proceeds 8-K expected within 30 days of 2026-05-21 close
-- **WULF**: Muskie Data Campus anchor tenant announcement (1 GW, ~285 acres KY — no tenant disclosed as of 2026-05-26)
-- **D/NEE**: First FERC filing on Dominion/NextEra all-stock merger (18-24 month approval timeline)
-- **PLTR/DDOG/CRM**: Layer 10 SaaS signals on NRR, AI feature adoption, pricing model shifts — no 8-K data available
+**Theme of the week: the AI buildout has moved decisively to debt + hybrid financing.**
+GOOGL preferred ($16.75B) + AMZN maple bonds (C$14B) + HUT ($4.25B) + CRWV ($3.5B) + CIEN
+($2.0B) + APLD ($1.59B+) + CIFR ($810M) + KEEL ($458M) ≈ **$40B+ of AI-infrastructure
+financing in one week**, across every layer from hyperscaler to neocloud to miner-conversion.
+Watch list implication: balance-sheet (BS Risk) ratings for Layer 3/9 names deserve scrutiny at
+the next rescore — leverage is rising fastest exactly where scores are improving.
 
 ---
 
-## 📊 Earnings Refreshed
+## 📊 Earnings Refreshed (Rule #9)
 
-**yfinance blocked — no earnings refresh possible this week.**
+| Ticker | Reported | Score before → after | Notes |
+|--------|----------|---------------------|-------|
+| **AVGO** 📊 | Q2 FY26, 8-K 6/04 (scan gap — caught via 10-Q 6/09) | **74.6 → 78.2 (+3.6)** | **📊 GM +846bps TTM (67.8→76.3), Rev YoY 29.5→47.9, EPS YoY 31.6→87.5.** TTM still lags the current run-rate (MRQ above TTM on every growth metric) — classic rule-9 fast-ramp case. **Recommend full `/earnings-update AVGO`.** Tier unchanged ✓✓; rises #14 → #7 in portfolio rank. |
+| **ORCL** | Q4 FY26, 8-K 6/10 (Item 2.02) | 62.8 → 63.4 | Rev $19.2B +21%, non-GAAP EPS $2.11 +24% (press release Ex 99.1); **RPO $638B, +$85B QoQ, +363% YoY**; IaaS +93%. FY26 FCF **−$23.7B** (capex) — FCF-driven Value metrics stay pinned at minimum; $75B of contracts are customer-prepaid/supplied hardware. Beat magnitude <15% → no immediate-priority flag. Tier ✓. |
+| **UEC** | FQ3 2026 (Apr 30), 8-K 6/09 (Item 2.02) | 41.7 → 41.7 | Inputs refreshed; rev YoY + EPS YoY missing on yfinance (flagged, kept stale values). Pre-profitability uranium developer — bands unchanged. Tier ?. |
+| **P** (fka PSTG) | Q1 FY27, 8-K 5/27 (scan gap) | n/a → 59.5 | Refresh overdue under Rule 9 (earnings 16 days ago). FCF margin 16.8→6.8, FCF yield 2.75→1.11 — meaningful FCF deterioration; rev/EPS YoY missing on yfinance (flagged). Tier ✓. |
 
-[FLAG] Cannot determine whether any watchlist names reported Q2/Q3 results during June 5–12.
-After network access is restored, check for Item 2.02 (Results of Operations) in 8-Ks for:
-- Semiconductor names whose fiscal quarters end in late April/May (AMAT, LRCX, SNPS, KLAC, etc.)
-- Any Layer 10 SaaS names with May quarter-ends
+**Scan-gap note:** No weekly scan ran 2026-05-31 → 2026-06-07 (between the 05-26 and 06-12
+scans), so 8-Ks from that week (AVGO 6/04 earnings, P 5/27 earnings, MRVL late-May earnings)
+were only caught this pass. MRVL is not refresh-priority (not held, score mid-table) but its
+inputs are also post-earnings stale — fold into next quarterly rescore at latest.
 
-Previously flagged from 2026-05-26 scan and still pending:
-- **KEYS** — April 2026 quarter likely now populated in yfinance; re-pull inputs
-- **NVDA** — Full `/earnings-update` still recommended for Q1 FY2027 transcript analysis
-- **MOD** — Full `/earnings-update` recommended for $4B hyperscaler chiller LTA details
+Still pending from 2026-05-26 scan: **KEYS** re-pull (April quarter now likely populated),
+**NVDA** + **MOD** full `/earnings-update`.
 
 ---
 
 ## 💼 Portfolio Pipeline
 
-**Pipeline scripts blocked by yfinance restriction. Status based on local spreadsheet data (last refreshed 2026-06-10).**
+Full pipeline ran post-refresh: `momentum_50dma.py` (135/135 written) → `refresh_targets.py` →
+`track_performance.py`.
 
-**Current portfolio (16 positions, all HOLD):**
+- **Membership unchanged — 16 positions, all HOLD. No ENTER/EXIT/EXIT-PENDING events.**
+- **TER survived at exactly 73.0** — the exit trigger requires score < 73.0; the refreshed
+  50DMA inputs did not move it. Still the #1 watch item: any deterioration starts the 2-run
+  exit confirm.
+- **EQT 73.8** — held on hysteresis, 0.8 above exit.
+- **AVGO 78.2** — biggest mover (+3.6), now 7th largest target weight.
+- Next-in-line below entry (74.5): **VRT 73.7, AMD 73.5** — neither entered.
+- [FLAG] **Layer 06 (silicon) = 35% of portfolio** (NVDA, SNDK, MU, AVGO, ALAB). No layer cap
+  is configured for L06 — flagging per pipeline output; a cap decision is Dom's call
+  (framework-level, per feedback memory).
 
-| Ticker | Score | Target % | Notes |
-|--------|-------|----------|-------|
-| NVDA | 83.3 | 8.99% | HOLD — well above exit |
-| TSM | 79.9 | 7.41% | HOLD |
-| SNDK | 79.7 | 7.32% | HOLD |
-| MU | 79.5 | 7.25% | HOLD |
-| META | 79.0 | 7.00% | HOLD |
-| CRDO | 78.3 | 6.70% | HOLD |
-| GOOGL | 77.7 | 6.44% | HOLD |
-| ANET | 77.5 | 6.34% | HOLD |
-| EME | 76.7 | 5.95% | HOLD |
-| ALAB | 76.5 | 5.87% | HOLD |
-| FIX | 76.4 | 5.82% | HOLD |
-| MSFT | 76.3 | 5.77% | HOLD |
-| PLTR | 74.9 | 5.13% | HOLD |
-| AVGO | 74.6 | 5.02% | HOLD |
-| EQT | 73.9 | 4.68% | HOLD — 0.9 pts above exit threshold |
-| TER | 73.0 | 4.29% | ⚠️ **HOLD — at exit threshold (73.0). Next refresh could trigger EXIT PENDING.** |
+**Performance mark (2026-06-12):** Model **$14,285, +3.52%** since 2026-05-26 inception.
 
-**Pipeline flags:**
-- No ENTER or EXIT events triggered based on current local scores
-- No names above entry threshold (74.5) that aren't already in portfolio
-- **TER watch**: Score 73.0 exactly equals the exit threshold. If any objective input worsens on next yfinance refresh (earnings miss, margin compression), TER triggers EXIT PENDING (2-run confirm required)
-- **EQT watch**: Score 73.9, held on hysteresis; still 0.9 pts above exit but not re-entering territory (entry = 74.5)
-- **VRT (73.7), AMD (73.5)**: Next tier below EQT — would need to reach 74.5 to enter
+| Benchmark | Since inception | Model alpha |
+|---|---|---|
+| SMH | +3.40% | **+0.11%** |
+| QQQ | −0.96% | **+4.47%** |
+| EW universe (35) | +3.22% | **+0.30%** |
 
-**Performance mark (last available: 2026-06-11):**
-| Portfolio | Model Value | vs Inception |
-|-----------|-------------|--------------|
-| Model | $14,058.88 | **+1.9%** |
-| SMH | — | +1.2% |
-| QQQ | — | -1.8% |
-| SPY | — | -1.7% |
-| EW universe | — | +1.2% |
-
-Model outperforming all benchmarks since 2026-05-26 inception. Cannot update to today (2026-06-12) without yfinance.
+Since the 2026-06-10 rebalance the model is +6.71% vs SMH +9.06% (−2.34% — SMH's NVDA/AVGO
+mega-weights outran our caps this week) and QQQ +4.27% (+2.45%). Top contributors since
+rebalance: SNDK +$203, ALAB +$120, MU +$117; bottom: MSFT −$16, EQT −$5.
 
 ---
 
 ## 🔬 Rating Integrity (Rule #12)
 
-`audit_rating_integrity.py` run: **71 gate violations, 0 stale names.**
-
-Gate violations = names carrying subjective AI/Momentum/Risk ratings with **no thesis.md and no research briefing**. Their ratings are unbacked — do not trust their AI, Momentum, or Risk subscores.
+`audit_rating_integrity.py`: **135 rated names | 71 gate violations | 0 stale.** Unchanged
+from the morning run (the P rename did not affect gate status).
 
 **Portfolio holdings with gate violations (7/16 — highest priority):**
+FIX, EME (since 05-18) · TER, TSM (since 06-10) · MSFT, GOOGL (since 05-18) · META (since 05-26).
 
-| Ticker | Score | Layer | Gate violation since |
-|--------|-------|-------|---------------------|
-| FIX | 76.4 | 03 | 2026-05-18 |
-| EME | 76.7 | 03 | 2026-05-18 |
-| TER | 73.0 | 04 | 2026-06-10 |
-| TSM | 79.9 | 05 | 2026-06-10 |
-| MSFT | 76.3 | 09 | 2026-05-18 |
-| GOOGL | 77.7 | 09 | 2026-05-18 |
-| META | 79.0 | 09 | 2026-05-26 |
-
-7 of 16 portfolio holdings are carrying unresearched subjective ratings. Per Rule 12, these names' AI/Momentum/Risk subscores should not be trusted until research-backed briefings are produced. The scheduled biweekly refresh routine handles the queue by layer rotation; flag this for the next collaborative rating session.
-
-**Full ungated list (71 names, non-portfolio):** GEV, ETN, SBGSY, ABBNY, HTHIY, HUBB, PWR, MTZ, POWL, NVT, ATKR, VRT, DLR, EQIX, IRM, CARR, TT, JCI, ASML, LRCX, KLAC, TOELY, ONTO, CAMT, KLIC, ENTG, MKSI, PLAB, UCTT, CDNS, SNPS, ARM, INTC, GFS, TSEM, UMC, COHR, LITE, AAOI, POET, CSCO, CIEN, APH, TEL, GLW, SMCI, DELL, HPE, CRWV, AMZN, ORCL, NBIS, APLD, CORZ, IREN, CIFR, CLSK, BTDR, HUT, RIOT, WULF, SNOW, NOW, CRM (non-portfolio names omitted above)
+Per Rule 12 these names' AI/Momentum/Risk subscores are unbacked until research-backed
+briefings exist. Suggested `/refresh-context` order (score-weighted): TSM → META → MSFT →
+GOOGL → EME → FIX → TER. The biweekly scheduled routine owns the rotation; surfacing here per
+Step 8. **Note:** GOOGL and MSFT both had material 8-Ks this week (preferred raise; Hoffman
+departure) — natural moment to do their briefings while the filings are fresh.
 
 ---
 
 ## Routine Filings
 
-No filing data available — SEC EDGAR scan blocked.
-
----
+- AAOI — S-8/S-8 POS ×10 (equity plan registration post-2026-plan approval) + annual-meeting 5.02/5.07
+- AAON — 8-K 7.01: William Blair conference presentation
+- AEIS — 8-K 8.01: redeeming remaining $136.7M 2.50% converts due 2028 (Sep 23); S-3ASR shelf
+- ALAB — 8-K 5.07: annual meeting results
+- AMBA — DEFA14A proxy supplement
+- ASML, MRVL — SD (conflict minerals)
+- AVGO — 8-K 8.01: debt tender offers; S-4 ×2 (exchange offers, not M&A); 10-Q Q2 FY26
+- BTDR — 6-K; CIFR/CRWV/OKLO/PLTR/WULF/TT — 8-K 5.07 annual-meeting results
+- D — $825M 5.35% senior notes '36; 425s (NEE merger comms, expected cadence); FWP/424B
+- DELL — $6.0B revolver refi (replaces 2021 facility); 10-Q; 13D/A
+- GOOGL — 8-A12B + CERT (NYSE listing of the new depositary shares); DEFA14A; PAO appointment
+- INTC, PPL, RRC — 11-K (benefit plans)
+- MU — 8-K 5.02: Alexis Black Björlin appointed independent director (Gov & Sustainability cmte)
+- NVTS — S-3ASR shelf; DEFA14A
+- PLAB, UEC — 10-Q
+- PLUG — 8-K 7.01: annual-meeting presentation
+- SO — ATM equity distribution agreement + S-3ASR; STX — 8-K: '28 exchangeable notes redemption
+- TT — 8-K 5.02: Donald Simmons promoted to EVP & COO eff. 7/01 (internal promotion)
+- TSEM, RMBS, BTDR — Schedule 13G; MRVL — 13G/A
+- UMC — 6-K (routine monthly disclosure)
+- XEL — 8-K 8.01: PSCo CO gas rate case — staff/UCA testimony proposes cutting the $190M ask
+  to −$15M/+$86M; hearings July 23–31. Watch for Layer 1 read-through on utility capex recovery.
+- UEC — DEF 14A/DEFA14A/ARS (proxy season)
 
 ## New 13F Activity
 
-No 13F scan available — SEC EDGAR scan blocked.
+None. All 6 tracked funds (Berkshire, Baillie Gifford, Tiger, Coatue, Whale Rock, Lone Pine)
+checked — no 13F-HR/A filings June 5–12 (between filing seasons; next cluster ~Aug 14).
 
 ---
 
 ## Follow-up Items
 
-**Immediate (unblock network access first):**
-1. Add `data.sec.gov`, `www.sec.gov`, `query2.finance.yahoo.com` to egress allowlist → re-run full scan
-2. Run `scripts/momentum_50dma.py` + `scripts/refresh_targets.py` + `scripts/track_performance.py`
+**New this week:**
+1. **AVGO** — full `/earnings-update` (📊 priority: GM +846bps, EPS +87.5% — TTM still understates run-rate)
+2. **SMCI** — pull 424B5 prospectus supplements for raise sizes/instruments next scan
+3. **GOOGL/MSFT** — `/refresh-context` while this week's filings are fresh (also clears 2 of 7 portfolio gate violations)
+4. **Layer 3/9 BS Risk** — revisit balance-sheet ratings at next rescore given the $40B+ debt-financing wave (HUT, APLD, CIFR, CRWV, KEEL leverage all stepped up this week)
+5. **ETN** — track Dana RMT regulatory/close timeline; post-separation Eaton is more thesis-direct
+6. **MRVL** — objective inputs post-earnings stale; fold into next rescore at latest
 
-**From prior scan (2026-05-26), still open:**
-3. **ONTO** — Monitor for use-of-proceeds disclosure (30-day window from 2026-05-21 close)
-4. **WULF** — Anchor tenant at Muskie Data Campus (1 GW, no tenant announced)
-5. **D/NEE** — First FERC merger filing (18-24 month approval timeline)
-6. **KEYS** — Re-pull yfinance once April 2026 quarter is populated
-7. **NVDA / MOD** — Full `/earnings-update` still recommended
+**Carried from 2026-05-26 scan, still open:**
+7. **ONTO** — use-of-proceeds disclosure (30-day window from 2026-05-21 close — expires ~6/20, check next scan)
+8. **WULF** — anchor tenant at Muskie Data Campus (1 GW; no tenant announced; annual-meeting 8-K this week had no disclosure)
+9. **D/NEE** — first FERC merger filing (425 comms cadence normal this week)
+10. **KEYS** — re-pull yfinance (April quarter)
+11. **NVDA / MOD** — full `/earnings-update` still recommended
 
-**Rating integrity (backlog):**
-8. Run `/refresh-context` on the 7 portfolio-name gate violations (priority order: TSM, META, MSFT, GOOGL, EME, FIX, TER)
+**Rating integrity backlog:**
+12. `/refresh-context` on remaining portfolio gate violations: TSM → META → MSFT → GOOGL → EME → FIX → TER

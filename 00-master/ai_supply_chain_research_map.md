@@ -203,7 +203,7 @@ Bandwidth is becoming as important as compute. 800G → 1.6T transitions are mas
 - **Flex Ltd (FLEX)** — AI server, power, and thermal infrastructure manufacturing; CPI spin-off pending
 
 ### Storage infrastructure
-- **Pure Storage (PSTG)** — all-flash arrays (FlashBlade) for AI training data pipelines
+- **Everpure (P, fka Pure Storage/PSTG, renamed ~May 2026)** — all-flash arrays (FlashBlade) for AI training data pipelines
 - **Seagate Technology (STX)** — nearline mass-capacity HDD for AI data lakes; HAMR ramp tightening supply
 
 ---

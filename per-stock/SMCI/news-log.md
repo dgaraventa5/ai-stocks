@@ -5,3 +5,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | Date | Source | Summary |
 |---|---|---|
 | 2026-05-19 | Hagens Berman / PR | New securities class action filed alleging additional disclosures re: $2.5B illegal server diversion to China. Lead plaintiff deadline May 26. 8-K (May 18): Matthew Thauberger appointed CRO, replacing retiring SVP Sales Don Clegg. |
+
+- **2026-06-12** (weekly scan, SEC EDGAR): 8-K 2026-06-09 (Item 8.01): refreshed risk factors + S-3ASR shelf + multiple 424B5s 06-09..06-12 — large capital-raise program in motion; sizes TBD from prospectus supplements.
