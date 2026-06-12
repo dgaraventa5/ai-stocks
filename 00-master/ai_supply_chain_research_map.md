@@ -48,11 +48,16 @@ The most under-appreciated bottleneck. AI training clusters are siting decisions
 - **Cummins (CMI)** — backup generators, gas turbines
 - **Generac (GNRC)** — backup power, distributed generation
 - **GE Vernova (GEV)** — gas turbines (huge backlog), wind, grid
+- **Solaris Energy Infrastructure (SEI)** — mobile gas-turbine fleets, >2 GW contracted to data-center counterparties (added 2026-06-12, SALP 13F)
+- **Power Solutions International (PSIX)** — natural-gas gensets for data centers, Weichai-controlled (added 2026-06-12, SALP 13F)
+- **Babcock & Wilcox (BW)** — boiler/steam-turbine islands for behind-the-meter gas power; Applied Digital anchor (added 2026-06-12, SALP 13F)
+- **ProPetro Holding (PUMP)** — Permian frac + PROPWR mobile power pivot, ~240 MW contracted (added 2026-06-12, SALP 13F)
 
 ### Solar & renewables equipment (behind-the-meter DC power)
 - **Nextracker (NXT)** — solar trackers for utility-scale + behind-the-meter data-center power
 
 ---
+- **T1 Energy (TE)** — US solar module/cell mfg (fka FREYR); AI link prospective only — thesis-adjacent (added 2026-06-12, SALP 13F)
 
 ## Layer 2 — Grid & Power Equipment
 
@@ -221,6 +226,8 @@ Bandwidth is becoming as important as compute. 800G → 1.6T transitions are mas
 - **CoreWeave (CRWV)** — biggest pure-play AI cloud
 - **Nebius Group (NBIS)** — former Yandex pieces, EU-based GPU cloud
 - **Applied Digital (APLD)** — HPC hosting + crypto pivot
+- **WhiteFiber (WYFI)** — Bit Digital AI-infra spinout, NC-1 campus + Montreal colo (added 2026-06-12, SALP 13F)
+- **SharonAI Holdings (SHAZ)** — de-SPAC GPU cloud, 132 MW secured / ~2 MW live; severe risk flags (added 2026-06-12, SALP 13F)
 
 ### Bitcoin miners pivoting to AI hosting
 The thesis here: stranded power contracts + interconnect rights + cheap land = call option on AI capacity.
@@ -236,6 +243,7 @@ The thesis here: stranded power contracts + interconnect rights + cheap land = c
 - **TeraWulf (WULF)** — nuclear-powered mining + HPC
 
 ---
+- **HIVE Digital Technologies (HIVE)** — hydro-powered miner (Canada/Sweden/Paraguay), BUZZ HPC AI pivot (added 2026-06-12, SALP 13F)
 
 ## Layer 10 — Models, Software & Applications
 

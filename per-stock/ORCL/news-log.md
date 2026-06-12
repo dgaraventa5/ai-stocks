@@ -6,3 +6,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 |---|---|---|
 
 - **2026-06-12** (weekly scan, SEC EDGAR): 8-K 2026-06-10 (Item 2.02): Q4 FY26 — rev $19.2B +21%, non-GAAP EPS $2.11 +24%, RPO $638B (+$85B QoQ, +363% YoY), IaaS +93% YoY; FY26 FCF -$23.7B on AI datacenter capex; $75B of AI contracts prepaid/customer-supplied hardware (press release Ex 99.1). Rule-9 refresh: score 62.8->63.4.
+
+- **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): NEW put position, $1.07B notional (7.29M sh underlying) — largest single-name put after NVDA.

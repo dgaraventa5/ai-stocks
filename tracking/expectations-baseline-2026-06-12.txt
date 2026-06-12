@@ -1,0 +1,103 @@
+screening 143 names
+
+=== FLAGGED (21) — peak multiple + decelerating growth ===
+GEV    P/S 6.93 = 92.8th pctile | YoY 4.8% vs median 15.0%
+ETR    P/S 3.86 = 95.4th pctile | YoY -5.9% vs median 2.5%
+UEC    P/S 267.68 = 96.4th pctile | YoY -100.0% vs median 1.4%
+CMI    P/S 2.71 = 97.3th pctile | YoY -0.7% vs median 6.1%
+GNRC   P/S 3.7 = 97.5th pctile | YoY -9.7% vs median -0.9%
+PWR    P/S 3.72 = 96.9th pctile | YoY 20.2% vs median 20.6%
+MTZ    P/S 2.02 = 95.1th pctile | YoY 17.7% vs median 22.9%
+POWL   P/S 9.49 = 98.5th pctile | YoY 6.5% vs median 26.3%
+TT     P/S 4.79 = 93.1th pctile | YoY -8.7% vs median 14.9%
+KLAC   P/S 25.61 = 100.0th pctile | YoY 11.0% vs median 16.4%
+UCTT   P/S 2.35 = 100.0th pctile | YoY -1.2% vs median 3.7%
+COHR   P/S 11.46 = 99.2th pctile | YoY 25.9% vs median 29.0%
+CIFR   P/S 50.34 = 98.9th pctile | YoY 44.5% vs median 53.1%
+WULF   P/S 77.5 = 99.3th pctile | YoY 25.7% vs median 78.3%
+MPWR   P/S 27.25 = 97.3th pctile | YoY 29.7% vs median 36.8%
+CRWD   P/S 35.53 = 99.2th pctile | YoY 37.2% vs median 43.6%
+CEVA   P/S 12.17 = 99.6th pctile | YoY -0.7% vs median -0.4%
+NVTS   P/S 119.02 = 98.4th pctile | YoY -60.3% vs median 57.6%
+RMBS   P/S 22.72 = 98.7th pctile | YoY 23.8% vs median 28.1%
+SEI    P/S 8.74 = 98.1th pctile | YoY 21.1% vs median 37.1%
+PUMP   P/S 1.52 = 96.4th pctile | YoY -25.0% vs median 3.3%
+
+=== HIGH-PERCENTILE but growth-supported (>=90th pctile, no flag) ===
+BE     P/S 37.47 = 96.7th pctile | YoY 131.9% vs median 32.9%
+VRT    P/S 11.63 = 95.4th pctile | YoY 27.8% vs median 26.0%
+MU     P/S 20.18 = 99.3th pctile | YoY 174.0% vs median 51.1%
+AMD    P/S 24.09 = 99.3th pctile | YoY 50.4% vs median 27.7%
+D      P/S 3.43 = 96.8th pctile | YoY 24.6% vs median 4.8%
+AEP    P/S 3.12 = 91.6th pctile | YoY 8.2% vs median 6.8%
+NVT    P/S 6.59 = 97.9th pctile | YoY 58.8% vs median 15.4%
+EQIX   P/S 11.27 = 95.4th pctile | YoY 11.0% vs median 11.0%
+FIX    P/S 7.09 = 98.3th pctile | YoY 58.1% vs median 41.1%
+EME    P/S 2.14 = 93.9th pctile | YoY 25.2% vs median 19.5%
+MOD    P/S 5.1 = 98.1th pctile | YoY 22.3% vs median 15.8%
+JCI    P/S 3.74 = 98.0th pctile | YoY 13.2% vs median 3.2%
+AMAT   P/S 15.36 = 100.0th pctile | YoY 10.4% vs median 5.8%
+LRCX   P/S 21.61 = 100.0th pctile | YoY 33.5% vs median 24.1%
+TER    P/S 18.62 = 99.5th pctile | YoY 73.9% vs median 1.4%
+ONTO   P/S 15.64 = 100.0th pctile | YoY 15.8% vs median 13.3%
+KLIC   P/S 7.87 = 100.0th pctile | YoY 46.0% vs median -9.2%
+ENTG   P/S 7.2 = 99.6th pctile | YoY 0.5% vs median -2.8%
+MKSI   P/S 6.04 = 100.0th pctile | YoY 20.3% vs median 11.5%
+ARM    P/S 92.17 = 99.4th pctile | YoY 47.2% vs median 27.8%
+INTC   P/S 11.87 = 99.7th pctile | YoY 2.2% vs median -9.1%
+MRVL   P/S 29.18 = 99.3th pctile | YoY 59.5% vs median 23.3%
+SNDK   P/S 22.59 = 100.0th pctile | YoY 217.2% vs median 48.0%
+LITE   P/S 29.47 = 97.6th pctile | YoY 101.0% vs median 14.4%
+FN     P/S 5.22 = 93.1th pctile | YoY 45.7% vs median 22.0%
+AAOI   P/S 28.7 = 96.9th pctile | YoY 132.0% vs median 12.4%
+ANET   P/S 22.28 = 90.2th pctile | YoY 49.6% vs median 41.9%
+CSCO   P/S 7.93 = 99.1th pctile | YoY 13.2% vs median 8.5%
+CIEN   P/S 11.82 = 93.2th pctile | YoY 46.5% vs median 10.5%
+GLW    P/S 9.91 = 97.5th pctile | YoY 22.2% vs median 3.4%
+DELL   P/S 1.04 = 99.2th pctile | YoY 83.2% vs median 6.8%
+HPE    P/S 1.74 = 99.2th pctile | YoY 36.0% vs median 11.4%
+GOOGL  P/S 5.29 = 96.3th pctile | YoY 24.5% vs median 18.0%
+CORZ   P/S 24.75 = 99.2th pctile | YoY 20.9% vs median -9.1%
+HUT    P/S 61.49 = 99.0th pctile | YoY 62.4% vs median 62.4%
+KEYS   P/S 10.03 = 96.9th pctile | YoY 32.3% vs median 7.3%
+TTMI   P/S 6.77 = 99.9th pctile | YoY 37.2% vs median 13.1%
+FLEX   P/S 2.04 = 99.1th pctile | YoY 7.7% vs median 0.5%
+DDOG   P/S 21.85 = 96.8th pctile | YoY 45.9% vs median 39.6%
+AIP    P/S 25.8 = 100.0th pctile | YoY 55.9% vs median 22.0%
+KN     P/S 5.83 = 100.0th pctile | YoY 7.4% vs median -8.6%
+NXT    P/S 5.45 = 96.3th pctile | YoY 43.1% vs median 40.2%
+FORM   P/S 13.63 = 98.5th pctile | YoY 8.8% vs median 1.3%
+AEIS   P/S 7.79 = 95.6th pctile | YoY 36.6% vs median 13.7%
+LSCC   P/S 36.11 = 98.9th pctile | YoY 34.5% vs median 13.3%
+STX    P/S 19.46 = 99.9th pctile | YoY 33.8% vs median 2.1%
+BW     P/S 3.65 = 95.2th pctile | YoY 40.5% vs median 1.4%
+
+clean: 96, skipped: 26
+
+=== SKIPPED ===
+CRWV   SEC companyfacts: only 7 quarterly periods in companyfacts — check skipped
+XEL    SEC companyfacts: latest XBRL quarter end 2019-09-30 is >200 days stale — check 
+CCJ    SEC companyfacts: companyfacts fetch failed (KeyError: 'us-gaap') — transient? r
+OKLO   SEC companyfacts: no quarterly periods under any known revenue tag — check skipp
+NNE    SEC companyfacts: no quarterly periods under any known revenue tag — check skipp
+SBGSY  SEC companyfacts: no CIK mapping for ticker — check skipped
+ABBNY  SEC companyfacts: no quarterly periods under any known revenue tag — check skipp
+HTHIY  SEC companyfacts: no quarterly periods under any known revenue tag — check skipp
+ASML   SEC companyfacts: no quarterly periods under any known revenue tag — check skipp
+TOELY  SEC companyfacts: no CIK mapping for ticker — check skipped
+CAMT   SEC companyfacts: latest XBRL quarter end 2021-06-30 is >200 days stale — check 
+TSM    SEC companyfacts: companyfacts fetch failed (KeyError: 'us-gaap') — transient? r
+GFS    SEC companyfacts: companyfacts fetch failed (KeyError: 'us-gaap') — transient? r
+TSEM   SEC companyfacts: latest XBRL quarter end 2024-06-30 is >200 days stale — check 
+UMC    SEC companyfacts: companyfacts fetch failed (KeyError: 'us-gaap') — transient? r
+POET   SEC companyfacts: no quarterly periods under any known revenue tag — check skipp
+NBIS   SEC companyfacts: no quarterly periods under any known revenue tag — check skipp
+IREN   SEC companyfacts: only 6 quarterly periods in companyfacts — check skipped
+CLSK   SEC companyfacts: latest XBRL quarter end 2024-06-30 is >200 days stale — check 
+BTDR   SEC companyfacts: companyfacts fetch failed (KeyError: 'us-gaap') — transient? r
+KEEL   SEC companyfacts: only 2 quarterly periods in companyfacts — check skipped
+BESIY  SEC companyfacts: no CIK mapping for ticker — check skipped
+TE     SEC companyfacts: only 7 quarterly periods in companyfacts — check skipped
+WYFI   SEC companyfacts: only 6 quarterly periods in companyfacts — check skipped
+SHAZ   SEC companyfacts: only 2 quarterly periods in companyfacts — check skipped
+HIVE   SEC companyfacts: only 6 quarterly periods in companyfacts — check skipped

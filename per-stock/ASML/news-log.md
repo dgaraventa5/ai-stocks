@@ -4,3 +4,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 
 | Date | Source | Summary |
 |---|---|---|
+
+- **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): NEW put $494M notional + small equity stub.

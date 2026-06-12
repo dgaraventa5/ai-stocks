@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "definition": "secured_gross_mw = energized + committed/under-construction gross facility power, MW. Speculative pipeline and pending interconnection EXCLUDED. Where the company discloses only critical IT load, converted x1.25 and flagged in basis.",
+    "updated": "2026-06-12",
+    "refresh_rule": "Refresh at quarterly rescore and on earnings (rule 9 pass). Used by batch_score.py to compute EV/MW for the Layer 9 capacity cohort (rule 13).",
+    "band_anchor": "AI DC replacement cost ~$9-10M per gross MW (~$11-12M per IT MW), facility+power excl. IT gear"
+  },
+  "CRWV": {
+    "secured_gross_mw": 3500,
+    "basis": "company 'contracted power', IT-vs-gross unspecified (treated gross, flagged)",
+    "asof": "2026-03-31",
+    "source": "Q1 2026 results, investors.coreweave.com, May 2026",
+    "confidence": "Medium"
+  },
+  "NBIS": {
+    "secured_gross_mw": 3500,
+    "basis": "company 'contracted power', IT-vs-gross unspecified (treated gross, flagged); >75% owned",
+    "asof": "2026-03-31",
+    "source": "Q1 2026 6-K + earnings call May 13 2026",
+    "confidence": "Medium"
+  },
+  "APLD": {
+    "secured_gross_mw": 1036,
+    "basis": "600 MW critical IT contracted (PF1 400 CoreWeave + PF2 200 hyperscaler) x1.25 = 750 gross-equiv + 286 MW legacy hosting gross",
+    "asof": "2026-01-07 (fiscal Q2 FY26; ~6 months stale, fiscal Q3 print may exist)",
+    "source": "ir.applieddigital.com fiscal Q2 2026 results + Nov 24 2025 RFS release",
+    "confidence": "Medium"
+  },
+  "IREN": {
+    "secured_gross_mw": 2910,
+    "basis": "company 'secured power and land portfolio', gross transmission MW",
+    "asof": "2026-05-07",
+    "source": "IREN Business Update & Q3 FY26 Results, GlobeNewswire May 7 2026",
+    "confidence": "High"
+  },
+  "CORZ": {
+    "secured_gross_mw": 1900,
+    "basis": "1.9 GW gross utility power across 10 sites (1.3 GW leasable; CoreWeave 590 MW critical IT within it)",
+    "asof": "2026-05-06",
+    "source": "Q1 2026 results + 10-Q, May 2026",
+    "confidence": "High"
+  },
+  "CIFR": {
+    "secured_gross_mw": 907,
+    "basis": "operating + contracted gross (207 mining + ~700 HPC under construction incl. Barber Lake 300, Black Pearl 300, 3rd campus 100, Stingray 100)",
+    "asof": "2026-05-05",
+    "source": "Cipher Q1 2026 Business Update, GlobeNewswire May 5 2026",
+    "confidence": "High"
+  },
+  "CLSK": {
+    "secured_gross_mw": 1809,
+    "basis": "total contracted gross utility power, owned/leased sites; zero AI/HPC MW contracted to date",
+    "asof": "2026-03-31",
+    "source": "CLSK 10-Q (period 2026-03-31) + March 2026 operational update",
+    "confidence": "High"
+  },
+  "BTDR": {
+    "secured_gross_mw": 2479,
+    "basis": "1,744 MW online gross + ~735 committed (Clarington OH 570 utility-confirmed + Tydal ~165 in construction); company does not publish clean secured split",
+    "asof": "2026-04-30",
+    "source": "Bitdeer April 2026 Production & Operations Update, May 12 2026",
+    "confidence": "Medium"
+  },
+  "HUT": {
+    "secured_gross_mw": 1350,
+    "basis": "1,020 MW energy capacity under management + 330 under construction (gross); 1,230 'under development' excluded; May 2026 352 MW TX lease sits within development",
+    "asof": "2026-05-06",
+    "source": "Hut 8 Q1 2026 results May 6 2026 + Dec 17 2025 Anthropic/Fluidstack announcement",
+    "confidence": "High"
+  },
+  "KEEL": {
+    "secured_gross_mw": 771,
+    "basis": "341 MW energized + 430 MW secured (executed utility agreements), gross grid power; 1.5 GW expansion pipeline excluded",
+    "asof": "2026-05-11",
+    "source": "ir.keelinfra.com + Q1 2026 earnings call May 11 2026",
+    "confidence": "High"
+  },
+  "RIOT": {
+    "secured_gross_mw": 1700,
+    "basis": "1.7 GW fully ERCOT-approved gross across Rockdale + Corsicana; AMD lease 50 MW critical IT within it",
+    "asof": "2026-01-16",
+    "source": "Riot 8-K / AMD lease announcement Jan 16 2026",
+    "confidence": "High"
+  },
+  "WULF": {
+    "secured_gross_mw": 550,
+    "basis": "~438 MW HPC critical IT contracted (Fluidstack ~360 + Core42 + Abernathy 168 IT) x1.25 gross-equiv; mining MW at Lake Mariner shares site power, excluded to avoid double count",
+    "asof": "2026-03-31",
+    "source": "TeraWulf Q1 2026 results + Fluidstack PRs Aug 2025",
+    "confidence": "Low-Medium"
+  },
+  "WYFI": {
+    "secured_gross_mw": 70,
+    "basis": "NC-1 54 MW Duke-energized gross + Enovum Montreal 16 MW (MTL-1/2/3); NC-1 +45 MW 2027 phase EXCLUDED (no binding construction contract \u2014 counting it gives 115 MW / $9.8M/MW / band 45 vs base 70 MW / $16.1M/MW / band 30 \u2014 STRADDLES BAND, flagged for Dom)",
+    "asof": "2026-05-14",
+    "source": "WYFI Q1 2026 results PR + transcript; Nscale 40MW/$865M 8-K",
+    "confidence": "Medium"
+  },
+  "SHAZ": {
+    "secured_gross_mw": 132,
+    "basis": "102 MW contracted + ~30 other secured; ONLY ~2 MW ENERGIZED (~98% un-energized \u2014 unlike all cohort peers; EV/MW is a backlog bet, not an asset read). ESDS anchor counterparty solvency contested (Bleecker St short report)",
+    "asof": "2026-06-12",
+    "source": "per-stock/SHAZ/context-2026-06-12.md (de-SPAC Feb 2026, CIK 0002068385)",
+    "confidence": "Low"
+  },
+  "HIVE": {
+    "secured_gross_mw": 540,
+    "basis": "440 MW operating gross (Canada+Sweden+Paraguay, predominantly BTC mining; AI-grade critical IT energized <10 MW) + 100 MW Paraguay Yguazu Phase-3 under construction (commissioning Q3 2026). EXCLUDED as development: GTA Gigafactory 320 MW (announced 2026-05-18, H2 2027, $3.5B campus financing incomplete), Grand Falls 70 + Toronto Airport 7 (construction status unconfirmed) \u2014 same standard that excluded HUT's development tranche. Aggressive alternative incl. Canadian HPC pipeline = 840 MW (subagent's proposal, flagged).",
+    "asof": "2026-06-02 (FY2026 results, FYE Mar 31) + 2026-05-18 GTA announcement",
+    "source": "HIVE FY2026 results PR + DCD Yguazu 400MW expansion + GTA Gigafactory announcement",
+    "confidence": "Low-Medium"
+  }
+}

@@ -55,6 +55,45 @@ def score_ev_ebitda(v):
         if v <= t: return s
     return 5
 
+def score_ev_fcf_saas(v):
+    # Rule 10 (2026-05-26): Layer 10 col F holds EV/FCF, SaaS-calibrated bands.
+    # Bands were documented in CLAUDE.md but not implemented in formulas/recalc
+    # until 2026-06-12.
+    v = _num(v)
+    if v is None: return None
+    if v < 0: return 5
+    for t, s in [(20, 100), (30, 90), (40, 75), (55, 60), (75, 45), (100, 30)]:
+        if v <= t: return s
+    return 15
+
+def score_ev_mw(v):
+    # Rule 13 (2026-06-12): Layer 9 capacity cohort col F holds EV per secured
+    # gross MW ($M/MW). Anchor: ~$9-10M/gross-MW replacement cost at the 45/60
+    # boundary. MW data: 00-master/capacity-mw.json.
+    v = _num(v)
+    if v is None: return None
+    for t, s in [(2, 100), (4, 90), (6, 75), (9, 60), (12, 45), (18, 30)]:
+        if v <= t: return s
+    return 15
+
+def is_layer10(layer):
+    return bool(layer) and str(layer).strip().startswith('10')
+
+def is_layer9_capacity(layer):
+    if not layer or not str(layer).strip().startswith('09'):
+        return False
+    l = str(layer).lower()
+    return 'bitcoin' in l or 'neocloud' in l
+
+def score_ev_col(v, layer):
+    """Layer-conditional col F: EV/EBITDA standard, EV/FCF for Layer 10,
+    EV/MW for the Layer 9 capacity cohort."""
+    if is_layer10(layer):
+        return score_ev_fcf_saas(v)
+    if is_layer9_capacity(layer):
+        return score_ev_mw(v)
+    return score_ev_ebitda(v)
+
 def score_fcf_yield(v):
     v = _num(v)
     if v is None: return None
@@ -196,7 +235,7 @@ def recalc():
         risk_inputs = [ws.cell(row=r, column=c).value for c in [31, 32, 33, 34]]
 
         # Subscores
-        value = avg_nonnull([score_fwd_pe(fwd_pe), score_ev_ebitda(ev_ebitda),
+        value = avg_nonnull([score_fwd_pe(fwd_pe), score_ev_col(ev_ebitda, layer),
                              score_fcf_yield(fcf_yield), score_ps(ps), score_peg(peg)])
         # ROIC/ND-EBITDA may be blank (yfinance gap / non-positive EBITDA); AVERAGE skips blanks.
         quality = avg_nonnull([score_roic(roic), score_gm(gm), score_fcf_mgn(fcf_mgn),

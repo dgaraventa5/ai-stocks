@@ -9,3 +9,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-06-12** (weekly scan, SEC EDGAR): 10-Q Q2 FY26 filed 2026-06-09 (earnings 8-K 2026-06-04 fell in scan gap). Rule-9 refresh 2026-06-12: TTM GM 67.8%->76.3% (+846bps), Rev YoY 29.5%->47.9%, EPS YoY 31.6%->87.5%; score 74.6->78.2. 8-K 2026-06-11: debt tender offers (routine). Full /earnings-update recommended.
 
 - **2026-06-12** (/earnings-update): Q2 FY26 (8-K 2026-06-03 Ex 99.1) — rev $22.2B +48%, AI semis $10.8B +143% (49% of rev), $30B+ AI bookings, Q3 guide $29.4B/+84% with AI $16B; six core customers with GW commitments; >20GW Apollo/Blackstone-funded XPU platform ($35B tranche 1); FY27 >$100B AI reaffirmed. Transcript + delta + context briefing written; thesis sections 1/3/4/9 flagged STALE.
+
+- **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): NEW put position, $1.01B notional (3.25M sh underlying).

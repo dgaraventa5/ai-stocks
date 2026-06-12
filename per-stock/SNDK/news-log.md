@@ -4,3 +4,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 
 | Date | Source | Summary |
 |---|---|---|
+
+- **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): Equity held at $724M (1.14M sh, +8% q/q) + NEW call $389M notional — conviction long, his #1 equity-plus-calls expression. We rank SNDK #3 (79.7 ✓✓) — rare strong agreement.

@@ -617,3 +617,31 @@ TSM/NVDA/MU). **Zero rating changes from the revision itself.**
 - **KLIC (R2=4):** historically large China revenue (ball bonders) → possible policy leg → candidate 3. Verify current geographic mix.
 - **AVGO (R2=4):** meaningful China revenue + 2024-25 SAMR antitrust probe history + networking export rules → possible two legs → candidate 3. Verify in next AVGO pass.
 - **Interpretation note (billing vs end-demand):** the demand leg counts *end-demand* geography where determinable, not billing address. TER's 41% Taiwan is genuine end-demand (testers bought/used by Taiwan fabs/OSATs). CRDO billing Taiwan ODMs that build for US hyperscalers is US end-demand → CRDO R2=4 stands. Apply this distinction consistently for fabless names.
+
+---
+
+## 2026-06-12 — SALP Q1 2026 13F vs. our rankings (rubric stress test)
+
+**Source:** Situational Awareness LP 13F-HR, period 2026-03-31, filed 2026-05-18 (acc 0002045724-26-000008). Tracking sheets: `13f-tracking.xlsx` → `SALP-2025-Q4`, `SALP-2026-Q1`.
+
+**The pattern:** His $8.46B put-notional overlay targets 5 of our top 6 names (TSM #1, NVDA #2, MU #4, AVGO #6, AMD #17 + SMH itself). His equity long book — except SNDK (our #3, strong agreement) — ranks #73–#131 of 135 in our system (BE, CRWV, APLD, IREN, CORZ, RIOT, CLSK, KEEL ✗-tier). This is a structured external lens of exactly the kind rule 12 calls for, applied to the whole watchlist at once.
+
+**Caveats before over-learning (13F mechanics):** option rows show notional of underlying, not premium/delta; written legs and true shorts are invisible (any put may be half a spread); MU and TSM carry put+call pairs (long-vol structure, not directional short); snapshot is 10 weeks stale on a book that doubled gross in one quarter. "He shorted our top names" is the loudest reading, not the only one — a levered small-cap long book plus index/megacap puts is also just hedged beta.
+
+**Rubric-change candidates surfaced (proposals only, per rule 8 — need Dom approval):**
+
+1. **Value category is non-informative for the Layer 9 capacity cohort.** All 5 Value metrics are income-statement-derived; the miner-pivot names (IREN, CORZ, APLD, RIOT, CLSK, KEEL) score 7.5–21 with zero differentiation — same floor-pinning failure that drove the rule-10 Layer 10 EV/FCF carve-out. The economic object (secured MW / interconnect pipeline / powered land vs. EV) has no home in any metric. Candidate: Layer 9 capacity carve-out replacing one Value metric with EV per contracted-or-energized MW, banded. Data from company IR decks (free, but uneven quality).
+2. **No expectations/crowdedness input anywhere.** Value bands are absolute; Momentum *rewards* relative strength; Quality rewards consensus-visible excellence. Net effect: the score is maximized exactly where the most is priced in — the same circularity we de-weighted once already (AI Thesis 30%→20%, 2026-05-25), now expressed through other categories. Candidate: an "expectations" red-flag check in /refresh-context (valuation vs. own 3-yr percentile, or implied-growth sanity check) — qualitative flag first, NOT a scored metric.
+3. **Score ≠ expected return, and ?-tier ≠ avoid-as-short.** CLSK at 45.4 is a fair "below-average business" read, but the rubric cannot represent conversion optionality (CORZ→CRWV precedent). Acknowledged limitation, no change proposed — but stop reading the bottom of the table as "wrong side."
+
+**Where the external lens validated us:** SNDK (his top conviction = our #3); ORCL is his largest single-name put and already our lowest-ranked hyperscaler (63.4, #80, below MSFT/META/GOOGL/AMZN); INTC (#123 ?) he flipped from calls to puts; his exits LITE/COHR sit mid-pack for us. Divergence against his book: he fully exited EQT (our #16, 73.8) and exited VST in Q4 2025 (our 70.6).
+
+**ADOPTED 2026-06-12 (Dom approval, same session):** candidates 1 and 2 above were approved and implemented — rule 13 (Layer 9 capacity EV/MW carve-out, bands anchored to ~$9-10M/gross-MW replacement cost, MW data in `00-master/capacity-mw.json`) and rule 14 (expectations red-flag, `scripts/expectations_flag.py`, wired into refresh-context Step 2b→2c). Implementation surfaced two latent bugs, both fixed: (a) 106 of 135 Watchlist rows had formula row-reference drift from openpyxl row deletions — Excel-displayed scores were wrong below the deleted rows, Python recalc unaffected; (b) rule 10's SaaS EV/FCF bands were documented 2026-05-26 but never implemented in formulas or recalc — Layer 10 names were scored on standard EV/EBITDA bands the whole time. Fix + future-proofing: `scripts/rebuild_watchlist_formulas.py` (run after ANY structural row change). Mechanical tier moves from correct bands: IREN ?→✓ (55.9), KEEL ✗→? (42.9); NOW lands 69.6, 0.4 below ✓✓ (not nudged, per policy).
+
+---
+
+## 2026-06-12 — rule 15 adopted (eps_yoy one-time blanking) + GEV/MPWR refresh outcomes
+
+**Rule 15** (Dom-approved): blank EPS YoY when dominated by documented non-operating items. First application GEV (+1,768% Prolec gain) — Growth 63.3→45, Total 70.3 ✓✓ → ~67.6 ✓. A tier change from a data-honesty correction; logged in Rating Audit.
+
+**Refresh outcomes (expectations-flag priority queue):** GEV — flag fired but research strengthened the thesis (supply-capped revenue, pricing +10-20%, DC orders inflecting); only D5 4→5; risk is valuation, not execution. MPWR — flag fired and research validated it (restatement + open material weakness, Vera Rubin recapture is sell-side projection not company-confirmed, 800V contested with Infineon leading); D2 4→3, M1 5→4, M3 3→2, R4 4→3 → ~67.6 ✓ (tier drop). The rule-14 screen's first two priority refreshes produced one false-positive-ish (GEV) and one true-positive (MPWR) — the flag is doing its job as a research trigger, not a verdict.

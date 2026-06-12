@@ -165,7 +165,9 @@ The scoring band thresholds in `ai_supply_chain_scoring.xlsx` Methodology tab ar
 
 **Why EV/FCF:** FCF is a real cash number (not adjusted by non-GAAP games), preserves the EV-based leverage signal that's the point of the metric, and yfinance provides the inputs. SBC dilution hits shareholders through share count, not through cash outflow, so FCF isn't distorted the way EBITDA is.
 
-**Current Layer 10 names affected:** PLTR, SNOW, NOW, CRM, DDOG, CRWD, MDB, PATH. When adding new Layer 10 names, use EV/FCF with these bands. The column header in the spreadsheet still says "EV/EBITDA" — for Layer 10 names, read it as EV/FCF.
+**Current Layer 10 names affected:** PLTR, SNOW, NOW, CRM, DDOG, CRWD, MDB, PATH, TEM. When adding new Layer 10 names, use EV/FCF with these bands. The column header in the spreadsheet still says "EV/EBITDA" — for Layer 10 names, read it as EV/FCF.
+
+**Implementation note (2026-06-12):** the EV/FCF *values* were written on 2026-05-26 but the SaaS *bands* above were never implemented — Excel formulas and `recalc_watchlist.py` kept applying standard EV/EBITDA bands to EV/FCF values until the 2026-06-12 fix (`rebuild_watchlist_formulas.py`). Same fix also repaired formula row-reference drift on 106 rows caused by openpyxl row deletions (openpyxl `delete_rows` does NOT rewrite formula references — **always run `python3 scripts/rebuild_watchlist_formulas.py` after any structural row change to the Watchlist**).
 
 ### 11. Momentum: objective 50DMA % metric (added 2026-06-09)
 
@@ -192,6 +194,26 @@ The scoring band thresholds in `ai_supply_chain_scoring.xlsx` Methodology tab ar
 - **Weekly:** `/weekly-scan` Step 8 runs the integrity audit and surfaces gate + stale names.
 - **Biweekly (scheduled):** a cloud routine runs `audit_rating_integrity.py --stalest` and then `/refresh-context` on the stalest rated names by layer rotation, writing fresh briefings for a collaborative rating session. The routine does the research legwork; rating changes stay in the human loop.
 - **Quarterly:** `/rescore-quarterly` does a full pass and should fail loudly on any gate violation.
+
+### 13. Layer 9 capacity cohort: EV/MW replaces EV/EBITDA (added 2026-06-12, approved by Dom)
+
+**Context:** The SALP Q1 2026 13F stress test showed the entire bitcoin-miner-pivot/neocloud cohort scoring 7.5–21 on Value with zero differentiation — all five Value metrics are income-statement-derived, but this cohort's value object is secured power capacity (gigawatts of interconnection + powered land) against current GAAP losses. Same floor-pinning failure that drove rule 10. The cohort cells held garbage anyway (negative EV/EBITDA like −1,430 for NBIS).
+
+**Rule:** For the Layer 9 capacity cohort — sub-layers containing "Bitcoin" or "Neocloud" (hyperscalers excluded) — the EV/EBITDA column contains **EV per secured gross MW** ($M/MW), scored: ≤2→100, ≤4→90, ≤6→75, ≤9→60, ≤12→45, ≤18→30, >18→15. Band anchor: ~$9–10M per gross MW AI-datacenter replacement cost (facility + power, excl. IT gear) sits at the 45/60 boundary — paying replacement scores mid, sub-half-replacement scores high.
+
+**MW data:** `00-master/capacity-mw.json` — secured gross MW (energized + committed/under-construction; speculative pipeline excluded) with per-name basis, as-of date, source, and confidence. Critical-IT-load-only disclosures convert ×1.25 (flagged). Refresh alongside rule-9 earnings refreshes and quarterly rescores — a stale MW denominator is as bad as a stale margin. Disclosure bases vary by company (gross vs IT load, secured definitions); the json's `basis` field records each interpretation — read it before trusting cross-name comparisons.
+
+**Division of labor (deliberate):** EV/MW measures *price per unit of capacity*; whether that capacity ever converts to AI revenue is the AI Thesis category's job (e.g., CLSK scores well on EV/MW but its 1.8 GW has zero AI/HPC contracts — its low AI Thesis score carries that information). Don't fold conversion probability into the Value metric.
+
+**Current cohort:** CRWV, NBIS, APLD, IREN, CORZ, CIFR, CLSK, BTDR, HUT, KEEL, RIOT, WULF.
+
+### 14. Expectations red-flag in /refresh-context (added 2026-06-12, approved by Dom)
+
+The rubric has no "what's priced in" input — Value bands are absolute and Momentum rewards relative strength, so Total Score peaks where consensus is most crowded (5 of SALP's 6 biggest Q1 2026 put targets were our top-6 names). Counterweight: `/refresh-context` Step 2c runs `python3 scripts/expectations_flag.py {TICKER}` — flags P/S ≥90th percentile of own 3-year range combined with revenue growth below its 3-year median (peak multiple, decelerating growth). **Qualitative red flag for the context briefing, NOT a scored metric** — see refresh-context.md Step 2c for interpretation discipline. Script self-skips honestly on foreign filers and unmapped XBRL revenue tags.
+
+### 15. EPS YoY: blank when one-time-dominated (added 2026-06-12, approved by Dom)
+
+GAAP EPS YoY scores garbage when the change is dominated by disclosed non-operating items (divestiture gains, fair-value swings, large tax one-offs) — GEV's +1,768% from the ~$4.5B Prolec gain would have scored 100 on a divestiture. **Rule:** blank the EPS YoY input when a briefing/filing documents that the YoY change is non-operating-dominated; Growth then averages the revenue metrics. Applied on documented per-name evidence (cite the item in the Rating Audit), NOT mechanically on magnitude — a big operational number off a small base (e.g., SEI +303%) stays. Same garbage-input principle as the negative-EBITDA blanking convention and rules 10/13.
 
 ## Common tools and libraries (pre-approved for installation)
 

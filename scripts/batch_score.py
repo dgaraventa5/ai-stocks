@@ -27,6 +27,7 @@ import math
 import re
 import time
 import warnings
+import json
 from pathlib import Path
 
 warnings.filterwarnings("ignore")
@@ -123,7 +124,32 @@ def statement_fcf(t: yf.Ticker) -> float | None:
     return None
 
 
-def compute_inputs(ticker: str, t: yf.Ticker, info: dict) -> tuple[dict, list[str]]:
+_CAPACITY_JSON = Path(__file__).resolve().parent.parent / "00-master" / "capacity-mw.json"
+
+
+def _secured_mw(ticker: str) -> float | None:
+    """Secured gross MW from 00-master/capacity-mw.json (rule 13 cohort data)."""
+    try:
+        data = json.loads(_CAPACITY_JSON.read_text())
+        rec = data.get(ticker)
+        return rec.get("secured_gross_mw") if rec else None
+    except Exception:
+        return None
+
+
+def _is_layer10(layer: str | None) -> bool:
+    return bool(layer) and str(layer).strip().startswith("10")
+
+
+def _is_layer9_capacity(layer: str | None) -> bool:
+    if not layer or not str(layer).strip().startswith("09"):
+        return False
+    l = str(layer).lower()
+    return "bitcoin" in l or "neocloud" in l
+
+
+def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
+                   layer: str | None = None) -> tuple[dict, list[str]]:
     """Return the 11 objective inputs + a list of gap messages for the log."""
     gaps: list[str] = []
     inp: dict[str, float | None] = {
@@ -134,9 +160,31 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict) -> tuple[dict, list[st
 
     # ----- Value -----
     inp["fwd_pe"]    = info.get("forwardPE")
+    # Col F is layer-conditional (the column header still says EV/EBITDA):
+    #   Layer 10 (rule 10): EV / statement FCF, SaaS bands
+    #   Layer 9 capacity cohort (rule 13): EV / secured gross MW in $M/MW,
+    #     MW from 00-master/capacity-mw.json
+    #   everything else: EV/EBITDA
     inp["ev_ebitda"] = info.get("enterpriseToEbitda")
     mcap = info.get("marketCap")
     fcf = statement_fcf(t)
+    ev = info.get("enterpriseValue")
+    if ev is None and mcap:
+        ev = mcap + (info.get("totalDebt") or 0) - (info.get("totalCash") or 0)
+    if _is_layer10(layer):
+        if ev and fcf:
+            inp["ev_ebitda"] = round(ev / fcf, 1)
+        else:
+            inp["ev_ebitda"] = None
+            gaps.append("EV/FCF (L10): missing EV or statement FCF — left blank")
+    elif _is_layer9_capacity(layer):
+        mw = _secured_mw(ticker)
+        if ev and mw:
+            inp["ev_ebitda"] = round(ev / 1e6 / mw, 1)
+        else:
+            inp["ev_ebitda"] = None
+            gaps.append(f"EV/MW (L9 capacity): no secured_gross_mw for {ticker} in "
+                        "capacity-mw.json — add it (rule 13) or score stays blank")
     if fcf is None:
         fcf = info.get("freeCashflow")
         if fcf is not None:
@@ -253,7 +301,7 @@ def process_ticker(ticker: str, layer: str, ws, row_num: int) -> tuple[str, list
     if not company:
         return ("error_no_data", ["yfinance returned empty info"], "")
 
-    inputs, gaps = compute_inputs(ticker, t, info)
+    inputs, gaps = compute_inputs(ticker, t, info, layer=layer)
     append_row(ws, row_num, ticker, layer, inputs)
     ws.cell(row=row_num, column=2, value=company)
 

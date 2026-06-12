@@ -48,6 +48,20 @@ This is a **qualitative red flag, not a scored metric** — it was deliberately 
 
 So interpret with judgment: a low conversion number only matters if the working-capital condition also holds. Note the finding (or "clean") in the briefing's Section 2.
 
+### 2c. Expectations red-flag check (added 2026-06-12, rule 14)
+
+```bash
+python3 scripts/expectations_flag.py $TICKER
+```
+
+Asks "what's priced in?" — the one question the scoring rubric structurally cannot ask (Value bands are absolute; Momentum *rewards* relative strength; so the Total Score peaks exactly where consensus expectations are highest — surfaced by the 2026-06-12 SALP 13F stress test, where our top 6 names were 5 of the fund's 6 biggest put targets).
+
+**The flag fires when:** current P/S sits ≥90th percentile of the name's own 3-year range AND current revenue YoY growth is *below* its 3-year median — i.e., peak multiple on decelerating growth.
+
+This is a **qualitative red flag, not a scored metric**: a name at its 3-year-high multiple can deserve it (genuine inflection — the briefing must make that argument explicitly), and a name at its 3-year-low can be cheap for a reason. The flag's job is to force the briefing to address embedded expectations head-on instead of letting "great business" silently stand in for "great forward return."
+
+The script self-skips with a stated reason on foreign filers (no quarterly us-gaap XBRL) and names using unmapped revenue tags (some crypto miners) — when it skips, note the skip + reason in Section 2; eyeball P/S vs its own history manually if the name is rating-critical.
+
 ### 3. WebSearch with current year in the query
 
 The current year is **mandatory** in search queries — Claude's bias is to assume "latest" means 2024 or 2025. Always include the actual current year.
