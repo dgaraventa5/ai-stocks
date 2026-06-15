@@ -241,10 +241,13 @@ deployed by `.github/workflows/deploy-site.yml` on push to `main`.
   the regression gate — never weaken it.
 - **Performance series:** `tracking/performance-series.json` is written by
   `track_performance.py`. `deploy-site.yml` needs no network/yfinance;
-  `daily-refresh.yml` (weekday cron 21:45 UTC) rebuilds it with
-  `--series-only`, commits if changed (holidays self-skip), and redeploys
-  inline — dashboard/performance pages stay daily-fresh. The weekly Cowork
-  routine still owns the narrative `performance-log.md`.
+  `daily-refresh.yml` (weekday crons 21:45 + 23:35 + 02:25 UTC) rebuilds it
+  with `--series-only`, commits if changed (holidays self-skip), and redeploys
+  inline — dashboard/performance pages stay daily-fresh. Three crons because
+  GitHub's `schedule` trigger is best-effort and drops runs (it dropped
+  2026-06-15 entirely); the commit-if-changed guard makes the backstops
+  idempotent. The weekly Cowork routine still owns the narrative
+  `performance-log.md`.
 - **Scan links:** `tracking/notion-scan-links.json` maps scan dates to Notion
   URLs; the Cowork weekly routine appends to it.
 - The spec lives at `docs/superpowers/specs/2026-06-10-portfolio-site-design.md`.
