@@ -2,10 +2,17 @@ name: Daily site refresh
 
 on:
   schedule:
-    # ~5:45pm ET during EDT, 4:45pm ET during EST — after close, adjusted
-    # closes settled. Weekdays only; holidays self-skip via the
-    # commit-if-changed guard (series is byte-identical when markets are shut).
-    - cron: '45 21 * * 1-5'
+    # GitHub's `schedule` trigger is BEST-EFFORT: runs land 60-90 min late and
+    # are sometimes dropped entirely under load (Monday 2026-06-15 was dropped,
+    # leaving the site a trading day stale). Mitigation: fire three times on
+    # spread-out, non-round minutes so a dropped/delayed primary is caught by a
+    # backstop. The "commit series if changed" guard makes redundant fires
+    # idempotent — only the run that finds new closes commits and deploys; the
+    # rest rebuild, see no diff, and exit in ~1 min. Holidays self-skip the same
+    # way (series is byte-identical when markets are shut).
+    - cron: '45 21 * * 1-5'   # primary — after close, ~5:45pm ET (EDT)
+    - cron: '35 23 * * 1-5'   # backstop 1 — ~2h later, same UTC day
+    - cron: '25 2 * * 2-6'    # backstop 2 — early-AM catch-up (next UTC day)
   workflow_dispatch:
 
 env:
@@ -14,6 +21,12 @@ env:
 
 permissions:
   contents: write
+
+# One refresh at a time: if a delayed primary and a backstop ever overlap, the
+# later one queues rather than racing on the commit/push.
+concurrency:
+  group: daily-refresh
+  cancel-in-progress: false
 
 jobs:
   refresh:
