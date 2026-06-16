@@ -154,6 +154,7 @@ The capital equipment that enables every AI chip.
 
 ### Power management silicon
 - **Monolithic Power Systems (MPWR)** — voltage regulators and power modules for AI accelerator boards
+- **onsemi (ON)** — EliteSiC + PowerTrench + GaN; named in NVIDIA 800VDC AI-datacenter power ecosystem; AI-DC revenue >2x YoY but a small minority (~8%) of a cyclical auto/industrial core
 - **Navitas Semiconductor (NVTS)** — GaN/SiC power ICs; design-in for 800VDC data-center power architecture (speculative)
 
 ### Programmable logic
@@ -165,6 +166,19 @@ The capital equipment that enables every AI chip.
 - **SanDisk (SNDK)** — NAND/storage spun from WD
 - **SK Hynix** — HBM leader (Korea-listed, ADR limited)
 - **Samsung** — Korea-listed
+
+### Analog, mixed-signal & embedded (diversified)
+*Added 2026-06-15 to close the SMH coverage gap (rule: scored the 8 SMH holdings absent from the watchlist). These are broad-line analog/embedded franchises whose cores are auto/industrial/handset; AI-datacenter content is a real but minority growth sleeve. Their AI-Thesis "directness" (rule 12) is moderate-to-low — the AI-Thesis category, not the Value metric, carries conversion probability (rule 13 division-of-labor).*
+- **Texas Instruments (TXN)** — analog + embedded; ~6-7% datacenter (power/signal chain) growing ~90% YoY off a megafab buildout; core is industrial/auto/personal-electronics
+- **Analog Devices (ADI)** — signal chain + high-density power (Empower acq.) + optical signal integrity; ~11-12% datacenter, the most AI-levered of the diversified analog group
+- **NXP Semiconductors (NXPI)** — auto/industrial/IoT; edge-AI (Kinara NPUs) not hyperscale-buildout; ~0-5% genuine AI-DC exposure
+- **Microchip (MCHP)** — MCU/analog/FPGA; Data Center Solutions unit (PCIe switches/retimers, NVMe controllers) ~8% of revenue; deep cyclical recovery
+- **STMicroelectronics (STM)** — analog + SiC/GaN power + MCU; NVIDIA 800VDC collaboration, datacenter guided >$1B for 2027; foreign filer (20-F/6-K), deep cyclical trough
+
+### RF front-end & application processors
+*Added 2026-06-15 (SMH gap). Handset/connectivity-centric; AI exposure is edge/on-device or immaterial, not hyperscale infrastructure.*
+- **Qualcomm (QCOM)** — handset SoC + licensing; on-device/edge AI embedded in SoCs; data-center push (AI200/AI250) is an unproven forward option; Apple modem revenue cliff
+- **Skyworks (SWKS)** — RF front-end, ~60% Apple concentration; AI-DC content immaterial; pending Qorvo merger under FTC review
 
 ---
 
