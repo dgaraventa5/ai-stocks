@@ -241,7 +241,8 @@ deployed by `.github/workflows/deploy-site.yml` on push to `main`.
   the regression gate — never weaken it.
 - **Performance series:** `tracking/performance-series.json` is written by
   `track_performance.py`. `deploy-site.yml` needs no network/yfinance;
-  `daily-refresh.yml` (weekday crons 21:45 + 23:35 + 02:25 UTC) rebuilds it
+  `daily-refresh.yml` (weekday crons 21:05 + 22:35 + 00:35 UTC, targeting ~5pm
+  ET right after the 4pm ET close) rebuilds it
   with `--series-only`, commits if changed (holidays self-skip), and redeploys
   inline — dashboard/performance pages stay daily-fresh. Three crons because
   GitHub's `schedule` trigger is best-effort and drops runs (it dropped

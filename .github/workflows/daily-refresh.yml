@@ -2,17 +2,23 @@ name: Daily site refresh
 
 on:
   schedule:
-    # GitHub's `schedule` trigger is BEST-EFFORT: runs land 60-90 min late and
-    # are sometimes dropped entirely under load (Monday 2026-06-15 was dropped,
-    # leaving the site a trading day stale). Mitigation: fire three times on
-    # spread-out, non-round minutes so a dropped/delayed primary is caught by a
-    # backstop. The "commit series if changed" guard makes redundant fires
-    # idempotent — only the run that finds new closes commits and deploys; the
-    # rest rebuild, see no diff, and exit in ~1 min. Holidays self-skip the same
-    # way (series is byte-identical when markets are shut).
-    - cron: '45 21 * * 1-5'   # primary — after close, ~5:45pm ET (EDT)
-    - cron: '35 23 * * 1-5'   # backstop 1 — ~2h later, same UTC day
-    - cron: '25 2 * * 2-6'    # backstop 2 — early-AM catch-up (next UTC day)
+    # Primary targets ~5pm ET, right after the 4pm ET close (yfinance adjusted
+    # closes have settled by then). NOTE: GitHub's `schedule` trigger is
+    # BEST-EFFORT — runs land 60-90 min late and are sometimes dropped entirely
+    # under load (Monday 2026-06-15 was dropped, leaving the site a trading day
+    # stale), so actual execution is ~6-6:30pm ET, not 5pm sharp; nominal-5pm is
+    # as early as a free GitHub cron can target. Mitigation: fire three times on
+    # spread-out, non-round minutes (round :00/:30 are GitHub's most-contended,
+    # most-dropped slots) so a dropped/delayed primary is caught by a backstop.
+    # The "commit series if changed" guard makes redundant fires idempotent —
+    # only the run that finds new closes commits and deploys; the rest rebuild,
+    # see no diff, and exit in ~1 min. Holidays self-skip the same way (series is
+    # byte-identical when markets are shut). UTC is fixed, so clock times drift
+    # 1h between EDT and EST — all three stay safely after the 4pm ET close in
+    # both seasons.
+    - cron: '5 21 * * 1-5'    # primary — ~5:05pm EDT / 4:05pm EST, post-close
+    - cron: '35 22 * * 1-5'   # backstop 1 — ~90 min later, same UTC day
+    - cron: '35 0 * * 2-6'    # backstop 2 — late catch-up (next UTC day)
   workflow_dispatch:
 
 env:
