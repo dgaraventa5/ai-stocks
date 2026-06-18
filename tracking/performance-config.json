@@ -145,6 +145,27 @@
         "VRT": 571.6
       },
       "cash": 0.02
+    },
+    {
+      "date": "2026-06-18",
+      "reason": "membership change: -EME, -EQT, -PLTR, -TER, -VRT, -ZS",
+      "allocations": {
+        "NVDA": 1389.97,
+        "GOOGL": 898.48,
+        "AVGO": 1059.49,
+        "META": 1073.04,
+        "APP": 1039.15,
+        "TSM": 1432.34,
+        "FIX": 886.62,
+        "ANET": 1010.34,
+        "MU": 1110.33,
+        "SNDK": 1120.5,
+        "ALAB": 915.43,
+        "CRDO": 1039.15,
+        "WDC": 978.14,
+        "MSFT": 923.9
+      },
+      "cash": -0.01
     }
   ]
 }
