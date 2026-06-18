@@ -215,6 +215,21 @@ The rubric has no "what's priced in" input — Value bands are absolute and Mome
 
 GAAP EPS YoY scores garbage when the change is dominated by disclosed non-operating items (divestiture gains, fair-value swings, large tax one-offs) — GEV's +1,768% from the ~$4.5B Prolec gain would have scored 100 on a divestiture. **Rule:** blank the EPS YoY input when a briefing/filing documents that the YoY change is non-operating-dominated; Growth then averages the revenue metrics. Applied on documented per-name evidence (cite the item in the Rating Audit), NOT mechanically on magnitude — a big operational number off a small base (e.g., SEI +303%) stays. Same garbage-input principle as the negative-EBITDA blanking convention and rules 10/13.
 
+### 16. Risk: R5 Disruption Risk dimension (added 2026-06-17, approved by Dom)
+
+**Context:** R1–R4 (customer concentration, geography, balance sheet, regulatory) measure whether earnings are *safe now*, not whether the *revenue model survives*. This let beaten-down application-SaaS names (down 40–67% on genuine agentic-AI disruption fears) still score ✓✓ — Value rises as price falls (20% weight) while the disruption thesis had nowhere to land (moat is only 1 of 5 AI-Thesis dims → ≤1.6pt swing). Surfaced in the 2026-06-17 QQQ-coverage batch (WDAY): a value-quality screen rewards a falling quality name *because* it is falling. R5 gives terminal-value/business-model durability a home.
+
+**Rule:** The Risk category now averages **five** dimensions — R1–R4 plus **R5 Disruption Risk** (Watchlist col **AL / 38**, appended after Tier so Risk Score/TOTAL/Tier indices don't shift). Risk weight unchanged at 15%. Inverted like R1–R4: **5 = most durable / lowest disruption risk.** Bands:
+- **5** — no credible AI/structural disruption to the core revenue model in ~5yr (physical infra, power, fabs, semis equip, HDD, networking, cloud compute). **Default for all non-Layer-10 names.**
+- **4** — durable; AI net-neutral/tailwind or threatens only a peripheral line (security software — AI expands attack surface; consumption-priced data/observability; AI-native beneficiaries).
+- **3** — contested but a structural moat (file format, regulatory, data, ecosystem) resists core disruption.
+- **2** — core pricing model/workflow is a direct agentic-AI target; durability in question, no active erosion yet (or a durable sub-segment offsets).
+- **1** — AI-native tools / the model layer can directly produce the core output or fully automate the workflow, **and** active erosion is visible (price concession, funnel/share loss).
+
+**Scope:** Only Layer 10 (Models, Software & Applications) carries sub-5 R5; everything else defaults to 5. Refresh R5 alongside subjective-rating reviews (rule 12), applying the absolute-lens stress test across the *whole* Layer-10 cohort (not relative ranking). **Deliberate asymmetry:** because the default is the max (5), R5 mostly *rewards durability* (lifts the non-exposed field slightly) and penalizes only the genuinely-exposed cohort.
+
+**Implementation:** R5 at col 38; `rebuild_watchlist_formulas.py` RISK template averages `AE:AH + AL`; `recalc_watchlist.py` `risk_inputs` includes col 38. **Run `rebuild_watchlist_formulas.py` after any structural row change still applies** (rule 10 note). The recalc-vs-Excel blank-handling divergence (recalc sums available category parts without renormalizing; Excel blanks TOTAL if any category is empty) is unchanged.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

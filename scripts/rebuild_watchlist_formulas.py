@@ -105,7 +105,9 @@ MOMENTUM = ('=IFERROR(AVERAGE('
             'IFERROR(IF(AC{r}="","",IF(AC{r}>=85,100,IF(AC{r}>=70,90,IF(AC{r}>=55,75,'
             'IF(AC{r}>=40,60,IF(AC{r}>=25,40,20)))))),"")),"")')
 
-RISK = '=IFERROR(AVERAGE(AE{r},AF{r},AG{r},AH{r})*20,"")'
+# R5 Disruption Risk (col AL=38, added 2026-06-17): appended after Tier to avoid
+# shifting Risk Score/TOTAL/Tier and breaking downstream scripts. 5 = most durable.
+RISK = '=IFERROR(AVERAGE(AE{r},AF{r},AG{r},AH{r},AL{r})*20,"")'
 
 TOTAL = ('=IFERROR(J{r}*Weights!$B$4 + O{r}*Weights!$B$5 + S{r}*Weights!$B$6 + '
          'Y{r}*Weights!$B$7 + AD{r}*Weights!$B$8 + AI{r}*Weights!$B$9,"")')

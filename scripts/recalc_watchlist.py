@@ -232,7 +232,9 @@ def recalc():
         ai_inputs = [ws.cell(row=r, column=c).value for c in [20, 21, 22, 23, 24]]
         mom_inputs = [ws.cell(row=r, column=c).value for c in [26, 27, 28]]
         dma_pct = ws.cell(row=r, column=29).value
-        risk_inputs = [ws.cell(row=r, column=c).value for c in [31, 32, 33, 34]]
+        # R5 Disruption Risk added 2026-06-17 at col 38 (appended to avoid shifting
+        # Risk Score/TOTAL/Tier); AVERAGE skips blanks like the other R dims.
+        risk_inputs = [ws.cell(row=r, column=c).value for c in [31, 32, 33, 34, 38]]
 
         # Subscores
         value = avg_nonnull([score_fwd_pe(fwd_pe), score_ev_col(ev_ebitda, layer),

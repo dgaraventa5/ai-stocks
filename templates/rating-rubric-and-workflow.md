@@ -253,7 +253,7 @@ The goal of this rubric: replace vibes with checkable criteria so two informed p
 
 ---
 
-### Risk (4 dimensions, 10% category weight) — 5 = LOWEST risk
+### Risk (5 dimensions, 15% category weight) — 5 = LOWEST risk
 
 This is inverted from the others. **5 means the stock has LOW risk on this dimension, 1 means HIGH risk.**
 
@@ -342,6 +342,21 @@ R2 scores the company's own revenue geography and asset footprint.
 | **1** | Major regulatory threat (e.g., DOJ antitrust, FDA action, class action that could be material). |
 
 **Sourcing rule:** 10-K "Legal Proceedings" section + recent 8-Ks announcing investigations or lawsuits.
+
+#### R5. Disruption Risk (added 2026-06-17, see CLAUDE.md rule 16)
+
+Business-model durability — does the *revenue stream survive*, vs. R1–R4 which ask if earnings are *safe now*. 5 = most durable / lowest disruption risk.
+
+**Criteria:**
+| Rating | Definition |
+|---|---|
+| **5** | No credible AI/structural disruption to the core revenue model in ~5yr. **Default for all non-Layer-10 names** (physical infra, power, fabs, semis equip, HDD, networking, cloud compute). |
+| **4** | Durable; AI net-neutral/tailwind or threatens only a peripheral line (security software, consumption-priced data/observability, AI-native beneficiaries). |
+| **3** | Contested but a structural moat (file format, regulatory, data, ecosystem) resists core disruption. |
+| **2** | Core pricing model/workflow is a direct agentic-AI target; durability in question, no active erosion yet (or a durable sub-segment offsets). |
+| **1** | AI-native tools / the model layer can directly produce the core output or fully automate the workflow, AND active erosion is visible (price concession, funnel/share loss). |
+
+**Scope:** only Layer 10 carries sub-5; everything else defaults to 5. Apply the absolute-lens stress test across the whole Layer-10 cohort, not relative ranking. Watchlist col AL/38.
 
 ---
 
