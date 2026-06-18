@@ -224,6 +224,7 @@ Bandwidth is becoming as important as compute. 800G → 1.6T transitions are mas
 ### Storage infrastructure
 - **Everpure (P, fka Pure Storage/PSTG, renamed ~May 2026)** — all-flash arrays (FlashBlade) for AI training data pipelines
 - **Seagate Technology (STX)** — nearline mass-capacity HDD for AI data lakes; HAMR ramp tightening supply
+- **Western Digital (WDC)** — pure-play nearline HDD after the early-2026 SanDisk (flash) spin; cloud = ~89% of revenue, sold out through CY2026 under LTAs to CY2029; the other half of the HDD duopoly with STX (added 2026-06-17, QQQ coverage diff)
 
 ---
 
@@ -275,6 +276,9 @@ Most foundation model labs are private (OpenAI, Anthropic, xAI, Mistral). Public
 
 ### AI cybersecurity
 - **CrowdStrike (CRWD)** — endpoint security using AI; protects AI infrastructure attack surface
+- **Palo Alto Networks (PANW)** — largest pure-play security platform; platformization + CyberArk (identity) + Chronosphere (observability); NGFW demand from AI-datacenter buildouts (added 2026-06-17, QQQ diff)
+- **Fortinet (FTNT)** — FortiASIC SPU + FortiOS Security Fabric; firewall refresh cycle + unified SASE (added 2026-06-17, QQQ diff)
+- **Zscaler (ZS)** — Zero Trust Exchange cloud security; AI Protect for data/AI-workload security (added 2026-06-17, QQQ diff)
 
 ### AI data layer
 - **MongoDB (MDB)** — document database with Atlas Vector Search for RAG / AI applications
@@ -282,8 +286,24 @@ Most foundation model labs are private (OpenAI, Anthropic, xAI, Mistral). Public
 ### AI-powered automation
 - **UiPath (PATH)** — robotic process automation + agentic AI capabilities
 
+### AI advertising
+- **AppLovin (APP)** — AXON AI ad-recommendation engine; divested games to become a pure AI-adtech platform; e-commerce ad expansion (added 2026-06-17, QQQ diff)
+
+### Creative & design software
+- **Adobe (ADBE)** — Firefly generative-AI + GenStudio; the central "gen-AI disruptor-or-disrupted" debate (added 2026-06-17, QQQ diff)
+- **Autodesk (ADSK)** — Project Bernini generative design + AutoCAD/Fusion/Forma AI; CAD/BIM workflow lock-in (added 2026-06-17, QQQ diff)
+
+### Enterprise & financial SaaS (AI-attach)
+- **Workday (WDAY)** — Illuminate / Agent System of Record on an HCM+Financials seat base; the per-seat-pricing-vs-agentic-AI tension (added 2026-06-17, QQQ diff)
+- **Intuit (INTU)** — GenOS / AI agents across TurboTax, QuickBooks, Credit Karma, Mailchimp (added 2026-06-17, QQQ diff)
+
 ### AI-native vertical applications
 - **Tempus AI (TEM)** — AI-native precision-medicine data + diagnostics platform
+- **Tesla (TSLA)** — autonomy (FSD/robotaxi) + Optimus robotics + in-house AI5/AI6 edge-inference silicon. Scored as an AI play, not an automaker; AI revenue is ~0% of the P&L today (pure optionality). Auto = ~73% of revenue / ~100% of realized profit (added 2026-06-17, QQQ diff)
+- **SpaceX (SPCX)** — ⚠️ **MAP-GAP / partial fit.** ~83% aerospace+satcom (not represented elsewhere in this map), with an AI overlay: xAI/Grok merged in Feb 2026 (~17% of FY25 rev), GW-scale training cluster, pending $60B Cursor/Anysphere acquisition (closes Q3 2026). Carried as a **research stub** — no Total Score until first 10-Q (~Aug 2026) + Cursor close (added 2026-06-17)
+
+### Edge / on-device AI platforms
+- **Apple (AAPL)** — ⚠️ **MAP-GAP flag.** Consumer hardware fits no clean supply-chain layer; placed here as the 1.4B-device edge-AI distribution platform (Apple Intelligence). In the AI *stack* Apple is the **demand anchor** (TSMC's #1 leading-edge customer; rents Gemini), not a supply-chain participant. AI revenue ≈ 0 as a line item; scored to quantify *why* it isn't an upstream pick (added 2026-06-17, QQQ diff)
 
 ---
 
