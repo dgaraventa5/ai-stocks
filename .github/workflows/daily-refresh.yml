@@ -38,8 +38,8 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install yfinance pandas openpyxl pytest
@@ -77,7 +77,7 @@ jobs:
         if: steps.commit.outputs.changed == 'true'
       - run: python scripts/check_site.py
         if: steps.commit.outputs.changed == 'true'
-      - uses: cloudflare/wrangler-action@v3
+      - uses: cloudflare/wrangler-action@v4
         if: steps.commit.outputs.changed == 'true'
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
