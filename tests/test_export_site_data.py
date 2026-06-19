@@ -119,6 +119,14 @@ def test_theses_extracts_populated_and_nulls_template(repo, capsys):
     assert 'TSM' in capsys.readouterr().err     # warned
 
 
+def test_theses_extracts_despite_stale_heading_suffix(repo):
+    """A '[STALE - revisit]' suffix on the section-1 heading must not hide a
+    populated one-liner (regression: AVGO dropped off the site, 2026-06-12)."""
+    th = ex.export_theses(repo, ['AVGO'])
+    assert th['AVGO'] == ('Broadcom designs the custom AI chips hyperscalers '
+                          'use to cut Nvidia dependence.')
+
+
 def test_theses_missing_file_is_null(repo, capsys):
     th = ex.export_theses(repo, ['NVDA', 'XYZ'])
     assert th['XYZ'] is None

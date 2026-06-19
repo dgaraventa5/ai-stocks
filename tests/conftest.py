@@ -96,6 +96,15 @@ def repo(tmp_path):
         '# {TICKER} — {Company Name}\n\n## 1. One-line thesis\n\n'
         '> {Single sentence: why does this stock exist in the portfolio?}\n\n'
         '---\n\n## 2. Position in the AI supply chain\n')
+    # AVGO: populated one-liner but heading carries an editorial suffix
+    # (the real bug — must still extract, not be mistaken for a template).
+    av = tmp_path / 'per-stock' / 'AVGO'
+    av.mkdir(parents=True)
+    (av / 'thesis.md').write_text(
+        '# AVGO — Broadcom\n\n## 1. One-line thesis [STALE - revisit]\n\n'
+        '> Broadcom designs the custom AI chips hyperscalers use to cut '
+        'Nvidia dependence.\n\n'
+        '---\n\n## 2. Position in the AI supply chain\n\ntext\n')
 
     # --- notion scan links
     (tmp_path / 'tracking' / 'notion-scan-links.json').write_text(json.dumps([

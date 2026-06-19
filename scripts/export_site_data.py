@@ -187,8 +187,11 @@ def export_changes(root: Path) -> list[dict]:
     return sorted(out, key=lambda c: (c['date'], c['type']), reverse=True)
 
 
+# Tolerate an editorial suffix on the heading (e.g. "## 1. One-line thesis
+# [STALE - revisit]"); the section delimiter is the heading prefix, not an
+# exact line match. The {placeholder} check below still rejects real templates.
 THESIS_SECTION = re.compile(
-    r'^## 1\. One-line thesis\s*$(.*?)(?=^## |\Z)', re.M | re.S)
+    r'^## 1\. One-line thesis[^\n]*$(.*?)(?=^## |\Z)', re.M | re.S)
 
 
 def export_theses(root: Path, tickers: list[str]) -> dict[str, str | None]:
