@@ -21,10 +21,6 @@ on:
     - cron: '35 0 * * 2-6'    # backstop 2 — late catch-up (next UTC day)
   workflow_dispatch:
 
-env:
-  # Match deploy-site.yml: GitHub forces Node 24 for actions from 2026-06-16.
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 permissions:
   contents: write
 
