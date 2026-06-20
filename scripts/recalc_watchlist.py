@@ -180,16 +180,16 @@ def avg_nonnull(vals):
     return sum(xs) / len(xs) if xs else None
 
 
-def recalc():
-    wb = load_workbook(XLSX, data_only=False)
+def recalc(xlsx=XLSX):
+    wb = load_workbook(xlsx, data_only=False)
     ws = wb['Watchlist']
 
-    # Weights from Weights sheet
-    wsw = wb['Weights']
+    # Weights from Weights sheet (falls back to the defaults below if absent).
     weights = {}
-    for row in wsw.iter_rows(min_row=2, values_only=True):
-        if row[0] and row[1] is not None:
-            weights[row[0]] = row[1]
+    if 'Weights' in wb.sheetnames:
+        for row in wb['Weights'].iter_rows(min_row=2, values_only=True):
+            if row[0] and row[1] is not None:
+                weights[row[0]] = row[1]
 
     # Defaults match the 2026-05-25 reweight. Weights sheet labels the AI row
     # "AI Thesis" (not "AI"), so read that key explicitly or the get() silently

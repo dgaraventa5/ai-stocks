@@ -19,7 +19,7 @@ from pathlib import Path
 import yfinance as yf
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
-from openpyxl.utils import get_column_letter
+from openpyxl.utils import column_index_from_string, get_column_letter
 
 from common import flag, per_stock_dir
 
@@ -59,6 +59,163 @@ def _write_df(ws, df) -> None:
             ws.cell(row=r, column=c).number_format = "#,##0"
     for c in range(1, ws.max_column + 1):
         ws.column_dimensions[get_column_letter(c)].width = 22 if c == 1 else 16
+
+
+# yfinance annual columns are most-recent-first, so col B = latest FY.
+_ANNUAL_COL = {"FY-3": "D", "FY-2": "C", "FY-1": "B"}
+_CANDIDATES = {
+    "rev": ["Total Revenue", "Operating Revenue"],
+    "gp": ["Gross Profit"],
+    "oi": ["Operating Income", "Total Operating Income As Reported"],
+    "eb": ["EBITDA", "Normalized EBITDA"],
+    "fcf": ["Free Cash Flow"],
+    "cap": ["Capital Expenditure"],
+    "nd": ["Net Debt"],
+    "sh": ["Ordinary Shares Number", "Share Issued", "Common Stock Shares Outstanding"],
+}
+
+
+def _find_row(ws, candidates) -> int | None:
+    labels = {ws.cell(row=r, column=1).value: r for r in range(2, ws.max_row + 1)}
+    for c in candidates:
+        if c in labels:
+            return labels[c]
+    return None
+
+
+def add_fy_summary(wb, info: dict, flags: list) -> None:
+    """Add a formula-driven 'FY Summary' tab: FY-3/FY-2/FY-1/TTM on a GAAP basis.
+
+    Raw line-items reference the statement sheets; every ratio is an Excel
+    formula (CLAUDE.md rule 4). TTM flows = Σ last 4 quarters; TTM stock items
+    (net debt, shares) = most-recent quarter. Missing line-items degrade to a
+    blank cell + a flag (rule 3), never a crash. Fixed 16-row layout so ratio
+    formula references stay stable regardless of which inputs are present.
+    """
+    required = ["Income stmt (annual)", "Income stmt (quarterly)",
+                "Cash flow (annual)", "Cash flow (quarterly)",
+                "Balance sheet (annual)"]
+    if any(s not in wb.sheetnames for s in required):
+        flags.append("FY Summary: skipped — statement sheets missing")
+        return
+    ai, qi = wb["Income stmt (annual)"], wb["Income stmt (quarterly)"]
+    ca, cq = wb["Cash flow (annual)"], wb["Cash flow (quarterly)"]
+    ba = wb["Balance sheet (annual)"]
+    qb = wb["Balance sheet (quarterly)"] if "Balance sheet (quarterly)" in wb.sheetnames else None
+
+    last_q = min(5, qi.max_column)              # cap TTM at 4 quarters (cols B:E)
+    last_q_letter = get_column_letter(last_q)
+    if last_q < 5:
+        flags.append(f"FY Summary: TTM uses only {last_q - 1} quarters (<4 available)")
+
+    R = {
+        "rev_a": _find_row(ai, _CANDIDATES["rev"]), "rev_q": _find_row(qi, _CANDIDATES["rev"]),
+        "gp_a": _find_row(ai, _CANDIDATES["gp"]), "gp_q": _find_row(qi, _CANDIDATES["gp"]),
+        "oi_a": _find_row(ai, _CANDIDATES["oi"]), "oi_q": _find_row(qi, _CANDIDATES["oi"]),
+        "eb_a": _find_row(ai, _CANDIDATES["eb"]), "eb_q": _find_row(qi, _CANDIDATES["eb"]),
+        "fcf_a": _find_row(ca, _CANDIDATES["fcf"]), "fcf_q": _find_row(cq, _CANDIDATES["fcf"]),
+        "cap_a": _find_row(ca, _CANDIDATES["cap"]), "cap_q": _find_row(cq, _CANDIDATES["cap"]),
+        "nd_a": _find_row(ba, _CANDIDATES["nd"]), "nd_q": _find_row(qb, _CANDIDATES["nd"]) if qb else None,
+        "sh_a": _find_row(ba, _CANDIDATES["sh"]), "sh_q": _find_row(qb, _CANDIDATES["sh"]) if qb else None,
+    }
+    for key, label in [("rev_a", "Total Revenue"), ("gp_a", "Gross Profit"),
+                       ("oi_a", "Operating Income"), ("eb_a", "EBITDA"),
+                       ("fcf_a", "Free Cash Flow"), ("cap_a", "Capital Expenditure"),
+                       ("nd_a", "Net Debt"), ("sh_a", "share count")]:
+        if R[key] is None:
+            flags.append(f"FY Summary: '{label}' not found in statements — left blank")
+
+    def a_ref(sheet, row, fycol, scale="", neg=False):
+        col = _ANNUAL_COL[fycol]
+        if row is None or column_index_from_string(col) > sheet.max_column:
+            return ""
+        return f"={'-' if neg else ''}'{sheet.title}'!{col}{row}{scale}"
+
+    def ttm_ref(sheet, row, neg=False):
+        if row is None:
+            return ""
+        return f"={'-' if neg else ''}SUM('{sheet.title}'!B{row}:{last_q_letter}{row})"
+
+    def mrq_ref(row, scale=""):
+        if qb is None or row is None:
+            return ""
+        return f"='{qb.title}'!B{row}{scale}"
+
+    if "FY Summary" in wb.sheetnames:
+        del wb["FY Summary"]
+    fy = wb.create_sheet("FY Summary", 1)
+
+    def hdr(ws, col):
+        ci = column_index_from_string(col)
+        return ws.cell(row=1, column=ci).value if ci <= ws.max_column else ""
+
+    fy.append(["Fiscal-year summary (GAAP, $ except where noted)",
+               "FY-3", "FY-2", "FY-1", "TTM", "Source / formula"])
+    for cell in fy[1]:
+        cell.fill, cell.font = HEADER_FILL, HEADER_FONT
+    fy.append(["Fiscal period end", hdr(ai, "D"), hdr(ai, "C"), hdr(ai, "B"),
+               f"TTM → {qi.cell(row=1, column=2).value}",
+               "annual statement headers; TTM = Σ last 4 quarters"])
+
+    def flow(label, a_sheet, a_row, q_sheet, q_row, src, neg=False):
+        fy.append([label,
+                   a_ref(a_sheet, a_row, "FY-3", neg=neg),
+                   a_ref(a_sheet, a_row, "FY-2", neg=neg),
+                   a_ref(a_sheet, a_row, "FY-1", neg=neg),
+                   ttm_ref(q_sheet, q_row, neg=neg), src])
+
+    def ratio(label, num_row, den_row, src):
+        fy.append([label] + [f'=IFERROR({get_column_letter(c)}{num_row}/'
+                             f'{get_column_letter(c)}{den_row},"")' for c in (2, 3, 4, 5)]
+                  + [src])
+
+    flow("Revenue", ai, R["rev_a"], qi, R["rev_q"], "Total Revenue")                  # r3
+    flow("Gross profit", ai, R["gp_a"], qi, R["gp_q"], "Gross Profit (GAAP)")         # r4
+    ratio("Gross margin %", 4, 3, "GAAP = gross profit / revenue")                    # r5
+    flow("Operating income", ai, R["oi_a"], qi, R["oi_q"], "Operating Income")        # r6
+    ratio("Operating margin %", 6, 3, "= operating income / revenue")                 # r7
+    flow("EBITDA", ai, R["eb_a"], qi, R["eb_q"], "EBITDA")                            # r8
+    flow("Free cash flow", ca, R["fcf_a"], cq, R["fcf_q"], "FCF = OCF − capex")       # r9
+    ratio("FCF margin %", 9, 3, "= FCF / revenue")                                    # r10
+    flow("Capex", ca, R["cap_a"], cq, R["cap_q"], "Capex (shown positive)", neg=True)  # r11
+    ratio("Capex / revenue %", 11, 3, "= capex / revenue")                            # r12
+    fy.append(["Net debt", a_ref(ba, R["nd_a"], "FY-3"), a_ref(ba, R["nd_a"], "FY-2"),  # r13
+               a_ref(ba, R["nd_a"], "FY-1"),
+               mrq_ref(R["nd_q"]) or a_ref(ba, R["nd_a"], "FY-1"),
+               "Net debt; TTM = MRQ"])
+    ratio("Net debt / EBITDA", 13, 8, "= net debt / EBITDA")                          # r14
+    fy.append(["Share count (period-end, M)",                                          # r15
+               a_ref(ba, R["sh_a"], "FY-3", scale="/1e6"),
+               a_ref(ba, R["sh_a"], "FY-2", scale="/1e6"),
+               a_ref(ba, R["sh_a"], "FY-1", scale="/1e6"),
+               mrq_ref(R["sh_q"], "/1e6") or a_ref(ba, R["sh_a"], "FY-1", scale="/1e6"),
+               "shares ÷ 1e6; TTM = MRQ"])
+    fy.append(["Share count YoY %", "", '=IFERROR(C15/B15-1,"")',                       # r16
+               '=IFERROR(D15/C15-1,"")', '=IFERROR(E15/D15-1,"")', "vs prior period"])
+
+    pct_rows = {5, 7, 10, 12, 16}
+    for r in range(3, fy.max_row + 1):
+        for c in range(2, 6):
+            fy.cell(row=r, column=c).number_format = "0.0%" if r in pct_rows else "#,##0"
+    for c in range(2, 6):
+        fy.cell(row=14, column=c).number_format = '0.00"x"'
+        fy.cell(row=15, column=c).number_format = "#,##0.0"
+    fy.column_dimensions["A"].width = 28
+    for c in "BCDE":
+        fy.column_dimensions[c].width = 15
+    fy.column_dimensions["F"].width = 52
+
+    # Non-GAAP gross-margin gap flag (generic: VMware-style amort. in COGS, etc.)
+    if R["gp_q"] and R["rev_q"]:
+        gp = sum((qi.cell(row=R["gp_q"], column=c).value or 0) for c in range(2, last_q + 1))
+        rev = sum((qi.cell(row=R["rev_q"], column=c).value or 0) for c in range(2, last_q + 1))
+        stmt_gm = gp / rev if rev else None
+        info_gm = info.get("grossMargins")
+        if stmt_gm and info_gm and info_gm - stmt_gm > 0.03:
+            flags.append(
+                f"Gross margin: GAAP (statement) ~{stmt_gm:.0%} vs yfinance "
+                f"info.grossMargins {info_gm:.0%} — info is a non-GAAP basis; "
+                f"FY Summary uses GAAP")
 
 
 def build_financials(ticker: str, out_path: Path | None = None) -> Path:
@@ -140,6 +297,7 @@ def build_financials(ticker: str, out_path: Path | None = None) -> Path:
         ("Income stmt (annual)", t.income_stmt),
         ("Income stmt (quarterly)", t.quarterly_income_stmt),
         ("Balance sheet (annual)", t.balance_sheet),
+        ("Balance sheet (quarterly)", t.quarterly_balance_sheet),
         ("Cash flow (annual)", t.cashflow),
         ("Cash flow (quarterly)", t.quarterly_cashflow),
     ]:
@@ -149,6 +307,9 @@ def build_financials(ticker: str, out_path: Path | None = None) -> Path:
         except Exception as e:
             flags.append(f"{sheet_name}: yfinance returned error — {e}")
             ws.append([f"(error: {e})"])
+
+    # ---------- FY Summary (formula-driven FY-3/FY-2/FY-1/TTM, GAAP) ----------
+    add_fy_summary(wb, info, flags)
 
     # ---------- Data flags ----------
     fl = wb.create_sheet("Data flags")
