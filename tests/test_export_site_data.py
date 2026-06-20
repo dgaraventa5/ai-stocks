@@ -141,15 +141,50 @@ def test_scans_passthrough_and_orphan_warning(repo, capsys):
     assert '2026-05-29' in capsys.readouterr().err   # scan md with no link
 
 
+def test_watchlist_fields_and_held_flags(repo):
+    wl = ex.export_watchlist(repo, held={'NVDA'})
+    by = {r['ticker']: r for r in wl}
+    assert set(by) == {'NVDA', 'TSM'}
+    nvda = by['NVDA']
+    assert nvda['company'] == 'NVIDIA Corp'
+    assert nvda['layer_num'] == '06'
+    assert nvda['layer'] == 'Silicon'
+    assert nvda['held'] is True
+    assert by['TSM']['held'] is False
+    # The miniature Watchlist has no scoring inputs, so every score is blank;
+    # blank-scored rows still export (with score/tier None), sorted last.
+    assert all(k in nvda for k in
+               ('value', 'quality', 'growth', 'ai', 'momentum', 'risk',
+                'score', 'tier'))
+    assert nvda['score'] is None and nvda['tier'] is None
+
+
+def test_methodology_weights_live_from_sheet(repo):
+    m = ex.export_methodology(repo)
+    cats = {c['name']: c for c in m['categories']}
+    assert [c['name'] for c in m['categories']] == [
+        'Value', 'Quality', 'Growth', 'AI Thesis', 'Momentum', 'Risk']
+    assert cats['Value']['weight'] == 0.20            # live from Weights sheet
+    assert cats['Value']['note'] == 'Is the price reasonable?'
+    assert 'Forward P/E' in cats['Value']['metrics']
+    assert cats['Risk']['weight'] == 0.15
+    assert cats['Risk']['kind'] == 'judgment'
+    assert abs(sum(c['weight'] for c in m['categories']) - 1.0) < 1e-9
+    # Tier legend present and ordered top-down.
+    assert m['tiers'][0]['symbol'] == '✓✓✓' and m['tiers'][0]['min'] == 85
+
+
 def test_main_writes_all_files(repo):
     ex.main(repo)
     names = {p.name for p in (repo / 'site' / 'data').glob('*.json')}
     assert names == {'positions.json', 'performance.json', 'changes.json',
-                     'theses.json', 'scans.json', 'meta.json'}
+                     'theses.json', 'watchlist.json', 'methodology.json',
+                     'scans.json', 'meta.json'}
     meta = json.loads((repo / 'site' / 'data' / 'meta.json').read_text())
     assert meta['as_of'] == '2026-05-28'
     assert meta['last_rebalance'] == '2026-06-10'
     assert meta['holdings'] == 2
+    assert meta['scored'] == 0   # miniature Watchlist has no scoring inputs
 
 
 def test_privacy_no_real_dollars_anywhere(repo):
