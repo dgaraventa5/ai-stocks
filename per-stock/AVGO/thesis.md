@@ -45,29 +45,31 @@ Six core AI customers, now structured around gigawatt-scale, multi-year commitme
 
 - **Demand:** Management: "Demand for XPUs and networking is simply insatiable" (call 2026-06-03). 2H FY26 AI revenue expected to ~2× 1H; FY26 AI guide ~$56B reaffirmed (+~180%); FY27 AI >$100B reiterated, "on track, if not stronger"; FY28 directionally "substantial growth from 2027" (call 2026-06-03).
 - **Pricing / content:** Content per GW stable near-term, rising generation-over-generation (more SRAM, embedded CPU cores, multi-die, HBM) (call 2026-06-03). Next-gen 200T switch tapes out in the current quarter.
-- **Gross margin trend:** Consolidated non-GAAP GM 77.1% in Q2 (−230bps YoY), guided ~74% for Q3 — XPU mix dilution, framed as mix not structural (call 2026-06-03). Semi operating margin 62% (+460bps YoY); software GM 93%. TTM GAAP gross margin 76.3% (watchlist 2026-06-12).
+- **Gross margin trend:** Consolidated non-GAAP GM 77.1% in Q2 (−230bps YoY), guided ~74% for Q3 — XPU mix dilution, framed as mix not structural (call 2026-06-03). Semi operating margin 62% (+460bps YoY); software GM 93%. TTM **GAAP** gross margin ~68% (financials.xlsx FY Summary, statement-based; FY25 67.8%) — the watchlist's 76.3% is the *non-GAAP* basis (yfinance `info.grossMargins`), the ~9pt gap being amortization of acquired VMware intangibles in GAAP COGS.
 - **Backlog / lead times:** Supply for 2026–2027 secured ("working on 2028 and 2029 right now"). Inventory days rose 68 → 86 ($3.0B → $4.3B), a deliberate 2H build (10-Q filed 2026-06-09; call 2026-06-03).
 
 ---
 
 ## 5. Financials snapshot
 
-> **Note:** `financials.xlsx` in this folder predates Q2 FY26 (last saved 2026-05-18) — **rebuild pending**. Figures below are sourced to Q2 FY26 disclosures and the 2026-06-12 objective refresh. TTM absolute revenue is derived and flagged.
+> **Note:** `financials.xlsx` rebuilt 2026-06-20 — see the **FY Summary** tab (FY2023/24/25 + TTM-through-Q2-FY26, GAAP, formula-driven). TTM figures below are statement-based (Σ last 4 quarters) and reconcile to the watchlist.
 
 | Metric | Q2 FY26 (quarter) | TTM / ratio | Source |
 |---|---|---|---|
-| Revenue | $22,187M (+48% YoY) | ~$63B TTM *(derived: TTM FCF ÷ FCF margin — flagged)* | 8-K 2026-06-03 |
+| Revenue | $22,187M (+48% YoY) | $75.5B TTM | 8-K 2026-06-03; FY Summary |
 | AI semi revenue | $10,800M (+143% YoY) | 49% of total | 8-K / call 2026-06-03 |
-| GAAP net income | $9,310M (+88% YoY) | — | 8-K 2026-06-03 |
-| Adj. EBITDA | $15,244M (69% of rev) | — | 8-K 2026-06-03 |
-| Gross margin | 77.1% non-GAAP | 76.3% TTM GAAP | 8-K 2026-06-03; watchlist 2026-06-12 |
-| FCF | $10,262M (46% of rev) | $27.2B TTM; margin 43.4% | 8-K 2026-06-03; watchlist 2026-06-12 |
-| Capex | $231M | very low (fabless) | 8-K 2026-06-03 |
+| GAAP net income | $9,310M (+88% YoY) | $29.3B TTM | 8-K 2026-06-03; FY Summary |
+| Adj. EBITDA | $15,244M (69% of rev) | $42.4B TTM | 8-K 2026-06-03; FY Summary |
+| Gross margin | 77.1% non-GAAP (Q2) | 68.3% TTM GAAP | 8-K 2026-06-03; FY Summary |
+| FCF (statement) | $10,262M (46% of rev) | $32.8B TTM; margin 43.4% | 8-K 2026-06-03; FY Summary |
+| Capex | $231M | $0.86B TTM; ~1.1% of rev (fabless) | 8-K 2026-06-03; FY Summary |
 | ROIC | — | 21.3% | watchlist 2026-06-12 |
-| Net debt / EBITDA | — | 1.08× | watchlist 2026-06-12 |
-| FCF conversion (FCF ÷ NI) | — | 93% TTM ($27.2B/$29.3B) — **clean** | context 2026-06-12 |
+| Net debt / EBITDA | — | 1.07× ($45.3B ND / $42.4B EBITDA) | FY Summary (MRQ net debt) |
+| FCF conversion (FCF ÷ NI) | — | 112% TTM ($32.8B/$29.3B) — **clean**; FCF > NI on non-cash VMware amort. | FY Summary |
 | Rev 3-yr CAGR | — | 24.4% | watchlist 2026-06-12 |
 | EPS YoY | — | +87.5% (GAAP) | watchlist 2026-06-12 |
+
+> **Correction (rule 3):** the 2026-06-12 briefing's "TTM FCF $27.2B / 93% conversion" used yfinance `info.freeCashflow` (levered estimate — the CLAUDE.md-documented trap). Statement-based TTM FCF is $32.8B (Σ quarterly OCF − capex), which reconciles to the watchlist's 43.41% margin and gives 112% conversion.
 
 Balance sheet: cash $19.6B, receivables $10.8B, inventory $4.3B (10-Q filed 2026-06-09). Working-capital watch: receivables +66% and inventory +95% over four quarters vs. revenue +48% — explained by the disclosed 2H supply build; escalate only if FCF conversion degrades (context 2026-06-12).
 
@@ -138,6 +140,7 @@ Balance sheet: cash $19.6B, receivables $10.8B, inventory $4.3B (10-Q filed 2026
 - 2026-06-17 — yfinance — price/market cap/EV/P-S valuation inputs
 - 2026-06-04 — The Register — Tomahawk 6 vs. Spectrum-X timing
 - TrendForce / Dell'Oro — Ethernet overtaking InfiniBand in AI scale-out
+- 2026-06-20 — `financials.xlsx` FY Summary (rebuilt; yfinance statements, GAAP, formula-driven) — FY2023–25 + TTM-through-Q2-FY26
 
 ---
 
@@ -146,4 +149,4 @@ Balance sheet: cash $19.6B, receivables $10.8B, inventory $4.3B (10-Q filed 2026
 | Date | Action | Conviction | Rationale | Position size after |
 |---|---|---|---|---|
 | 2026-06-17 | Thesis populated from sourced briefing (was template-only) | ✓✓ *(tracks Tier; confirm)* | Per rule 12, name needed a research-backed thesis; data from post-Q2-FY26 briefing | ~6.6% (site weight) |
-| | | | | |
+| 2026-06-20 | Rebuilt `financials.xlsx` (FY Summary tab); corrected GAAP gross margin (68% not 76%) and statement TTM FCF ($32.8B not $27.2B) | ✓✓ | Deep-dive financials gap; surfaced the info.freeCashflow trap in the briefing | ~6.6% |
