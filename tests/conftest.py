@@ -46,6 +46,17 @@ def repo(tmp_path):
     ws.append(['Ticker', 'Company', 'Layer'])
     ws.append(['NVDA', 'NVIDIA Corp', '06'])
     ws.append(['TSM', 'TSMC', '05'])
+    wsw = wb.create_sheet('Weights')
+    wsw.append(['Category Weights'])
+    wsw.append(['Category', 'Weight (%)', 'Notes'])
+    for cat, wt, note in [
+            ('Value', 0.20, 'Is the price reasonable?'),
+            ('Quality', 0.20, 'Is the business well-run?'),
+            ('Growth', 0.15, 'Is it growing?'),
+            ('AI Thesis', 0.20, 'How strong is AI exposure?'),
+            ('Momentum', 0.10, 'Are estimates and price improving?'),
+            ('Risk', 0.15, 'Concentration / geographic / regulatory')]:
+        wsw.append([cat, wt, note])
     wa = wb.create_sheet('Rating Audit')
     wa.append(['Date', 'Ticker', 'Dimension', 'Rating', 'Rationale',
                'Source', 'Confidence', 'Type'])

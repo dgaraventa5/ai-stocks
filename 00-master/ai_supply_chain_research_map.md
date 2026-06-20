@@ -108,10 +108,18 @@ The capital equipment that enables every AI chip.
 - **Camtek (CAMT)** — inspection, advanced packaging
 - **Kulicke & Soffa (KLIC)** — packaging equipment
 - **BE Semiconductor (BESIY)** — hybrid bonding & die-attach; the enabling tool for HBM4 / advanced packaging (Dutch FPI, US ADR)
+- **Axcelis Technologies (ACLS)** — ion implantation (Purion family); one of two serious implant franchises vs AMAT; mature-node/power/memory exposure; pending all-stock Veeco merger (H2 2026, China-SAMR-gated). Added 2026-06-20.
 
 ### Test & measurement
 - **Keysight Technologies (KEYS)** — electronic test equipment for chips, optical, 800G/1.6T networking, PCIe Gen6
 - **FormFactor (FORM)** — probe cards for wafer sort; rising HBM / known-good-die test intensity
+- **Cohu (COHU)** — back-end test handlers, contactors, thermal subsystems & inspection; ~60% recurring revenue; HPC/HBM test ramp off a cyclical trough. Added 2026-06-20.
+
+### OSAT & advanced packaging (back-end services)
+
+Outsourced Semiconductor Assembly & Test — back-end **contract manufacturers** that operate packaging/test capacity (service providers, not tool vendors; they buy from the Equipment names above). Advanced packaging (2.5D / CoWoS-adjacent, fan-out, HBM) is the AI lever. Added 2026-06-20.
+- **ASE Technology (ASX)** — world's #1 OSAT; LEAP advanced-packaging revenue compounding fast; Taiwan (US-listed ADR, 20-F/IFRS filer — yfinance Value fields are currency-contaminated, see per-stock note)
+- **Amkor Technology (AMKR)** — #2 OSAT; HDFO / 2.5D advanced packaging; ~30% Apple concentration; Apple/TSMC-anchored Arizona facility (production ~2028)
 
 ### Materials & consumables
 - **Entegris (ENTG)** — specialty materials

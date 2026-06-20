@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>AI Supply Chain — Watchlist Scores</title>
+<link rel="stylesheet" href="css/terminal.css">
+</head>
+<body>
+<div class="wrap">
+  <nav></nav>
+  <div id="main">
+    <div class="stat-row" id="stats"></div>
+    <details class="panel explainer" id="explainer">
+      <summary>How is each stock scored? <span class="dim">— click to expand</span></summary>
+      <div id="explainer-body"></div>
+    </details>
+    <div class="panel">
+      <h2>All scored names</h2>
+      <div class="controls">
+        <input type="search" id="search" class="filter" placeholder="Search ticker or company…" autocomplete="off">
+        <select id="layer-filter" class="filter"><option value="">All layers</option></select>
+        <span class="dim" id="result-count"></span>
+      </div>
+      <table id="watchlist"></table>
+    </div>
+  </div>
+  <div class="footer" id="footer"></div>
+</div>
+<script src="js/common.js"></script>
+<script src="js/watchlist.js"></script>
+</body>
+</html>

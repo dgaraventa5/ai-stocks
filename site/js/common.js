@@ -36,8 +36,8 @@ function showError(containerId, msg) {
 
 function renderNav(active) {
   const pages = [['index.html', 'Dashboard'], ['performance.html', 'Performance'],
-    ['positions.html', 'Positions'], ['changes.html', 'Changes'],
-    ['scans.html', 'Scans']];
+    ['positions.html', 'Positions'], ['watchlist.html', 'Watchlist'],
+    ['changes.html', 'Changes'], ['scans.html', 'Scans']];
   const nav = document.querySelector('nav');
   nav.innerHTML = '<span class="brand">AI SUPPLY CHAIN</span>' + pages.map(
     ([href, label]) =>

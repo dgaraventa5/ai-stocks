@@ -14,7 +14,8 @@ SITE = ROOT / 'site'
 
 REQUIRED = {
     'positions.json': list, 'performance.json': dict, 'changes.json': list,
-    'theses.json': dict, 'scans.json': list, 'meta.json': dict,
+    'theses.json': dict, 'watchlist.json': list, 'methodology.json': dict,
+    'scans.json': list, 'meta.json': dict,
 }
 
 errors: list[str] = []
