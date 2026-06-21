@@ -12,6 +12,13 @@ from openpyxl.utils import column_index_from_string
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
+import pytest
+
+# yfinance_fundamentals imports yfinance at module load; deploy-site.yml CI is
+# intentionally yfinance-free (CLAUDE.md), so skip this builder test there rather
+# than break pytest collection — which silently froze the site deploy (PR #6/#7).
+pytest.importorskip("yfinance")
+
 import yfinance_fundamentals as yf  # noqa: E402
 
 
