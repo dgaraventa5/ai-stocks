@@ -125,10 +125,10 @@ No ✓✓✓ names (highest score: TSM 84.7, NVDA 84.1 — both below 85 thresho
 
 | Period | Model | SMH | QQQ | EW Universe | Model α vs SMH | Model α vs QQQ |
 |--------|-------|-----|-----|-------------|----------------|----------------|
-| Since inception (2026-05-26) | **+7.80%** ($14,877) | +9.59% | +1.42% | +8.32% | **−1.79%** | **+6.38%** |
+| Since inception (2026-05-26) | **+7.80%** ($10,780) | +9.59% | +1.42% | +8.32% | **−1.79%** | **+6.38%** |
 | This week (June 12→18) | **+5.14%** | +6.44% | +2.67% | +5.60% | **−1.30%** | **+2.47%** |
 
-Model value 2026-06-18: **$14,877** (up from $14,151 on June 12).
+Model value 2026-06-18: **$10,780** (up from $10,254 on June 12).
 
 **Context:** The model underperformed SMH again this week as NVDA (+~14% week) and the broader semiconductor rally (NVDA bond deal as capex confidence signal) dominated. The model's per-position caps mean it captures less of mega-cap surges. QQQ alpha remains strongly positive (+6.38% inception). The June 17 rebalance (76-bar tighten) has been in place for 1 trading day — too early to assess its impact.
 

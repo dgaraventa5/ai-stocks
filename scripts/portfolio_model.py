@@ -4,7 +4,7 @@ Per Dom's 2026-06-09 decision, the MODEL is the portfolio of record (the
 Positions sheet is unused). The model is event-sourced in
 tracking/performance-config.json:
 
-  events[0]   initial deployment (2026-05-26, $13,800)
+  events[0]   initial deployment (2026-05-26, $10,000 notional)
   events[n]   a rebalance: the portfolio marked to that day's value, then
               re-allocated across the pipeline's new target weights
 
