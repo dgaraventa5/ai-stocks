@@ -1,7 +1,7 @@
 {
   "_meta": {
     "definition": "secured_gross_mw = energized + committed/under-construction gross facility power, MW. Speculative pipeline and pending interconnection EXCLUDED. Where the company discloses only critical IT load, converted x1.25 and flagged in basis.",
-    "updated": "2026-06-12",
+    "updated": "2026-06-22",
     "refresh_rule": "Refresh at quarterly rescore and on earnings (rule 9 pass). Used by batch_score.py to compute EV/MW for the Layer 9 capacity cohort (rule 13).",
     "band_anchor": "AI DC replacement cost ~$9-10M per gross MW (~$11-12M per IT MW), facility+power excl. IT gear"
   },
@@ -20,17 +20,17 @@
     "confidence": "Medium"
   },
   "APLD": {
-    "secured_gross_mw": 1036,
-    "basis": "600 MW critical IT contracted (PF1 400 CoreWeave + PF2 200 hyperscaler) x1.25 = 750 gross-equiv + 286 MW legacy hosting gross",
-    "asof": "2026-01-07 (fiscal Q2 FY26; ~6 months stale, fiscal Q3 print may exist)",
-    "source": "ir.applieddigital.com fiscal Q2 2026 results + Nov 24 2025 RFS release",
+    "secured_gross_mw": 2036,
+    "basis": "~1,400 MW contracted critical IT across 5 AI Factory campuses (CoreWeave PF1 400 + IG-hyperscaler PF2 200 / Delta Forge 1 430 / Delta Forge 2 210) x1.25 = 1,750 gross-equiv + 286 MW legacy hosting gross (Jamestown 106 + legacy Ellendale 180) = 2,036; cross-check vs company-disclosed ~2.15 GW grid-connected utility power. All leases signed/financed (committed/under-construction). EXCLUDED as speculative: mgmt '5-6 GW view' + ~1 GW marketed development sites. BIG MOVE 1,036->2,036 (prior counted only 600 IT) -- flagged for Dom.",
+    "asof": "2026-06-08",
+    "source": "APLD Delta Forge 2 lease PR 2026-06-08 (~1.4 GW contracted IT, ~2.15 GW grid-connected, ~$36B backlog) + 8-K 2026-06-16 (ELN-04 150 MW notes); per-stock/APLD/context-2026-06-22.md",
     "confidence": "Medium"
   },
   "IREN": {
     "secured_gross_mw": 2910,
-    "basis": "company 'secured power and land portfolio', gross transmission MW",
+    "basis": "Re-based off Q3 FY26 disclosure of 4,510 MW executed grid-connection across 7 sites. Included (energized + under-construction/committed): Childress 750 + Sweetwater 1 1,400 (energizing 2026) + Sweetwater 2 600 + Canal Flats 30 + Mackenzie 80 + Prince George 50 = 2,910. EXCLUDED: Oklahoma 1,600 (executed grid-connection but NOT yet under construction) per energized+committed standard; 800 MW Australia (2028) + broader 5.8 GW pipeline as speculative. Value coincidentally unchanged at 2,910. JUDGMENT CALL flagged for Dom: counting Oklahoma would lift to 4,510.",
     "asof": "2026-05-07",
-    "source": "IREN Business Update & Q3 FY26 Results, GlobeNewswire May 7 2026",
+    "source": "IREN Q3 FY26 Business Update & Results (8-K/10-Q period 2026-03-31), GlobeNewswire 2026-05-07; per-stock/IREN/context-2026-06-22.md",
     "confidence": "High"
   },
   "CORZ": {
@@ -42,9 +42,9 @@
   },
   "CIFR": {
     "secured_gross_mw": 907,
-    "basis": "operating + contracted gross (207 mining + ~700 HPC under construction incl. Barber Lake 300, Black Pearl 300, 3rd campus 100, Stingray 100)",
-    "asof": "2026-05-05",
-    "source": "Cipher Q1 2026 Business Update, GlobeNewswire May 5 2026",
+    "basis": "207 MW Odessa mining (energized, gross) + 600 MW contracted HPC gross (Black Pearl ~300 AWS 15-yr + Barber Lake 300 Fluidstack/Google 10-yr) + Stingray 100 MW gross (Andrews TX, financed by $810M 6.000% notes, energize Q4 2026) = 907. RECONCILED double-count concern: prior basis text double-listed '3rd campus 100' AND 'Stingray 100', but the 907 sum counts Stingray ONCE and there is no separate 3rd campus -- no double-count. Business-update's 807 figure simply predates/excludes Stingray. 6 additional planned HPC sites EXCLUDED as speculative.",
+    "asof": "2026-06-15",
+    "source": "CIFR Q1 2026 10-Q (period 2026-03-31) + business-update 8-K (807 MW op+contracted) + Stingray $810M notes 8-K 2026-06-15; per-stock/CIFR/context-2026-06-22.md",
     "confidence": "High"
   },
   "CLSK": {
@@ -62,11 +62,11 @@
     "confidence": "Medium"
   },
   "HUT": {
-    "secured_gross_mw": 1350,
-    "basis": "1,020 MW energy capacity under management + 330 under construction (gross); 1,230 'under development' excluded; May 2026 352 MW TX lease sits within development",
-    "asof": "2026-05-06",
-    "source": "Hut 8 Q1 2026 results May 6 2026 + Dec 17 2025 Anthropic/Fluidstack announcement",
-    "confidence": "High"
+    "secured_gross_mw": 1790,
+    "basis": "1,020 MW energized energy-under-management + River Bend 245 MW IT (~330 MW gross utility, under construction, financed by $3.25B notes) + Beacon Point 352 MW IT x1.25 = 440 gross-equiv (now SIGNED 15-yr lease, AA-+ tenant, financed by $4.25B 6.129% notes closed 2026-06-10) = 1,790. Beacon Point reclassified from prior 'development.' Cross-check: Q1-call '830 MW under construction' ~= River Bend + Beacon Point. EXCLUDED development pipeline: 550 dev + 1,680 exclusivity + 5,315 diligence. Move 1,350->1,790 flagged for Dom (IT->gross x1.25 assumption; '1,020 under management' includes managed-for-others).",
+    "asof": "2026-06-10",
+    "source": "Hut 8 Q1 2026 10-Q/8-K 2026-05-06 (597 MW IT signed take-or-pay) + Beacon Point $4.25B notes 8-K 2026-06-05/06-10; per-stock/HUT/context-2026-06-22.md",
+    "confidence": "Medium"
   },
   "KEEL": {
     "secured_gross_mw": 771,
@@ -77,17 +77,17 @@
   },
   "RIOT": {
     "secured_gross_mw": 1700,
-    "basis": "1.7 GW fully ERCOT-approved gross across Rockdale + Corsicana; AMD lease 50 MW critical IT within it",
-    "asof": "2026-01-16",
-    "source": "Riot 8-K / AMD lease announcement Jan 16 2026",
+    "basis": "1.7 GW fully ERCOT-approved gross across Rockdale ~700 + Corsicana ~1,000; AMD lease 50 MW critical IT within it (expanded 25->50, first 5 MW online Q1 2026). Kentucky 162 MW developed capacity (non-ERCOT) EXCLUDED per prior ERCOT-only scope -- including it gives ~1,862. Headline confirmed consistent with Q1 2026 10-Q; only AMD contracted, no hyperscale tenant signed (conversion = AI-Thesis's job, not Value, per rule 13).",
+    "asof": "2026-03-31",
+    "source": "Riot 10-Q period 2026-03-31 (filed 2026-04-30) + Q1 2026 earnings deck; AMD lease 8-K 2026-01-16; per-stock/RIOT/context-2026-06-22.md",
     "confidence": "High"
   },
   "WULF": {
-    "secured_gross_mw": 550,
-    "basis": "~438 MW HPC critical IT contracted (Fluidstack ~360 + Core42 + Abernathy 168 IT) x1.25 gross-equiv; mining MW at Lake Mariner shares site power, excluded to avoid double count",
+    "secured_gross_mw": 653,
+    "basis": "522 critical IT MW executed long-term leases (company FY2025 total: Core42/G42 60 IT energized Q1 2026 + Fluidstack Lake Mariner CB-3/4/5 + Abernathy TX 168, all under construction delivering 2026) x1.25 = 653 gross-equiv. Using the company's 522 total nets out the prior Fluidstack-360-vs-CB-buildings overlap (prior basis used 438 -> 550). Muskie KY (up to 1 GW, 2028/2030 ramp) EXCLUDED as development; Lake Mariner mining shares site power, not added.",
     "asof": "2026-03-31",
-    "source": "TeraWulf Q1 2026 results + Fluidstack PRs Aug 2025",
-    "confidence": "Low-Medium"
+    "source": "TeraWulf Q4/FY2025 results PR (522 critical IT MW) + Q1 2026 10-Q (60 MW energized, period 2026-03-31); per-stock/WULF/context-2026-06-22.md",
+    "confidence": "Medium"
   },
   "WYFI": {
     "secured_gross_mw": 70,
