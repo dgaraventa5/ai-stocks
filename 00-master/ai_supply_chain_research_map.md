@@ -296,6 +296,7 @@ Most foundation model labs are private (OpenAI, Anthropic, xAI, Mistral). Public
 
 ### AI advertising
 - **AppLovin (APP)** — AXON AI ad-recommendation engine; divested games to become a pure AI-adtech platform; e-commerce ad expansion (added 2026-06-17, QQQ diff)
+- **Reddit (RDDT)** — ad platform where ML is the monetization engine (lower-funnel conversion +20%, Automated Bidding/Targeting) + 30-language AI machine translation (intl DAUq +31%); **licenses its conversation corpus to OpenAI/Google for model training = direct AI-economy revenue** — the supply-side hook that earns its place here. Scored under standard Layer-10 rubric (EV/FCF). ⚠️ R5 disruption: ad funnel is partly Google-referral-dependent, exposed to AI-Overviews/zero-click. (added 2026-06-22)
 
 ### Creative & design software
 - **Adobe (ADBE)** — Firefly generative-AI + GenStudio; the central "gen-AI disruptor-or-disrupted" debate (added 2026-06-17, QQQ diff)
@@ -314,6 +315,8 @@ Most foundation model labs are private (OpenAI, Anthropic, xAI, Mistral). Public
 - **Apple (AAPL)** — ⚠️ **MAP-GAP flag.** Consumer hardware fits no clean supply-chain layer; placed here as the 1.4B-device edge-AI distribution platform (Apple Intelligence). In the AI *stack* Apple is the **demand anchor** (TSMC's #1 leading-edge customer; rents Gemini), not a supply-chain participant. AI revenue ≈ 0 as a line item; scored to quantify *why* it isn't an upstream pick (added 2026-06-17, QQQ diff)
 
 ---
+
+> **Layer 11 (AI Adopters / Bucket 3) experiment — tried and reverted 2026-06-22.** A two-pass deep-research effort scored 8 demand-side AI *adopters* (JPM, NU, LMND, RDDT, MA, PERI, RXRX, HOOD) as a separate layer with a reinterpreted AI-Thesis rubric + an "AI-materiality gate." Dom's call: the apparatus was over-engineered for the yield (only ~1–2 keepers). **Reddit (RDDT) was re-homed to Layer 10 / AI advertising** (above) for its data-licensing AI-revenue hook; the other 7 were dropped. The durable lesson is kept elsewhere: for would-be adopters, ~80% of the rubric measures business quality (orthogonal to AI), so quality can masquerade as AI exposure — judge AI *materiality to the return* before adding any "uses AI" name.
 
 ## Per-Stock Research Framework
 
