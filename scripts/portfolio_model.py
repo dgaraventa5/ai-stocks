@@ -114,6 +114,99 @@ def log_rebalance(cfg: dict, weights: dict[str, float], reason: str) -> dict:
 SERIES = ROOT / 'tracking' / 'performance-series.json'
 
 
+def ew_roster_events(cfg: dict) -> list[dict]:
+    """Chronological [{date, roster}] for the equal-weight benchmark.
+
+    A re-baseline appends a new {date, roster} so the EW series chain-links at
+    the splice (old roster before, new roster after) instead of being rewritten
+    with hindsight. Legacy configs carrying only the flat `ew_universe` list are
+    migrated to a single inception-dated roster."""
+    evs = cfg.get('ew_events')
+    if not evs:
+        return [{'date': cfg['inception'],
+                 'roster': list(cfg.get('ew_universe', []))}]
+    return sorted(evs, key=lambda e: e['date'])
+
+
+def ew_growth(cfg: dict, idx=None):
+    """Chain-linked equal-weight growth-of-1 series for the EW benchmark.
+
+    Within each roster period the value is an equal-weight (daily-rebalanced)
+    basket of that period's names, re-based to the prior period's closing level
+    at the splice. A roster change therefore injects NO return on the splice
+    itself and NO look-ahead: dates before a splice keep the old roster, and the
+    new roster drives returns only after it — so a name that ran INTO the >=70
+    universe gets no retroactive credit for the run-up that admitted it. The
+    splice day still reflects the new roster's real move off the prior close."""
+    import pandas as pd
+
+    inception = cfg['inception']
+    inc_date = dt.date.fromisoformat(inception)
+
+    if idx is None:
+        s = _series('SMH', inception)
+        if s is None:
+            return None
+        s = s[s.index.date >= inc_date]
+        if s.empty:
+            return None
+        idx = s.index
+
+    # growth-of-1 from inception per name, aligned to the benchmark calendar;
+    # period normalization divides by the anchor value, recovering price ratios.
+    def gfull(t):
+        s = _series(t, inception)
+        if s is None:
+            return None
+        s = s[s.index.date >= inc_date]
+        if s.empty or s.iloc[0] == 0:
+            return None
+        return (s / s.iloc[0]).reindex(idx).ffill()
+
+    events = ew_roster_events(cfg)
+    ew = pd.Series(index=idx, dtype=float)
+    level = 1.0
+    anchor = None                       # prior period's last calendar timestamp
+    for i, ev in enumerate(events):
+        start = dt.date.fromisoformat(ev['date'])
+        end = (dt.date.fromisoformat(events[i + 1]['date'])
+               if i + 1 < len(events) else None)
+        mask = idx.date >= start
+        if end is not None:
+            mask &= idx.date < end
+        if not mask.any():
+            continue
+        seg_idx = idx[mask]
+        parts = []
+        for t in ev['roster']:
+            g = gfull(t)
+            if g is None:
+                continue
+            base = g.loc[anchor] if anchor is not None else g.loc[seg_idx[0]]
+            if base != base or base == 0:          # NaN (pre-listing) / zero
+                continue
+            parts.append(g.reindex(seg_idx) / base)
+        if not parts:
+            continue
+        seg = level * pd.concat(parts, axis=1).mean(axis=1)
+        ew[seg_idx] = seg
+        level = float(seg.iloc[-1])
+        anchor = seg_idx[-1]
+    ew = ew.ffill()
+    return None if ew.isna().all() else ew
+
+
+def ew_return_since(cfg: dict, frm: str) -> float | None:
+    """Chain-linked EW total return from the first close on/after `frm`."""
+    ew = ew_growth(cfg)
+    if ew is None:
+        return None
+    sub = ew[ew.index.date >= dt.date.fromisoformat(frm)]
+    if sub.empty:
+        return None
+    return float(ew.iloc[-1] / sub.iloc[0] - 1)
+
+
 def build_daily_series(cfg: dict) -> dict | None:
     """Daily valuation series since inception, written to SERIES.
 
@@ -140,12 +233,10 @@ def build_daily_series(cfg: dict) -> dict | None:
         return None
     idx = smh.index
 
-    ew_parts = [g.reindex(idx).ffill()
-                for t in cfg['ew_universe'] if (g := growth(t)) is not None]
-    if not ew_parts:
+    ew = ew_growth(cfg, idx)
+    if ew is None:
         flag('series: no EW universe price data — series not built')
         return None
-    ew = pd.concat(ew_parts, axis=1).mean(axis=1)
 
     model = pd.Series(0.0, index=idx)
     events = cfg['events']

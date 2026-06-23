@@ -27,7 +27,8 @@ Run the quarterly rescore for the AI Supply Chain Research project. Refer to CLA
 2. Re-pull financial inputs ticker by ticker. Respect SEC EDGAR rate limits (10 req/sec). yfinance can run more freely but throttle if errors appear.
 3. Update Last Updated to today for each refreshed row
 4. Compare current scores against the prior quarterly-rescore report
-5. Write the rescore report — note any rating changes that came out of /refresh-context briefings, with citations
+5. **Re-baseline the EW benchmark to the current universe.** After scores settle, append a new `ew_events` entry to `tracking/performance-config.json`: `{"date": "<next trading day>", "roster": [<all score>=70 tickers>]}`. Use the *next* trading day (not today) as the splice date so no already-observed bar is rewritten — the chain-link preserves prior history and drives EW returns from the new roster forward (see `portfolio_model.ew_roster_events`/`ew_growth`). Then rebuild the series: `python3 scripts/track_performance.py --series-only`. This keeps the EW skill-test tracking the live universe as it evolves instead of drifting against the frozen roster.
+6. Write the rescore report — note any rating changes that came out of /refresh-context briefings, with citations, and record the EW re-baseline (roster delta: added/dropped names)
 
 ## Report
 

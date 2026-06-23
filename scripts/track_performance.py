@@ -10,9 +10,12 @@ equal-weighting of the same universe?
           refresh_targets.py whenever membership changes. See
           portfolio_model.py for the standing execution assumption.
   SMH/QQQ ETF benchmarks from the 2026-05-26 inception.
-  EW      equal-weight buy-and-hold of every score>=70 name in the 2026-05-25
-          Targets snapshot (35 names, point-in-time, CTRA excluded). The
-          honest comparison: if score-weighting doesn't beat this, the
+  EW      equal-weight of every score>=70 name, chain-linked at each
+          re-baseline (portfolio_model.ew_roster_events): the 2026-05-25
+          roster (35 names, CTRA excluded) runs through 2026-06-23, the current
+          40-name roster drives returns from 2026-06-24 — the splice carries no
+          return and no look-ahead, and no already-observed bar is rewritten.
+          The honest comparison: if score-weighting doesn't beat this, the
           scoring precision isn't adding portfolio value.
 
 Returns use dividend-adjusted closes (approximately total return), ex-fees/
@@ -28,7 +31,8 @@ import argparse
 import datetime as dt
 
 from common import ROOT
-from portfolio_model import build_daily_series, load_cfg, mark, ret_since
+from portfolio_model import (build_daily_series, ew_return_since,
+                             ew_roster_events, load_cfg, mark, ret_since)
 
 LOG = ROOT / 'tracking' / 'performance-log.md'
 
@@ -52,13 +56,13 @@ def main() -> None:
     model_ret = value / capital - 1
     last_event = cfg['events'][-1]
 
+    n_ew = len(ew_roster_events(cfg)[-1]['roster'])   # current roster size
+
     def bench(frm):
         """(smh, qqq, ew) returns measured from date `frm`."""
-        ew = [r for t in cfg['ew_universe']
-              if (r := ret_since(t, frm, inception)) is not None]
         return (ret_since('SMH', frm, inception),
                 ret_since('QQQ', frm, inception),
-                (sum(ew) / len(ew) if ew else None), len(ew))
+                ew_return_since(cfg, frm), n_ew)
 
     # Two lenses: since INCEPTION (strategy paper record) and since the LATEST
     # REBALANCE (how the current portfolio does from its own start — added
