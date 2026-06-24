@@ -97,18 +97,21 @@ rules in the same run).
 | 3 | **Layer-10 SaaS** | layer == 10 | Col 6 carries EV/FCF on SaaS bands | **AUTO** (already inside `compute_inputs`) |
 | 4 | **Layer-9 capacity cohort** | sub-layer contains "Bitcoin"/"Neocloud" | Col 6 carries EV/MW from `capacity-mw.json`; blank if MW missing | **AUTO** value; **FLAG** if MW missing OR the entry's `as_of` date is older than 90 days |
 | 5 | **Fetch returned None, cell has a value** | fresh value is `None`/blank AND existing cell non-blank | **Keep the existing value** — a "no data" never clobbers a real number (protects ROIC and any hand-curated cell) | **AUTO** + log |
-| 6 | **EPS-YoY one-off** | (a) cell currently blank; OR (b) fresh `\|EPS YoY\| ≥ 300%` or a sign-flip | (a) **preserve the blank**; (b) **leave the cell as-is** (do not write the extreme value — never auto-inflate Growth off a possible one-off) | **FLAG** |
+| 6 | **EPS-YoY one-off** | (a) cell currently blank; OR (b) fresh `\|EPS YoY\| ≥ 300%` | (a) **preserve the blank**; (b) **leave the cell as-is** (do not write the extreme value — never auto-inflate Growth off a possible one-off) | **FLAG** |
 | 7 | Everything else | — | Write the fresh value | **AUTO** |
 
 Guard order matters: 1–4 decide *which metric/representation* a column holds and
 can force blanks; 5 protects existing values from a failed fetch; 6 is the
 EPS-YoY judgment gate; 7 is the default write.
 
-**Threshold (guard 6b):** `|EPS YoY| ≥ 300%` OR sign-flip → flag, don't write.
-Rationale: GEV's +1,768% (Prolec divestiture gain) clears it; a name growing
-50%→80% does not. Per rule 15, the *decision* to blank is documented judgment,
-not magnitude — so the script only ever **flags**; it never blanks a previously
-valid EPS-YoY on its own.
+**Threshold (guard 6b):** `|EPS YoY| ≥ 300%` → flag, don't write. Rationale:
+GEV's +1,768% (Prolec divestiture gain) clears it; a name growing 50%→80% does
+not. `eps_yoy` is `info['earningsQuarterlyGrowth'] × 100` — a single computed %,
+so a true loss→profit sign-flip isn't separately detectable (yfinance returns
+`None` or an already-extreme number in that case, which the magnitude test
+catches anyway). Per rule 15, the *decision* to blank is documented judgment, not
+magnitude — so the script only ever **flags**; it never blanks a previously valid
+EPS-YoY on its own.
 
 ## Run flow
 
