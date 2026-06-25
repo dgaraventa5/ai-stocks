@@ -81,3 +81,64 @@ def test_mw_flag_fresh_returns_none(tmp_path):
 def test_mw_flag_non_l9_returns_none(tmp_path):
     cj = _cap(tmp_path, {})
     assert roi.mw_staleness_flag("NVDA", "06 Silicon", TODAY, capacity_json=cj) is None
+
+
+# ---------------------------------------------------------------------------
+# Task 3: apply_guards tests
+# ---------------------------------------------------------------------------
+
+def _blank_existing():
+    return {k: None for k in roi.OBJ_COLS}
+
+
+def test_guard_currency_blanks_adr_cols():
+    info = {"financialCurrency": "TWD"}
+    fresh = {"fwd_pe": 23.4, "ev_ebitda": 15.0, "fcf_yield": 3.2, "ps": 8.0,
+             "roic": 20.0, "gross_mgn": 55.0, "fcf_mgn": 30.0, "nd_ebitda": 0.5,
+             "rev_3y_cagr": 25.0, "rev_yoy": 30.0, "eps_yoy": 40.0}
+    writes, flags = roi.apply_guards(info, fresh, _blank_existing())
+    assert writes["ps"] is None and writes["ev_ebitda"] is None and writes["fcf_yield"] is None
+    assert writes["fwd_pe"] == 23.4  # kept
+    assert any("ADR" in f or "currency" in f.lower() for f in flags)
+
+
+def test_guard_keeps_existing_on_fetched_none():
+    info = {"financialCurrency": "USD"}
+    fresh = {k: None for k in roi.OBJ_COLS}
+    fresh["fwd_pe"] = 40.0
+    existing = _blank_existing()
+    existing["roic"] = 18.5  # human-curated
+    writes, flags = roi.apply_guards(info, fresh, existing)
+    assert "roic" not in writes  # untouched, not clobbered with None
+    assert writes["fwd_pe"] == 40.0
+    assert any("roic" in f.lower() for f in flags)
+
+
+def test_guard_eps_yoy_preserves_blank():
+    info = {"financialCurrency": "USD"}
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["eps_yoy"] = 50.0
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+    existing["eps_yoy"] = None  # deliberately blank (GEV-style)
+    writes, flags = roi.apply_guards(info, fresh, existing)
+    assert "eps_yoy" not in writes
+    assert any("eps yoy" in f.lower() and "blank" in f.lower() for f in flags)
+
+
+def test_guard_eps_yoy_withholds_extreme():
+    info = {"financialCurrency": "USD"}
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["eps_yoy"] = 412.0
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+    writes, flags = roi.apply_guards(info, fresh, existing)
+    assert "eps_yoy" not in writes
+    assert any("412" in f or "extreme" in f.lower() for f in flags)
+
+
+def test_guard_eps_yoy_normal_writes():
+    info = {"financialCurrency": "USD"}
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["eps_yoy"] = 80.0
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+    writes, flags = roi.apply_guards(info, fresh, existing)
+    assert writes["eps_yoy"] == 80.0

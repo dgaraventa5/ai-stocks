@@ -65,6 +65,82 @@ def resolve_targets(arg, scoring_path=SCORING_PATH, portfolio_path=PORTFOLIO_PAT
     return [t.strip().upper() for t in arg if t.strip().upper() in wlset]
 
 
+OBJ_COLS = {"fwd_pe": 5, "ev_ebitda": 6, "fcf_yield": 7, "ps": 8,
+            "roic": 11, "gross_mgn": 12, "fcf_mgn": 13, "nd_ebitda": 14,
+            "rev_3y_cagr": 16, "rev_yoy": 17, "eps_yoy": 18}
+DMA_COL = 29
+LAST_UPDATED_COL = 4
+EPS_YOY_EXTREME = 300.0
+_ADR_BLANK_KEYS = ("ps", "ev_ebitda", "fcf_yield")
+
+
+def _blank(v):
+    return v is None or v == ""
+
+
+def apply_guards(info, fresh, existing):
+    """Apply smart blank-handling guards to produce safe write set.
+
+    Args:
+        info: yfinance info dict (needs 'financialCurrency').
+        fresh: compute_inputs output dict (input-key → value).
+        existing: current Watchlist cell values (input-key → value or None/"" if blank).
+
+    Returns:
+        (writes, flags): writes maps input-key → value for keys to write (absent = leave
+        untouched; present-None = write blank). flags is a list of human-readable strings.
+    """
+    writes, flags = {}, []
+
+    # Guard 1: currency — ADR/foreign filer blanks P/S, EV/EBITDA, FCF-Yield
+    cur = info.get("financialCurrency")
+    adr = bool(cur) and str(cur).upper() != "USD"
+    if adr:
+        for k in _ADR_BLANK_KEYS:
+            writes[k] = None
+        flags.append(
+            f"ADR currency {cur}: blanked P/S, EV/EBITDA, FCF-Yield "
+            f"(USD price vs local financials)."
+        )
+
+    # Per-key loop
+    for key in OBJ_COLS:
+        # ADR keys already forced-blank above; skip them in the per-key loop
+        if adr and key in _ADR_BLANK_KEYS:
+            continue
+
+        if key == "eps_yoy":
+            # (a) existing blank → preserve, do not write
+            if _blank(existing.get(key)):
+                flags.append(
+                    "EPS YoY: cell currently blank (likely a documented one-off) "
+                    "— preserved blank, not refilled."
+                )
+                continue
+            # (b) fresh value extreme → withhold
+            v = fresh.get(key)
+            if v is not None and abs(v) >= EPS_YOY_EXTREME:
+                flags.append(
+                    f"EPS YoY: fresh {v:+.0f}% ≥ {EPS_YOY_EXTREME:.0f}% "
+                    f"→ withheld as possible one-off (rule 15). Confirm blank or write."
+                )
+                continue
+            # (c) normal — write (may be None)
+            writes[key] = v
+            continue
+
+        # Guard 4: every other key — if fresh is None and existing is non-blank, keep existing
+        v = fresh.get(key)
+        if v is None and not _blank(existing.get(key)):
+            flags.append(
+                f"{key}: fetch returned no data — kept prior value {existing.get(key)}."
+            )
+            continue
+        writes[key] = v
+
+    return writes, flags
+
+
 def mw_staleness_flag(ticker, layer, today, capacity_json=None):
     """Check Layer-9 capacity cohort MW data staleness (rule 13).
 
