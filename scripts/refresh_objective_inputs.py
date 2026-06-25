@@ -16,12 +16,27 @@ import datetime as dt
 from pathlib import Path
 from openpyxl import load_workbook
 
+# Sibling scripts (batch_score, momentum_50dma) import yfinance at module load.
+# The site deploy runs `pytest tests` with ONLY openpyxl+pytest installed (no
+# yfinance), so those are imported LAZILY inside the functions that need them —
+# keeping this module and its tests importable without yfinance.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from batch_score import _is_layer9_capacity, _CAPACITY_JSON
 
 ROOT = Path(__file__).resolve().parent.parent
 SCORING_PATH = ROOT / "00-master" / "ai_supply_chain_scoring.xlsx"
 PORTFOLIO_PATH = ROOT / "00-master" / "portfolio.xlsx"
+
+# Mirrored from batch_score so mw_staleness_flag doesn't import batch_score
+# (which pulls yfinance, absent in the site-deploy pytest env). Keep in sync
+# with batch_score._is_layer9_capacity / _CAPACITY_JSON.
+_CAPACITY_JSON = ROOT / "00-master" / "capacity-mw.json"
+
+
+def _is_layer9_capacity(layer):
+    if not layer or not str(layer).strip().startswith("09"):
+        return False
+    l = str(layer).lower()
+    return "bitcoin" in l or "neocloud" in l
 
 
 def _watchlist_tickers(scoring_path) -> list[str]:
@@ -247,13 +262,14 @@ def write_row(ws, row, writes, dma_value, today_iso):
 # Task 5: real yfinance fetcher + orchestration
 # ---------------------------------------------------------------------------
 
-import yfinance as yf  # noqa: E402 — after sys.path set above
-from batch_score import compute_inputs  # noqa: E402
-from momentum_50dma import pct_days_above_50dma  # noqa: E402
-
-
 def _default_fetcher(ticker, layer):
-    """Default fetcher: calls yfinance + compute_inputs. Injectable for tests."""
+    """Default fetcher: calls yfinance + compute_inputs. Injectable for tests.
+
+    yfinance/batch_score imported lazily so this module stays importable
+    without yfinance (the site deploy's pytest env has openpyxl only).
+    """
+    import yfinance as yf
+    from batch_score import compute_inputs
     t = yf.Ticker(ticker)
     info = t.info or {}
     fresh, _gaps = compute_inputs(ticker, t, info, layer=layer)
@@ -284,7 +300,9 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
         dict with keys: mode_count, rows, flags, wrote.
     """
     fetcher = fetcher or _default_fetcher
-    dma_fetcher = dma_fetcher or pct_days_above_50dma
+    if dma_fetcher is None:
+        from momentum_50dma import pct_days_above_50dma
+        dma_fetcher = pct_days_above_50dma
     today = today or dt.date.today()
 
     wb = load_workbook(scoring_path, data_only=False)

@@ -299,3 +299,30 @@ def test_refresh_isolates_per_ticker_fetch_error(tmp_path):
     assert ws2.cell(row=3, column=5).value == 10.0
     # error surfaced as a flag
     assert any("BAD" in f and "fetch error" in f.lower() for f in rep["flags"])
+
+
+def test_module_imports_without_yfinance():
+    # The site deploy runs `pytest tests` with ONLY openpyxl+pytest installed
+    # (no yfinance). This module must import cleanly there — yfinance/batch_score
+    # imports are lazy. Simulate by blocking yfinance in a subprocess.
+    import subprocess, sys, textwrap
+    code = textwrap.dedent('''
+        import sys
+        class _Block:
+            def find_spec(self, name, path=None, target=None):
+                if name == "yfinance" or name.startswith("yfinance."):
+                    raise ModuleNotFoundError("No module named 'yfinance'")
+                return None
+        sys.meta_path.insert(0, _Block())
+        import scripts.refresh_objective_inputs as roi
+        assert "yfinance" not in sys.modules, "yfinance imported at module load"
+        assert "batch_score" not in sys.modules, "batch_score imported at module load"
+        # pure paths must work without yfinance
+        roi.apply_guards({"financialCurrency": "USD"},
+                         {k: 1.0 for k in roi.OBJ_COLS},
+                         {k: None for k in roi.OBJ_COLS})
+        roi.mw_staleness_flag("NVDA", "06 Silicon", __import__("datetime").date(2026,6,24))
+    ''')
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
+                       cwd="/Users/dom/Desktop/ai-stocks")
+    assert r.returncode == 0, f"import-without-yfinance failed:\n{r.stderr}"
