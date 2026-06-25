@@ -2,7 +2,7 @@ import json
 import datetime as dt
 import shutil
 from pathlib import Path
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 import scripts.refresh_objective_inputs as roi
 
 
@@ -191,3 +191,47 @@ def test_read_existing_pulls_objective_keys():
     existing = roi.read_existing(ws, 2)
     assert existing["roic"] == 18.5
     assert set(existing) == set(roi.OBJ_COLS)
+
+
+# ---------------------------------------------------------------------------
+# Task 5: refresh() orchestration
+# ---------------------------------------------------------------------------
+
+def test_refresh_dry_run_writes_nothing(tmp_path, monkeypatch):
+    # build a scoring workbook with NVDA + a layer in col 3
+    wb = Workbook(); ws = wb.active; ws.title = "Watchlist"
+    ws.append(["Ticker", "Company", "Layer", "Last Updated"] + [None]*34)
+    ws.append(["NVDA", "Nvidia", "06 Silicon", "2026-01-01"] + [None]*34)
+    sp = tmp_path / "scoring.xlsx"; wb.save(sp)
+
+    def fake_fetch(ticker, layer):
+        info = {"financialCurrency": "USD"}
+        fresh = {k: 10.0 for k in roi.OBJ_COLS}
+        return info, fresh
+
+    rep = roi.refresh(["NVDA"], dry_run=True, scoring_path=sp,
+                      fetcher=fake_fetch, dma_fetcher=lambda t: 70.0,
+                      today=dt.date(2026, 6, 24))
+    # nothing written: Last Updated still original
+    ws2 = load_workbook(sp)["Watchlist"]
+    assert ws2.cell(row=2, column=4).value == "2026-01-01"
+    assert ws2.cell(row=2, column=5).value is None
+    assert rep["wrote"] is False
+
+
+def test_refresh_live_writes_and_bumps_last_updated(tmp_path):
+    wb = Workbook(); ws = wb.active; ws.title = "Watchlist"
+    ws.append(["Ticker", "Company", "Layer", "Last Updated"] + [None]*34)
+    ws.append(["NVDA", "Nvidia", "06 Silicon", "2026-01-01"] + [None]*34)
+    sp = tmp_path / "scoring.xlsx"; wb.save(sp)
+
+    def fake_fetch(ticker, layer):
+        return {"financialCurrency": "USD"}, {k: 10.0 for k in roi.OBJ_COLS}
+
+    roi.refresh(["NVDA"], dry_run=False, scoring_path=sp,
+                fetcher=fake_fetch, dma_fetcher=lambda t: 70.0,
+                today=dt.date(2026, 6, 24))
+    ws2 = load_workbook(sp)["Watchlist"]
+    assert ws2.cell(row=2, column=4).value == "2026-06-24"
+    assert ws2.cell(row=2, column=5).value == 10.0
+    assert ws2.cell(row=2, column=29).value == 70.0

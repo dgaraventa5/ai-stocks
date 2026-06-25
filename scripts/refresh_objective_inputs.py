@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import sys
 import json
+import time
+import argparse
+import subprocess
 import datetime as dt
 from pathlib import Path
 from openpyxl import load_workbook
@@ -222,3 +225,136 @@ def write_row(ws, row, writes, dma_value, today_iso):
     ws.cell(row=row, column=LAST_UPDATED_COL).value = today_iso
     touched.append(LAST_UPDATED_COL)
     return sorted(set(touched))
+
+
+# ---------------------------------------------------------------------------
+# Task 5: real yfinance fetcher + orchestration
+# ---------------------------------------------------------------------------
+
+import yfinance as yf  # noqa: E402 — after sys.path set above
+from batch_score import compute_inputs  # noqa: E402
+from momentum_50dma import pct_days_above_50dma  # noqa: E402
+
+
+def _default_fetcher(ticker, layer):
+    """Default fetcher: calls yfinance + compute_inputs. Injectable for tests."""
+    t = yf.Ticker(ticker)
+    info = t.info or {}
+    fresh, _gaps = compute_inputs(ticker, t, info, layer=layer)
+    return info, fresh
+
+
+def _layer_of(ws, row):
+    """Return the layer string from column 3 for the given row."""
+    return ws.cell(row=row, column=3).value
+
+
+def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
+            dma_fetcher=None, today=None):
+    """Orchestrate fetch → guards → (write|stage) for each target ticker.
+
+    Args:
+        targets: List of ticker strings (already resolved).
+        dry_run: If True, do not write or save the workbook.
+        scoring_path: Path to the scoring .xlsx file.
+        fetcher: Callable(ticker, layer) -> (info, fresh_dict). Defaults to
+                 _default_fetcher (real yfinance). Injectable for tests.
+        dma_fetcher: Callable(ticker) -> float|None. Defaults to
+                     pct_days_above_50dma. Injectable for tests.
+        today: date object for Last Updated and staleness checks. Defaults
+               to dt.date.today().
+
+    Returns:
+        dict with keys: mode_count, rows, flags, wrote.
+    """
+    fetcher = fetcher or _default_fetcher
+    dma_fetcher = dma_fetcher or pct_days_above_50dma
+    today = today or dt.date.today()
+
+    wb = load_workbook(scoring_path, data_only=False)
+    ws = wb["Watchlist"]
+    rows = {
+        str(ws.cell(row=r, column=1).value).strip().upper(): r
+        for r in range(2, ws.max_row + 1)
+        if ws.cell(row=r, column=1).value
+    }
+
+    report = {"mode_count": len(targets), "rows": [], "flags": [], "wrote": False}
+
+    for ticker in targets:
+        row = rows.get(ticker)
+        if row is None:
+            report["flags"].append(f"{ticker}: not on Watchlist — skipped.")
+            continue
+
+        layer = _layer_of(ws, row)
+        info, fresh = fetcher(ticker, layer)
+        existing = read_existing(ws, row)
+        writes, flags = apply_guards(info, fresh, existing)
+
+        mwf = mw_staleness_flag(ticker, layer, today)
+        if mwf:
+            flags.append(mwf)
+
+        try:
+            dma_value = dma_fetcher(ticker)
+        except Exception as e:
+            dma_value = None
+            flags.append(f"{ticker} 50DMA: fetch error — {e}")
+
+        touched = []
+        if not dry_run:
+            touched = write_row(ws, row, writes, dma_value, today.isoformat())
+
+        report["rows"].append({"ticker": ticker, "touched": touched, "flags": flags})
+        report["flags"].extend(f"{ticker}: {f}" for f in flags)
+
+        # Throttle only for the real yfinance fetcher; injected test fakes are fast
+        if fetcher is _default_fetcher:
+            time.sleep(0.3)
+
+    if not dry_run:
+        wb.save(scoring_path)
+        report["wrote"] = True
+
+    return report
+
+
+def main():
+    """CLI entry point: refresh objective inputs for portfolio / all / subset."""
+    ap = argparse.ArgumentParser(description="Refresh objective Watchlist inputs.")
+    ap.add_argument("target", nargs="+", help="'portfolio', 'all', or ticker(s)")
+    ap.add_argument("--dry-run", action="store_true")
+    args = ap.parse_args()
+
+    # Single 'portfolio' or 'all' token → pass as string; otherwise ticker list
+    if len(args.target) == 1 and args.target[0] in ("portfolio", "all"):
+        arg = args.target[0]
+    else:
+        arg = args.target
+
+    targets = resolve_targets(arg)
+    mode_label = "DRY RUN" if args.dry_run else "LIVE"
+    print(f"REFRESH OBJECTIVE INPUTS — {len(targets)} names — {mode_label}")
+
+    rep = refresh(targets, dry_run=args.dry_run)
+
+    for r in rep["rows"]:
+        print(f"  {r['ticker']:<6} touched cols: {r['touched']}")
+
+    if rep["flags"]:
+        print("\nJUDGMENT FLAGS (human ruling needed):")
+        for f in rep["flags"]:
+            print(f"  • {f}")
+
+    if rep["wrote"]:
+        print("\nTOTAL changes (after recalc):")
+        out = subprocess.run(
+            ["python3", str(ROOT / "scripts" / "recalc_watchlist.py")],
+            capture_output=True, text=True,
+        )
+        print(out.stdout)
+
+
+if __name__ == "__main__":
+    main()
