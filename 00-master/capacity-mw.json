@@ -106,8 +106,8 @@
   "HIVE": {
     "secured_gross_mw": 540,
     "basis": "440 MW operating gross (Canada+Sweden+Paraguay, predominantly BTC mining; AI-grade critical IT energized <10 MW) + 100 MW Paraguay Yguazu Phase-3 under construction (commissioning Q3 2026). EXCLUDED as development: GTA Gigafactory 320 MW (announced 2026-05-18, H2 2027, $3.5B campus financing incomplete), Grand Falls 70 + Toronto Airport 7 (construction status unconfirmed) \u2014 same standard that excluded HUT's development tranche. Aggressive alternative incl. Canadian HPC pipeline = 840 MW (subagent's proposal, flagged).",
-    "asof": "2026-06-02 (FY2026 results, FYE Mar 31) + 2026-05-18 GTA announcement",
-    "source": "HIVE FY2026 results PR + DCD Yguazu 400MW expansion + GTA Gigafactory announcement",
+    "asof": "2026-06-02",
+    "source": "HIVE FY2026 results PR + DCD Yguazu 400MW expansion + GTA Gigafactory announcement (asof basis: FY2026 results FYE Mar 31; GTA Gigafactory announced 2026-05-18, excluded as development)",
     "confidence": "Low-Medium"
   }
 }

@@ -143,7 +143,10 @@ The scoring band thresholds in `ai_supply_chain_scoring.xlsx` Methodology tab ar
 
 **Primary enforcement:** The `/weekly-scan` skill (Step 6) now includes earnings-triggered refresh as a built-in step. Any 8-K with Item 2.02 (quarterly results) triggers an objective input refresh in the same pass. This is the expected catch-all — `/earnings-update` handles deep single-name processing, but the weekly scan ensures nothing slips through even if `/earnings-update` wasn't run.
 
-**How to refresh:** Pull yfinance data and update the Watchlist row. For fast-ramp names where TTM averages understate the current business (e.g., 4 quarters spanning a margin ramp), note the MRQ values in the context briefing so the TTM limitation is visible.
+**How to refresh:** Pull yfinance data and update the Watchlist row. For a scripted objective-only refresh of a set of names, use `/refresh-objective
+<portfolio|all|TICKERS>` (dry-run first) — it refreshes every objective input,
+guards the deliberate-blank conventions, and leaves subjective ratings untouched.
+For fast-ramp names where TTM averages understate the current business (e.g., 4 quarters spanning a margin ramp), note the MRQ values in the context briefing so the TTM limitation is visible.
 
 **TTM limitation (known issue):** yfinance provides TTM (trailing twelve months) data. For companies with rapidly improving fundamentals, TTM averages include lower quarters and systematically understate the current run-rate. This biases scores DOWN for high-momentum names — exactly the ones where staleness matters most. When TTM and MRQ diverge by >10 points on any quality metric, flag it in the per-stock context file. We may eventually want an MRQ-adjusted scoring option, but for now the TTM approach maintains cross-name comparability.
 
