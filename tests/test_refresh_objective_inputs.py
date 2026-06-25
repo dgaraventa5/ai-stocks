@@ -142,3 +142,14 @@ def test_guard_eps_yoy_normal_writes():
     existing = {k: 9.0 for k in roi.OBJ_COLS}
     writes, flags = roi.apply_guards(info, fresh, existing)
     assert writes["eps_yoy"] == 80.0
+
+
+def test_guard_eps_yoy_keeps_existing_on_fetched_none():
+    info = {"financialCurrency": "USD"}
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["eps_yoy"] = None  # yfinance earningsQuarterlyGrowth frequently None
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+    existing["eps_yoy"] = 80.0  # previously-valid, must not be clobbered
+    writes, flags = roi.apply_guards(info, fresh, existing)
+    assert "eps_yoy" not in writes
+    assert any("eps_yoy" in f.lower() and ("kept" in f.lower() or "no data" in f.lower()) for f in flags)

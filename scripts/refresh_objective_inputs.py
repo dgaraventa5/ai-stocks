@@ -125,7 +125,15 @@ def apply_guards(info, fresh, existing):
                     f"→ withheld as possible one-off (rule 15). Confirm blank or write."
                 )
                 continue
-            # (c) normal — write (may be None)
+            # (c) fresh None over a non-blank existing → keep existing (don't clobber).
+            # yfinance earningsQuarterlyGrowth is frequently None; same protection
+            # the generic-key path applies (guard 4).
+            if v is None and not _blank(existing.get(key)):
+                flags.append(
+                    f"eps_yoy: fetch returned no data — kept prior value {existing.get(key)}."
+                )
+                continue
+            # (d) normal — write (may be None when existing is also blank)
             writes[key] = v
             continue
 
