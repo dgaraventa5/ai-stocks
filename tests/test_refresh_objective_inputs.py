@@ -323,6 +323,7 @@ def test_module_imports_without_yfinance():
                          {k: None for k in roi.OBJ_COLS})
         roi.mw_staleness_flag("NVDA", "06 Silicon", __import__("datetime").date(2026,6,24))
     ''')
+    repo_root = Path(__file__).resolve().parent.parent
     r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
-                       cwd="/Users/dom/Desktop/ai-stocks")
+                       cwd=str(repo_root))
     assert r.returncode == 0, f"import-without-yfinance failed:\n{r.stderr}"
