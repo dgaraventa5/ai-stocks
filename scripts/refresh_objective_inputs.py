@@ -7,8 +7,14 @@ docs/superpowers/specs/2026-06-24-refresh-objective-inputs-design.md.
 """
 from __future__ import annotations
 
+import sys
+import json
+import datetime as dt
 from pathlib import Path
 from openpyxl import load_workbook
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from batch_score import _is_layer9_capacity, _CAPACITY_JSON
 
 ROOT = Path(__file__).resolve().parent.parent
 SCORING_PATH = ROOT / "00-master" / "ai_supply_chain_scoring.xlsx"
@@ -57,3 +63,38 @@ def resolve_targets(arg, scoring_path=SCORING_PATH, portfolio_path=PORTFOLIO_PAT
     # explicit subset
     wlset = set(watchlist)
     return [t.strip().upper() for t in arg if t.strip().upper() in wlset]
+
+
+def mw_staleness_flag(ticker, layer, today, capacity_json=None):
+    """Check Layer-9 capacity cohort MW data staleness (rule 13).
+
+    Returns flag string if layer is Layer-9 capacity AND entry is missing OR as_of >90 days old;
+    else None.
+
+    Args:
+        ticker: Stock ticker symbol.
+        layer: Layer string from Watchlist.
+        today: date object for age calculation.
+        capacity_json: Override path to capacity-mw.json (for testing).
+
+    Returns:
+        str | None: Flag message or None.
+    """
+    if not _is_layer9_capacity(layer):
+        return None
+    path = capacity_json if capacity_json is not None else _CAPACITY_JSON
+    try:
+        data = json.loads(Path(path).read_text())
+    except Exception:
+        data = {}
+    rec = data.get(ticker)
+    if not rec or rec.get("secured_gross_mw") is None:
+        return f"{ticker} EV/MW: missing from capacity-mw.json — add it (rule 13)."
+    as_of = rec.get("as_of")
+    try:
+        age = (today - dt.date.fromisoformat(as_of)).days
+    except Exception:
+        return f"{ticker} EV/MW: capacity-mw.json as_of unparseable ({as_of!r}) — stale, refresh MW."
+    if age > 90:
+        return f"{ticker} EV/MW: capacity-mw.json as_of {as_of} → {age} days old (>90) → stale, refresh MW."
+    return None
