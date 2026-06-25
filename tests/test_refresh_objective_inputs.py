@@ -67,13 +67,14 @@ def test_mw_flag_missing_entry(tmp_path):
 
 
 def test_mw_flag_stale_asof(tmp_path):
-    cj = _cap(tmp_path, {"CRWV": {"secured_gross_mw": 300, "as_of": "2026-03-01"}})
+    # Real capacity-mw.json uses the key "asof" (no underscore) — see _meta/CRWV.
+    cj = _cap(tmp_path, {"CRWV": {"secured_gross_mw": 300, "asof": "2026-03-01"}})
     f = roi.mw_staleness_flag("CRWV", L9, TODAY, capacity_json=cj)
-    assert f is not None and "EV/MW" in f and "stale" in f.lower()
+    assert f is not None and "EV/MW" in f and "days old" in f.lower()
 
 
 def test_mw_flag_fresh_returns_none(tmp_path):
-    cj = _cap(tmp_path, {"CRWV": {"secured_gross_mw": 300, "as_of": "2026-06-01"}})
+    cj = _cap(tmp_path, {"CRWV": {"secured_gross_mw": 300, "asof": "2026-06-01"}})
     assert roi.mw_staleness_flag("CRWV", L9, TODAY, capacity_json=cj) is None
 
 

@@ -191,13 +191,15 @@ def mw_staleness_flag(ticker, layer, today, capacity_json=None):
     rec = data.get(ticker)
     if not rec or rec.get("secured_gross_mw") is None:
         return "EV/MW: missing from capacity-mw.json — add it (rule 13)."
-    as_of = rec.get("as_of")
+    # Real capacity-mw.json uses the key "asof" (no underscore); accept the
+    # underscored spelling too for resilience against legacy entries.
+    as_of = rec.get("asof") or rec.get("as_of")
     try:
         age = (today - dt.date.fromisoformat(as_of)).days
     except Exception:
-        return f"EV/MW: capacity-mw.json as_of unparseable ({as_of!r}) — stale, refresh MW."
+        return f"EV/MW: capacity-mw.json asof unparseable ({as_of!r}) — stale, refresh MW."
     if age > 90:
-        return f"EV/MW: capacity-mw.json as_of {as_of} → {age} days old (>90) → stale, refresh MW."
+        return f"EV/MW: capacity-mw.json asof {as_of} → {age} days old (>90) → stale, refresh MW."
     return None
 
 
