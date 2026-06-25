@@ -182,3 +182,43 @@ def mw_staleness_flag(ticker, layer, today, capacity_json=None):
     if age > 90:
         return f"{ticker} EV/MW: capacity-mw.json as_of {as_of} → {age} days old (>90) → stale, refresh MW."
     return None
+
+
+def read_existing(ws, row):
+    """Read current cell values for all objective input keys.
+
+    Args:
+        ws: openpyxl worksheet.
+        row: Row number to read from.
+
+    Returns:
+        dict: maps input-key to current cell value (or None/"" if blank).
+    """
+    return {k: ws.cell(row=row, column=c).value for k, c in OBJ_COLS.items()}
+
+
+def write_row(ws, row, writes, dma_value, today_iso):
+    """Write objective inputs and metadata to a row, never touching subjective columns.
+
+    Args:
+        ws: openpyxl worksheet.
+        row: Row number to write to.
+        writes: dict mapping input-key → value. Absent key = leave untouched;
+                present key with None value = write blank.
+        dma_value: Value for DMA_COL, or None to skip writing it.
+        today_iso: ISO date string for LAST_UPDATED_COL.
+
+    Returns:
+        list[int]: Sorted list of column indices actually written.
+    """
+    touched = []
+    for key, val in writes.items():
+        c = OBJ_COLS[key]
+        ws.cell(row=row, column=c).value = val
+        touched.append(c)
+    if dma_value is not None:
+        ws.cell(row=row, column=DMA_COL).value = dma_value
+        touched.append(DMA_COL)
+    ws.cell(row=row, column=LAST_UPDATED_COL).value = today_iso
+    touched.append(LAST_UPDATED_COL)
+    return sorted(set(touched))

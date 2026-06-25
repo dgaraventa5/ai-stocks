@@ -153,3 +153,41 @@ def test_guard_eps_yoy_keeps_existing_on_fetched_none():
     writes, flags = roi.apply_guards(info, fresh, existing)
     assert "eps_yoy" not in writes
     assert any("eps_yoy" in f.lower() and ("kept" in f.lower() or "no data" in f.lower()) for f in flags)
+
+
+# ---------------------------------------------------------------------------
+# Task 4: row read/write helpers
+# ---------------------------------------------------------------------------
+
+def _ws_one_row():
+    wb = Workbook()
+    ws = wb.active
+    # 38 columns; put a sentinel in every subjective col so we can prove they're untouched
+    for c in range(1, 39):
+        ws.cell(row=2, column=c, value=f"S{c}")
+    return ws
+
+
+def test_write_row_only_touches_objective_and_meta():
+    ws = _ws_one_row()
+    writes = {"fwd_pe": 41.1, "ps": None}
+    touched = roi.write_row(ws, 2, writes, dma_value=78.0, today_iso="2026-06-24")
+    assert ws.cell(row=2, column=5).value == 41.1
+    assert ws.cell(row=2, column=8).value is None
+    assert ws.cell(row=2, column=29).value == 78.0
+    assert ws.cell(row=2, column=4).value == "2026-06-24"
+    # subjective cols untouched
+    for c in (20, 21, 22, 23, 24, 26, 27, 28, 31, 32, 33, 34, 38):
+        assert ws.cell(row=2, column=c).value == f"S{c}"
+    # score/formula cols untouched
+    for c in (9, 10, 15, 19, 25, 30, 35, 36, 37):
+        assert ws.cell(row=2, column=c).value == f"S{c}"
+    assert set(touched) == {4, 5, 8, 29}
+
+
+def test_read_existing_pulls_objective_keys():
+    ws = _ws_one_row()
+    ws.cell(row=2, column=11, value=18.5)
+    existing = roi.read_existing(ws, 2)
+    assert existing["roic"] == 18.5
+    assert set(existing) == set(roi.OBJ_COLS)
