@@ -96,7 +96,7 @@ rules in the same run).
 | 2 | **Negative / non-positive EBITDA** | fetched EBITDA ≤ 0 | Blank EV/EBITDA (6) & ND/EBITDA (14) | **AUTO** (already inside `compute_inputs`) |
 | 3 | **Layer-10 SaaS** | layer == 10 | Col 6 carries EV/FCF on SaaS bands | **AUTO** (already inside `compute_inputs`) |
 | 4 | **Layer-9 capacity cohort** | sub-layer contains "Bitcoin"/"Neocloud" | Col 6 carries EV/MW from `capacity-mw.json`; blank if MW missing | **AUTO** value; **FLAG** if MW missing OR the entry's `as_of` date is older than 90 days |
-| 5 | **Fetch returned None, cell has a value** | fresh value is `None`/blank AND existing cell non-blank | **Keep the existing value** — a "no data" never clobbers a real number (protects ROIC and any hand-curated cell) | **AUTO** + log |
+| 5 | **Fetch returned None, cell has a value** | fresh value is `None`/blank AND existing cell non-blank | **Keep the existing value** — a "no data" never clobbers a real number (protects ROIC and any hand-curated cell). **Exception:** `ev_ebitda` and `nd_ebitda` blank-through on a fresh `None` so that guard-2 (non-positive EBITDA) and guard-3/4 (L10 EV/FCF / L9 EV/MW missing denominator) deliberate blanks win over keep-prior; a flag is emitted when the cell had a prior value. | **AUTO** + log |
 | 6 | **EPS-YoY one-off** | (a) cell currently blank; OR (b) fresh `\|EPS YoY\| ≥ 300%` | (a) **preserve the blank**; (b) **leave the cell as-is** (do not write the extreme value — never auto-inflate Growth off a possible one-off) | **FLAG** |
 | 7 | Everything else | — | Write the fresh value | **AUTO** |
 

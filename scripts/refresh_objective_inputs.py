@@ -75,6 +75,10 @@ DMA_COL = 29
 LAST_UPDATED_COL = 4
 EPS_YOY_EXTREME = 300.0
 _ADR_BLANK_KEYS = ("ps", "ev_ebitda", "fcf_yield")
+# Keys where a fresh None must blank the cell (guard-2/3/4 deliberate blanks must
+# win over guard-5's keep-prior behaviour).  For all other keys, guard-5 protects
+# existing values from a transient yfinance "no data" return.
+_BLANK_THROUGH_ON_NONE = frozenset({"ev_ebitda", "nd_ebitda"})
 
 
 def _blank(v):
@@ -140,13 +144,23 @@ def apply_guards(info, fresh, existing):
             writes[key] = v
             continue
 
-        # Guard 4: every other key — if fresh is None and existing is non-blank, keep existing
+        # Guard 4/5: every other key.
+        # For most keys: if fresh is None and existing is non-blank, keep existing
+        # (guard 5 — protects curated values like ROIC from a transient fetch gap).
+        # Exception: ev_ebitda and nd_ebitda blank-through on a fresh None so that
+        # guard-2 (non-positive EBITDA) and guard-3/4 (L10 EV/FCF / L9 EV/MW
+        # missing denominator) blanks win over keep-prior (_BLANK_THROUGH_ON_NONE).
         v = fresh.get(key)
-        if v is None and not _blank(existing.get(key)):
+        if v is None and key not in _BLANK_THROUGH_ON_NONE and not _blank(existing.get(key)):
             flags.append(
                 f"{key}: fetch returned no data — kept prior value {existing.get(key)}."
             )
             continue
+        if v is None and key in _BLANK_THROUGH_ON_NONE and not _blank(existing.get(key)):
+            flags.append(
+                f"{key}: no computable value (e.g. non-positive EBITDA / missing denominator)"
+                f" — blanked (was {existing.get(key)})."
+            )
         writes[key] = v
 
     return writes, flags
@@ -176,14 +190,14 @@ def mw_staleness_flag(ticker, layer, today, capacity_json=None):
         data = {}
     rec = data.get(ticker)
     if not rec or rec.get("secured_gross_mw") is None:
-        return f"{ticker} EV/MW: missing from capacity-mw.json — add it (rule 13)."
+        return "EV/MW: missing from capacity-mw.json — add it (rule 13)."
     as_of = rec.get("as_of")
     try:
         age = (today - dt.date.fromisoformat(as_of)).days
     except Exception:
-        return f"{ticker} EV/MW: capacity-mw.json as_of unparseable ({as_of!r}) — stale, refresh MW."
+        return f"EV/MW: capacity-mw.json as_of unparseable ({as_of!r}) — stale, refresh MW."
     if age > 90:
-        return f"{ticker} EV/MW: capacity-mw.json as_of {as_of} → {age} days old (>90) → stale, refresh MW."
+        return f"EV/MW: capacity-mw.json as_of {as_of} → {age} days old (>90) → stale, refresh MW."
     return None
 
 
@@ -300,7 +314,7 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
             dma_value = dma_fetcher(ticker)
         except Exception as e:
             dma_value = None
-            flags.append(f"{ticker} 50DMA: fetch error — {e}")
+            flags.append(f"50DMA: fetch error — {e}")
 
         touched = []
         if not dry_run:

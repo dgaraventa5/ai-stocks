@@ -1,6 +1,5 @@
 import json
 import datetime as dt
-import shutil
 from pathlib import Path
 from openpyxl import Workbook, load_workbook
 import scripts.refresh_objective_inputs as roi
@@ -64,13 +63,13 @@ def _cap(tmp_path, payload):
 def test_mw_flag_missing_entry(tmp_path):
     cj = _cap(tmp_path, {})
     f = roi.mw_staleness_flag("CRWV", L9, TODAY, capacity_json=cj)
-    assert f is not None and "CRWV" in f and "missing" in f.lower()
+    assert f is not None and "EV/MW" in f and "missing" in f.lower()
 
 
 def test_mw_flag_stale_asof(tmp_path):
     cj = _cap(tmp_path, {"CRWV": {"secured_gross_mw": 300, "as_of": "2026-03-01"}})
     f = roi.mw_staleness_flag("CRWV", L9, TODAY, capacity_json=cj)
-    assert f is not None and "stale" in f.lower()
+    assert f is not None and "EV/MW" in f and "stale" in f.lower()
 
 
 def test_mw_flag_fresh_returns_none(tmp_path):
@@ -197,7 +196,7 @@ def test_read_existing_pulls_objective_keys():
 # Task 5: refresh() orchestration
 # ---------------------------------------------------------------------------
 
-def test_refresh_dry_run_writes_nothing(tmp_path, monkeypatch):
+def test_refresh_dry_run_writes_nothing(tmp_path):
     # build a scoring workbook with NVDA + a layer in col 3
     wb = Workbook(); ws = wb.active; ws.title = "Watchlist"
     ws.append(["Ticker", "Company", "Layer", "Last Updated"] + [None]*34)
@@ -235,3 +234,36 @@ def test_refresh_live_writes_and_bumps_last_updated(tmp_path):
     assert ws2.cell(row=2, column=4).value == "2026-06-24"
     assert ws2.cell(row=2, column=5).value == 10.0
     assert ws2.cell(row=2, column=29).value == 70.0
+
+
+def test_guard_ev_ebitda_nd_ebitda_blank_through_on_none():
+    """ev_ebitda and nd_ebitda must blank-through on fresh None (guard-2/3/4 wins over guard-5).
+    Contrast: roic fresh None over non-blank existing → kept prior (guard-5 still applies)."""
+    info = {"financialCurrency": "USD"}
+    # Fresh: ev_ebitda + nd_ebitda are None (e.g. non-positive EBITDA); all others have values
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["ev_ebitda"] = None
+    fresh["nd_ebitda"] = None
+    fresh["roic"] = None  # also None — but roic is NOT in _BLANK_THROUGH_ON_NONE
+    # Existing: every key has a prior non-blank value
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+
+    writes, flags = roi.apply_guards(info, fresh, existing)
+
+    # ev_ebitda and nd_ebitda: present in writes as None (cell blanked, not kept stale)
+    assert "ev_ebitda" in writes and writes["ev_ebitda"] is None, (
+        "ev_ebitda fresh None over non-blank existing must blank-through (guard-2)"
+    )
+    assert "nd_ebitda" in writes and writes["nd_ebitda"] is None, (
+        "nd_ebitda fresh None over non-blank existing must blank-through (guard-2)"
+    )
+    # A flag must mention the blanking for at least one of these keys
+    assert any(
+        ("ev_ebitda" in f or "nd_ebitda" in f) and "blank" in f.lower()
+        for f in flags
+    ), f"Expected a blanked flag for ev_ebitda/nd_ebitda in: {flags}"
+
+    # Contrast: roic fresh None over non-blank existing → key ABSENT from writes (kept prior)
+    assert "roic" not in writes, (
+        "roic fresh None over non-blank existing must keep prior (guard-5), not blank-through"
+    )
