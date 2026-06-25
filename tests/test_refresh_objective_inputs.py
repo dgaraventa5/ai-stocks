@@ -267,3 +267,34 @@ def test_guard_ev_ebitda_nd_ebitda_blank_through_on_none():
     assert "roic" not in writes, (
         "roic fresh None over non-blank existing must keep prior (guard-5), not blank-through"
     )
+
+
+def test_refresh_isolates_per_ticker_fetch_error(tmp_path):
+    # A transient fetch error on one ticker must not abort the whole run:
+    # the bad row is left unchanged + flagged; later tickers still process.
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Watchlist"
+    ws.append(["Ticker", "Company", "Layer", "Last Updated"] + [None] * 34)
+    ws.append(["BAD", "Bad Inc", "06 Silicon", "2026-01-01"] + [None] * 34)
+    ws.append(["NVDA", "Nvidia", "06 Silicon", "2026-01-01"] + [None] * 34)
+    sp = tmp_path / "scoring.xlsx"
+    wb.save(sp)
+
+    def flaky(ticker, layer):
+        if ticker == "BAD":
+            raise RuntimeError("yfinance boom")
+        return {"financialCurrency": "USD"}, {k: 10.0 for k in roi.OBJ_COLS}
+
+    rep = roi.refresh(["BAD", "NVDA"], dry_run=False, scoring_path=sp,
+                      fetcher=flaky, dma_fetcher=lambda t: 70.0,
+                      today=dt.date(2026, 6, 24))
+    ws2 = load_workbook(sp)["Watchlist"]
+    # BAD row untouched (no clobber with bad data)
+    assert ws2.cell(row=2, column=4).value == "2026-01-01"
+    assert ws2.cell(row=2, column=5).value is None
+    # NVDA still processed
+    assert ws2.cell(row=3, column=4).value == "2026-06-24"
+    assert ws2.cell(row=3, column=5).value == 10.0
+    # error surfaced as a flag
+    assert any("BAD" in f and "fetch error" in f.lower() for f in rep["flags"])

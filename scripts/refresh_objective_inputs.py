@@ -302,7 +302,18 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
             continue
 
         layer = _layer_of(ws, row)
-        info, fresh = fetcher(ticker, layer)
+        try:
+            info, fresh = fetcher(ticker, layer)
+        except Exception as e:
+            # Isolate per-ticker fetch failures: leave the row unchanged (never
+            # clobber with bad data), flag it, and keep going. Matters most on
+            # the ~167-name `all` run where one transient yfinance error would
+            # otherwise abort the whole pass and save nothing.
+            report["flags"].append(f"{ticker}: fetch error — {e} — skipped (row unchanged).")
+            report["rows"].append({"ticker": ticker, "touched": [], "flags": [f"fetch error — {e}"]})
+            if fetcher is _default_fetcher:
+                time.sleep(0.3)
+            continue
         existing = read_existing(ws, row)
         writes, flags = apply_guards(info, fresh, existing)
 
