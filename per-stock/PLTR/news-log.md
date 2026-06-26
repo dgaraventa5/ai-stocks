@@ -4,6 +4,7 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 
 | Date | Source | Summary |
 |---|---|---|
+| 2026-06-26 | Portfolio pipeline review | Score 76.4 (✓✓, 2nd-in-line above 76 bar); WDC EXIT confirmed this scan → RDDT (79.4) takes the slot as first-in-line; PLTR remains next candidate if additional slot opens. Value=36 (expensive: Fwd P/E 54.5x, EV/FCF 98.4x, P/S 52x) is main constraint — any price appreciation without earnings growth risks dropping below 76. Watch Q2 2026 earnings for NRR and US commercial acceleration. |
 | 2026-05-04 | 8-K / Earnings release | Q1 2026: Revenue $1.633B (+85% YoY), beat consensus by 5.8%; US commercial +133% YoY; adj operating margin 60%; GAAP net income $871M (53% margin); adj FCF $925M (57% margin); NRR 150%; raised FY26 guide to $7.65-7.66B (+71% YoY) |
 | 2026-05-04 | Earnings call | Karp: "Almost every highlighted example of AI producing results in the U.S. is actually Palantir." Positioned AIP as only production-grade AI platform. 70 salespeople vs. 7,000 at peer companies. |
 | 2026-05-04 | Earnings call | Maven usage doubled in 4 months, 4x in 12 months. USDA awarded $300M contract (new civilian agency vertical). Ship OS reducing Navy BOM approval from 200 hrs to 15 sec. |
