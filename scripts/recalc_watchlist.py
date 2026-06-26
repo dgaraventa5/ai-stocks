@@ -6,9 +6,11 @@ modify the workbook.
 """
 from __future__ import annotations
 
+from pathlib import Path
 from openpyxl import load_workbook
 
-XLSX = '/Users/dom/Desktop/ai-stocks/00-master/ai_supply_chain_scoring.xlsx'
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+XLSX = str(_REPO_ROOT / '00-master/ai_supply_chain_scoring.xlsx')
 
 
 def _num(v):
