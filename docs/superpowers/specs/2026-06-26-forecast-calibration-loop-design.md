@@ -35,7 +35,8 @@ from outside, exposes it."* Calibration **is** that outside standard.
 
 1. **Frozen peers.** The rel-strength benchmark is a layer-cohort equal-weight basket
    whose constituent list is **frozen into `resolution_rule` at creation**. Thin layers
-   (< 6 peers after excluding self) fall back to a frozen `SMH`. No membership look-ahead.
+   (< 4 peers after excluding self) fall back to a frozen `SMH`. No membership look-ahead.
+   (Threshold lowered 6→4 on 2026-06-26 so Layer 05's 4 fab peers form a real cohort — per Dom.)
 2. **Batch-seed now.** Phase 1 seeds one `REL_STRENGTH_1Q` forecast per current portfolio
    name today; first outcomes resolve in ~1 quarter.
 3. **Single append-only snapshot log.** One file, `tracking/forecasts.jsonl`. Creation
@@ -286,7 +287,7 @@ All core modules CI-safe (no yfinance / matplotlib / numpy at import).
   degraded cohort > 25% missing (needs_review). Plus `resolution_date` weekday math.
 - **`tests/test_forecast_cohorts.py`** — frozen-cohort construction on a synthetic Watchlist:
   groups by `layer_num`, excludes self, and falls back to a frozen `SMH` when a layer has
-  < 6 peers. (openpyxl-based fixture, CI-safe.)
+  < 4 peers. (openpyxl-based fixture, CI-safe.)
 - **`tests/test_forecast_metrics.py`** — BS value on a known set; `REL − RES + UNC == BS`
   identity (discrete forecasts); BSS sign; log-loss clipping; reliability table; N = 0 and
   small-N behavior.

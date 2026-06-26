@@ -555,7 +555,7 @@ SCORING_PATH = ROOT / "00-master" / "ai_supply_chain_scoring.xlsx"
 TICKER_COL = 1
 LAYER_COL = 3
 HORIZON_TD = 63
-MIN_PEERS = 6   # fewer same-layer peers than this -> SMH fallback
+MIN_PEERS = 4   # fewer same-layer peers than this -> SMH fallback (Layer 05 = 4 peers -> cohort)
 
 
 def read_watchlist_rows(scoring_path: Path = SCORING_PATH) -> list[tuple[str, str]]:

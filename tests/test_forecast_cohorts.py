@@ -28,7 +28,18 @@ def test_cohort_groups_by_layer_and_excludes_self(tmp_path):
     assert rule["horizon_td"] == 63
 
 
+def test_four_peer_layer_forms_cohort(tmp_path):
+    # real Layer-05 shape: 5 names -> TSM has 4 peers, which meets MIN_PEERS=4
+    p = _scoring(tmp_path, [("TSM", "05 Fabs"), ("INTC", "05 Fabs"), ("GFS", "05 Fabs"),
+                            ("TSEM", "05 Fabs"), ("UMC", "05 Fabs")])
+    layer, rule = c.build_frozen_cohort("TSM", scoring_path=p)
+    assert layer == "05"
+    assert rule["benchmark"] == "layer_cohort_ew"
+    assert rule["constituents"] == ["GFS", "INTC", "TSEM", "UMC"]
+
+
 def test_thin_layer_falls_back_to_smh(tmp_path):
+    # 3 names -> TSM has only 2 peers (< MIN_PEERS) -> SMH fallback
     p = _scoring(tmp_path, [("TSM", "05 Fabs"), ("UMC", "05 Fabs"), ("GFS", "05 Fabs")])
     layer, rule = c.build_frozen_cohort("TSM", scoring_path=p)
     assert layer == "05"
