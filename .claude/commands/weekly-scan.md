@@ -62,6 +62,13 @@ Run the weekly news scan per CLAUDE.md.
    ```
    Report GATE violations (names carrying AI ratings with no thesis and no research briefing — their ratings are unbacked and should not be trusted) and STALE names (>90d since last research-backed review). These don't block the scan, but a GATE violation in a *portfolio holding* is a flag to surface prominently. The biweekly scheduled refresh routine handles the rotation; this step is the weekly check that it's keeping up.
 
+9. **Resolve due forecasts (calibration loop, Rule #17, added 2026-06-26).** Grade any forecasts whose `resolution_date` has arrived:
+   ```bash
+   python3 scripts/resolve_forecasts.py --dry-run
+   python3 scripts/resolve_forecasts.py
+   ```
+   Report newly **resolved** outcomes (id, outcome, the cited evidence string), anything routed to **needs_review** (needs a human-confirmed resolution), and the running **void/needs_review rate** (a high rate means the resolution rules are too vague — fix the rules, don't fudge the grades). Resolution only appends a new snapshot to `tracking/forecasts.jsonl`; it never edits a prior line.
+
 ## Output
 
 Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
@@ -69,6 +76,7 @@ Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **📊 Earnings refreshed** (tickers that reported this week: before/after score, TTM vs MRQ flags, any tier changes)
 - **💼 Portfolio pipeline** (ENTER/EXIT/pending/blocked changes, weekly mark vs benchmarks, any concentration flags)
 - **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
+- **🎯 Calibration** (newly resolved forecasts + needs_review items from Step 9; only if any)
 - **Routine filings** (one-line each: ticker, filing type, generic descriptor)
 - **New 13F activity** (only if any)
 

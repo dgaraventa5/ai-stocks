@@ -233,6 +233,20 @@ GAAP EPS YoY scores garbage when the change is dominated by disclosed non-operat
 
 **Implementation:** R5 at col 38; `rebuild_watchlist_formulas.py` RISK template averages `AE:AH + AL`; `recalc_watchlist.py` `risk_inputs` includes col 38. **Run `rebuild_watchlist_formulas.py` after any structural row change still applies** (rule 10 note). The recalc-vs-Excel blank-handling divergence (recalc sums available category parts without renormalizing; Excel blanks TOTAL if any category is empty) is unchanged.
 
+### 17. Forecast calibration loop (added 2026-06-26, approved by Dom)
+
+**Context:** Subjective ratings (AI-Thesis, Momentum, Risk R1–R5) are implicit predictions, assigned and frozen but never graded against what happened. A ranking system can't see its own uniform bias (rule 12); calibration is the external absolute standard that can.
+
+**Rule:** Selected ratings are logged as falsifiable, dated forecasts with a frozen, mechanical resolution rule in `tracking/forecasts.jsonl` — a **single append-only snapshot log** (creation appends an `open` snapshot; resolution appends a new snapshot of the same `id`; lines are never edited; the current state of an `id` is its last snapshot). Forecasts are resolved on schedule and graded with Brier score, the Murphy REL/RES/UNC decomposition, Brier Skill Score vs. the base rate, and a reliability diagram.
+
+**Guarantees (do not weaken — treat like the site privacy gate):** `created_date`, `ticker`, `layer`, `dimension`, `rating_value`, `template`, `probability`, `resolution_date`, and `resolution_rule` are immutable (a changed mind is a *new* forecast); `created_date` is set to today at log time so backdating is impossible; the resolver consumes only post-`created_date` data (no look-ahead); ambiguous resolutions go to `needs_review`, never guessed (rule 3); every resolution carries a cited evidence string (rule 1).
+
+**Boundary:** calibration is diagnostic — it does **not** feed back into the Total Score or category weights, adds **no** Watchlist columns, uses **no** paid data, and is **not** surfaced on the friend-facing site. A dimension proving to be noise is a human decision ("stop trusting it / investigate"), never an automatic reweight (the overfitting trap flagged in prior reviews).
+
+**Cadence & scripts:** `/weekly-scan` runs `scripts/resolve_forecasts.py` (resolve due); `/rescore-quarterly` runs `scripts/calibration_report.py` (regenerate `tracking/calibration-report.md`). Seed/log forecasts with `scripts/log_forecast.py`. Core logic: `forecast_store.py` (the log), `forecast_cohorts.py` (frozen peer basket), `forecast_resolvers.py` (template registry), `forecast_metrics.py` (Brier/Murphy/BSS).
+
+**Rollout:** Phase 1 = `REL_STRENGTH_1Q` on portfolio names (frozen layer-cohort EW basket; SMH fallback for thin layers). Phase 2 adds `EARNINGS_REACTION` + full watchlist + rating-time forecasts. Phase 3 adds the fundamental templates. Switch rating→probability defaults from the §4 priors to empirically-learned per-bucket hit rates once each dimension has ~30 resolved forecasts.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash
