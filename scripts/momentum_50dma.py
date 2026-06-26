@@ -19,13 +19,15 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import time
+from pathlib import Path
 
 import yfinance as yf
 from openpyxl import load_workbook
 
 from common import flag
 
-XLSX = '/Users/dom/Desktop/ai-stocks/00-master/ai_supply_chain_scoring.xlsx'
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+XLSX = str(_REPO_ROOT / '00-master/ai_supply_chain_scoring.xlsx')
 DMA_COL = 29          # AC — '50DMA %'
 WINDOW = 120          # trading days scored
 SMA = 50              # moving-average length

@@ -51,9 +51,16 @@ Run the weekly news scan per CLAUDE.md.
    python3 scripts/track_performance.py
    ```
 
-   b. Report every pipeline FLAG in the output: ENTER/EXIT/EXIT PENDING/BLOCKED names, dead tickers, layer-cap or concentration warnings, manual-override collisions. EXIT PENDING names confirm on the *next* weekly run — call out anything confirming next week so it isn't a surprise.
+   `refresh_targets.py` automatically recomputes Target % allocations for **all** portfolio members using the latest scores — not just ENTER/EXIT events. A tier upgrade (e.g., ✓✓ → ✓✓✓ from an earnings beat) immediately increases that name's target allocation; a tier downgrade decreases it. The script outputs a flag line for each holding that changed tier, with old and new allocations. This is the mechanism that keeps the portfolio composition maximally weighted toward the highest-scoring names each week.
 
-   c. Include the weekly mark (model value, returns vs SMH/QQQ/equal-weight universe) in the output. The model is the portfolio of record — membership changes logged by refresh_targets.py are rebalance events Dom mirrors in his account.
+   b. Report every pipeline FLAG in the output:
+   - **ENTER/EXIT/EXIT PENDING/BLOCKED** — membership changes (ENTER/EXIT are rebalance events Dom mirrors in his account)
+   - **Tier changes for existing holdings** — e.g., "MU ✓✓ → ✓✓✓: allocation 7.4% → 9.8%" — these are weight shifts without a membership change; Dom may want to rebalance toward the new target
+   - **Dead tickers, layer-cap or concentration warnings, manual-override collisions**
+
+   EXIT PENDING names confirm on the *next* weekly run — call out anything confirming next week so it isn't a surprise.
+
+   c. Include the weekly mark (model value, returns vs SMH/QQQ/equal-weight universe) in the output. The model is the portfolio of record — membership changes logged by refresh_targets.py are rebalance events Dom mirrors in his account. Tier-driven weight shifts are reported for awareness but do not auto-log a rebalance event (only ENTER/EXIT does).
 
 8. **Subjective-rating integrity (Rule #12, added 2026-06-10).** Run the gate + staleness audit:
    ```bash
@@ -74,7 +81,7 @@ Run the weekly news scan per CLAUDE.md.
 Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **⚠️ Material events** (full one-sentence summary per item, plus ticker)
 - **📊 Earnings refreshed** (tickers that reported this week: before/after score, TTM vs MRQ flags, any tier changes)
-- **💼 Portfolio pipeline** (ENTER/EXIT/pending/blocked changes, weekly mark vs benchmarks, any concentration flags)
+- **💼 Portfolio pipeline** (ENTER/EXIT/pending/blocked changes; tier-change reallocations for existing holdings with old→new Target %; weekly mark vs benchmarks; any concentration flags)
 - **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
 - **🎯 Calibration** (newly resolved forecasts + needs_review items from Step 9; only if any)
 - **Routine filings** (one-line each: ticker, filing type, generic descriptor)

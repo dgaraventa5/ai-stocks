@@ -34,6 +34,7 @@ import argparse
 import datetime as dt
 import time
 from copy import copy
+from pathlib import Path
 
 import yfinance as yf
 from openpyxl import load_workbook
@@ -43,7 +44,8 @@ from common import flag
 from portfolio_model import load_cfg, log_rebalance
 from recalc_watchlist import recalc
 
-PORTFOLIO = '/Users/dom/Desktop/ai-stocks/00-master/portfolio.xlsx'
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+PORTFOLIO = str(_REPO_ROOT / '00-master/portfolio.xlsx')
 
 HEADER_FILL = PatternFill('solid', fgColor='1F4E78')
 HEADER_FONT = Font(bold=True, color='FFFFFF')
@@ -152,9 +154,11 @@ def current_price(ticker: str) -> float | None:
     return round(float(hist['Close'].iloc[-1]), 2)
 
 
-def refresh(dry_run: bool = False, resize: bool = False) -> None:
+def refresh(dry_run: bool = False, resize: bool = False,
+            portfolio: str | None = None) -> None:
     today = dt.date.today().isoformat()
-    wb = load_workbook(PORTFOLIO, data_only=False)
+    path = portfolio or PORTFOLIO
+    wb = load_workbook(path, data_only=False)
     sizing, targets, recon = wb['Sizing Rules'], wb['Targets'], wb['Reconciliation']
     positions = wb['Positions']
 
@@ -176,6 +180,8 @@ def refresh(dry_run: bool = False, resize: bool = False) -> None:
     hdr = [c.value for c in targets[2]]
     col = {name: i for i, name in enumerate(hdr)}
     prior_include: set[str] = set()
+    prior_tiers: dict[str, str] = {}      # ticker -> prior Tier string
+    prior_weights: dict[str, float] = {}  # ticker -> prior Target %
     overrides: dict[str, str] = {}
     exit_pending: dict[str, str] = {}   # ticker -> 'since' date
     notes: dict[str, str] = {}
@@ -185,6 +191,15 @@ def refresh(dry_run: bool = False, resize: bool = False) -> None:
             continue
         if row[col.get('Include?', 5)] == 'Y':
             prior_include.add(tkr)
+            tier_val = row[col['Tier']] if 'Tier' in col else None
+            if tier_val:
+                prior_tiers[tkr] = str(tier_val)
+            pct_val = row[col['Target %']] if 'Target %' in col else None
+            if pct_val is not None:
+                try:
+                    prior_weights[tkr] = float(pct_val)
+                except (TypeError, ValueError):
+                    pass
         note = str(row[col.get('Notes', 8)] or '')
         if note:
             notes[tkr] = note
@@ -275,6 +290,16 @@ def refresh(dry_run: bool = False, resize: bool = False) -> None:
     base = {t: base_weight(info[t]['TOTAL'], p['tiers']) for t in include}
     weights = cap_and_normalize(base, layers, 1.0 - cash, max_single, layer_cap)
 
+    # ---- tier-change reporting (for holdings that changed tier this refresh) ----
+    for t in include:
+        new_tier = info[t].get('Tier', '')
+        old_tier = prior_tiers.get(t, '')
+        if old_tier and new_tier and old_tier != new_tier:
+            old_pct = prior_weights.get(t, 0.0)
+            new_pct = weights.get(t, 0.0) * 100
+            flag(f'{t}: tier {old_tier} → {new_tier} | allocation '
+                 f'{old_pct:.1f}% → {new_pct:.1f}% (rebalance)')
+
     by_layer: dict[str, float] = {}
     for t, v in weights.items():
         by_layer[layers[t]] = by_layer.get(layers[t], 0) + v
@@ -360,8 +385,8 @@ def refresh(dry_run: bool = False, resize: bool = False) -> None:
         if row[0].value == 'Last built':
             row[1].value = f'{today} (refresh_targets.py — hysteresis pipeline)'
 
-    wb.save(PORTFOLIO)
-    print(f'wrote {len(include)} target positions to {PORTFOLIO}')
+    wb.save(path)
+    print(f'wrote {len(include)} target positions to {path}')
 
     # ---- roll the model forward when membership changed ----
     # The model is the portfolio of record (Dom decision 2026-06-09); a
@@ -388,5 +413,8 @@ if __name__ == '__main__':
     ap.add_argument('--resize', action='store_true',
                     help='intentional re-sizing: drop below-exit-score names '
                          'immediately, bypassing the 2-run exit hysteresis')
+    ap.add_argument('--portfolio-path', default=None,
+                    help='override path to portfolio.xlsx (default: auto-derived '
+                         'from repo root)')
     args = ap.parse_args()
-    refresh(dry_run=args.dry_run, resize=args.resize)
+    refresh(dry_run=args.dry_run, resize=args.resize, portfolio=args.portfolio_path)
