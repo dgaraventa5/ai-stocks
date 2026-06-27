@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os
 import time
 
 import yfinance as yf
@@ -207,6 +208,38 @@ def ew_return_since(cfg: dict, frm: str) -> float | None:
     return float(ew.iloc[-1] / sub.iloc[0] - 1)
 
 
+def _may_overwrite_series(out: dict) -> bool:
+    """High-water-mark guard: a rebuild may correct historical values but must
+    never DROP a trading day already recorded in the committed series.
+
+    Why (2026-06-27): yfinance intermittently serves the latest bar with a NaN
+    close (unsettled adjusted close, esp. over weekends). _series does
+    ['Close'].dropna(), so a flickering rebuild comes back one bar SHORTER; the
+    daily-refresh.yml `git diff --quiet` guard committed that shorter series and
+    bounced the dashboard as_of BACKWARD. Refuse the regression here so every
+    caller (cron, /update-dashboard, local) is protected; the next run advances
+    once Yahoo settles the close. FORCE_SERIES=1 bypasses for deliberate history
+    rebuilds (inception/notional/config changes).
+    """
+    if os.environ.get('FORCE_SERIES') == '1':
+        return True
+    if not SERIES.exists():
+        return True
+    try:
+        committed = set(json.loads(SERIES.read_text()).get('dates', []))
+    except (ValueError, OSError):
+        return True
+    dropped = committed - set(out['dates'])
+    if dropped:
+        flag(f"series: rebuild ends {out['as_of']} but committed series records "
+             f"{len(dropped)} later/intermediate bar(s) "
+             f"({', '.join(sorted(dropped))}) — refusing to drop recorded "
+             f"trading day(s) (yfinance latest-close flicker); keeping committed "
+             f"series. Set FORCE_SERIES=1 to override for a deliberate rebuild.")
+        return False
+    return True
+
+
 def build_daily_series(cfg: dict) -> dict | None:
     """Daily valuation series since inception, written to SERIES.
 
@@ -275,6 +308,8 @@ def build_daily_series(cfg: dict) -> dict | None:
     if any(v != v for series in (out['model'], *out['bench'].values())
            for v in series):
         flag('series: NaN in output — series not written')
+        return None
+    if not _may_overwrite_series(out):
         return None
     SERIES.write_text(json.dumps(out) + '\n')
     return out
