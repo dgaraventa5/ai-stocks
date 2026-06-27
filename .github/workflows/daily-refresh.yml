@@ -60,7 +60,13 @@ jobs:
             git config user.name 'github-actions[bot]'
             git config user.email 'github-actions[bot]@users.noreply.github.com'
             git add tracking/performance-series.json
-            git commit -m "chore(data): daily performance series $(date -u +%F)"
+            # Stamp the message with the series' actual as_of (the latest bar),
+            # NOT the wall-clock run date — they diverge when the latest close
+            # hasn't settled yet, which made git history misleading (a Jun-25
+            # series was committed as "2026-06-27"). The high-water-mark guard
+            # in build_daily_series means a committed change never regresses.
+            asof=$(python -c "import json; print(json.load(open('tracking/performance-series.json'))['as_of'])")
+            git commit -m "chore(data): daily performance series $asof"
             git pull --rebase origin main
             git push
             echo "changed=true" >> "$GITHUB_OUTPUT"

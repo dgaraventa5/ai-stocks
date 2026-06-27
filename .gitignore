@@ -30,3 +30,7 @@ site/data/
 
 # Wrangler local dev cache
 .wrangler/
+
+# Generated chart artifacts (backtest / perf-vs-benchmarks PNGs) — regenerable,
+# not source of truth; the series JSON + site exporter are.
+tracking/*.png
