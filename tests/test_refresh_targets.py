@@ -12,8 +12,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'scripts'))
 import refresh_targets as rt
 
 
-def _build_portfolio(path, holdings):
-    """holdings: [(ticker, layer, score, tier)] written as Include?=Y rows."""
+def _build_portfolio(path, holdings, aux_sheets=True):
+    """holdings: [(ticker, layer, score, tier)] written as Include?=Y rows.
+    aux_sheets=False omits Reconciliation + Positions, mirroring the slimmed
+    workbook the notional privacy pass (PR #9) left behind."""
     wb = openpyxl.Workbook()
     sz = wb.active
     sz.title = 'Sizing Rules'
@@ -37,8 +39,9 @@ def _build_portfolio(path, holdings):
     for i, (t, lay, sc, tier) in enumerate(holdings, 1):
         tg.append([t, lay, sc, tier, i, 'HOLD', 'Y', None,
                    round(100 / len(holdings), 2), None])
-    wb.create_sheet('Reconciliation')
-    wb.create_sheet('Positions').append(['Ticker', 'Company', 'Shares'])
+    if aux_sheets:
+        wb.create_sheet('Reconciliation')
+        wb.create_sheet('Positions').append(['Ticker', 'Company', 'Shares'])
     wb.create_sheet('README').append(['Last built', 'old'])
     wb.save(path)
 
@@ -99,3 +102,29 @@ def test_refresh_frozen_when_unchanged(monkeypatch, tmp_path):
 
     assert calls == []                     # no rebalance event logged
     assert path.read_bytes() == before     # workbook untouched (frozen snapshot)
+
+
+def test_refresh_tolerates_missing_recon_and_positions(monkeypatch, tmp_path):
+    """The notional privacy pass (PR #9) removed Reconciliation + Positions.
+    refresh() must run on the slim workbook (Sizing Rules + Targets only),
+    writing just the Targets snapshot — not crash on a missing sheet (the crash
+    that forced the ad-hoc Targets hand-edits this whole change replaces)."""
+    path = tmp_path / 'portfolio.xlsx'
+    _build_portfolio(path, [('NVDA', '06 Silicon', 86.0, '✓✓✓'),
+                            ('TSM', '05 Fabs', 78.0, '✓✓')], aux_sheets=False)
+    live = [{'ticker': 'NVDA', 'layer': '06 Silicon', 'TOTAL': 86.0, 'Tier': '✓✓✓'},
+            {'ticker': 'TSM', 'layer': '05 Fabs', 'TOTAL': 78.0, 'Tier': '✓✓'}]
+    cfg = {'inception': '2026-05-26', 'events': [{
+        'date': '2026-06-18', 'reason': 'seed',
+        'allocations': {'NVDA': 500.0, 'TSM': 500.0}, 'cash': 0.0,
+        'tiers': {'NVDA': '✓✓', 'TSM': '✓✓'}}]}   # NVDA ✓✓ → ✓✓✓ fires
+    calls = _mock_env(monkeypatch, live, cfg)
+
+    rt.refresh(portfolio=str(path))            # must not raise
+
+    assert len(calls) == 1                     # rebalance still logged
+    wb = openpyxl.load_workbook(path)
+    assert 'Reconciliation' not in wb.sheetnames   # not recreated (kept slim)
+    w = {r[0]: r[8] for r in wb['Targets'].iter_rows(min_row=3, values_only=True)
+         if r[0]}
+    assert w['NVDA'] > w['TSM']                # Targets snapshot still written

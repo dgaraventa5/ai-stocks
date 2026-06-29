@@ -160,8 +160,15 @@ def refresh(dry_run: bool = False, resize: bool = False,
     today = dt.date.today().isoformat()
     path = portfolio or PORTFOLIO
     wb = load_workbook(path, data_only=False)
-    sizing, targets, recon = wb['Sizing Rules'], wb['Targets'], wb['Reconciliation']
-    positions = wb['Positions']
+    sizing, targets = wb['Sizing Rules'], wb['Targets']
+    # Reconciliation + Positions were removed in the notional-only privacy pass
+    # (PR #9); both are optional. The site reads only Targets, and Positions is
+    # unused (the model is the portfolio of record — portfolio_model.py). Tolerate
+    # their absence so refresh runs on the slimmed workbook instead of crashing —
+    # that KeyError crash is what forced the ad-hoc Targets hand-edits this change
+    # replaces. Absent sheets are not recreated (Dom 2026-06-29: keep it slim).
+    recon = wb['Reconciliation'] if 'Reconciliation' in wb.sheetnames else None
+    positions = wb['Positions'] if 'Positions' in wb.sheetnames else None
 
     ensure_params(sizing)
     p = load_params(sizing)
@@ -340,13 +347,16 @@ def refresh(dry_run: bool = False, resize: bool = False,
               'snapshot frozen, nothing written')
         return
 
-    # ---- prices for the trade plan (only when firing) ----
+    # ---- prices for the Reconciliation trade plan (only if that sheet exists) ----
+    # Prices feed the Reconciliation sheet only; skip the network entirely when it
+    # was slimmed away (the common case on the notional workbook).
     prices: dict[str, float] = {}
-    for t in include:
-        prices[t] = current_price(t)
-        time.sleep(0.25)
-        if prices[t] is None:
-            flag(f'{t}: no current price — Reconciliation row left without shares')
+    if recon is not None:
+        for t in include:
+            prices[t] = current_price(t)
+            time.sleep(0.25)
+            if prices[t] is None:
+                flag(f'{t}: no current price — Reconciliation row left without shares')
 
     # ---- rewrite Targets ----
     targets.delete_rows(1, targets.max_row)
@@ -366,41 +376,43 @@ def refresh(dry_run: bool = False, resize: bool = False,
             notes.get(t, ''),
         ])
 
-    # ---- rewrite Reconciliation ----
-    has_positions = any(positions.cell(row=r, column=1).value not in (None, 'TOTAL')
-                        for r in range(2, positions.max_row + 1))
-    recon.delete_rows(1, recon.max_row)
-    mode = ('target vs current positions'
-            if has_positions else 'fresh deployment — Positions sheet is empty')
-    recon.append([f'Mechanical target diff ({mode}) — not a trade '
-                  f'recommendation; decisions are Dom\'s (CLAUDE.md rule 5)'])
-    recon.append([f'Portfolio: ${capital:,.0f} | Prices as of {today}'])
-    recon.append(['Ticker', 'Score', 'Target %', '$ Amount', 'Price', 'Shares',
-                  'Round $', 'Delta'])
-    for c in recon[3]:
-        c.fill, c.font = copy(HEADER_FILL), copy(HEADER_FONT)
-    held = {}
-    if has_positions:
-        for r in range(2, positions.max_row + 1):
-            t = positions.cell(row=r, column=1).value
-            if t and t != 'TOTAL':
-                held[t] = positions.cell(row=r, column=3).value or 0
-    cap_row = next(r for r in range(1, sizing.max_row + 1)
-                   if sizing.cell(row=r, column=1).value == 'Portfolio Value ($)')
-    cap_cell = f"'Sizing Rules'!$B${cap_row}"
-    for t in sorted(include, key=lambda t: -weights.get(t, 0)):
+    # ---- rewrite Reconciliation (skipped if the sheet was slimmed away) ----
+    if recon is not None:
+        has_positions = positions is not None and any(
+            positions.cell(row=r, column=1).value not in (None, 'TOTAL')
+            for r in range(2, positions.max_row + 1))
+        recon.delete_rows(1, recon.max_row)
+        mode = ('target vs current positions'
+                if has_positions else 'fresh deployment — Positions sheet is empty')
+        recon.append([f'Mechanical target diff ({mode}) — not a trade '
+                      f'recommendation; decisions are Dom\'s (CLAUDE.md rule 5)'])
+        recon.append([f'Portfolio: ${capital:,.0f} | Prices as of {today}'])
+        recon.append(['Ticker', 'Score', 'Target %', '$ Amount', 'Price', 'Shares',
+                      'Round $', 'Delta'])
+        for c in recon[3]:
+            c.fill, c.font = copy(HEADER_FILL), copy(HEADER_FONT)
+        held = {}
+        if has_positions:
+            for r in range(2, positions.max_row + 1):
+                t = positions.cell(row=r, column=1).value
+                if t and t != 'TOTAL':
+                    held[t] = positions.cell(row=r, column=3).value or 0
+        cap_row = next(r for r in range(1, sizing.max_row + 1)
+                       if sizing.cell(row=r, column=1).value == 'Portfolio Value ($)')
+        cap_cell = f"'Sizing Rules'!$B${cap_row}"
+        for t in sorted(include, key=lambda t: -weights.get(t, 0)):
+            r = recon.max_row + 1
+            # Formulas, not pasted values (CLAUDE.md rule 4).
+            recon.append([
+                t, round(info[t]['TOTAL'], 1), round(weights[t] * 100, 2),
+                f'=C{r}/100*{cap_cell}', prices.get(t),
+                f'=IF(E{r}="","",ROUND(D{r}/E{r},4))',
+                f'=IF(E{r}="","",F{r}*E{r})',
+                (f'={held.get(t, 0)}-F{r}' if has_positions else 'NEW'),
+            ])
         r = recon.max_row + 1
-        # Formulas, not pasted values (CLAUDE.md rule 4).
-        recon.append([
-            t, round(info[t]['TOTAL'], 1), round(weights[t] * 100, 2),
-            f'=C{r}/100*{cap_cell}', prices.get(t),
-            f'=IF(E{r}="","",ROUND(D{r}/E{r},4))',
-            f'=IF(E{r}="","",F{r}*E{r})',
-            (f'={held.get(t, 0)}-F{r}' if has_positions else 'NEW'),
-        ])
-    r = recon.max_row + 1
-    recon.append(['TOTAL', None, f'=SUM(C4:C{r - 1})', f'=SUM(D4:D{r - 1})',
-                  None, None, f'=SUM(G4:G{r - 1})', None])
+        recon.append(['TOTAL', None, f'=SUM(C4:C{r - 1})', f'=SUM(D4:D{r - 1})',
+                      None, None, f'=SUM(G4:G{r - 1})', None])
 
     # ---- README breadcrumbs ----
     rm = wb['README']
