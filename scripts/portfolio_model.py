@@ -93,16 +93,20 @@ def mark(cfg: dict) -> tuple[float, dict[str, float], list[str]]:
     return value, pnl, missing
 
 
-def log_rebalance(cfg: dict, weights: dict[str, float], reason: str) -> dict:
+def log_rebalance(cfg: dict, weights: dict[str, float], reason: str,
+                  tiers: dict[str, str] | None = None) -> dict:
     """Mark the model, re-allocate at today's value, append (or same-day
     replace) the event, and persist. `weights` are fractions of total value
-    (summing to 1 - cash buffer, as refresh_targets produces them)."""
+    (summing to 1 - cash buffer, as refresh_targets produces them). `tiers` is
+    the per-name tier at rebalance time — the baseline the tier-crossing detector
+    compares future runs against."""
     today = dt.date.today().isoformat()
     value, _, missing = mark(cfg)
     if missing:
         flag(f'rebalance marked with carried values for: {", ".join(missing)}')
     alloc = {t: round(w * value, 2) for t, w in weights.items()}
     event = {'date': today, 'reason': reason, 'allocations': alloc,
+             'tiers': dict(tiers or {}),
              'cash': round(value - sum(alloc.values()), 2)}
     if cfg['events'] and cfg['events'][-1]['date'] == today:
         cfg['events'][-1] = event       # idempotent same-day re-runs
