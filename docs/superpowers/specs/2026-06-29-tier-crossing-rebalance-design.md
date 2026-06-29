@@ -76,9 +76,13 @@ Within-tier score drift continues to change nothing (hysteresis preserved).
 ### Invariant (prevents recurrence)
 
 Every score / tier / weight in the `Targets` sheet comes from the **same**
-`refresh_targets` snapshot. A test asserts it: for every included row, the `Target %`
-must lie within the band of its `Tier` (per the `Sizing Rules` table). The MU
-state (✓✓✓ tier + ✓✓-band weight) becomes uncommittable.
+`refresh_targets` snapshot. A test asserts the included weights are **monotonic in
+score**: sorted by score descending, `Target %` is non-increasing (ties allowed for
+cap-clipped names). `base_weight` is monotonic in score and normalization/capping
+preserve order, so any inversion — like MU (✓✓✓, 86.4) at 7.4% below NVDA (✓✓, 84.1)
+at 9.3% — means a stale weight, and is uncommittable. (A "within the tier band" check
+would false-positive: normalization pushes a ✓✓✓ name's 12% base weight below the 12%
+band floor, e.g. to ~11.7%.)
 
 ### Components
 
@@ -171,13 +175,17 @@ the detector compares future runs against its stored `tiers`.
 
 New tests in `tests/` (pytest, matching the existing exporter suite):
 
-- `test_targets_band_consistency` — for every included `Targets` row, `Target %`
-  is within its `Tier` band. The regression gate for this whole bug class.
-- `test_tier_crossing_triggers_rebalance` — given a prior event with `tiers` and a
-  recalc where one held name's tier changed, the gate fires and the reason names the
-  tier delta. (Mock `recalc`; no network.)
-- `test_within_tier_drift_no_rebalance` — a held name's score moves within its band →
-  gate does **not** fire → workbook untouched.
+- `weights_score_monotonic()` unit tests — an inverted (score, weight) list is
+  flagged; a sorted one passes. (Pure, no yfinance.)
+- `test_targets_weights_monotonic` (data gate) — the committed `Targets` sheet's
+  included rows are score-monotonic. The regression gate for this whole bug class;
+  goes green once the corrective rebalance is committed. (openpyxl only, no yfinance.)
+- `tier_changes()` / `build_reason()` unit tests — crossing detected, within-tier and
+  newly-entered names ignored; reason string concatenates membership + tier deltas.
+- `test_refresh_fires_on_tier_change` / `test_refresh_frozen_when_unchanged` —
+  integration over a temp workbook with `recalc`/network/`log_rebalance` mocked: a tier
+  crossing rewrites `Targets` and logs one event carrying `tiers`; no change leaves the
+  workbook byte-identical and logs nothing.
 - `test_log_rebalance_stores_tiers` — `log_rebalance` persists the `tiers` map.
 
 Network calls (`last_trade_age_days`, `current_price`, `mark`) are mocked/stubbed in
@@ -206,10 +214,14 @@ unit tests, as in the existing `refresh_targets`-adjacent tests.
 
 ## Files touched
 
+- `scripts/portfolio_sizing.py` (new) — pure, yfinance-free sizing helpers:
+  `tier_changes`, `build_reason`, `weights_score_monotonic`. So the regression gate
+  runs in the minimal (openpyxl-only) deploy CI.
 - `scripts/portfolio_model.py` — `tiers` in event schema; `log_rebalance` signature.
-- `scripts/refresh_targets.py` — detector, gate, freeze-snapshot write gating,
-  `--resize` forces rebalance.
-- `tests/` — four new tests above.
+- `scripts/refresh_targets.py` — import the helpers; wire the gate, freeze-snapshot
+  write gating, `--resize` forces rebalance, pass `tiers` to `log_rebalance`.
+- `tests/` — `test_portfolio_sizing.py` (helpers + data gate),
+  `test_refresh_targets.py` (integration), `test_log_rebalance_stores_tiers`.
 - `CLAUDE.md` + weekly-scan skill — `refresh_targets.py` is the single `Targets`
   writer; run it after rescores; never hand-edit scores into `Targets`.
 
