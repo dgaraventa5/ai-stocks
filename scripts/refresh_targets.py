@@ -188,8 +188,6 @@ def refresh(dry_run: bool = False, resize: bool = False,
     hdr = [c.value for c in targets[2]]
     col = {name: i for i, name in enumerate(hdr)}
     prior_include: set[str] = set()
-    prior_tiers: dict[str, str] = {}      # ticker -> prior Tier string
-    prior_weights: dict[str, float] = {}  # ticker -> prior Target %
     overrides: dict[str, str] = {}
     exit_pending: dict[str, str] = {}   # ticker -> 'since' date
     notes: dict[str, str] = {}
@@ -199,15 +197,6 @@ def refresh(dry_run: bool = False, resize: bool = False,
             continue
         if row[col.get('Include?', 5)] == 'Y':
             prior_include.add(tkr)
-            tier_val = row[col['Tier']] if 'Tier' in col else None
-            if tier_val:
-                prior_tiers[tkr] = str(tier_val)
-            pct_val = row[col['Target %']] if 'Target %' in col else None
-            if pct_val is not None:
-                try:
-                    prior_weights[tkr] = float(pct_val)
-                except (TypeError, ValueError):
-                    pass
         note = str(row[col.get('Notes', 8)] or '')
         if note:
             notes[tkr] = note
