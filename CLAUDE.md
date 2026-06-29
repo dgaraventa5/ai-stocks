@@ -247,6 +247,18 @@ GAAP EPS YoY scores garbage when the change is dominated by disclosed non-operat
 
 **Rollout:** Phase 1 = `REL_STRENGTH_1Q` on portfolio names (frozen layer-cohort EW basket; SMH fallback for thin layers). Phase 2 adds `EARNINGS_REACTION` + full watchlist + rating-time forecasts. Phase 3 adds the fundamental templates. Switch rating→probability defaults from the §4 priors to empirically-learned per-bucket hit rates once each dimension has ~30 resolved forecasts.
 
+### 18. Targets sheet has one writer: refresh_targets.py (added 2026-06-29)
+
+`00-master/portfolio.xlsx` `Targets` is written ONLY by `scripts/refresh_targets.py`.
+Never hand-edit scores/tiers into it — that bypass left MU showing ✓✓✓ at a stale
+✓✓-band weight (a ✓✓✓ name below a ✓✓ name) because weights and the model never
+moved. After any rescore that could change a held name's tier, run
+`python3 scripts/refresh_targets.py` (it re-weights + logs a model event iff
+membership OR a held tier changed; within-tier drift freezes the snapshot, no churn).
+`--resize` forces a re-weight. The score-monotonicity gate
+(`tests/test_portfolio_sizing.py::test_targets_weights_monotonic`) fails the build on
+any inversion. See spec 2026-06-29-tier-crossing-rebalance-design.md.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

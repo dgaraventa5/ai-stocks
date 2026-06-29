@@ -51,7 +51,7 @@ Run the weekly news scan per CLAUDE.md.
    python3 scripts/track_performance.py
    ```
 
-   `refresh_targets.py` automatically recomputes Target % allocations for **all** portfolio members using the latest scores — not just ENTER/EXIT events. A tier upgrade (e.g., ✓✓ → ✓✓✓ from an earnings beat) immediately increases that name's target allocation; a tier downgrade decreases it. The script outputs a flag line for each holding that changed tier, with old and new allocations. This is the mechanism that keeps the portfolio composition maximally weighted toward the highest-scoring names each week.
+   `refresh_targets.py` is the **only writer** of the `Targets` sheet in `portfolio.xlsx` — do not hand-edit scores or tiers into it directly (Rule #18). Run it after any rescore that could change a held name's tier; use `--resize` to force a re-weight. It re-weights and logs a model event only on a membership or tier change; within-tier score drift freezes the snapshot (no churn). `refresh_targets.py` automatically recomputes Target % allocations for **all** portfolio members using the latest scores — not just ENTER/EXIT events. A tier upgrade (e.g., ✓✓ → ✓✓✓ from an earnings beat) immediately increases that name's target allocation; a tier downgrade decreases it. The script outputs a flag line for each holding that changed tier, with old and new allocations. This is the mechanism that keeps the portfolio composition maximally weighted toward the highest-scoring names each week.
 
    b. Report every pipeline FLAG in the output:
    - **ENTER/EXIT/EXIT PENDING/BLOCKED** — membership changes (ENTER/EXIT are rebalance events Dom mirrors in his account)

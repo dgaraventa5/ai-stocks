@@ -42,6 +42,7 @@ from openpyxl.styles import Font, PatternFill
 
 from common import flag
 from portfolio_model import load_cfg, log_rebalance
+from portfolio_sizing import tier_changes, build_reason, weights_score_monotonic
 from recalc_watchlist import recalc
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -159,8 +160,15 @@ def refresh(dry_run: bool = False, resize: bool = False,
     today = dt.date.today().isoformat()
     path = portfolio or PORTFOLIO
     wb = load_workbook(path, data_only=False)
-    sizing, targets, recon = wb['Sizing Rules'], wb['Targets'], wb['Reconciliation']
-    positions = wb['Positions']
+    sizing, targets = wb['Sizing Rules'], wb['Targets']
+    # Reconciliation + Positions were removed in the notional-only privacy pass
+    # (PR #9); both are optional. The site reads only Targets, and Positions is
+    # unused (the model is the portfolio of record — portfolio_model.py). Tolerate
+    # their absence so refresh runs on the slimmed workbook instead of crashing —
+    # that KeyError crash is what forced the ad-hoc Targets hand-edits this change
+    # replaces. Absent sheets are not recreated (Dom 2026-06-29: keep it slim).
+    recon = wb['Reconciliation'] if 'Reconciliation' in wb.sheetnames else None
+    positions = wb['Positions'] if 'Positions' in wb.sheetnames else None
 
     ensure_params(sizing)
     p = load_params(sizing)
@@ -290,15 +298,26 @@ def refresh(dry_run: bool = False, resize: bool = False,
     base = {t: base_weight(info[t]['TOTAL'], p['tiers']) for t in include}
     weights = cap_and_normalize(base, layers, 1.0 - cash, max_single, layer_cap)
 
-    # ---- tier-change reporting (for holdings that changed tier this refresh) ----
-    for t in include:
-        new_tier = info[t].get('Tier', '')
-        old_tier = prior_tiers.get(t, '')
-        if old_tier and new_tier and old_tier != new_tier:
-            old_pct = prior_weights.get(t, 0.0)
-            new_pct = weights.get(t, 0.0) * 100
-            flag(f'{t}: tier {old_tier} → {new_tier} | allocation '
-                 f'{old_pct:.1f}% → {new_pct:.1f}% (rebalance)')
+    # ---- rebalance gate: membership change OR a held name crossed a tier band ----
+    # (--resize forces it). Crossing baseline is the LAST MODEL EVENT's stored
+    # tiers, NOT the Targets sheet: the sheet can carry a fresh tier from an
+    # out-of-band score edit (the bug this fixes), so it is not a trustworthy
+    # baseline. Within-tier drift changes nothing — hysteresis preserved.
+    cfg = load_cfg()
+    last_ev = cfg['events'][-1]
+    prior_model = set(last_ev['allocations'])
+    last_tiers = last_ev.get('tiers', {})
+    tier_chg = tier_changes(include, info, last_tiers)
+    entered = sorted(set(include) - prior_model)
+    exited = sorted(prior_model - set(include))
+    fire = bool(entered or exited) or bool(tier_chg) or resize
+
+    # ---- tier-change reporting (allocation delta vs prior model weight) ----
+    denom = sum(last_ev['allocations'].values()) + last_ev.get('cash', 0)
+    prior_w = {t: a / denom for t, a in last_ev['allocations'].items()} if denom else {}
+    for t, old, new in tier_chg:
+        flag(f'{t}: tier {old} → {new} | allocation '
+             f'{prior_w.get(t, 0) * 100:.1f}% → {weights.get(t, 0) * 100:.1f}%')
 
     by_layer: dict[str, float] = {}
     for t, v in weights.items():
@@ -307,21 +326,37 @@ def refresh(dry_run: bool = False, resize: bool = False,
         if v > 0.25:
             flag(f'layer {lay}: {v:.0%} of portfolio (no layer cap active)')
 
-    # ---- prices for the trade plan ----
-    prices: dict[str, float] = {}
-    for t in include:
-        prices[t] = current_price(t)
-        time.sleep(0.25)
-        if prices[t] is None:
-            flag(f'{t}: no current price — Reconciliation row left without shares')
+    # ---- sanity: freshly computed weights must be monotonic in score ----
+    viol = weights_score_monotonic([(info[t]['TOTAL'], weights.get(t, 0))
+                                    for t in include])
+    if viol:
+        flag(f'non-monotonic weights {viol} — investigate base_weight/caps')
 
     if dry_run:
         print(f'\n{"Tkr":<7}{"Rank":>5}{"Score":>7}{"Status":<34}{"Wt %":>6}')
         for t in sorted(include, key=lambda t: -weights.get(t, 0)):
             print(f'{t:<7}{rank.get(t, 0):>5}{info[t]["TOTAL"]:>7.1f}'
                   f'{statuses.get(t, ""):<34}{weights.get(t, 0) * 100:>6.1f}')
-        print('(dry run — nothing written)')
+        verdict = ('REBALANCE: ' + build_reason(entered, exited, tier_chg, resize)
+                   if fire else 'FREEZE (no membership/tier change)')
+        print(f'(dry run — would {verdict}; nothing written)')
         return
+
+    if not fire:
+        print('membership & tiers unchanged since last rebalance — '
+              'snapshot frozen, nothing written')
+        return
+
+    # ---- prices for the Reconciliation trade plan (only if that sheet exists) ----
+    # Prices feed the Reconciliation sheet only; skip the network entirely when it
+    # was slimmed away (the common case on the notional workbook).
+    prices: dict[str, float] = {}
+    if recon is not None:
+        for t in include:
+            prices[t] = current_price(t)
+            time.sleep(0.25)
+            if prices[t] is None:
+                flag(f'{t}: no current price — Reconciliation row left without shares')
 
     # ---- rewrite Targets ----
     targets.delete_rows(1, targets.max_row)
@@ -341,43 +376,43 @@ def refresh(dry_run: bool = False, resize: bool = False,
             notes.get(t, ''),
         ])
 
-    # ---- rewrite Reconciliation ----
-    has_positions = any(positions.cell(row=r, column=1).value not in (None, 'TOTAL')
-                        for r in range(2, positions.max_row + 1))
-    recon.delete_rows(1, recon.max_row)
-    mode = ('target vs current positions'
-            if has_positions else 'fresh deployment — Positions sheet is empty')
-    recon.append([f'Mechanical target diff ({mode}) — not a trade '
-                  f'recommendation; decisions are Dom\'s (CLAUDE.md rule 5)'])
-    recon.append([f'Portfolio: ${capital:,.0f} | Prices as of {today}'])
-    recon.append(['Ticker', 'Score', 'Target %', '$ Amount', 'Price', 'Shares',
-                  'Round $', 'Delta'])
-    for c in recon[3]:
-        c.fill, c.font = copy(HEADER_FILL), copy(HEADER_FONT)
-    held = {}
-    if has_positions:
-        for r in range(2, positions.max_row + 1):
-            t = positions.cell(row=r, column=1).value
-            if t and t != 'TOTAL':
-                held[t] = positions.cell(row=r, column=3).value or 0
-    cap_row = next(r for r in range(1, sizing.max_row + 1)
-                   if sizing.cell(row=r, column=1).value == 'Portfolio Value ($)')
-    cap_cell = f"'Sizing Rules'!$B${cap_row}"
-    for t in sorted(include, key=lambda t: -weights.get(t, 0)):
+    # ---- rewrite Reconciliation (skipped if the sheet was slimmed away) ----
+    if recon is not None:
+        has_positions = positions is not None and any(
+            positions.cell(row=r, column=1).value not in (None, 'TOTAL')
+            for r in range(2, positions.max_row + 1))
+        recon.delete_rows(1, recon.max_row)
+        mode = ('target vs current positions'
+                if has_positions else 'fresh deployment — Positions sheet is empty')
+        recon.append([f'Mechanical target diff ({mode}) — not a trade '
+                      f'recommendation; decisions are Dom\'s (CLAUDE.md rule 5)'])
+        recon.append([f'Portfolio: ${capital:,.0f} | Prices as of {today}'])
+        recon.append(['Ticker', 'Score', 'Target %', '$ Amount', 'Price', 'Shares',
+                      'Round $', 'Delta'])
+        for c in recon[3]:
+            c.fill, c.font = copy(HEADER_FILL), copy(HEADER_FONT)
+        held = {}
+        if has_positions:
+            for r in range(2, positions.max_row + 1):
+                t = positions.cell(row=r, column=1).value
+                if t and t != 'TOTAL':
+                    held[t] = positions.cell(row=r, column=3).value or 0
+        cap_row = next(r for r in range(1, sizing.max_row + 1)
+                       if sizing.cell(row=r, column=1).value == 'Portfolio Value ($)')
+        cap_cell = f"'Sizing Rules'!$B${cap_row}"
+        for t in sorted(include, key=lambda t: -weights.get(t, 0)):
+            r = recon.max_row + 1
+            # Formulas, not pasted values (CLAUDE.md rule 4).
+            recon.append([
+                t, round(info[t]['TOTAL'], 1), round(weights[t] * 100, 2),
+                f'=C{r}/100*{cap_cell}', prices.get(t),
+                f'=IF(E{r}="","",ROUND(D{r}/E{r},4))',
+                f'=IF(E{r}="","",F{r}*E{r})',
+                (f'={held.get(t, 0)}-F{r}' if has_positions else 'NEW'),
+            ])
         r = recon.max_row + 1
-        # Formulas, not pasted values (CLAUDE.md rule 4): editing Target % or
-        # capital re-derives dollars and share counts. Fractional shares
-        # (Dom decision 2026-06-09) — share price no longer constrains sizing.
-        recon.append([
-            t, round(info[t]['TOTAL'], 1), round(weights[t] * 100, 2),
-            f'=C{r}/100*{cap_cell}', prices.get(t),
-            f'=IF(E{r}="","",ROUND(D{r}/E{r},4))',
-            f'=IF(E{r}="","",F{r}*E{r})',
-            (f'={held.get(t, 0)}-F{r}' if has_positions else 'NEW'),
-        ])
-    r = recon.max_row + 1
-    recon.append(['TOTAL', None, f'=SUM(C4:C{r - 1})', f'=SUM(D4:D{r - 1})',
-                  None, None, f'=SUM(G4:G{r - 1})', None])
+        recon.append(['TOTAL', None, f'=SUM(C4:C{r - 1})', f'=SUM(D4:D{r - 1})',
+                      None, None, f'=SUM(G4:G{r - 1})', None])
 
     # ---- README breadcrumbs ----
     rm = wb['README']
@@ -388,23 +423,12 @@ def refresh(dry_run: bool = False, resize: bool = False,
     wb.save(path)
     print(f'wrote {len(include)} target positions to {path}')
 
-    # ---- roll the model forward when membership changed ----
-    # The model is the portfolio of record (Dom decision 2026-06-09); a
-    # membership change here = a rebalance event. Weight drift within the
-    # same names does NOT rebalance — matches the hysteresis philosophy.
-    cfg = load_cfg()
-    prior_model = set(cfg['events'][-1]['allocations'])
-    if set(include) != prior_model:
-        entered = sorted(set(include) - prior_model)
-        exited = sorted(prior_model - set(include))
-        reason = ('membership change: '
-                  + ', '.join(['+' + t for t in entered]
-                              + ['-' + t for t in exited]))
-        ev = log_rebalance(cfg, weights, reason)
-        print(f'model rebalanced: {reason} — value at rebalance '
-              f'${sum(ev["allocations"].values()) + ev["cash"]:,.0f}')
-    else:
-        print('model membership unchanged — no rebalance event logged')
+    # ---- log the rebalance event (membership and/or tier change, or resize) ----
+    reason = build_reason(entered, exited, tier_chg, resize)
+    tiers_now = {t: info[t]['Tier'] for t in include}
+    ev = log_rebalance(cfg, weights, reason, tiers_now)
+    print(f'model rebalanced: {reason} — value at rebalance '
+          f'${sum(ev["allocations"].values()) + ev["cash"]:,.0f}')
 
 
 if __name__ == '__main__':
