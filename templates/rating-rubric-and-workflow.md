@@ -1,20 +1,37 @@
 # Subjective Rating Rubric & Workflow
 
-How to rate the 12 subjective columns in `00-master/ai_supply_chain_scoring.xlsx` reliably, including how Claude and Dom work together, what biases to guard against, and how to audit calibration over time.
+How to rate the 13 subjective columns in `00-master/ai_supply_chain_scoring.xlsx` reliably, including how Claude and Dom work together, what biases to guard against, and how to audit calibration over time.
 
 ---
 
 ## Why this exists
 
-The scoring system has 12 subjective 1-5 ratings spread across AI Thesis (5), Momentum (3), and Risk (4). They carry 50% of the total score weight by direct contribution, and they color how you read the objective inputs. If they're miscalibrated, the whole system is miscalibrated.
+The scoring system has 13 subjective 1-5 ratings spread across AI Thesis (5), Momentum (3), and Risk (5). They carry **~42.5%** of the total score weight by direct contribution (AI Thesis 20% + Risk 15% + the 3 subjective Momentum ratings ≈ 7.5% of the 10% Momentum weight; the 4th Momentum input, 50DMA %, is objective), and they color how you read the objective inputs. If they're miscalibrated, the whole system is miscalibrated.
 
 The goal of this rubric: replace vibes with checkable criteria so two informed people rating the same stock get the same answer.
 
 ---
 
-## The 12 dimensions
+## Category weights — the Weights tab is the single source of truth
 
-### AI Thesis (5 dimensions, 30% category weight)
+These six category weights are **read from** `00-master/ai_supply_chain_scoring.xlsx` → **Weights** tab, which is authoritative. The table below is a mirror kept here for convenience; if it ever disagrees with the Weights tab, **the Weights tab wins and this doc is stale.** `tests/test_rubric_weights_match_workbook.py` fails the build on any drift — it is the gate that catches the AI-Thesis-quoted-at-30%-while-the-model-used-20% error that lived in this file until 2026-07-01.
+
+| Category | Weight |
+|---|---|
+| Value | 20% |
+| Quality | 20% |
+| Growth | 15% |
+| AI Thesis | 20% |
+| Momentum | 10% |
+| Risk | 15% |
+
+Do not hand-tune these here. Category-weight changes are gated on measured Information Coefficient (not intuition) and are made in the Weights tab, never in this doc.
+
+---
+
+## The 13 dimensions
+
+### AI Thesis (5 dimensions, 20% category weight)
 
 #### D1. AI Revenue % of Total
 
@@ -398,7 +415,7 @@ D2. Supply Chain Position: 4
    Source: Industry context + 10-K customer disclosures
    Confidence: High
 
-... (continues for all 12 dimensions)
+... (continues for all 13 dimensions)
 ```
 
 **Critical:** Every rating must include:
@@ -468,7 +485,7 @@ Once a year, do a full audit:
 Add a sheet to `00-master/ai_supply_chain_scoring.xlsx` named "Rating Audit" with columns:
 - Date
 - Ticker
-- Dimension (D1-D5, M1-M3, R1-R4)
+- Dimension (D1-D5, M1-M3, R1-R5)
 - Rating
 - Rationale (one line)
 - Source
