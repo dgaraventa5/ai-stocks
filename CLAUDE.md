@@ -259,6 +259,129 @@ membership OR a held tier changed; within-tier drift freezes the snapshot, no ch
 (`tests/test_portfolio_sizing.py::test_targets_weights_monotonic`) fails the build on
 any inversion. See spec 2026-06-29-tier-crossing-rebalance-design.md.
 
+### 19. Foreign filers: convert to a common currency, never mix (added 2026-07-02, approved by Dom)
+
+**Context:** A foreign company trading as a US ADR (price in USD) but reporting
+financials in a local currency (TSM/UMC in TWD) produced garbage on every
+market-cap-based ratio — P/S, EV/EBITDA, FCF-yield divide a USD numerator by a
+local-currency denominator, off by the FX rate. The old convention just *blanked*
+them, which hid how expensive names like TSM were (fixing it dropped TSM ✓✓✓→✓✓).
+yfinance's ADR `enterpriseValue` is itself corrupt, so FX-converting the ADR fields
+is unreliable.
+
+**Rule:** Whenever a name's price currency differs from its financial-reporting
+currency (`info['currency'] != info['financialCurrency']`), put numerator and
+denominator in the **same** currency before computing P/S, EV/EBITDA, FCF-yield.
+`scripts/adr_currency.py` does this inside `compute_inputs`:
+- **Preferred (mapped US ADRs):** take the ratios from the company's LOCAL listing,
+  where trading == reporting currency and yfinance's ratios are clean (US-ADR
+  market caps are corrupt, so the local listing is more accurate). Map = `ADR_LOCAL`
+  (TSM→2330.TW, UMC→2303.TW); extend it for new US ADRs.
+- **General (any other foreign listing):** convert the market cap into the financial
+  currency by exchange rate (`fx_rate`, via yfinance `{from}{to}=X`), compute
+  EV = market cap + debt − cash (NOT the corrupt yfinance EV), and recompute the
+  three ratios (`ratios_via_fx`). No per-name mapping — works for foreign primary
+  listings (e.g. SMIC 0981.HK, HKD-trade / USD-report).
+- Detection is **`trading != financial`**, NOT "financial != USD" (which wrongly
+  blanks a clean same-currency foreign name like Vanguard 5347.TWO). Blank only when
+  conversion is impossible (no FX rate). Skips Layer-10/9 (col F is EV/FCF or EV/MW).
+
+Ratios are dimensionless once currency-consistent, so they compare apples-to-apples
+across the whole watchlist regardless of reporting currency. Gross/FCF margins,
+ND/EBITDA, growth %s and forward P/E are already currency-neutral and untouched.
+Foreign filers still lack SEC Form-4 (M3 = flagged default) and `expectations_flag.py`
+self-skips (no us-gaap XBRL). Refresh with `/refresh-objective` after adding to `ADR_LOCAL`.
+
+### 20. P1 cohort-relative scoring is LIVE (added 2026-07-02, approved by Dom)
+
+The six style-biased metrics — **EV/EBITDA, FCF-yield, P/S** (Value) and **ROIC,
+gross margin, FCF margin** (Quality) — are scored as a **percentile rank within
+the name's top-level-layer cohort** (§5-2 hybrid), NOT against absolute bands. A
+cohort with <8 non-null values for a metric falls back to that metric's absolute
+band (min-cohort-size guard, `cohort_percentile.cohort_metric_scores`). Col F
+(EV/*) stays absolute for Layer 9 (mixed EV/EBITDA + EV/MW) and percentiles EV/FCF
+for Layer 10. Everything else — ND/EBITDA, Fwd P/E, PEG, Growth, and all
+subjective dims — is unchanged (absolute / subjective).
+
+**Why:** absolute margin/ROIC bands measured "has an asset-light business model,"
+not within-peer merit — software/silicon auto-maxed them (silicon+software vs
+capital-heavy mean-Quality gap was **+28**; now **+6**). Before/after:
+`docs/superpowers/plans/2026-07-02-p1-before-after-report.md`.
+
+**Engine:** `recalc_watchlist.recalc(mode='percentile')` is the LIVE default and
+the single source of truth for every consumer (`export_site_data`,
+`refresh_targets`). `mode='absolute'` reproduces the pre-P1 scores. Tier bands
+(85/70/55/40) and portfolio entry/exit (74.5/73.0) were reviewed and **held
+unchanged** — the overall score scale barely compressed.
+
+**Sheet:** the cohort-relative Value Score (col J) and Quality Score (col O) can't
+be per-row Excel formulas, so they are **recalc-maintained VALUES** written by
+`python3 scripts/recalc_watchlist.py --sync` (TOTAL/Tier stay formulas that
+reference J/O). **After `rebuild_watchlist_formulas.py` (which restores absolute
+formulas in J/O) OR any objective-input refresh, re-run `--sync`.** Deliberate
+rule-4 exception for cohort-relative scoring (same garbage-input-family reasoning
+as rules 10/13).
+
+### 21. P2 reverse-DCF mispricing metric in Value (added 2026-07-02, approved by Dom)
+
+Value now averages a **6th sub-metric** (§5-3): a reverse-DCF mispricing score
+targeting finding F1 (reward *mispricing*, not just *quality*). For each name,
+implied FCF growth is solved from its **EV/FCF** multiple (a fixed 10% WACC / 3%
+terminal / 10-yr multi-stage DCF); the score is the gap between a grounded growth
+estimate (**revenue 3-yr CAGR**) and that implied growth — a bigger positive gap
+(grounded > implied) = cheaper-vs-expectations = higher score
+(`reverse_dcf.reverse_dcf_score`). Folded into Value (no reweight), so it dodges
+the P3 IC-gate.
+
+**Data:** EV/FCF per name lives in `00-master/reverse-dcf.json`, refreshed by
+`scripts/refresh_reverse_dcf.py` — currency-consistent per rule 19 (mapped ADRs
+use the local listing, other foreign filers FX-convert; blank on
+non-positive/unavailable FCF). `recalc` reads the json + the sheet's Rev-3y-CAGR;
+a missing json makes the term drop out cleanly (Value = the five prior metrics).
+**Refresh alongside objective refreshes (rule 9), then re-run `--sync`.**
+
+**Effect:** 1 of 6 Value metrics ≈ 3.3% of TOTAL, so swings are small by design
+(±3 pts). Rewards fast-growers whose multiple is justified by growth; penalizes
+names whose multiple implies more growth than their recent revenue trend.
+**Known limitation:** revenue-3yr-CAGR is a noisy grounded-growth proxy for
+commodity/cyclical names (nat-gas E&P AR/RRC get dinged on a depressed revenue
+trend) — a candidate refinement, documented not hidden.
+
+### 22. Subjective floor removed: AI Thesis / Risk use (mean−1)×25 (added 2026-07-02, approved by Dom)
+
+**P6 (finding F8).** AI Thesis and Risk map their 1–5 ratings to a subscore via
+**(mean − 1) × 25** (1→0, 2→25, 3→50, 4→75, 5→100), NOT the old mean × 20 (which
+floored at 20). A genuinely weak dimension can now drag the subscore to 0 rather
+than banking 20/100 for free ("zero AI exposure still banked 20% credit on 20% of
+the score"). Scoped to AI Thesis + Risk; **Momentum keeps rating × 20** (it blends
+with the objective 50DMA band, so it isn't floored the same way). Lives in
+`recalc_watchlist._assemble` and the Excel AI/Risk Score formulas
+(`rebuild_watchlist_formulas.py`).
+
+### 23. Collinear inputs (P4) + D5 dual-framework (P5): measured & disclosed (added 2026-07-02, approved by Dom)
+
+**P4 — accepted double-counts (finding F4).** The flagged overlaps were measured
+across the Watchlist (Pearson): **R3 Balance-Sheet-Risk ↔ Quality ND/EBITDA
++0.77**; **D2 Supply-Chain-Position ↔ D3 Moat +0.73**; **D5 Hyperscaler-Exposure
+↔ D1 AI-Revenue-% +0.62** (vs ~+0.49 for a normal within-category pair).
+Decision: **keep + disclose** (§5-5 option b) — each input adds a distinct angle
+(R3 = holistic maturities/dilution vs the raw ratio; Position = pricing-power
+bottleneck vs Moat = durability), so removing loses information; but the additive
+sum DOES over-weight the shared signal, so treat a high-scoring "dominant crowded
+AI winner" cluster with skepticism. **Future option if reducing the double-count
+is wanted:** re-scope R3 to exclude leverage (already in ND/EBITDA), keeping only
+maturities / dilution / going-concern — a rubric change + re-rate, not done here.
+
+**P5 — D5 dual-framework (finding F9).** D5 = supplier hyperscaler-revenue
+exposure (Layers 1–8) OR buyer AI-capex commitment (Layer 9); a "5" means
+"maximally AI-tied" in either, but the constructs differ. Kept as one column
+(splitting adds a column for ≈no scoring change, since each name uses exactly one
+framework). Mitigation: **P1 cohorts are by top-level layer, so L1–8 (supplier)
+and L9 (buyer) fall in different cohorts** — cross-framework D5 comparison no
+longer happens in the ranking. Framework documented in
+`templates/rating-rubric-and-workflow.md` (D5 section). Do NOT cross-compare a raw
+D5 between a supplier and a hyperscaler.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

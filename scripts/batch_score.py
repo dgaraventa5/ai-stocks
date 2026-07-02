@@ -33,6 +33,8 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 
 import yfinance as yf
+
+import adr_currency
 from openpyxl import load_workbook
 
 from common import ROOT, flag, per_stock_dir
@@ -195,6 +197,32 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
     else:
         gaps.append("FCF Yield: missing freeCashflow or marketCap")
     inp["ps"] = info.get("priceToSalesTrailing12Months")
+
+    # Foreign filer whose price currency differs from its financial-reporting
+    # currency: yfinance's market-cap-based ratios (EV/EBITDA, P/S, FCF-Yield)
+    # mix currencies and are garbage. Fix by putting numerator and denominator in
+    # the SAME currency. Prefer a mapped local listing (cleanest — for US ADRs
+    # like TSM whose ADR market cap is itself corrupt); otherwise CONVERT the
+    # market cap into the financial currency by exchange rate and recompute
+    # (general — any foreign primary listing, e.g. SMIC in HKD). Skip Layer-10/9
+    # (col F is EV/FCF or EV/MW there, not EV/EBITDA).
+    trading, financial = info.get("currency"), info.get("financialCurrency")
+    if adr_currency.has_currency_mismatch(trading, financial) \
+            and not _is_layer10(layer) and not _is_layer9_capacity(layer):
+        fixed = adr_currency.fetch_local_ratios(ticker)
+        if fixed:
+            src = f"local listing {adr_currency.ADR_LOCAL.get(ticker)}"
+        else:
+            rate = adr_currency.fx_rate(trading, financial)
+            fixed = adr_currency.ratios_via_fx(
+                mcap, rate, info.get("totalRevenue"), info.get("ebitda"),
+                info.get("totalDebt"), info.get("totalCash"), fcf)
+            src = f"FX {trading}->{financial}"
+        inp["ev_ebitda"], inp["ps"], inp["fcf_yield"] = (
+            fixed["ev_ebitda"], fixed["ps"], fixed["fcf_yield"])
+        got = [k for k in ("ev_ebitda", "ps", "fcf_yield") if fixed[k] is not None]
+        gaps.append(f"Foreign filer {trading}/{financial}: EV/EBITDA, P/S, "
+                    f"FCF-Yield via {src} ({', '.join(got) or 'none available'})")
 
     # ----- Quality -----
     # ROIC not exposed by yfinance.info; leave blank (don't substitute ROA)
