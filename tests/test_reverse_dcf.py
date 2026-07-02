@@ -124,6 +124,15 @@ def test_reverse_dcf_scores_the_gap_not_the_level():
     assert rd.reverse_dcf_score(20.0, 25.0, wacc=WACC) > rd.reverse_dcf_score(20.0, 5.0, wacc=WACC)
 
 
+def test_reverse_dcf_grounded_growth_is_clamped():
+    # review #1 fix: trailing CAGR is clamped to [0, 25]% before scoring, so a
+    # 100%-trailing-growth name scores the same as 25% (no saturation) and a -50%
+    # cyclical dip scores the same as 0% (no spurious penalty).
+    assert rd.reverse_dcf_score(20.0, 100.0) == rd.reverse_dcf_score(20.0, 25.0)
+    assert rd.reverse_dcf_score(20.0, -50.0) == rd.reverse_dcf_score(20.0, 0.0)
+    assert rd.reverse_dcf_score(20.0, 20.0) != rd.reverse_dcf_score(20.0, 5.0)
+
+
 def test_reverse_dcf_score_none_on_bad_inputs():
     assert rd.reverse_dcf_score(ev_over_fcf=None, grounded_growth_pct=8.0) is None
     assert rd.reverse_dcf_score(ev_over_fcf=-12.0, grounded_growth_pct=8.0) is None  # neg FCF
