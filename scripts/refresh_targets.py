@@ -36,7 +36,6 @@ import time
 from copy import copy
 from pathlib import Path
 
-import yfinance as yf
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill
 
@@ -142,6 +141,7 @@ def cap_and_normalize(weights: dict[str, float], layers: dict[str, str],
 
 
 def last_trade_age_days(ticker: str) -> int | None:
+    import yfinance as yf  # lazy: the fire/dry-run path is offline (site-deploy CI has no yfinance)
     hist = yf.Ticker(ticker).history(period='1mo', auto_adjust=True)
     if hist is None or hist.empty:
         return None
@@ -149,6 +149,7 @@ def last_trade_age_days(ticker: str) -> int | None:
 
 
 def current_price(ticker: str) -> float | None:
+    import yfinance as yf  # lazy (see last_trade_age_days)
     hist = yf.Ticker(ticker).history(period='5d', auto_adjust=False)
     if hist is None or hist.empty:
         return None
@@ -156,7 +157,7 @@ def current_price(ticker: str) -> float | None:
 
 
 def refresh(dry_run: bool = False, resize: bool = False,
-            portfolio: str | None = None) -> None:
+            portfolio: str | None = None, check_freshness: bool = True) -> None:
     today = dt.date.today().isoformat()
     path = portfolio or PORTFOLIO
     wb = load_workbook(path, data_only=False)
@@ -227,13 +228,14 @@ def refresh(dry_run: bool = False, resize: bool = False,
         {t for t in info if info[t]['TOTAL'] >= exit_score} | prior_include
         | {t for t, v in overrides.items() if v == 'INCLUDE'})
     dead: set[str] = set()
-    for t in candidates:
-        age = last_trade_age_days(t)
-        time.sleep(0.25)
-        if age is None or age > stale_days:
-            dead.add(t)
-            flag(f'{t}: last trade {"none" if age is None else f"{age}d ago"} '
-                 f'— excluded as halted/delisted')
+    if check_freshness:   # network; skipped by the offline pending_rebalance() gate
+        for t in candidates:
+            age = last_trade_age_days(t)
+            time.sleep(0.25)
+            if age is None or age > stale_days:
+                dead.add(t)
+                flag(f'{t}: last trade {"none" if age is None else f"{age}d ago"} '
+                     f'— excluded as halted/delisted')
 
     # ---- membership: hysteresis ----
     include: list[str] = []
@@ -329,12 +331,14 @@ def refresh(dry_run: bool = False, resize: bool = False,
         verdict = ('REBALANCE: ' + build_reason(entered, exited, tier_chg, resize)
                    if fire else 'FREEZE (no membership/tier change)')
         print(f'(dry run — would {verdict}; nothing written)')
-        return
+        return {'fire': fire, 'entered': entered, 'exited': exited,
+                'tier_chg': tier_chg, 'wrote': False}
 
     if not fire:
         print('membership & tiers unchanged since last rebalance — '
               'snapshot frozen, nothing written')
-        return
+        return {'fire': False, 'entered': [], 'exited': [], 'tier_chg': [],
+                'wrote': False}
 
     # ---- prices for the Reconciliation trade plan (only if that sheet exists) ----
     # Prices feed the Reconciliation sheet only; skip the network entirely when it
@@ -418,6 +422,21 @@ def refresh(dry_run: bool = False, resize: bool = False,
     ev = log_rebalance(cfg, weights, reason, tiers_now)
     print(f'model rebalanced: {reason} — value at rebalance '
           f'${sum(ev["allocations"].values()) + ev["cash"]:,.0f}')
+    return {'fire': True, 'entered': entered, 'exited': exited,
+            'tier_chg': tier_chg, 'wrote': True}
+
+
+def pending_rebalance(portfolio: str | None = None) -> bool:
+    """True when the committed Targets are STALE vs the live scores — a rebalance
+    is pending because membership or a held name's tier has changed since the last
+    logged model event. Offline (dry-run path uses no yfinance). This is the
+    guarantee behind rule 25: True here means the weights no longer reflect the
+    scores, and something changed them without re-weighting."""
+    import contextlib
+    import io
+    with contextlib.redirect_stdout(io.StringIO()):   # swallow the dry-run print
+        rep = refresh(dry_run=True, portfolio=portfolio, check_freshness=False)
+    return bool(rep and rep.get('fire'))
 
 
 if __name__ == '__main__':
@@ -429,5 +448,17 @@ if __name__ == '__main__':
     ap.add_argument('--portfolio-path', default=None,
                     help='override path to portfolio.xlsx (default: auto-derived '
                          'from repo root)')
+    ap.add_argument('--check', action='store_true',
+                    help='exit 1 if the Targets are stale vs live scores (a '
+                         'rebalance is pending) — the CI/commit gate; writes nothing')
     args = ap.parse_args()
+    if args.check:
+        import sys
+        if pending_rebalance(portfolio=args.portfolio_path):
+            print('STALE: Targets do not reflect current scores — a rebalance is '
+                  'pending. Run `python3 scripts/refresh_targets.py` (--resize to '
+                  'force immediate exits).')
+            sys.exit(1)
+        print('Targets reflect current scores ✓')
+        sys.exit(0)
     refresh(dry_run=args.dry_run, resize=args.resize, portfolio=args.portfolio_path)

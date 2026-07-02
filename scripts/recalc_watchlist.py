@@ -374,6 +374,16 @@ if __name__ == '__main__':
         n = sync_scores()
         print(f'synced P1 percentile Value/Quality Score cells for {n} rows '
               f'(TOTAL/Tier formulas reference them)')
+        # Auto re-weight the portfolio to the fresh scores (rule 25). --sync is the
+        # finalize step after ANY score change, so chaining the re-weight here means
+        # weights never silently lag the scores. Freeze-safe: refresh_targets only
+        # rewrites when a held name's tier or the roster membership changed since the
+        # last logged rebalance; within-tier drift freezes (no churn). Lazy import
+        # avoids a recalc<->refresh_targets cycle; check_freshness=False keeps it
+        # offline (the periodic full refresh_targets handles halted/delisted names).
+        if '--no-reweight' not in sys.argv:
+            import refresh_targets
+            refresh_targets.refresh(check_freshness=False)
         sys.exit(0)
     rs = recalc()
     # Sort by TOTAL desc (None last)

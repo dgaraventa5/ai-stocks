@@ -27,8 +27,6 @@ import json
 import os
 import time
 
-import yfinance as yf
-
 from common import ROOT, flag
 
 CONFIG = ROOT / 'tracking' / 'performance-config.json'
@@ -56,6 +54,7 @@ def save_cfg(cfg: dict) -> None:
 def _series(ticker: str, earliest: str):
     """Dividend-adjusted close series from `earliest`, cached per run."""
     if ticker not in _series_cache:
+        import yfinance as yf  # lazy: keeps the portfolio path offline-importable
         start = (dt.date.fromisoformat(earliest) - dt.timedelta(days=5)).isoformat()
         hist = yf.Ticker(ticker).history(start=start, auto_adjust=True)
         time.sleep(0.2)
