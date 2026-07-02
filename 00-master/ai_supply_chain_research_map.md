@@ -145,7 +145,7 @@ Outsourced Semiconductor Assembly & Test — back-end **contract manufacturers**
 - **GlobalFoundries (GFS)** — mature node specialty
 - **Tower Semiconductor (TSEM)** — analog/RF/specialty, in Aschenbrenner portfolio
 - **United Microelectronics (UMC)** — mature node Taiwan foundry
-- **SkyWater Technology (SKYT)** — US specialty/defense pure-play foundry (Technology-as-a-Service; ITAR/DoD, advanced packaging); added 2026-07-02 to fatten the Fabs cohort for cohort-relative (P1) scoring
+- **SMIC (0981.HK)** — China's #1 foundry (Shanghai-HQ; makes Huawei/Ascend AI accelerators); HK-listed, trades HKD / reports USD, valuation ratios handled by the currency converter; added 2026-07-02 (swapped in for SKYT, which is being acquired by IonQ)
 - **Vanguard Intl Semiconductor (5347.TWO)** — TSMC-affiliated 8-inch mature-node foundry (Taiwan); reports+trades TWD (no currency trap); added 2026-07-02 to fatten the Fabs cohort
 - **Hua Hong Semiconductor (HHUSF)** — China #2 foundry, mature-node (US OTC line; reports+trades USD, no trap); added 2026-07-02 to fatten the Fabs cohort
 
