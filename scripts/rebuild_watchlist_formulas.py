@@ -98,7 +98,9 @@ GROWTH = ('=IFERROR(AVERAGE('
           'IFERROR(IF(R{r}="","",IF(R{r}>=40,100,IF(R{r}>=30,90,IF(R{r}>=20,75,IF(R{r}>=10,60,'
           'IF(R{r}>=0,45,IF(R{r}>=-10,30,15))))))),"")),"")')
 
-AI = '=IFERROR(AVERAGE(T{r},U{r},V{r},W{r},X{r})*20,"")'
+# P6 (rule 22): AI Thesis maps ratings via (mean-1)*25 (1->0 .. 5->100) so a
+# genuine zero drags to 0 rather than flooring at 20. Momentum keeps *20 (blend).
+AI = '=IFERROR((AVERAGE(T{r},U{r},V{r},W{r},X{r})-1)*25,"")'
 
 MOMENTUM = ('=IFERROR(AVERAGE('
             'IFERROR(IF(Z{r}="","",Z{r}*20),""),'
@@ -109,7 +111,7 @@ MOMENTUM = ('=IFERROR(AVERAGE('
 
 # R5 Disruption Risk (col AL=38, added 2026-06-17): appended after Tier to avoid
 # shifting Risk Score/TOTAL/Tier and breaking downstream scripts. 5 = most durable.
-RISK = '=IFERROR(AVERAGE(AE{r},AF{r},AG{r},AH{r},AL{r})*20,"")'
+RISK = '=IFERROR((AVERAGE(AE{r},AF{r},AG{r},AH{r},AL{r})-1)*25,"")'
 
 TOTAL = ('=IFERROR(J{r}*Weights!$B$4 + O{r}*Weights!$B$5 + S{r}*Weights!$B$6 + '
          'Y{r}*Weights!$B$7 + AD{r}*Weights!$B$8 + AI{r}*Weights!$B$9,"")')

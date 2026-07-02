@@ -266,12 +266,16 @@ def _assemble(row, ms, w):
                            score_nd_ebitda(row['nd_eb'])])
     growth = avg_nonnull([score_rev_cagr(row['rev_cagr']), score_rev_yoy(row['rev_yoy']),
                           score_eps_yoy(row['eps_yoy'])])
-    ai_inputs = row['ai_inputs']
-    ai = (sum(x for x in ai_inputs if x is not None) / sum(1 for x in ai_inputs if x is not None) * 20) if any(x is not None for x in ai_inputs) else None
+    # AI Thesis / Risk map rating -> score as (mean-1)*25 (rule 22, P6): 1->0,
+    # 3->50, 5->100, so a genuine "zero" dimension can drag the score to 0 rather
+    # than flooring at 20. Momentum keeps rating*20 (it blends with the objective
+    # 50DMA band, out of P6 scope).
+    ai_present = [x for x in row['ai_inputs'] if x is not None]
+    ai = ((sum(ai_present) / len(ai_present) - 1) * 25) if ai_present else None
     momentum = avg_nonnull([x * 20 if x is not None else None for x in row['mom_inputs']]
                            + [score_50dma(row['dma_pct'])])
-    risk_inputs = row['risk_inputs']
-    risk = (sum(x for x in risk_inputs if x is not None) / sum(1 for x in risk_inputs if x is not None) * 20) if any(x is not None for x in risk_inputs) else None
+    risk_present = [x for x in row['risk_inputs'] if x is not None]
+    risk = ((sum(risk_present) / len(risk_present) - 1) * 25) if risk_present else None
     parts = []
     for sub, key in [(value, 'Value'), (quality, 'Quality'), (growth, 'Growth'),
                      (ai, 'AI'), (momentum, 'Momentum'), (risk, 'Risk')]:
