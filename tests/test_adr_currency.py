@@ -71,3 +71,54 @@ def test_local_value_ratios_blank_fcf_yield_when_inputs_missing():
 def test_adr_local_map_has_tsm_and_umc():
     assert ac.ADR_LOCAL["TSM"] == "2330.TW"
     assert ac.ADR_LOCAL["UMC"] == "2303.TW"
+
+
+# --- general FX conversion (the "convert whenever we need it" mechanism) ---
+
+def test_fx_rate_same_currency_is_one_no_network():
+    assert ac.fx_rate("USD", "USD") == 1.0
+
+
+def test_fx_rate_uses_from_to_ticker():
+    # Injected fake yfinance: fx_rate('HKD','USD') must query 'HKDUSD=X'.
+    seen = {}
+
+    class _FakeTicker:
+        def __init__(self, sym):
+            seen["sym"] = sym
+        @property
+        def info(self):
+            return {"regularMarketPrice": 0.1275}
+
+    assert ac.fx_rate("HKD", "USD", ticker_cls=_FakeTicker) == 0.1275
+    assert seen["sym"] == "HKDUSD=X"
+
+
+def test_ratios_via_fx_converts_market_cap_then_computes():
+    # mcap 100 (trading) x rate 0.1 = 10 (financial currency). revenue 5, ebitda 2,
+    # debt 3, cash 1, fcf 1  ->  P/S 2, EV/EBITDA (10+3-1)/2 = 6, FCF-yield 1/10 = 10%.
+    out = ac.ratios_via_fx(mcap_trading=100.0, rate=0.1, revenue=5.0,
+                           ebitda=2.0, debt=3.0, cash=1.0, fcf=1.0)
+    assert out["ps"] == 2.0
+    assert out["ev_ebitda"] == 6.0
+    assert out["fcf_yield"] == 10.0
+
+
+def test_ratios_via_fx_negative_ebitda_blanks_ev_ebitda():
+    out = ac.ratios_via_fx(mcap_trading=100.0, rate=0.1, revenue=5.0,
+                           ebitda=-2.0, debt=0.0, cash=0.0, fcf=1.0)
+    assert out["ev_ebitda"] is None          # non-positive EBITDA -> blank
+    assert out["ps"] == 2.0
+
+
+def test_ratios_via_fx_blank_when_market_cap_or_rate_missing():
+    assert ac.ratios_via_fx(None, 0.1, 5.0, 2.0, 0.0, 0.0, 1.0)["ps"] is None
+    assert ac.ratios_via_fx(100.0, None, 5.0, 2.0, 0.0, 0.0, 1.0)["ps"] is None
+
+
+def test_ratios_via_fx_treats_missing_debt_cash_fcf_gracefully():
+    out = ac.ratios_via_fx(mcap_trading=100.0, rate=0.1, revenue=5.0,
+                           ebitda=2.0, debt=None, cash=None, fcf=None)
+    assert out["ev_ebitda"] == 5.0           # ev = mcap 10 + 0 - 0 = 10; /2 = 5
+    assert out["fcf_yield"] is None          # no FCF
+

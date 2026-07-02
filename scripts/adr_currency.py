@@ -66,6 +66,55 @@ def local_value_ratios(local_info: dict, local_fcf) -> dict:
     return {"ev_ebitda": ev_ebitda, "ps": ps, "fcf_yield": fcf_yield}
 
 
+_FX_CACHE: dict = {}
+
+
+def _fetch_fx(f: str, t: str, ticker_cls) -> Optional[float]:
+    try:
+        info = ticker_cls(f"{f}{t}=X").info
+        return info.get("regularMarketPrice") or info.get("previousClose")
+    except Exception:
+        return None
+
+
+def fx_rate(from_ccy, to_ccy, *, ticker_cls=None) -> Optional[float]:
+    """Exchange rate: units of `to_ccy` per 1 `from_ccy`, via yfinance
+    '{from}{to}=X'. 1.0 for the same currency; None if unavailable. The default
+    (real) path is cached per pair; an injected ticker_cls (tests) is never
+    cached, so it can't pollute the shared cache."""
+    if not from_ccy or not to_ccy:
+        return None
+    f, t = str(from_ccy).upper(), str(to_ccy).upper()
+    if f == t:
+        return 1.0
+    if ticker_cls is not None:
+        return _fetch_fx(f, t, ticker_cls)
+    key = (f, t)
+    if key not in _FX_CACHE:
+        import yfinance as yf
+        _FX_CACHE[key] = _fetch_fx(f, t, yf.Ticker)
+    return _FX_CACHE[key]
+
+
+def ratios_via_fx(mcap_trading, rate, revenue, ebitda, debt, cash, fcf) -> dict:
+    """Pure: the GENERAL currency fix. Convert market cap from the trading
+    currency to the financial currency (× rate), then compute {ev_ebitda, ps,
+    fcf_yield} against the financial-currency statement items (revenue/ebitda/
+    debt/cash/fcf already in that currency, so ratios end up dimensionless and
+    comparable to every other name). EV is computed here (market cap + debt −
+    cash) rather than trusting yfinance's often-corrupt ADR enterpriseValue."""
+    none = {"ev_ebitda": None, "ps": None, "fcf_yield": None}
+    if not mcap_trading or not rate:
+        return dict(none)
+    mcap = mcap_trading * rate
+    ps = _sane(round(mcap / revenue, 2), 0.0, 1000.0) if revenue else None
+    ev = mcap + (debt or 0) - (cash or 0)
+    ev_ebitda = (_sane(round(ev / ebitda, 2), -1000.0, 1000.0)
+                 if (ebitda and ebitda > 0) else None)
+    fcf_yield = round(fcf / mcap * 100, 2) if (fcf is not None and mcap) else None
+    return {"ev_ebitda": ev_ebitda, "ps": ps, "fcf_yield": fcf_yield}
+
+
 def fetch_local_ratios(ticker: str, *, ticker_cls=None, fcf_fn=None) -> Optional[dict]:
     """Network wrapper: for a mapped ADR, fetch its local listing and return the
     clean {ev_ebitda, ps, fcf_yield}. Returns None if the ticker is unmapped or

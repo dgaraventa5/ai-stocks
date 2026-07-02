@@ -259,6 +259,39 @@ membership OR a held tier changed; within-tier drift freezes the snapshot, no ch
 (`tests/test_portfolio_sizing.py::test_targets_weights_monotonic`) fails the build on
 any inversion. See spec 2026-06-29-tier-crossing-rebalance-design.md.
 
+### 19. Foreign filers: convert to a common currency, never mix (added 2026-07-02, approved by Dom)
+
+**Context:** A foreign company trading as a US ADR (price in USD) but reporting
+financials in a local currency (TSM/UMC in TWD) produced garbage on every
+market-cap-based ratio — P/S, EV/EBITDA, FCF-yield divide a USD numerator by a
+local-currency denominator, off by the FX rate. The old convention just *blanked*
+them, which hid how expensive names like TSM were (fixing it dropped TSM ✓✓✓→✓✓).
+yfinance's ADR `enterpriseValue` is itself corrupt, so FX-converting the ADR fields
+is unreliable.
+
+**Rule:** Whenever a name's price currency differs from its financial-reporting
+currency (`info['currency'] != info['financialCurrency']`), put numerator and
+denominator in the **same** currency before computing P/S, EV/EBITDA, FCF-yield.
+`scripts/adr_currency.py` does this inside `compute_inputs`:
+- **Preferred (mapped US ADRs):** take the ratios from the company's LOCAL listing,
+  where trading == reporting currency and yfinance's ratios are clean (US-ADR
+  market caps are corrupt, so the local listing is more accurate). Map = `ADR_LOCAL`
+  (TSM→2330.TW, UMC→2303.TW); extend it for new US ADRs.
+- **General (any other foreign listing):** convert the market cap into the financial
+  currency by exchange rate (`fx_rate`, via yfinance `{from}{to}=X`), compute
+  EV = market cap + debt − cash (NOT the corrupt yfinance EV), and recompute the
+  three ratios (`ratios_via_fx`). No per-name mapping — works for foreign primary
+  listings (e.g. SMIC 0981.HK, HKD-trade / USD-report).
+- Detection is **`trading != financial`**, NOT "financial != USD" (which wrongly
+  blanks a clean same-currency foreign name like Vanguard 5347.TWO). Blank only when
+  conversion is impossible (no FX rate). Skips Layer-10/9 (col F is EV/FCF or EV/MW).
+
+Ratios are dimensionless once currency-consistent, so they compare apples-to-apples
+across the whole watchlist regardless of reporting currency. Gross/FCF margins,
+ND/EBITDA, growth %s and forward P/E are already currency-neutral and untouched.
+Foreign filers still lack SEC Form-4 (M3 = flagged default) and `expectations_flag.py`
+self-skips (no us-gaap XBRL). Refresh with `/refresh-objective` after adding to `ADR_LOCAL`.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

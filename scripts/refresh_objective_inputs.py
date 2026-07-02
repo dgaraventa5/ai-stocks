@@ -136,12 +136,12 @@ def apply_guards(info, fresh, existing):
         if fixed:
             flags.append(
                 f"Foreign filer ({trading}/{financial}): P/S, EV/EBITDA, FCF-Yield "
-                f"sourced from local listing where available ({', '.join(fixed)})."
+                f"converted to a common currency where available ({', '.join(fixed)})."
             )
         else:
             flags.append(
                 f"Foreign filer ({trading}/{financial}): P/S, EV/EBITDA, FCF-Yield "
-                f"blanked — no local-listing mapping (currency trap)."
+                f"could not be put in a common currency — blanked."
             )
 
     # Per-key loop
