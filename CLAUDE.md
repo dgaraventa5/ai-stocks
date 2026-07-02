@@ -347,6 +347,41 @@ names whose multiple implies more growth than their recent revenue trend.
 commodity/cyclical names (nat-gas E&P AR/RRC get dinged on a depressed revenue
 trend) — a candidate refinement, documented not hidden.
 
+### 22. Subjective floor removed: AI Thesis / Risk use (mean−1)×25 (added 2026-07-02, approved by Dom)
+
+**P6 (finding F8).** AI Thesis and Risk map their 1–5 ratings to a subscore via
+**(mean − 1) × 25** (1→0, 2→25, 3→50, 4→75, 5→100), NOT the old mean × 20 (which
+floored at 20). A genuinely weak dimension can now drag the subscore to 0 rather
+than banking 20/100 for free ("zero AI exposure still banked 20% credit on 20% of
+the score"). Scoped to AI Thesis + Risk; **Momentum keeps rating × 20** (it blends
+with the objective 50DMA band, so it isn't floored the same way). Lives in
+`recalc_watchlist._assemble` and the Excel AI/Risk Score formulas
+(`rebuild_watchlist_formulas.py`).
+
+### 23. Collinear inputs (P4) + D5 dual-framework (P5): measured & disclosed (added 2026-07-02, approved by Dom)
+
+**P4 — accepted double-counts (finding F4).** The flagged overlaps were measured
+across the Watchlist (Pearson): **R3 Balance-Sheet-Risk ↔ Quality ND/EBITDA
++0.77**; **D2 Supply-Chain-Position ↔ D3 Moat +0.73**; **D5 Hyperscaler-Exposure
+↔ D1 AI-Revenue-% +0.62** (vs ~+0.49 for a normal within-category pair).
+Decision: **keep + disclose** (§5-5 option b) — each input adds a distinct angle
+(R3 = holistic maturities/dilution vs the raw ratio; Position = pricing-power
+bottleneck vs Moat = durability), so removing loses information; but the additive
+sum DOES over-weight the shared signal, so treat a high-scoring "dominant crowded
+AI winner" cluster with skepticism. **Future option if reducing the double-count
+is wanted:** re-scope R3 to exclude leverage (already in ND/EBITDA), keeping only
+maturities / dilution / going-concern — a rubric change + re-rate, not done here.
+
+**P5 — D5 dual-framework (finding F9).** D5 = supplier hyperscaler-revenue
+exposure (Layers 1–8) OR buyer AI-capex commitment (Layer 9); a "5" means
+"maximally AI-tied" in either, but the constructs differ. Kept as one column
+(splitting adds a column for ≈no scoring change, since each name uses exactly one
+framework). Mitigation: **P1 cohorts are by top-level layer, so L1–8 (supplier)
+and L9 (buyer) fall in different cohorts** — cross-framework D5 comparison no
+longer happens in the ranking. Framework documented in
+`templates/rating-rubric-and-workflow.md` (D5 section). Do NOT cross-compare a raw
+D5 between a supplier and a hyperscaler.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash
