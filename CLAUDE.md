@@ -372,15 +372,20 @@ AI winner" cluster with skepticism. **Future option if reducing the double-count
 is wanted:** re-scope R3 to exclude leverage (already in ND/EBITDA), keeping only
 maturities / dilution / going-concern — a rubric change + re-rate, not done here.
 
-**P5 — D5 dual-framework (finding F9).** D5 = supplier hyperscaler-revenue
-exposure (Layers 1–8) OR buyer AI-capex commitment (Layer 9); a "5" means
-"maximally AI-tied" in either, but the constructs differ. Kept as one column
-(splitting adds a column for ≈no scoring change, since each name uses exactly one
-framework). Mitigation: **P1 cohorts are by top-level layer, so L1–8 (supplier)
-and L9 (buyer) fall in different cohorts** — cross-framework D5 comparison no
-longer happens in the ranking. Framework documented in
-`templates/rating-rubric-and-workflow.md` (D5 section). Do NOT cross-compare a raw
-D5 between a supplier and a hyperscaler.
+**P5 — D5 dual-framework (finding F9): DEFERRED, not resolved.** D5 = supplier
+hyperscaler-revenue exposure (Layers 1–8) OR buyer AI-capex commitment (Layer 9);
+a "5" means "maximally AI-tied" in either, but the constructs differ. Kept as one
+column, documented in `templates/rating-rubric-and-workflow.md` (D5 section).
+**Correction (2026-07-02 verification, review #5):** an earlier note here claimed
+P1 cohorts "separate" the two frameworks so cross-framework comparison no longer
+happens. **That is false.** P1 percentile-ranks only the six OBJECTIVE Value/
+Quality metrics; D5 is a SUBJECTIVE rating feeding the AI-Thesis subscore, which
+is NOT peer-ranked and enters the single cross-layer TOTAL as an absolute value
+(the roster spans layers 01–10). So a supplier's D5=5 and a hyperscaler's D5=5
+still meet on non-comparable meanings in the cross-layer ranking. Nothing
+normalizes D5 across frameworks. **P5 is genuinely open** — a real fix would
+z-score/percentile D5 within each framework before it contributes. Do NOT
+cross-compare a raw D5 between a supplier and a hyperscaler.
 
 ## Common tools and libraries (pre-approved for installation)
 

@@ -108,6 +108,22 @@ def test_reverse_dcf_score_from_ev_fcf_cheap_beats_rich():
     assert cheap > rich
 
 
+def test_reverse_dcf_monotonic_cheap_fair_expensive():
+    # Gate for review #1: strictly monotonic across cheap -> fair -> expensive at
+    # a fixed grounded growth. Confirms the metric scores mispricing direction.
+    g = 8.0
+    cheap = rd.reverse_dcf_score(6.0, g, wacc=WACC)
+    fair = rd.reverse_dcf_score(18.0, g, wacc=WACC)
+    expensive = rd.reverse_dcf_score(60.0, g, wacc=WACC)
+    assert cheap > fair > expensive
+
+
+def test_reverse_dcf_scores_the_gap_not_the_level():
+    # Same EV/FCF (same implied growth), different grounded growth -> higher
+    # grounded scores higher. Proves it scores the GAP, not the implied level.
+    assert rd.reverse_dcf_score(20.0, 25.0, wacc=WACC) > rd.reverse_dcf_score(20.0, 5.0, wacc=WACC)
+
+
 def test_reverse_dcf_score_none_on_bad_inputs():
     assert rd.reverse_dcf_score(ev_over_fcf=None, grounded_growth_pct=8.0) is None
     assert rd.reverse_dcf_score(ev_over_fcf=-12.0, grounded_growth_pct=8.0) is None  # neg FCF
