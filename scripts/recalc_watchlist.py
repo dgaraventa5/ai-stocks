@@ -10,6 +10,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 import cohort_percentile
+import reverse_dcf
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 XLSX = str(_REPO_ROOT / '00-master/ai_supply_chain_scoring.xlsx')
@@ -258,7 +259,9 @@ def _assemble(row, ms, w):
     """Category subscores + TOTAL, using the cohort/absolute metric scores `ms`
     for the six style-biased metrics and live absolute bands for the rest."""
     value = avg_nonnull([score_fwd_pe(row['fwd_pe']), ms['ev'], ms['fcf_yield'],
-                         ms['ps'], score_peg(row['peg'])])
+                         ms['ps'], score_peg(row['peg']),
+                         reverse_dcf.reverse_dcf_score(row.get('ev_fcf'),
+                                                       _num(row['rev_cagr']))])
     quality = avg_nonnull([ms['roic'], ms['gm'], ms['fcf_mgn'],
                            score_nd_ebitda(row['nd_eb'])])
     growth = avg_nonnull([score_rev_cagr(row['rev_cagr']), score_rev_yoy(row['rev_yoy']),
@@ -278,6 +281,22 @@ def _assemble(row, ms, w):
     return {'ticker': row['ticker'], 'layer': row['layer'], 'row': row['row'],
             'Value': value, 'Quality': quality, 'Growth': growth, 'AI': ai,
             'Momentum': momentum, 'Risk': risk, 'TOTAL': total, 'Tier': tier(total)}
+
+
+def _load_ev_fcf_map():
+    """{ticker: ev_fcf} from 00-master/reverse-dcf.json (the P2 reverse-DCF input,
+    refreshed by refresh_reverse_dcf.py). Empty if the file is absent, so the
+    reverse-DCF term simply drops out of the Value average."""
+    import json
+    p = _REPO_ROOT / '00-master' / 'reverse-dcf.json'
+    if not p.exists():
+        return {}
+    try:
+        data = json.loads(p.read_text())
+    except Exception:
+        return {}
+    return {k: (v.get('ev_fcf') if isinstance(v, dict) else v)
+            for k, v in data.items()}
 
 
 def recalc(xlsx=XLSX, mode='percentile'):
@@ -306,6 +325,9 @@ def recalc(xlsx=XLSX, mode='percentile'):
 
     rows = [_read_raw(ws, r) for r in range(2, ws.max_row + 1)
             if ws.cell(row=r, column=1).value]
+    ev_fcf_map = _load_ev_fcf_map()
+    for row in rows:
+        row['ev_fcf'] = ev_fcf_map.get(row['ticker'])
     if mode == 'percentile':
         ms = _metric_scores_percentile(rows)
     else:

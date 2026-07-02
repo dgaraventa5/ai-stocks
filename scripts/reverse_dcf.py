@@ -130,3 +130,22 @@ def mispricing_score(ev: float, fcf0: float, wacc: float, grounded_g: float,
     if gap is None:
         return None
     return gap_to_score(gap)
+
+
+def reverse_dcf_score(ev_over_fcf, grounded_growth_pct, wacc: float = 0.10,
+                      years: int = 10, terminal_growth: float = 0.03) -> Number:
+    """The live P2 metric (§5-3): a 0-100 mispricing score computed straight from
+    the EV/FCF multiple and a grounded growth estimate (in PERCENT, e.g. 8.0).
+
+    Implied growth depends only on EV/FCF (fcf0 cancels out of the DCF), so we
+    solve with fcf0=1 and ev = the multiple. A bigger positive gap (grounded >
+    implied) means the market underappreciates the name -> higher score. Returns
+    None when EV/FCF is non-positive (negative FCF) or grounded growth is missing,
+    so the Value average simply skips it (like every other blank)."""
+    if ev_over_fcf is None or ev_over_fcf <= 0 or grounded_growth_pct is None:
+        return None
+    implied = implied_growth(ev_over_fcf, 1.0, wacc, years=years,
+                             terminal_growth=terminal_growth)
+    if implied is None:
+        return None
+    return gap_to_score(grounded_growth_pct / 100.0 - implied)

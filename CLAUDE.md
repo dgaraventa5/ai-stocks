@@ -322,6 +322,31 @@ formulas in J/O) OR any objective-input refresh, re-run `--sync`.** Deliberate
 rule-4 exception for cohort-relative scoring (same garbage-input-family reasoning
 as rules 10/13).
 
+### 21. P2 reverse-DCF mispricing metric in Value (added 2026-07-02, approved by Dom)
+
+Value now averages a **6th sub-metric** (§5-3): a reverse-DCF mispricing score
+targeting finding F1 (reward *mispricing*, not just *quality*). For each name,
+implied FCF growth is solved from its **EV/FCF** multiple (a fixed 10% WACC / 3%
+terminal / 10-yr multi-stage DCF); the score is the gap between a grounded growth
+estimate (**revenue 3-yr CAGR**) and that implied growth — a bigger positive gap
+(grounded > implied) = cheaper-vs-expectations = higher score
+(`reverse_dcf.reverse_dcf_score`). Folded into Value (no reweight), so it dodges
+the P3 IC-gate.
+
+**Data:** EV/FCF per name lives in `00-master/reverse-dcf.json`, refreshed by
+`scripts/refresh_reverse_dcf.py` — currency-consistent per rule 19 (mapped ADRs
+use the local listing, other foreign filers FX-convert; blank on
+non-positive/unavailable FCF). `recalc` reads the json + the sheet's Rev-3y-CAGR;
+a missing json makes the term drop out cleanly (Value = the five prior metrics).
+**Refresh alongside objective refreshes (rule 9), then re-run `--sync`.**
+
+**Effect:** 1 of 6 Value metrics ≈ 3.3% of TOTAL, so swings are small by design
+(±3 pts). Rewards fast-growers whose multiple is justified by growth; penalizes
+names whose multiple implies more growth than their recent revenue trend.
+**Known limitation:** revenue-3yr-CAGR is a noisy grounded-growth proxy for
+commodity/cyclical names (nat-gas E&P AR/RRC get dinged on a depressed revenue
+trend) — a candidate refinement, documented not hidden.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

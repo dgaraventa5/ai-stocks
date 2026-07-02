@@ -98,6 +98,30 @@ def test_mispricing_score_none_when_fcf_nonpositive():
     assert rd.mispricing_score(500.0, fcf0=-5.0, wacc=WACC, grounded_g=0.10) is None
 
 
+def test_reverse_dcf_score_from_ev_fcf_cheap_beats_rich():
+    # implied growth depends only on the EV/FCF multiple. Cheap (5x) vs rich (50x),
+    # same grounded growth (8%): cheap has a big positive gap -> high score.
+    cheap = rd.reverse_dcf_score(ev_over_fcf=5.0, grounded_growth_pct=8.0, wacc=WACC)
+    rich = rd.reverse_dcf_score(ev_over_fcf=50.0, grounded_growth_pct=8.0, wacc=WACC)
+    assert cheap == 100.0
+    assert rich <= 30.0
+    assert cheap > rich
+
+
+def test_reverse_dcf_score_none_on_bad_inputs():
+    assert rd.reverse_dcf_score(ev_over_fcf=None, grounded_growth_pct=8.0) is None
+    assert rd.reverse_dcf_score(ev_over_fcf=-12.0, grounded_growth_pct=8.0) is None  # neg FCF
+    assert rd.reverse_dcf_score(ev_over_fcf=20.0, grounded_growth_pct=None) is None
+
+
+def test_reverse_dcf_score_matches_absolute_path():
+    # score via the EV/FCF ratio must equal the score via absolute EV & FCF.
+    ev, fcf, g = 600.0, 20.0, 0.08
+    via_ratio = rd.reverse_dcf_score(ev / fcf, g * 100, wacc=WACC)
+    via_abs = rd.mispricing_score(ev, fcf, WACC, g)
+    assert via_ratio == via_abs
+
+
 def test_richly_valued_megacap_scores_worse_than_cheap_cyclical():
     """The doc's required sanity check: the metric must be anti-correlated with
     the current Value-multiple scores. A rich name (EV/FCF ~50) bakes in high
