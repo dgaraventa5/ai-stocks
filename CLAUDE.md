@@ -372,20 +372,24 @@ AI winner" cluster with skepticism. **Future option if reducing the double-count
 is wanted:** re-scope R3 to exclude leverage (already in ND/EBITDA), keeping only
 maturities / dilution / going-concern — a rubric change + re-rate, not done here.
 
-**P5 — D5 dual-framework (finding F9): DEFERRED, not resolved.** D5 = supplier
-hyperscaler-revenue exposure (Layers 1–8) OR buyer AI-capex commitment (Layer 9);
-a "5" means "maximally AI-tied" in either, but the constructs differ. Kept as one
-column, documented in `templates/rating-rubric-and-workflow.md` (D5 section).
-**Correction (2026-07-02 verification, review #5):** an earlier note here claimed
-P1 cohorts "separate" the two frameworks so cross-framework comparison no longer
-happens. **That is false.** P1 percentile-ranks only the six OBJECTIVE Value/
-Quality metrics; D5 is a SUBJECTIVE rating feeding the AI-Thesis subscore, which
-is NOT peer-ranked and enters the single cross-layer TOTAL as an absolute value
-(the roster spans layers 01–10). So a supplier's D5=5 and a hyperscaler's D5=5
-still meet on non-comparable meanings in the cross-layer ranking. Nothing
-normalizes D5 across frameworks. **P5 is genuinely open** — a real fix would
-z-score/percentile D5 within each framework before it contributes. Do NOT
-cross-compare a raw D5 between a supplier and a hyperscaler.
+**P5 — D5 dual-framework (finding F9): RESOLVED as a reframe, normalization
+rejected on evidence (2026-07-02).** D5 = supplier hyperscaler-revenue exposure
+(Layers 1–8) OR buyer AI-capex commitment (Layer 9). F9 flagged two constructs in
+one cross-layer-ranked column; and review #5 correctly killed an earlier false
+claim that P1 cohorts "separate" them (they don't — D5 is subjective, not
+peer-ranked, and enters the cross-layer TOTAL as an absolute value). **Examined:**
+Layer-9 mean D5 = 3.7 vs supplier 3.3, half of L9 rates 5 — but those are the
+mega-hyperscalers (META/MSFT/GOOGL/AMZN) genuinely at $30–80B/yr AI capex, so the
+higher buyer mean is REAL, not a calibration error. **Tested the doc's proposed
+fix** (percentile-within-framework normalization): it would dock those four ~1
+TOTAL pt each for being correctly-common in their layer — under-crediting the real
+AI leaders, the opposite of an improvement. **Decision: do NOT normalize.** Instead
+D5 is reframed (rubric D5 section) as ONE dimension — *strength of AI-buildout tie*
+— on a parallel 5-max-for-role scale, so a supplier's 5 and a hyperscaler's 5 are
+deliberately-equivalent contributions (comparable by construction) even though the
+raw evidence (">30% revenue" vs "$30B capex") must not be read literally against
+each other. This closes the "two constructs, one column" concern at its root
+without suppressing a real signal.
 
 ### 24. Cohort membership is governed (added 2026-07-02, review #3)
 
