@@ -145,6 +145,7 @@ Outsourced Semiconductor Assembly & Test — back-end **contract manufacturers**
 - **GlobalFoundries (GFS)** — mature node specialty
 - **Tower Semiconductor (TSEM)** — analog/RF/specialty, in Aschenbrenner portfolio
 - **United Microelectronics (UMC)** — mature node Taiwan foundry
+- **SkyWater Technology (SKYT)** — US specialty/defense pure-play foundry (Technology-as-a-Service; ITAR/DoD, advanced packaging); added 2026-07-02 to fatten the Fabs cohort for cohort-relative (P1) scoring
 
 ---
 
@@ -233,6 +234,7 @@ Bandwidth is becoming as important as compute. 800G → 1.6T transitions are mas
 - **Everpure (P, fka Pure Storage/PSTG, renamed ~May 2026)** — all-flash arrays (FlashBlade) for AI training data pipelines
 - **Seagate Technology (STX)** — nearline mass-capacity HDD for AI data lakes; HAMR ramp tightening supply
 - **Western Digital (WDC)** — pure-play nearline HDD after the early-2026 SanDisk (flash) spin; cloud = ~89% of revenue, sold out through CY2026 under LTAs to CY2029; the other half of the HDD duopoly with STX (added 2026-06-17, QQQ coverage diff)
+- **NetApp (NTAP)** — enterprise storage & unified data infrastructure (ONTAP; AI data pipelines); direct peer to STX/WDC/Everpure; added 2026-07-02 to fatten the Servers cohort for cohort-relative (P1) scoring
 
 ---
 
