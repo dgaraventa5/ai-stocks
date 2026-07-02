@@ -22,17 +22,19 @@
 
 ---
 
-## Blocking Decisions (critique §5) — must be answered by Dom before wiring
+## Blocking Decisions (critique §5) — RESOLVED 2026-07-02 (except §5-5, deferred)
 
-These are judgment calls about the *character* of the scoring system, not implementation details. They are being surfaced to Dom via a separate structured question set. Each task below names the decision it depends on. **Recommendations are stated (Dom's collaboration style: conviction + tradeoffs, not deference), but none is adopted until Dom signs off.**
+Judgment calls about the *character* of the scoring system, surfaced to Dom and answered 2026-07-02.
 
-| # | Decision | Options | Recommendation (pending sign-off) |
-|---|---|---|---|
-| **1** | **Cohort granularity for P1** | (a) top-level layer 01–10; (b) top-level layer with thin layers (<~8) merged into super-cohorts; (c) granular sub-layer (col C as-is) | **(b)** — col C is far too granular (many 1-name sub-layers → percentile is meaningless); pure top-level leaves Fabs (5) and Servers (7) too thin. Merge thin layers into documented super-cohorts. |
-| **2** | **Relative vs absolute character** | (a) hybrid: percentile the 6 style-biased metrics, keep ND/EBITDA + R absolute (critique's proposal); (b) keep a larger absolute component | **(a)** — matches the critique's hybrid; targets exactly the style-bias metrics (F3) while keeping level-meaningful metrics absolute. |
-| **3** | **Reverse-DCF placement (P2)** | (a) sub-metric inside Value (no reweight); (b) new standalone category (reweight → IC-gated, i.e. blocked by P3) | **(a)** — fold into Value first. Avoids a weight change (which is P3-gated), still gets the signal in. |
-| **4** | **Recalibrate tier bands + entry/exit thresholds to the post-P1 distribution, or hold fixed?** | (a) recalibrate 85/70/55/40 + 74.5/73.0 to the new percentile-shaped distribution; (b) hold fixed and accept tier drift | **(a)** — percentile scores compress (cohort-max ≈ 92 not 100), so holding bands fixed silently reshuffles tiers. Recalibrate deliberately, as its own reviewed step, BEFORE finalizing P1. |
-| **5** | **De-dup vs document collinear inputs (P4)** | (a) remove redundant inputs (R3↔Quality ND/EBITDA, D5↔D1, D2↔D3); (b) keep and disclose the double-count | Defer — P4 is a later task in this sequence tier; recommend deciding after seeing the P1 subscore-correlation matrix (Task P4-0). |
+| # | Decision | Resolution |
+|---|---|---|
+| **1** | **Cohort granularity for P1** | **Pure top-level layer 01–10, NO cross-business-model merging.** Dom's call, and correct: merging thin layers (e.g. Fabs→Semis) would rank TSM (capital-intensive foundry) against asset-light fabless designers and sink it on the margin/FCF percentiles — reintroducing the exact F3 style bias P1 exists to remove. Instead: (i) **expand** the two thin cohorts with real names (Task P1-0.5) — today Fabs=5 {TSM,INTC,GFS,TSEM,UMC}, Servers=7 {SMCI,DELL,HPE,FLEX,P,STX,WDC}; (ii) a **min-cohort-size guard** (default 8): a metric whose cohort has fewer than that many non-null values falls back to its absolute band for that cohort until it is fattened — never ship a noisy 5-name percentile. Dominant players still score high: percentile touches only the 6 objective Value/Quality metrics; franchise dominance lives in the *absolute* subjective dims (TSM Moat/Position/Capacity = 5 → AI-Thesis ≈100, 20% of TOTAL) and in topping its real peer cohort. |
+| **2** | **Relative vs absolute character** | **Hybrid.** Percentile only Gross Margin, FCF Margin, ROIC, EV/EBITDA, FCF Yield, P/S. Net Debt/EBITDA + all Risk dims stay absolute. |
+| **3** | **Reverse-DCF placement (P2)** | **6th sub-metric inside Value** (Value average skips blanks). No category-weight change → no P3 entanglement. |
+| **4** | **Recalibrate tier bands + Entry/Exit** | **Recalibrate, as its own reviewed step** after the P1 before/after report (Task P1-5). Dom approves the new 85/70/55/40 + 74.5/73.0 numbers explicitly against the percentile-shaped distribution. |
+| **5** | **De-dup vs document collinear inputs (P4)** | **Deferred** to P4 (later in this tier); decide after the subscore-correlation matrix (Task P4-0). |
+
+**One open sub-question for §5-1** (does not block starting P1-0.5): confirm the min-cohort-size threshold (recommend **8**) and whether to invest now in expanding Fabs — a naturally small clean-free-data universe (realistic additions: SKYT; foreign foundries PSMC/VIS/SMIC/XFAB need the ADR-currency handling the watchlist already applies to TSM/UMC).
 
 ---
 
@@ -76,7 +78,20 @@ These are judgment calls about the *character* of the scoring system, not implem
 
 ---
 
-## Task P1-1: Cohort assignment (pure, config-driven) — **BLOCKED on §5-1, §5-2**
+## Task P1-0.5: Expand the two thin cohorts (Fabs, Servers) — prerequisite for §5-1
+
+**Why:** §5-1 keeps pure-layer cohorts (no cross-model merge), so Fabs (5) and Servers (7) must be fattened toward the min-size threshold (8) with real, apples-to-apples names before those cohorts flip from absolute-fallback to percentile. This is normal coverage work, not scoring-engine work — each new name goes through the full `/refresh-context` → collaborative-rating pipeline (rule 12 gate) exactly like any other watchlist add. It is sequenced FIRST so P1 has fat-enough cohorts to percentile.
+
+- [ ] **Step 1:** Confirm candidate lists with Dom. Fabs: SKYT (US, clean data); PSMC / VIS / SMIC / XFAB (foreign foundries — apply the ADR-currency blanking the watchlist already uses for TSM/UMC; see foreign-ADR-currency-trap memory). Servers/storage/cooling: NTAP, NVT / VRT if not already carried in Layer 03. (Do NOT re-add Pure Storage — already present as ticker "P" / "Everpure (fka Pure Storage)".)
+- [ ] **Step 2:** Score each via `/score-stock` (which runs `/refresh-context` first) — one name end-to-end per subagent (CLAUDE.md subagent pattern; serialize SEC/yfinance calls).
+- [ ] **Step 3:** Confirm each new cohort clears the min-size threshold; if Fabs still can't reach 8 with clean data, note it and let Fabs run on absolute-fallback (documented, not silent).
+- [ ] **Step 4: Commit** the new watchlist rows (this is data, separate from the P1 engine commits).
+
+> Does NOT block writing the P1 code (P1-1..P1-4) against the min-size guard — the guard makes P1 correct even while cohorts are still thin. It blocks only the *flip* of a given cohort to percentile.
+
+---
+
+## Task P1-1: Cohort assignment (pure, config-driven) — **§5-1 RESOLVED: pure layer + min-size guard**
 
 **Files:**
 - Create: `scripts/cohorts.py`
@@ -87,7 +102,7 @@ These are judgment calls about the *character* of the scoring system, not implem
 - Consumes: nothing (pure).
 - Produces: `cohort_key(layer_str, merge_map) -> str` and `top_level_layer(layer_str) -> str` for `recalc_watchlist.py`.
 
-**Design note (why this isolates the decision):** `top_level_layer("06 AI Compute Silicon / GPUs") -> "06"` is a mechanical string op. `cohort_key` then applies a `merge_map` (e.g. `{"05": "semis", "04": "semis", "06": "semis"}`) so thin layers fold into super-cohorts. **The code is decision-independent; the `merge_map` values ARE §5-1.** Do not hardcode a merge-map — read it from `scoring-config.json`, whose values Dom sets.
+**Design note:** `top_level_layer("06 AI Compute Silicon / GPUs") -> "06"` is a mechanical string op. Per §5-1 the cohort IS the top-level layer — **no cross-model merge** — so `cohort_key` uses an **identity map by default** (`merge_map={}` → cohort == top-level layer). The `merge_map` hook is retained but stays empty unless Dom ever documents a genuine *same-business-model* merge. The real config knob is `min_cohort_size` (Task P1-2's absolute-fallback guard), not merging.
 
 - [ ] **Step 1: Write failing tests**
 
@@ -138,7 +153,8 @@ def cohort_key(layer_str, merge_map):
 ```json
 {
   "p1": {
-    "cohort_merge_map": { "<see §5-1>": "..." },
+    "cohort_merge_map": {},
+    "min_cohort_size": 8,
     "percentile_metrics": ["gross_margin","fcf_margin","roic","ev_ebitda","fcf_yield","ps"],
     "absolute_metrics": ["nd_ebitda","peg","fwd_pe"]
   },
@@ -163,7 +179,7 @@ def cohort_key(layer_str, merge_map):
 - Consumes: `cohort_percentile.rank_cohort`, `cohorts.cohort_key`, `scoring-config.json`.
 - Produces: a `recalc(..., mode="percentile"|"absolute")` switch so before/after (Task P1-4) can call both.
 
-**Key design:** percentile scoring is inherently cross-sectional — you cannot score one row in isolation; you need the whole cohort's column at once. So `recalc()` gains a pre-pass: group rows by `cohort_key`, and for each (cohort, metric) call `rank_cohort` to get 0–100 scores, then substitute those for the absolute-band scores of the six percentile metrics. Absolute metrics (ND/EBITDA, PEG, Fwd P/E, all subjective) are unchanged. **Direction matters:** Gross Margin/FCF Margin/ROIC/FCF Yield are `higher_is_better=True`; EV/EBITDA and P/S are `higher_is_better=False`.
+**Key design:** percentile scoring is inherently cross-sectional — you cannot score one row in isolation; you need the whole cohort's column at once. So `recalc()` gains a pre-pass: group rows by `cohort_key`, and for each (cohort, metric) call `rank_cohort` to get 0–100 scores — **but only if the cohort has ≥ `min_cohort_size` non-null values for that metric; otherwise that (cohort, metric) falls back to its absolute band** (the §5-1 guard, so thin cohorts never ship a noisy 5-name percentile). Then substitute the percentile scores for the absolute-band scores of the six percentile metrics where the guard passes. Absolute metrics (ND/EBITDA, PEG, Fwd P/E, all subjective) are unchanged. **Direction matters:** Gross Margin/FCF Margin/ROIC/FCF Yield are `higher_is_better=True`; EV/EBITDA and P/S are `higher_is_better=False`.
 
 > **Layer-carve-out interaction (must handle):** col F already holds EV/FCF for Layer 10 (rule 10) and EV/MW for the Layer 9 capacity cohort (rule 13). Under percentile scoring these become "rank EV/FCF within the Layer-10 cohort" and "rank EV/MW within the Layer-9 capacity cohort" — which is *more* consistent, not less (the carve-outs were the ad-hoc precedent P1 generalizes). Preserve the value selection (which raw metric sits in col F), swap only the band→percentile step.
 
