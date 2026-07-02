@@ -16,6 +16,11 @@ import datetime as dt
 from pathlib import Path
 from openpyxl import load_workbook
 
+try:                                 # works as a sibling (scripts/ on path) AND
+    import adr_currency              # as scripts.refresh_objective_inputs (package);
+except ModuleNotFoundError:          # pure + yfinance-free either way
+    from scripts import adr_currency
+
 # Sibling scripts (batch_score, momentum_50dma) import yfinance at module load.
 # The site deploy runs `pytest tests` with ONLY openpyxl+pytest installed (no
 # yfinance), so those are imported LAZILY inside the functions that need them —
@@ -114,21 +119,35 @@ def apply_guards(info, fresh, existing):
     """
     writes, flags = {}, []
 
-    # Guard 1: currency — ADR/foreign filer blanks P/S, EV/EBITDA, FCF-Yield
-    cur = info.get("financialCurrency")
-    adr = bool(cur) and str(cur).upper() != "USD"
-    if adr:
+    # Guard 1: foreign-ADR currency trap. A trading-vs-financial currency
+    # mismatch corrupts the market-cap-based ratios (see adr_currency). Detection
+    # is trading != financial — NOT "financial != USD", which also wrongly blanks
+    # a clean same-currency foreign name (Vanguard 5347.TWO, TWD/TWD).
+    # compute_inputs is authoritative: it sources the 3 from the local listing
+    # (fresh carries real values) or leaves them None (unmapped). Write those
+    # through here; never force-blank a clean same-currency name.
+    trading = info.get("currency")
+    financial = info.get("financialCurrency")
+    trap = adr_currency.has_currency_mismatch(trading, financial)
+    if trap:
         for k in _ADR_BLANK_KEYS:
-            writes[k] = None
-        flags.append(
-            f"ADR currency {cur}: blanked P/S, EV/EBITDA, FCF-Yield "
-            f"(USD price vs local financials)."
-        )
+            writes[k] = fresh.get(k)
+        fixed = [k for k in _ADR_BLANK_KEYS if fresh.get(k) is not None]
+        if fixed:
+            flags.append(
+                f"Foreign filer ({trading}/{financial}): P/S, EV/EBITDA, FCF-Yield "
+                f"sourced from local listing where available ({', '.join(fixed)})."
+            )
+        else:
+            flags.append(
+                f"Foreign filer ({trading}/{financial}): P/S, EV/EBITDA, FCF-Yield "
+                f"blanked — no local-listing mapping (currency trap)."
+            )
 
     # Per-key loop
     for key in OBJ_COLS:
-        # ADR keys already forced-blank above; skip them in the per-key loop
-        if adr and key in _ADR_BLANK_KEYS:
+        # trap keys handled above (written or blanked); skip in the per-key loop
+        if trap and key in _ADR_BLANK_KEYS:
             continue
 
         if key == "eps_yoy":

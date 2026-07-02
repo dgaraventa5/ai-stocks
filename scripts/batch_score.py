@@ -33,6 +33,8 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 
 import yfinance as yf
+
+import adr_currency
 from openpyxl import load_workbook
 
 from common import ROOT, flag, per_stock_dir
@@ -195,6 +197,26 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
     else:
         gaps.append("FCF Yield: missing freeCashflow or marketCap")
     inp["ps"] = info.get("priceToSalesTrailing12Months")
+
+    # Foreign-ADR currency trap: a name that trades in one currency but reports
+    # financials in another has garbage market-cap-based ratios from yfinance
+    # (USD price / TWD financials). Source EV/EBITDA, P/S, FCF-Yield from the
+    # local listing (adr_currency); blank if unmapped. Skip Layer-10/9, where
+    # col F is EV/FCF or EV/MW rather than EV/EBITDA.
+    if adr_currency.has_currency_mismatch(info.get("currency"),
+                                          info.get("financialCurrency")) \
+            and not _is_layer10(layer) and not _is_layer9_capacity(layer):
+        fixed = adr_currency.fetch_local_ratios(ticker)
+        cpair = f"{info.get('currency')}/{info.get('financialCurrency')}"
+        if fixed:
+            inp["ev_ebitda"], inp["ps"], inp["fcf_yield"] = (
+                fixed["ev_ebitda"], fixed["ps"], fixed["fcf_yield"])
+            gaps.append(f"Foreign filer {cpair}: EV/EBITDA, P/S, FCF-Yield sourced "
+                        f"from local listing {adr_currency.ADR_LOCAL.get(ticker)}")
+        else:
+            inp["ev_ebitda"] = inp["ps"] = inp["fcf_yield"] = None
+            gaps.append(f"Foreign filer {cpair}: no local-listing mapping — "
+                        f"EV/EBITDA, P/S, FCF-Yield blanked (currency trap)")
 
     # ----- Quality -----
     # ROIC not exposed by yfinance.info; leave blank (don't substitute ROA)

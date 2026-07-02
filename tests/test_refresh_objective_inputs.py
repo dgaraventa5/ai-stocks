@@ -91,15 +91,41 @@ def _blank_existing():
     return {k: None for k in roi.OBJ_COLS}
 
 
-def test_guard_currency_blanks_adr_cols():
-    info = {"financialCurrency": "TWD"}
-    fresh = {"fwd_pe": 23.4, "ev_ebitda": 15.0, "fcf_yield": 3.2, "ps": 8.0,
+def test_guard_currency_mapped_writes_fixed_ratios():
+    # Real ADR trap (USD trading / TWD financials) where compute_inputs already
+    # sourced the 3 ratios from the local listing -> written through, NOT blanked.
+    info = {"currency": "USD", "financialCurrency": "TWD"}
+    fresh = {"fwd_pe": 23.4, "ev_ebitda": 22.0, "fcf_yield": 1.64, "ps": 15.6,
+             "roic": 20.0, "gross_mgn": 55.0, "fcf_mgn": 30.0, "nd_ebitda": 0.5,
+             "rev_3y_cagr": 25.0, "rev_yoy": 30.0, "eps_yoy": 40.0}
+    writes, flags = roi.apply_guards(info, fresh, _blank_existing())
+    assert writes["ev_ebitda"] == 22.0 and writes["ps"] == 15.6 and writes["fcf_yield"] == 1.64
+    assert writes["fwd_pe"] == 23.4
+    assert any("foreign" in f.lower() or "local" in f.lower() for f in flags)
+
+
+def test_guard_currency_unmapped_blanks():
+    # Real ADR trap with no local mapping -> compute_inputs left the 3 as None
+    # -> apply_guards writes them blank.
+    info = {"currency": "USD", "financialCurrency": "TWD"}
+    fresh = {"fwd_pe": 23.4, "ev_ebitda": None, "fcf_yield": None, "ps": None,
              "roic": 20.0, "gross_mgn": 55.0, "fcf_mgn": 30.0, "nd_ebitda": 0.5,
              "rev_3y_cagr": 25.0, "rev_yoy": 30.0, "eps_yoy": 40.0}
     writes, flags = roi.apply_guards(info, fresh, _blank_existing())
     assert writes["ps"] is None and writes["ev_ebitda"] is None and writes["fcf_yield"] is None
-    assert writes["fwd_pe"] == 23.4  # kept
-    assert any("ADR" in f or "currency" in f.lower() for f in flags)
+    assert writes["fwd_pe"] == 23.4
+    assert any("foreign" in f.lower() or "currency" in f.lower() for f in flags)
+
+
+def test_guard_same_currency_foreign_not_blanked():
+    # Vanguard (5347.TWO): trades AND reports in TWD -> NOT a trap -> yfinance's
+    # clean ratios pass through (the old 'financial != USD' guard wrongly blanked these).
+    info = {"currency": "TWD", "financialCurrency": "TWD"}
+    fresh = {"fwd_pe": 28.0, "ev_ebitda": 25.6, "fcf_yield": -5.97, "ps": 7.56,
+             "roic": 10.0, "gross_mgn": 27.9, "fcf_mgn": -10.0, "nd_ebitda": 0.2,
+             "rev_3y_cagr": 5.0, "rev_yoy": 8.0, "eps_yoy": 12.0}
+    writes, flags = roi.apply_guards(info, fresh, _blank_existing())
+    assert writes["ev_ebitda"] == 25.6 and writes["ps"] == 7.56 and writes["fcf_yield"] == -5.97
 
 
 def test_guard_keeps_existing_on_fetched_none():
