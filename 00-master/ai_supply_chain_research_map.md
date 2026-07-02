@@ -146,6 +146,8 @@ Outsourced Semiconductor Assembly & Test — back-end **contract manufacturers**
 - **Tower Semiconductor (TSEM)** — analog/RF/specialty, in Aschenbrenner portfolio
 - **United Microelectronics (UMC)** — mature node Taiwan foundry
 - **SkyWater Technology (SKYT)** — US specialty/defense pure-play foundry (Technology-as-a-Service; ITAR/DoD, advanced packaging); added 2026-07-02 to fatten the Fabs cohort for cohort-relative (P1) scoring
+- **Vanguard Intl Semiconductor (5347.TWO)** — TSMC-affiliated 8-inch mature-node foundry (Taiwan); reports+trades TWD (no currency trap); added 2026-07-02 to fatten the Fabs cohort
+- **Hua Hong Semiconductor (HHUSF)** — China #2 foundry, mature-node (US OTC line; reports+trades USD, no trap); added 2026-07-02 to fatten the Fabs cohort
 
 ---
 
