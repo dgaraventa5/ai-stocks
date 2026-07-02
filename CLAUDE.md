@@ -413,6 +413,27 @@ with zero change to the companies. Governance:
   metric) falls back to the absolute band (not merge-to-super-cohort). The map's
   `pct/abs` flags show this per cohort.
 
+### 25. Portfolio weights must reflect scores — enforced + auto-applied (added 2026-07-02, Dom)
+
+Position weights must never silently lag the scores (they did this session until a
+manual `refresh_targets` run). Two mechanisms now guarantee it, no manual step:
+- **Auto-apply:** `recalc_watchlist.py --sync` — the finalize step run after ANY
+  score change (objective refresh, re-rating, methodology, cohort edit) — chains
+  `refresh_targets.refresh()`. **Freeze-safe:** refresh_targets rewrites the Targets
+  only when a HELD name's tier or the roster membership changed since the last
+  logged model event; within-tier drift freezes (no churn). So the normal workflow
+  re-weights itself. `--no-reweight` opts out.
+- **Gate:** `python3 scripts/refresh_targets.py --check` and
+  `tests/test_targets_reweight_gate.py` fail when `pending_rebalance()` is True —
+  the committed Targets don't reflect the live scores. **Stale weights are a build
+  failure**; you can't commit a score change without the portfolio reflecting it.
+  Offline (no yfinance — the whole portfolio path now imports yfinance lazily).
+
+`pending_rebalance()` = the `fire` signal: membership or a held tier changed since
+the last model event (measured against the event's stored tiers, NOT the Targets
+sheet, so an out-of-band score edit can't hide staleness). Rule 18 (refresh_targets
+is the single Targets writer) still holds — this just makes running it non-optional.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

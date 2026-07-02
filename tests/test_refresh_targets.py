@@ -104,6 +104,44 @@ def test_refresh_frozen_when_unchanged(monkeypatch, tmp_path):
     assert path.read_bytes() == before     # workbook untouched (frozen snapshot)
 
 
+def test_pending_rebalance_true_on_tier_change(monkeypatch, tmp_path):
+    """The rule-25 gate signal: pending_rebalance() is True when a held name's tier
+    moved since the last event — and, being a dry run, writes NOTHING (a read-only
+    probe, safe to call from a test/CI gate)."""
+    path = tmp_path / 'portfolio.xlsx'
+    _build_portfolio(path, [('NVDA', '06 Silicon', 86.0, '✓✓✓'),
+                            ('TSM', '05 Fabs', 78.0, '✓✓')])
+    live = [{'ticker': 'NVDA', 'layer': '06 Silicon', 'TOTAL': 86.0, 'Tier': '✓✓✓'},
+            {'ticker': 'TSM', 'layer': '05 Fabs', 'TOTAL': 78.0, 'Tier': '✓✓'}]
+    cfg = {'inception': '2026-05-26', 'events': [{
+        'date': '2026-06-18', 'reason': 'seed',
+        'allocations': {'NVDA': 500.0, 'TSM': 500.0}, 'cash': 0.0,
+        'tiers': {'NVDA': '✓✓', 'TSM': '✓✓'}}]}   # NVDA was ✓✓, now ✓✓✓
+    calls = _mock_env(monkeypatch, live, cfg)
+    before = path.read_bytes()
+
+    assert rt.pending_rebalance(portfolio=str(path)) is True
+    assert calls == []                     # dry run: nothing logged
+    assert path.read_bytes() == before     # dry run: workbook untouched
+
+
+def test_pending_rebalance_false_when_frozen(monkeypatch, tmp_path):
+    """False when tiers/membership match the last event — so the gate passes exactly
+    when the committed Targets already reflect the live scores (the steady state)."""
+    path = tmp_path / 'portfolio.xlsx'
+    _build_portfolio(path, [('NVDA', '06 Silicon', 86.0, '✓✓✓'),
+                            ('TSM', '05 Fabs', 78.0, '✓✓')])
+    live = [{'ticker': 'NVDA', 'layer': '06 Silicon', 'TOTAL': 86.0, 'Tier': '✓✓✓'},
+            {'ticker': 'TSM', 'layer': '05 Fabs', 'TOTAL': 78.0, 'Tier': '✓✓'}]
+    cfg = {'inception': '2026-05-26', 'events': [{
+        'date': '2026-06-18', 'reason': 'seed',
+        'allocations': {'NVDA': 500.0, 'TSM': 500.0}, 'cash': 0.0,
+        'tiers': {'NVDA': '✓✓✓', 'TSM': '✓✓'}}]}   # tiers already match
+    _mock_env(monkeypatch, live, cfg)
+
+    assert rt.pending_rebalance(portfolio=str(path)) is False
+
+
 def test_refresh_tolerates_missing_recon_and_positions(monkeypatch, tmp_path):
     """The notional privacy pass (PR #9) removed Reconciliation + Positions.
     refresh() must run on the slim workbook (Sizing Rules + Targets only),
