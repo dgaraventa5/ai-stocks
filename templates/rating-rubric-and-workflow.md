@@ -151,7 +151,7 @@ Do not hand-tune these here. Category-weight changes are gated on measured Infor
 
 #### D5. Hyperscaler Exposure / AI Infrastructure Commitment
 
-**What it measures:** For supply chain companies (Layers 1-8): direct, material revenue from hyperscaler customers. For hyperscalers and cloud providers (Layer 9): intensity of AI infrastructure investment commitment. Two frameworks, same dimension — both measure how deeply tied the company is to the AI infrastructure buildout.
+**What it measures:** A SINGLE dimension — **strength of tie to the AI-infrastructure buildout** — read through two lenses depending on the company's role. Supply-chain companies (Layers 1-8): direct, material revenue from hyperscaler customers (supplier lens). Hyperscalers/cloud (Layer 9): intensity of AI-infrastructure investment commitment (buyer lens). The 1-5 scale is **parallel across both lenses: 5 = maximally AI-tied for this company's role, 1 = minimal.** A supplier's 5 and a hyperscaler's 5 are deliberately equivalent — both mean "as AI-tied as this kind of company gets" — so their contribution is directly comparable in the cross-layer score (even though the raw evidence, ">30% revenue" vs "$30B+ capex", should not be read literally against each other).
 
 **Criteria — Layers 1-8 (supplier framework):**
 | Rating | Definition |
@@ -172,6 +172,8 @@ Do not hand-tune these here. Category-weight changes are gated on measured Infor
 | **1** | Minimal AI infrastructure commitment. |
 
 **Why two frameworks:** D5 was originally designed to score supply chain companies on hyperscaler demand exposure. But when applied to the hyperscalers themselves, it penalized companies like META (D5=1) for not selling cloud compute, even though META spends $40B+/yr on AI infrastructure and drives massive upstream demand. The Layer 9 framework measures the same underlying signal — how tied is this company to the AI buildout — from the buyer's side rather than the seller's side. (Methodology change approved 2026-05-26.)
+
+**Cross-framework comparability (P5 / finding F9, examined 2026-07-02).** F9 flagged that a "5" encodes two different constructs yet is ranked across layers in one Total Score. Examined empirically: Layer-9 (buyer) mean D5 = 3.7 vs supplier mean 3.3, and half of Layer 9 rates 5 — but those are the mega-hyperscalers (META/MSFT/GOOGL/AMZN) genuinely spending $30–80B/yr, i.e. the actual AI-buildout leaders, so the higher buyer mean is *real*, not a calibration error. **Decision: keep both lenses on the common absolute 5-max-for-role scale; do NOT normalize D5 within-framework.** Percentile-within-framework normalization was tested and would dock those four ~1 Total pt each for being (correctly) common in their layer — under-crediting the real AI leaders, the opposite of an improvement. The parallel 1→5 structure already puts the lenses on one comparable strength scale by construction. (See CLAUDE.md rule 23.)
 
 **Anchor examples:**
 - *Supplier framework:* CoreWeave (Microsoft is anchor), Vertiv: 5. Coherent, Lumentum: 4. Most semi-equipment: 3-4. Utilities with DC load: 2-3.
