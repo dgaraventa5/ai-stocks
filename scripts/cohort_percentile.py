@@ -72,3 +72,29 @@ def rank_cohort(values: Iterable[Number],
     non_null = [v for v in values if v is not None]
     return [percentile_score(v, non_null, higher_is_better) if v is not None else None
             for v in values]
+
+
+import re as _re
+
+MIN_COHORT_SIZE = 8
+
+
+def top_level_layer(layer_str):
+    """'06 AI Compute Silicon / GPUs' -> '06'. None/blank/no-code -> None.
+    The cohort key for P1 (§5-1: pure top-level layer, no cross-model merge)."""
+    if not layer_str:
+        return None
+    m = _re.match(r"\s*(\d{2})", str(layer_str))
+    return m.group(1) if m else None
+
+
+def cohort_metric_scores(values, higher_is_better, absolute_fn,
+                         min_size=MIN_COHORT_SIZE):
+    """Percentile-rank `values` within their cohort when >= min_size are
+    non-null; otherwise score each via `absolute_fn` (the live absolute band).
+    Blanks stay blank in both cases. This is the min-cohort-size guard that keeps
+    a thin cohort from shipping a noisy 5-name percentile."""
+    non_null = [v for v in values if v is not None]
+    if len(non_null) >= min_size:
+        return rank_cohort(values, higher_is_better)
+    return [absolute_fn(v) if v is not None else None for v in values]

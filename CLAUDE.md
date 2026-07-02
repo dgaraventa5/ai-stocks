@@ -292,6 +292,36 @@ ND/EBITDA, growth %s and forward P/E are already currency-neutral and untouched.
 Foreign filers still lack SEC Form-4 (M3 = flagged default) and `expectations_flag.py`
 self-skips (no us-gaap XBRL). Refresh with `/refresh-objective` after adding to `ADR_LOCAL`.
 
+### 20. P1 cohort-relative scoring is LIVE (added 2026-07-02, approved by Dom)
+
+The six style-biased metrics — **EV/EBITDA, FCF-yield, P/S** (Value) and **ROIC,
+gross margin, FCF margin** (Quality) — are scored as a **percentile rank within
+the name's top-level-layer cohort** (§5-2 hybrid), NOT against absolute bands. A
+cohort with <8 non-null values for a metric falls back to that metric's absolute
+band (min-cohort-size guard, `cohort_percentile.cohort_metric_scores`). Col F
+(EV/*) stays absolute for Layer 9 (mixed EV/EBITDA + EV/MW) and percentiles EV/FCF
+for Layer 10. Everything else — ND/EBITDA, Fwd P/E, PEG, Growth, and all
+subjective dims — is unchanged (absolute / subjective).
+
+**Why:** absolute margin/ROIC bands measured "has an asset-light business model,"
+not within-peer merit — software/silicon auto-maxed them (silicon+software vs
+capital-heavy mean-Quality gap was **+28**; now **+6**). Before/after:
+`docs/superpowers/plans/2026-07-02-p1-before-after-report.md`.
+
+**Engine:** `recalc_watchlist.recalc(mode='percentile')` is the LIVE default and
+the single source of truth for every consumer (`export_site_data`,
+`refresh_targets`). `mode='absolute'` reproduces the pre-P1 scores. Tier bands
+(85/70/55/40) and portfolio entry/exit (74.5/73.0) were reviewed and **held
+unchanged** — the overall score scale barely compressed.
+
+**Sheet:** the cohort-relative Value Score (col J) and Quality Score (col O) can't
+be per-row Excel formulas, so they are **recalc-maintained VALUES** written by
+`python3 scripts/recalc_watchlist.py --sync` (TOTAL/Tier stay formulas that
+reference J/O). **After `rebuild_watchlist_formulas.py` (which restores absolute
+formulas in J/O) OR any objective-input refresh, re-run `--sync`.** Deliberate
+rule-4 exception for cohort-relative scoring (same garbage-input-family reasoning
+as rules 10/13).
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

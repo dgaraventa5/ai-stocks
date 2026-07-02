@@ -9,6 +9,8 @@ from __future__ import annotations
 from pathlib import Path
 from openpyxl import load_workbook
 
+import cohort_percentile
+
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 XLSX = str(_REPO_ROOT / '00-master/ai_supply_chain_scoring.xlsx')
 
@@ -182,105 +184,171 @@ def avg_nonnull(vals):
     return sum(xs) / len(xs) if xs else None
 
 
-def recalc(xlsx=XLSX):
+def tier(t):
+    if t is None: return None
+    if t >= 85: return '✓✓✓'
+    if t >= 70: return '✓✓'
+    if t >= 55: return '✓'
+    if t >= 40: return '?'
+    return '✗'
+
+
+def _read_raw(ws, r):
+    """Raw inputs for one row (PEG recomputed like the Watchlist formula)."""
+    fwd_pe = ws.cell(row=r, column=5).value
+    E, Rv = _num(fwd_pe), _num(ws.cell(row=r, column=18).value)
+    peg = (E / Rv) if (E is not None and Rv is not None and Rv > 0 and E >= 0) else None
+    layer = ws.cell(row=r, column=3).value
+    return dict(
+        ticker=ws.cell(row=r, column=1).value, layer=layer, row=r,
+        tl=cohort_percentile.top_level_layer(layer),
+        fwd_pe=fwd_pe, ev_ebitda=ws.cell(row=r, column=6).value,
+        fcf_yield=ws.cell(row=r, column=7).value, ps=ws.cell(row=r, column=8).value,
+        peg=peg, roic=ws.cell(row=r, column=11).value, gm=ws.cell(row=r, column=12).value,
+        fcf_mgn=ws.cell(row=r, column=13).value, nd_eb=ws.cell(row=r, column=14).value,
+        rev_cagr=ws.cell(row=r, column=16).value, rev_yoy=ws.cell(row=r, column=17).value,
+        eps_yoy=ws.cell(row=r, column=18).value,
+        ai_inputs=[ws.cell(row=r, column=c).value for c in (20, 21, 22, 23, 24)],
+        mom_inputs=[ws.cell(row=r, column=c).value for c in (26, 27, 28)],
+        dma_pct=ws.cell(row=r, column=29).value,
+        risk_inputs=[ws.cell(row=r, column=c).value for c in (31, 32, 33, 34, 38)],
+    )
+
+
+def _metric_scores_absolute(row):
+    """The six style-biased metric scores via the live absolute bands."""
+    return dict(
+        ev=score_ev_col(row['ev_ebitda'], row['layer']),
+        fcf_yield=score_fcf_yield(row['fcf_yield']), ps=score_ps(row['ps']),
+        roic=score_roic(row['roic']), gm=score_gm(row['gm']),
+        fcf_mgn=score_fcf_mgn(row['fcf_mgn']))
+
+
+def _metric_scores_percentile(rows):
+    """The six style-biased metric scores as within-cohort percentiles (P1),
+    keyed by row number. Cohort = top-level layer; min size 8 else absolute
+    fallback (cohort_percentile.cohort_metric_scores). Col F (EV/*) stays
+    absolute for Layer 9 (mixed EV/EBITDA + EV/MW), EV/FCF for Layer 10."""
+    by_layer = {}
+    for row in rows:
+        by_layer.setdefault(row['tl'], []).append(row)
+    out = {row['row']: {} for row in rows}
+    uniform = [('fcf_yield', True, score_fcf_yield), ('ps', False, score_ps),
+               ('roic', True, score_roic), ('gm', True, score_gm),
+               ('fcf_mgn', True, score_fcf_mgn)]
+    for tl, cohort in by_layer.items():
+        for key, hib, absfn in uniform:
+            vals = [_num(r[key]) for r in cohort]
+            for r, s in zip(cohort,
+                            cohort_percentile.cohort_metric_scores(vals, hib, absfn)):
+                out[r['row']][key] = s
+        vals = [_num(r['ev_ebitda']) for r in cohort]
+        if tl == '09':
+            ev = [score_ev_col(r['ev_ebitda'], r['layer']) for r in cohort]
+        elif tl == '10':
+            ev = cohort_percentile.cohort_metric_scores(vals, False, score_ev_fcf_saas)
+        else:
+            ev = cohort_percentile.cohort_metric_scores(vals, False, score_ev_ebitda)
+        for r, s in zip(cohort, ev):
+            out[r['row']]['ev'] = s
+    return out
+
+
+def _assemble(row, ms, w):
+    """Category subscores + TOTAL, using the cohort/absolute metric scores `ms`
+    for the six style-biased metrics and live absolute bands for the rest."""
+    value = avg_nonnull([score_fwd_pe(row['fwd_pe']), ms['ev'], ms['fcf_yield'],
+                         ms['ps'], score_peg(row['peg'])])
+    quality = avg_nonnull([ms['roic'], ms['gm'], ms['fcf_mgn'],
+                           score_nd_ebitda(row['nd_eb'])])
+    growth = avg_nonnull([score_rev_cagr(row['rev_cagr']), score_rev_yoy(row['rev_yoy']),
+                          score_eps_yoy(row['eps_yoy'])])
+    ai_inputs = row['ai_inputs']
+    ai = (sum(x for x in ai_inputs if x is not None) / sum(1 for x in ai_inputs if x is not None) * 20) if any(x is not None for x in ai_inputs) else None
+    momentum = avg_nonnull([x * 20 if x is not None else None for x in row['mom_inputs']]
+                           + [score_50dma(row['dma_pct'])])
+    risk_inputs = row['risk_inputs']
+    risk = (sum(x for x in risk_inputs if x is not None) / sum(1 for x in risk_inputs if x is not None) * 20) if any(x is not None for x in risk_inputs) else None
+    parts = []
+    for sub, key in [(value, 'Value'), (quality, 'Quality'), (growth, 'Growth'),
+                     (ai, 'AI'), (momentum, 'Momentum'), (risk, 'Risk')]:
+        if sub is not None:
+            parts.append(sub * w[key])
+    total = sum(parts) if parts else None
+    return {'ticker': row['ticker'], 'layer': row['layer'], 'row': row['row'],
+            'Value': value, 'Quality': quality, 'Growth': growth, 'AI': ai,
+            'Momentum': momentum, 'Risk': risk, 'TOTAL': total, 'Tier': tier(total)}
+
+
+def recalc(xlsx=XLSX, mode='percentile'):
+    """Recompute Watchlist scores.
+
+    mode='percentile' (LIVE default, P1): the six style-biased metrics (EV/EBITDA,
+    FCF-yield, P/S, ROIC, gross margin, FCF margin) are ranked within each
+    top-level-layer cohort; a cohort with <8 non-null values for a metric falls
+    back to that metric's absolute band. Everything else (ND/EBITDA, Fwd P/E, PEG,
+    Growth, and all subjective dims) is scored on absolute bands exactly as before.
+
+    mode='absolute' reproduces the pre-P1 fixed-band scores (for before/after).
+    """
     wb = load_workbook(xlsx, data_only=False)
     ws = wb['Watchlist']
-
-    # Weights from Weights sheet (falls back to the defaults below if absent).
     weights = {}
     if 'Weights' in wb.sheetnames:
         for row in wb['Weights'].iter_rows(min_row=2, values_only=True):
             if row[0] and row[1] is not None:
                 weights[row[0]] = row[1]
-
-    # Defaults match the 2026-05-25 reweight. Weights sheet labels the AI row
-    # "AI Thesis" (not "AI"), so read that key explicitly or the get() silently
-    # falls back to the pre-reweight 30%.
     w = {
-        'Value': weights.get('Value', 0.20),
-        'Quality': weights.get('Quality', 0.20),
+        'Value': weights.get('Value', 0.20), 'Quality': weights.get('Quality', 0.20),
         'Growth': weights.get('Growth', 0.15),
         'AI': weights.get('AI Thesis', weights.get('AI', 0.20)),
-        'Momentum': weights.get('Momentum', 0.10),
-        'Risk': weights.get('Risk', 0.15),
-    }
+        'Momentum': weights.get('Momentum', 0.10), 'Risk': weights.get('Risk', 0.15)}
 
-    results = []
-    for r in range(2, ws.max_row + 1):
-        ticker = ws.cell(row=r, column=1).value
-        if not ticker: continue
-        layer = ws.cell(row=r, column=3).value
+    rows = [_read_raw(ws, r) for r in range(2, ws.max_row + 1)
+            if ws.cell(row=r, column=1).value]
+    if mode == 'percentile':
+        ms = _metric_scores_percentile(rows)
+    else:
+        ms = {row['row']: _metric_scores_absolute(row) for row in rows}
+    return [_assemble(row, ms[row['row']], w) for row in rows]
 
-        # Objective inputs (current layout: PEG inserted at col I=9 on 2026-05-25,
-        # which shifts ROIC..EPS-YoY one column right vs the pre-PEG schema).
-        fwd_pe = ws.cell(row=r, column=5).value       # E
-        ev_ebitda = ws.cell(row=r, column=6).value    # F
-        fcf_yield = ws.cell(row=r, column=7).value    # G
-        ps = ws.cell(row=r, column=8).value           # H
-        # PEG (col I) is a formula; openpyxl can't read its value, so recompute it
-        # the same way as the Watchlist formula: E/R when both valid, R>0, E>=0.
-        E, R = _num(fwd_pe), _num(ws.cell(row=r, column=18).value)
-        peg = (E / R) if (E is not None and R is not None and R > 0 and E >= 0) else None
-        roic = ws.cell(row=r, column=11).value        # K
-        gm = ws.cell(row=r, column=12).value          # L
-        fcf_mgn = ws.cell(row=r, column=13).value     # M
-        nd_eb = ws.cell(row=r, column=14).value       # N
-        rev_cagr = ws.cell(row=r, column=16).value    # P
-        rev_yoy = ws.cell(row=r, column=17).value     # Q
-        eps_yoy = ws.cell(row=r, column=18).value     # R
 
-        # Subjective (AI: T-X, Momentum: Z-AB, Risk: AE-AH) + objective 50DMA %
-        # (AC, inserted 2026-06-09 — shifts Risk/Score columns one right).
-        ai_inputs = [ws.cell(row=r, column=c).value for c in [20, 21, 22, 23, 24]]
-        mom_inputs = [ws.cell(row=r, column=c).value for c in [26, 27, 28]]
-        dma_pct = ws.cell(row=r, column=29).value
-        # R5 Disruption Risk added 2026-06-17 at col 38 (appended to avoid shifting
-        # Risk Score/TOTAL/Tier); AVERAGE skips blanks like the other R dims.
-        risk_inputs = [ws.cell(row=r, column=c).value for c in [31, 32, 33, 34, 38]]
+def sync_scores(xlsx=XLSX):
+    """Write the P1 percentile Value Score (col J) and Quality Score (col O) to
+    the Watchlist as VALUES.
 
-        # Subscores
-        value = avg_nonnull([score_fwd_pe(fwd_pe), score_ev_col(ev_ebitda, layer),
-                             score_fcf_yield(fcf_yield), score_ps(ps), score_peg(peg)])
-        # ROIC/ND-EBITDA may be blank (yfinance gap / non-positive EBITDA); AVERAGE skips blanks.
-        quality = avg_nonnull([score_roic(roic), score_gm(gm), score_fcf_mgn(fcf_mgn),
-                               score_nd_ebitda(nd_eb)])
-        growth = avg_nonnull([score_rev_cagr(rev_cagr), score_rev_yoy(rev_yoy),
-                              score_eps_yoy(eps_yoy)])
-        ai = (sum(x for x in ai_inputs if x is not None) / sum(1 for x in ai_inputs if x is not None) * 20) if any(x is not None for x in ai_inputs) else None
-        # Momentum blends 3 subjective ratings (×20) with the banded 50DMA %.
-        momentum = avg_nonnull([x * 20 if x is not None else None for x in mom_inputs]
-                               + [score_50dma(dma_pct)])
-        risk = (sum(x for x in risk_inputs if x is not None) / sum(1 for x in risk_inputs if x is not None) * 20) if any(x is not None for x in risk_inputs) else None
+    These two subscores are cohort-relative (they rank a name against its peers),
+    which cannot be expressed as a per-row Excel formula. The TOTAL and Tier
+    cells stay live formulas that reference J and O, so on open Excel computes the
+    correct percentile TOTAL/Tier while Growth/AI/Momentum/Risk remain live
+    formulas that auto-update from their inputs. recalc() is the authoritative
+    engine for every consumer (site, portfolio) regardless; this only keeps the
+    raw sheet honest when opened directly.
 
-        # TOTAL
-        parts = []
-        if value is not None: parts.append(value * w['Value'])
-        if quality is not None: parts.append(quality * w['Quality'])
-        if growth is not None: parts.append(growth * w['Growth'])
-        if ai is not None: parts.append(ai * w['AI'])
-        if momentum is not None: parts.append(momentum * w['Momentum'])
-        if risk is not None: parts.append(risk * w['Risk'])
-        total = sum(parts) if parts else None
-
-        def tier(t):
-            if t is None: return None
-            if t >= 85: return '✓✓✓'
-            if t >= 70: return '✓✓'
-            if t >= 55: return '✓'
-            if t >= 40: return '?'
-            return '✗'
-
-        results.append({
-            'ticker': ticker, 'layer': layer, 'row': r,
-            'Value': value, 'Quality': quality, 'Growth': growth,
-            'AI': ai, 'Momentum': momentum, 'Risk': risk,
-            'TOTAL': total, 'Tier': tier(total)
-        })
-
-    return results
+    Re-run after rebuild_watchlist_formulas (which restores the absolute-band
+    formulas here) and after any objective-input refresh. Returns rows written.
+    """
+    results = recalc(xlsx, mode='percentile')
+    wb = load_workbook(xlsx, data_only=False)
+    ws = wb['Watchlist']
+    n = 0
+    for x in results:
+        if x['Value'] is not None:
+            ws.cell(row=x['row'], column=10).value = round(x['Value'], 1)
+        if x['Quality'] is not None:
+            ws.cell(row=x['row'], column=15).value = round(x['Quality'], 1)
+        n += 1
+    wb.save(xlsx)
+    return n
 
 
 if __name__ == '__main__':
+    import sys
+    if '--sync' in sys.argv:
+        n = sync_scores()
+        print(f'synced P1 percentile Value/Quality Score cells for {n} rows '
+              f'(TOTAL/Tier formulas reference them)')
+        sys.exit(0)
     rs = recalc()
     # Sort by TOTAL desc (None last)
     rs.sort(key=lambda x: (x['TOTAL'] is None, -(x['TOTAL'] or 0)))
