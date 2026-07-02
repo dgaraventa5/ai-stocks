@@ -13,7 +13,13 @@ import time
 from pathlib import Path
 from typing import Optional
 
-import requests
+# `requests` is imported lazily inside sec_get (below), NOT at module level: this
+# module is on the import path of the offline scoring/portfolio code (recalc,
+# refresh_targets, the rule-25 gate test), which the site-deploy CI runs with only
+# `openpyxl pytest` installed. A top-level `import requests` there aborts pytest
+# COLLECTION (ModuleNotFoundError), failing the whole suite before any test runs.
+# The `-> requests.Response` annotation on sec_get is a string (from __future__
+# import annotations), so it does not evaluate `requests` at definition time.
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -53,8 +59,9 @@ class RateLimiter:
 sec_limiter = RateLimiter()
 
 
-def sec_get(url: str, *, host_data_sec: bool = False, **kwargs) -> requests.Response:
+def sec_get(url: str, *, host_data_sec: bool = False, **kwargs) -> "requests.Response":
     """GET against sec.gov / data.sec.gov with the right UA + throttle."""
+    import requests  # lazy: keeps common importable in the network-free deploy CI
     sec_limiter.wait()
     headers = DATA_SEC_HEADERS if host_data_sec else SEC_HEADERS
     headers = {**headers, **kwargs.pop("headers", {})}
