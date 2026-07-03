@@ -10,3 +10,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-06-12** (weekly scan, SEC EDGAR): 8-K 2026-06-10 (Item 1.01): closed $4.25B 6.129% senior secured notes due 2042 (Beacon Point DC LLC) funding 352MW six-hall turnkey DC in Nueces County TX, leased to a tenant rated AA- or higher — IG-tenant DC conversion thesis confirming.
 
 - **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): FULL EXIT of $40M equity position.
+
+- **2026-07-03** (weekly scan, PR Newswire) — Majority-owned subsidiary American Bitcoin Corp (ABTC) announced a 1-for-15 reverse stock split (effective 7/2) to maintain Nasdaq minimum-bid compliance. HUT shares fell ~10% same day (7/1) — could not confirm whether the split, the broader Meta Compute sector selloff, or both drove the drop.

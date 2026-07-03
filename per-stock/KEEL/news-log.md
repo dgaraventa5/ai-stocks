@@ -10,3 +10,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-06-12** (weekly scan, SEC EDGAR): 8-K 2026-06-10 (Item 1.01): issued $458M 1.250% convertible senior notes due 2032 (upsized from $350M, full greenshoe); proceeds for capped calls + accelerating DC development (Panther Creek, Sharon, Moses Lake).
 
 - **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): Added +188% to 19.88M sh ($39M) — bigger % add than RIOT, missed by most 13F commentary (filed under Bitfarms CUSIP 09173B107).
+
+- **2026-07-03** (weekly scan) — Added to the Russell 3000 effective 6/29. Sharp selloff 7/1-7/2, down ~13.7% in a session (~$447M in equity value, roughly wiping out the ~$445.4M raised in the June 9 convert offering). Aggregator sources cite "delays/cost overruns on a transport project" and cash-burn concerns — **could not corroborate against a primary source; flagging as unverified sourcing**, though the price move itself is real.
