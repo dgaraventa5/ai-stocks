@@ -70,9 +70,9 @@
   },
   "KEEL": {
     "secured_gross_mw": 771,
-    "basis": "341 MW energized + 430 MW secured (executed utility agreements), gross grid power; 1.5 GW expansion pipeline excluded",
+    "basis": "341 MW energized + 430 MW secured (executed utility agreements), gross grid power; ~2.2 GW expansion pipeline excluded. Note: redomiciled to Delaware / US domestic filer 2026-04-01 (was Bitfarms/Canada) — files 10-Q/8-K, no ADR-currency (rule 19) handling; reports USD.",
     "asof": "2026-05-11",
-    "source": "ir.keelinfra.com + Q1 2026 earnings call May 11 2026",
+    "source": "ir.keelinfra.com + Q1 2026 earnings call May 11 2026; pipeline per per-stock/KEEL/context-2026-07-06.md",
     "confidence": "High"
   },
   "RIOT": {
