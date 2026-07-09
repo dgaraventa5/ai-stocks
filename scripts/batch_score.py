@@ -2,13 +2,21 @@
 
 For each ticker:
   1. yfinance pull → 11 objective inputs for the Watchlist tab
-  2. Append row to 00-master/ai_supply_chain_scoring.xlsx (formulas retargeted)
+  2. Append row to 00-master/ai_supply_chain_scoring.xlsx (inputs + PEG formula)
   3. Scaffold per-stock/{T}/ (thesis.md, news-log.md, catalysts-watchlist.md, dirs)
   4. Build per-stock/{T}/financials.xlsx with Data flags sheet
 
 Subjective rating cells (12 of them) are left BLANK — those happen in a
 collaborative rating session with the human per
 templates/rating-rubric-and-workflow.md.
+
+REQUIRED follow-up (rule-10 note): append_row writes only the objective inputs
+and the PEG formula. The category/TOTAL/Tier formulas are owned by
+rebuild_watchlist_formulas.py and are BLANK until it runs. After any batch_score
+run, finalize the new rows with:
+
+  python3 scripts/rebuild_watchlist_formulas.py   # Value/Quality/Growth/AI/Momentum/Risk/TOTAL/Tier
+  python3 scripts/recalc_watchlist.py --sync      # cohort-relative J/O + Targets (rule 20)
 
 Saves incrementally every 5 tickers so partial failures don't lose work.
 
@@ -285,11 +293,24 @@ def _retarget_formula(formula: str, new_row: int) -> str:
 
 
 def append_row(ws, row_num: int, ticker: str, layer: str, inputs: dict) -> None:
-    """Append a Watchlist row with values + retargeted formulas. Subjective cells blank."""
+    """Append a Watchlist row with objective inputs + the retargeted PEG formula.
+
+    append_row is the SOLE writer of PEG(9) for a new row. Every OTHER computed
+    column — Value(10), Quality(15), Growth(19), AI(25), Momentum(30), Risk(35),
+    TOTAL(36), Tier(37) — is owned by ``scripts/rebuild_watchlist_formulas.py``,
+    which MUST be run after any batch_score run (the rule-10-note follow-up):
+
+        python3 scripts/rebuild_watchlist_formulas.py   # fills the category cols
+        python3 scripts/recalc_watchlist.py --sync      # syncs J/O + targets (rule 20)
+
+    Until that rebuild runs, the category/TOTAL/Tier cells on the new row are
+    deliberately BLANK. (Formerly append_row also copied a hard-coded set of those
+    formulas from row 2, but that list drifted off-by-one from the live layout and
+    left Momentum Score/Tier blank; owning only PEG removes the duplicated layout
+    knowledge. Subjective rating cells are left blank for the rating session.)
+    """
     SRC_ROW = 2
-    # PEG(9), ValueScore(10), QualityScore(15), GrowthScore(19),
-    # AIScore(25), MomentumScore(29), RiskScore(34), TOTAL(35), Tier(36)
-    SCORE_COLS = [9, 10, 15, 19, 25, 29, 34, 35, 36]
+    SCORE_COLS = [9]  # PEG only; rebuild_watchlist_formulas.py owns the rest
     for col in SCORE_COLS:
         src = ws.cell(row=SRC_ROW, column=col).value
         if isinstance(src, str) and src.startswith("="):
