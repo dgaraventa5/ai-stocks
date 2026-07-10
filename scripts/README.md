@@ -24,6 +24,26 @@ pip install -r ../requirements.txt
 | `yfinance_fundamentals.py` | Pull fundamentals + statements into `per-stock/{TICKER}/financials.xlsx` with derived ratios as formulas. |
 | `parse_13f.py` | Resolve a fund's latest 13F-HR (or a specific accession), parse the information table, print top holdings. |
 | `new_ticker.py` | Scaffold `per-stock/{TICKER}/` from templates. Optional flags to chain `yfinance_fundamentals.py` and `sec_edgar.py`. |
+| `weekly_scan_runner.py` | Primary weekly scan: pull each ticker's 8-Ks/6-Ks from EDGAR for the window, classify material vs. routine, check tracked-fund 13Fs. Exits to `web_scan.py` if EDGAR egress is blocked. |
+| `web_scan.py` | Date-verified, source-filtered web fallback for the weekly scan when EDGAR is blocked. `--plan` emits the full-watchlist query plan (holdings/✓✓ names get filing+press+news queries, the tail gets a filing query, all domain-filtered to SEC/wire sources); `--verify hits.json` date-filters harvested hits to the window, flags undated ones UNVERIFIED, and classifies materiality by keyword. |
+
+## Weekly scan fallback (EDGAR blocked)
+
+When `data.sec.gov` is unreachable (every cloud session since 2026-06-12), the ad-hoc
+"search each ticker's news" approach leaks material events — it has no real recency
+filter and buries headline-light items (the AVGO CFO change was missed by four scans).
+Use the systematic fallback instead:
+
+```bash
+python3 scripts/web_scan.py --plan --from 2026-07-03 --to 2026-07-10   # queries to run
+# ...run each WebSearch(query, allowed_domains); collect hits into hits.json as
+#    [{"ticker","title","url","date","snippet"}, ...]
+python3 scripts/web_scan.py --verify hits.json --from 2026-07-03 --to 2026-07-10
+```
+
+`--verify` drops out-of-window hits, surfaces undated ones as UNVERIFIED (never assumed
+in-window, per CLAUDE.md rule 3), and flags material events via a keyword net covering
+leadership/M&A/capacity/guidance/financing/legal/going-concern.
 
 ## Common workflows
 

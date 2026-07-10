@@ -138,7 +138,18 @@ def main():
     print(f"  {len(watchlist)} tickers loaded.")
 
     print("Loading CIK map...")
-    cik_map = load_cik_map()
+    try:
+        cik_map = load_cik_map()
+    except Exception as e:
+        # EDGAR egress is blocked on cloud sessions (has been since 2026-06-12). The
+        # primary dated-filings feed is unavailable → don't guess, point at the
+        # date-verified web fallback instead of producing a silent partial scan.
+        print(f"\n[FLAG] SEC EDGAR unreachable ({e}).")
+        print("  Primary filings feed is down. Use the web-search fallback, which is "
+              "date-verified\n  and covers the full watchlist:")
+        print("    python3 scripts/web_scan.py --plan       # emit the query plan to run")
+        print("    python3 scripts/web_scan.py --verify hits.json   # date-filter + classify")
+        raise SystemExit(2)
     print(f"  {len(cik_map)} tickers in CIK map.")
 
     material = []
