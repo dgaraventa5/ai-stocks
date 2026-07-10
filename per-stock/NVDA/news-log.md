@@ -11,3 +11,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-07-03 | weekly scan (secondary-sourced, unconfirmed vs. primary NVIDIA source) | NVIDIA + partners (TSMC, Foxconn, Wistron, Amkor, SPIL) reportedly plan up to $500B in US AI-infrastructure investment over 4 years incl. first domestic Blackwell production (AZ chip build/test, TX supercomputer assembly). Flagged unconfirmed — NVIDIA blog fetch returned 403. |
 
 - **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): NEW put position, $1.57B notional (8.99M sh underlying) + residual $0.5M equity stub. Part of $8.46B put overlay on megacap AI semis.
+
+- **2026-06-18** (weekly scan, SEC EDGAR) — 8-K: completed $28B bond offering across 7 tranches, maturities 2028-2056. Continued AI-capex/buyback debt financing, routine. (Puri/Parker succession above already covers the 6/28 Item 5.02 — not duplicated here.)
