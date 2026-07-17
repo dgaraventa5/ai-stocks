@@ -11,3 +11,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-05-07 | Earnings Call | Capital returns: ~$600M returned YTD ($525M buybacks + $75M dividend). 169M shares retired since Nov 2021 at avg. $37/share (30% reduction). $1.475B authorization remaining. |
 | 2026-05-07 | Earnings Call | ERCOT load growth guide: 5-6% annually through 2030, 10-15 GW data center. Burke: "physical world takes much longer to develop than what people might imagine." |
 | 2026-05-07 | Earnings Call | Bridge power with gas increasingly part of data center conversations. Management sees gas colocation deal opportunities beyond nuclear. |
+| 2026-07-14 | weekly scan (8-K) | Cleared ~10,924 MW in PJM's 2028/2029 capacity auction across 7 zones (RTO, ATSI, COMED, DEOK, EMAAC, MAAC, DOM) at a weighted-average clearing price of $325/MW-day. |
