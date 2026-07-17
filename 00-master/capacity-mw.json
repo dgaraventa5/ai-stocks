@@ -7,16 +7,16 @@
   },
   "CRWV": {
     "secured_gross_mw": 3500,
-    "basis": "company 'contracted power', IT-vs-gross unspecified (treated gross, flagged)",
+    "basis": "company 'contracted power', IT-vs-gross unspecified (treated gross, flagged) | Sweep through 2026-07-16: no newer contracted-power total (Galaxy Helios Phase I 2026-07-06 is delivery of pre-existing lease; Conapto 2026-06-24 re-cites Q1 figures). Next trigger: Q2 earnings 2026-08-18. Note: Helios discloses IT-vs-gross ratio ~1.52 (526 IT / 800 gross), evidence the x1.25 convention may understate gross for IT-quoted leases.",
     "asof": "2026-03-31",
     "source": "Q1 2026 results, investors.coreweave.com, May 2026",
     "confidence": "Medium"
   },
   "NBIS": {
     "secured_gross_mw": 3500,
-    "basis": "company 'contracted power', IT-vs-gross unspecified (treated gross, flagged); >75% owned",
-    "asof": "2026-03-31",
-    "source": "Q1 2026 6-K + earnings call May 13 2026",
+    "basis": "company 'contracted power' \u2014 explicitly defined in Q1 2026 shareholder letter as 'power secured by contracted land and power commitments' (matches secured = energized + committed; connected was ~170 MW at YE2025). Floor of stated '>3.5 GW'; includes up-to-1.2 GW Pennsylvania site announced same day. EXCLUDES the >4 GW YE-2026 contracted-power guidance (target, not secured). IT-vs-gross still unspecified, treated gross (land+grid commitments inherently gross; no x1.25); >75% owned",
+    "asof": "2026-05-13",
+    "source": "Q1 2026 shareholder letter 2026-05-13 ('Scaling our infrastructure globally') + earnings call; companion 6-K acc 0001104659-26-059872",
     "confidence": "Medium"
   },
   "APLD": {
@@ -49,9 +49,9 @@
   },
   "CLSK": {
     "secured_gross_mw": 1809,
-    "basis": "total contracted gross utility power, owned/leased sites; zero AI/HPC MW contracted to date",
-    "asof": "2026-03-31",
-    "source": "CLSK 10-Q (period 2026-03-31) + March 2026 operational update",
+    "basis": "total contracted gross utility power, owned/leased sites (GA/TN/MS/WY); reaffirmed '1.8 GW under contract' in June 2026 op update. FIRST AI/HPC LEASE SIGNED 2026-07-10: Sandersville GA 175 MW critical IT (~219 gross at x1.25), 20-yr NNN, ~$6.6B initial-term revenue, deliveries from Q4 2027 \u2014 carved from EXISTING contracted power, no MW addition. Texas portfolio (up to 885 MW 'secured and planned', ~585 ERCOT-approved; now under non-binding tenant LOI/exclusivity) EXCLUDED \u2014 company reports it separately and does not split secured vs planned; candidate addition at fiscal Q3 10-Q (~Aug 2026).",
+    "asof": "2026-06-30",
+    "source": "CleanSpark June 2026 Operational Update (PRNewswire ~2026-07-07: 1.8 GW contracted, 808 MW utilized) + 8-K filed 2026-07-14 (event 2026-07-10, acc 0001193125-26-302448: Sandersville lease + Texas LOI) + 10-Q period 2026-03-31 (1,809 MW verbatim)",
     "confidence": "High"
   },
   "BTDR": {
@@ -70,23 +70,23 @@
   },
   "KEEL": {
     "secured_gross_mw": 771,
-    "basis": "341 MW energized + 430 MW secured (executed utility agreements), gross grid power; ~2.2 GW expansion pipeline excluded. Note: redomiciled to Delaware / US domestic filer 2026-04-01 (was Bitfarms/Canada) — files 10-Q/8-K, no ADR-currency (rule 19) handling; reports USD.",
+    "basis": "341 MW energized + 430 MW secured (executed utility agreements), gross grid power; ~2.2 GW expansion pipeline excluded. Note: redomiciled to Delaware / US domestic filer 2026-04-01 (was Bitfarms/Canada) \u2014 files 10-Q/8-K, no ADR-currency (rule 19) handling; reports USD.",
     "asof": "2026-05-11",
     "source": "ir.keelinfra.com + Q1 2026 earnings call May 11 2026; pipeline per per-stock/KEEL/context-2026-07-06.md",
     "confidence": "High"
   },
   "RIOT": {
     "secured_gross_mw": 1700,
-    "basis": "1.7 GW fully ERCOT-approved gross across Rockdale ~700 + Corsicana ~1,000; AMD lease 50 MW critical IT within it (expanded 25->50, first 5 MW online Q1 2026). Kentucky 162 MW developed capacity (non-ERCOT) EXCLUDED per prior ERCOT-only scope -- including it gives ~1,862. Headline confirmed consistent with Q1 2026 10-Q; only AMD contracted, no hyperscale tenant signed (conversion = AI-Thesis's job, not Value, per rule 13).",
+    "basis": "1.7 GW fully ERCOT-approved gross across Rockdale ~700 + Corsicana ~1,000; AMD lease 50 MW critical IT within it (Rockdale per Riot PR; expanded 25->50, first 5 MW online Q1 2026). Kentucky 162 MW developed capacity (non-ERCOT) EXCLUDED per ERCOT-only scope -- including it gives ~1,862. Post-Q1 checks through 2026-07-16: no capacity-changing disclosure; Terrestrial Energy nuclear MOU 2026-05-06 (up to 4 GW IMSR) EXCLUDED as speculative pipeline; ~$400M Corsicana building permit (May 2026) is within the existing envelope. Q2 production update + Q2 10-Q not yet published.",
     "asof": "2026-03-31",
-    "source": "Riot 10-Q period 2026-03-31 (filed 2026-04-30) + Q1 2026 earnings deck; AMD lease 8-K 2026-01-16; per-stock/RIOT/context-2026-06-22.md",
+    "source": "Riot 10-Q period 2026-03-31 (filed 2026-04-30) + Q1 2026 earnings deck; AMD lease 8-K 2026-01-16; Q1 2026 production update PR 2026-04-02; EDGAR CIK 1167419 swept through 2026-07-16 (no capacity 8-K after 2026-06-15 AGM); per-stock/RIOT/context-2026-06-22.md",
     "confidence": "High"
   },
   "WULF": {
-    "secured_gross_mw": 653,
-    "basis": "522 critical IT MW executed long-term leases (company FY2025 total: Core42/G42 60 IT energized Q1 2026 + Fluidstack Lake Mariner CB-3/4/5 + Abernathy TX 168, all under construction delivering 2026) x1.25 = 653 gross-equiv. Using the company's 522 total nets out the prior Fluidstack-360-vs-CB-buildings overlap (prior basis used 438 -> 550). Muskie KY (up to 1 GW, 2028/2030 ramp) EXCLUDED as development; Lake Mariner mining shares site power, not added.",
-    "asof": "2026-03-31",
-    "source": "TeraWulf Q4/FY2025 results PR (522 critical IT MW) + Q1 2026 10-Q (60 MW energized, period 2026-03-31); per-stock/WULF/context-2026-06-22.md",
+    "secured_gross_mw": 944,
+    "basis": "755 critical IT MW executed long-term leases x1.25 = 944 gross-equiv. Components: prior company-stated FY2025 total 522 IT MW (Core42 60 energized + Fluidstack Lake Mariner CB-3/4/5, delivering 2026) MINUS Abernathy TX 168 (entire 50.1% JV interest sold to Fluidstack-led group ~$530M, 8-K 2026-07-06) PLUS Anthropic Justified Data Campus, Hawesville KY 401 IT MW (executed 20-yr lease, ~$19B initial-term revenue, phased delivery H2 2027-early 2028 \u2014 counted via executed-lease clause; FLAG: earliest-stage inclusion, construction start not disclosed). Muskie KY (up to 1 GW, 2028/2030, no lease) still EXCLUDED as development; Lake Mariner mining shares site power, not added. Fluidstack CB-building composition overlap still flagged (context-2026-06-22 s6).",
+    "asof": "2026-07-06",
+    "source": "WULF 8-K filed 2026-07-06 (acc 0001104659-26-080583, Items 8.01/9.01) + Ex-99.1 PR (investors.terawulf.com detail/142); prior 522 IT MW from Q4/FY2025 results PR (detail/132); per-stock/WULF/context-2026-06-22.md",
     "confidence": "Medium"
   },
   "WYFI": {
