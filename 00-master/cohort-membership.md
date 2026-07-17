@@ -11,7 +11,7 @@ metrics: ev_ebitda=pct(32)  fcf_yield=pct(33)  ps=pct(31)  roic=pct(25)  gm=pct(
 members: AEP, AR, BE, BW, BWXT, CCJ, CEG, CMI, D, DUK, EQT, ETR, EXE, GNRC, LEU, NEE, NNE, NRG, NXT, OKLO, PLUG, PPL, PSIX, PUMP, RRC, SEI, SMR, SO, TE, TLN, UEC, VST, XEL
 
 ## Layer 02 — 11 names
-metrics: ev_ebitda=pct(11)  fcf_yield=pct(11)  ps=pct(11)  roic=pct(11)  gm=pct(11)  fcf_mgn=pct(11)
+metrics: ev_ebitda=pct(10)  fcf_yield=pct(11)  ps=pct(11)  roic=pct(11)  gm=pct(11)  fcf_mgn=pct(11)
 members: ABBNY, ATKR, ETN, GEV, HTHIY, HUBB, MTZ, NVT, POWL, PWR, SBGSY
 
 ## Layer 03 — 11 names
@@ -19,7 +19,7 @@ metrics: ev_ebitda=pct(11)  fcf_yield=pct(11)  ps=pct(11)  roic=pct(10)  gm=pct(
 members: AAON, CARR, DLR, EME, EQIX, FIX, IRM, JCI, MOD, TT, VRT
 
 ## Layer 04 — 28 names
-metrics: ev_ebitda=pct(28)  fcf_yield=pct(27)  ps=pct(28)  roic=pct(18)  gm=pct(28)  fcf_mgn=pct(27)
+metrics: ev_ebitda=pct(27)  fcf_yield=pct(27)  ps=pct(27)  roic=pct(18)  gm=pct(28)  fcf_mgn=pct(27)
 members: ACLS, AEIS, AIP, AMAT, AMKR, ARM, ASML, ASX, BESIY, CAMT, CDNS, CEVA, COHU, ENTG, FORM, KEYS, KLAC, KLIC, KN, LRCX, MKSI, ONTO, PLAB, SNPS, TER, TOELY, TTMI, UCTT
 
 ## Layer 05 — 8 names
