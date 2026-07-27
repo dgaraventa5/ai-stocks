@@ -8,7 +8,7 @@
 
 ---
 
-## 1. One-line thesis
+## 1. One-line thesis [STALE - revisit]
 
 > Owned as the most vertically integrated AI player: its custom TPU silicon, fastest-growing major cloud, and Gemini stack sit behind a Search, ad-tech, and YouTube moat, making it the one hyperscaler outrunning the broad market on AI execution.
 
@@ -44,7 +44,7 @@
 
 ---
 
-## 5. Financials snapshot
+## 5. Financials snapshot [STALE - revisit]
 
 (See `financials.xlsx` for detail)
 
@@ -98,7 +98,7 @@
 
 ---
 
-## 9. Risks
+## 9. Risks [STALE - revisit]
 
 - **Thesis-killer #1:** {single development that would force exit}
 - **Thesis-killer #2:** {second-most concerning risk}
