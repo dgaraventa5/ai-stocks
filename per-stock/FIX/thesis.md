@@ -8,7 +8,7 @@
 
 ---
 
-## 1. One-line thesis
+## 1. One-line thesis [STALE - revisit]
 
 > A mechanical and electrical contractor that has become a core picks-and-shovels play on AI infrastructure: nearly half its revenue is data-center work, backlog has more than doubled, and it does the cooling and buildout for essentially every major hyperscaler.
 
