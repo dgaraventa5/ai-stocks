@@ -5,5 +5,8 @@
       "mcp__claude_ai_Notion__notion-fetch",
       "Bash(python3 scripts/recalc_watchlist.py)"
     ]
+  },
+  "env": {
+    "CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION": "500"
   }
 }
