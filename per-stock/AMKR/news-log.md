@@ -4,3 +4,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 
 | Date | Source | Summary |
 |---|---|---|
+| 2026-07-27 ⚠️ | weekly scan (Yahoo Finance) | Record Q2 revenue (record Computing/Auto-Industrial segments) and a new 10-year TSMC Arizona advanced-packaging manufacturing partnership. |

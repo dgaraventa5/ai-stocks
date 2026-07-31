@@ -12,3 +12,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): FULL EXIT of $40M equity position.
 
 - **2026-07-03** (weekly scan, PR Newswire) — Majority-owned subsidiary American Bitcoin Corp (ABTC) announced a 1-for-15 reverse stock split (effective 7/2) to maintain Nasdaq minimum-bid compliance. HUT shares fell ~10% same day (7/1) — could not confirm whether the split, the broader Meta Compute sector selloff, or both drove the drop.
+- **2026-07-20** ⚠️ (weekly scan (Barchart / Quiverquant)) — Fully commercialized the 1GW Beacon Point campus with a 2nd 352MW lease, bringing base-term contract value to $19.6B; stock +10.4%. Separate reports of Nvidia lease commitments up to $50B tied to the 1GW TX site (unconfirmed against a primary source).
