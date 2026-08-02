@@ -9,7 +9,11 @@ Pipeline rules (parameters live on the Sizing Rules sheet — edit there):
     rank > exit_rank OR score < 70 (tier drop below ✓✓), and an exit must be
     confirmed on 2 consecutive runs (EXIT PENDING -> EXIT) so a single noisy
     refresh can't trade the portfolio. Entrants admitted in rank order only
-    while position count < max_positions.
+    while position count < max_positions. The pending clock is persisted in
+    tracking/performance-config.json (`exit_pending`, rule 26), NOT the Targets
+    sheet: freeze-snapshot gating rewrites the sheet only when a rebalance
+    fires, so a sheet-persisted clock could never start (2026-08-02 fix).
+    Frozen runs save only the config; dry runs never mutate it.
   - Freshness gate: candidates whose last yfinance trade is >7 days old are
     treated as dead (halted/delisted), excluded, and flagged — a delisted
     name (CTRA, 2026-05) once sat in the live top-20 on frozen data.
@@ -40,7 +44,7 @@ from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill
 
 from common import flag
-from portfolio_model import load_cfg, log_rebalance
+from portfolio_model import load_cfg, log_rebalance, save_cfg
 from portfolio_sizing import tier_changes, build_reason, weights_score_monotonic
 from recalc_watchlist import recalc
 
@@ -52,6 +56,10 @@ HEADER_FONT = Font(bold=True, color='FFFFFF')
 
 # Defaults for parameters added 2026-06-09; written to Sizing Rules if absent
 # so they are visible and editable in the workbook, not buried here.
+# THE SHEET IS AUTHORITATIVE for live values — ensure_params only seeds missing
+# rows, never overwrites. Keep these seeds in sync with the sheet: drift here
+# misled CLAUDE.md rule 20 into quoting 74.5/73.0 while the sheet ran the
+# 2026-06-18 76/74.5 concentration experiment (reverted 2026-08-02, Dom).
 NEW_PARAMS = [
     # Membership is SCORE-threshold-anchored (2026-06-10, Dom): hold the genuine
     # ✓✓ cluster, let the count flex with scores rather than fix it. Hysteresis
@@ -185,12 +193,17 @@ def refresh(dry_run: bool = False, resize: bool = False,
     cash = float(p['Cash buffer %'])
     capital = float(p['Portfolio Value ($)'])
 
-    # ---- prior state from existing Targets sheet ----
+    # ---- prior state: model config (pending clock) + Targets sheet ----
+    cfg = load_cfg()
+    # Exit-pending clock: ticker -> 'since' date, persisted in the config, NOT
+    # the sheet — freeze-snapshot gating rewrites the Status column only when a
+    # rebalance fires, so a sheet-persisted clock could never start (the
+    # 2026-08-02 bug: GOOGL/META/AMZN restarted their clocks every run).
+    exit_pending: dict[str, str] = dict(cfg.get('exit_pending', {}))
     hdr = [c.value for c in targets[2]]
     col = {name: i for i, name in enumerate(hdr)}
     prior_include: set[str] = set()
     overrides: dict[str, str] = {}
-    exit_pending: dict[str, str] = {}   # ticker -> 'since' date
     notes: dict[str, str] = {}
     for row in targets.iter_rows(min_row=3, values_only=True):
         tkr = row[0]
@@ -212,9 +225,6 @@ def refresh(dry_run: bool = False, resize: bool = False,
             ov = 'EXCLUDE'
         if ov:
             overrides[tkr] = ov
-        st = str(row[col['Status']] or '') if 'Status' in col else ''
-        if st.startswith('EXIT PENDING'):
-            exit_pending[tkr] = st.split('since ')[-1].rstrip(')')
 
     # ---- live scores ----
     live = [x for x in recalc() if x['TOTAL'] is not None]
@@ -240,6 +250,7 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # ---- membership: hysteresis ----
     include: list[str] = []
     statuses: dict[str, str] = {}
+    new_pending: dict[str, str] = {}    # next state of the exit-pending clock
     for t in prior_include:
         if t in dead or overrides.get(t) == 'EXCLUDE':
             statuses[t] = 'EXIT (dead/override)'
@@ -261,7 +272,9 @@ def refresh(dry_run: bool = False, resize: bool = False,
                  f'pending since {exit_pending[t]})')
         else:
             include.append(t)   # still held while pending
-            statuses[t] = f'EXIT PENDING (score {info[t]["TOTAL"]:.1f}, since {today})'
+            new_pending[t] = exit_pending.get(t, today)   # start/keep the clock
+            statuses[t] = (f'EXIT PENDING (score {info[t]["TOTAL"]:.1f}, '
+                           f'since {new_pending[t]})')
             flag(f'{t}: below exit score ({info[t]["TOTAL"]:.1f} < {exit_score}) — '
                  f'EXIT PENDING, confirms next refresh')
     for x in live:
@@ -294,7 +307,6 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # tiers, NOT the Targets sheet: the sheet can carry a fresh tier from an
     # out-of-band score edit (the bug this fixes), so it is not a trustworthy
     # baseline. Within-tier drift changes nothing — hysteresis preserved.
-    cfg = load_cfg()
     last_ev = cfg['events'][-1]
     prior_model = set(last_ev['allocations'])
     last_tiers = last_ev.get('tiers', {})
@@ -332,13 +344,21 @@ def refresh(dry_run: bool = False, resize: bool = False,
                    if fire else 'FREEZE (no membership/tier change)')
         print(f'(dry run — would {verdict}; nothing written)')
         return {'fire': fire, 'entered': entered, 'exited': exited,
-                'tier_chg': tier_chg, 'wrote': False}
+                'tier_chg': tier_chg, 'wrote': False, 'pending': new_pending}
 
     if not fire:
+        # The workbook snapshot stays frozen, but the exit-pending clock is
+        # cross-run state and MUST survive this run — persist it to the config
+        # (the confirm leg evaluates it next run; rule 26).
+        if new_pending != dict(cfg.get('exit_pending', {})):
+            cfg['exit_pending'] = new_pending
+            save_cfg(cfg)
+            print(f'exit-pending clock persisted to config: '
+                  f'{new_pending or "(cleared)"}')
         print('membership & tiers unchanged since last rebalance — '
               'snapshot frozen, nothing written')
         return {'fire': False, 'entered': [], 'exited': [], 'tier_chg': [],
-                'wrote': False}
+                'wrote': False, 'pending': new_pending}
 
     # ---- prices for the Reconciliation trade plan (only if that sheet exists) ----
     # Prices feed the Reconciliation sheet only; skip the network entirely when it
@@ -417,21 +437,24 @@ def refresh(dry_run: bool = False, resize: bool = False,
     print(f'wrote {len(include)} target positions to {path}')
 
     # ---- log the rebalance event (membership and/or tier change, or resize) ----
+    cfg['exit_pending'] = new_pending   # persisted by log_rebalance's save_cfg
     reason = build_reason(entered, exited, tier_chg, resize)
     tiers_now = {t: info[t]['Tier'] for t in include}
     ev = log_rebalance(cfg, weights, reason, tiers_now)
     print(f'model rebalanced: {reason} — value at rebalance '
           f'${sum(ev["allocations"].values()) + ev["cash"]:,.0f}')
     return {'fire': True, 'entered': entered, 'exited': exited,
-            'tier_chg': tier_chg, 'wrote': True}
+            'tier_chg': tier_chg, 'wrote': True, 'pending': new_pending}
 
 
 def pending_rebalance(portfolio: str | None = None) -> bool:
     """True when the committed Targets are STALE vs the live scores — a rebalance
     is pending because membership or a held name's tier has changed since the last
-    logged model event. Offline (dry-run path uses no yfinance). This is the
-    guarantee behind rule 25: True here means the weights no longer reflect the
-    scores, and something changed them without re-weighting."""
+    logged model event, OR an exit-pending clock from a prior date is due to
+    confirm (the name is still below the exit score, so the next real run exits
+    it). Offline (dry-run path uses no yfinance) and read-only: never starts or
+    advances pending clocks. This is the guarantee behind rule 25: True here means
+    the weights no longer reflect the scores/rules, and the fix is a real run."""
     import contextlib
     import io
     with contextlib.redirect_stdout(io.StringIO()):   # swallow the dry-run print
