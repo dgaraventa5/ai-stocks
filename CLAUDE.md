@@ -312,7 +312,11 @@ capital-heavy mean-Quality gap was **+28**; now **+6**). Before/after:
 the single source of truth for every consumer (`export_site_data`,
 `refresh_targets`). `mode='absolute'` reproduces the pre-P1 scores. Tier bands
 (85/70/55/40) and portfolio entry/exit (74.5/73.0) were reviewed and **held
-unchanged** — the overall score scale barely compressed.
+unchanged** — the overall score scale barely compressed. *[Correction
+2026-08-02: the live sheet params were actually 76/74.5 at the time — the
+2026-06-18 concentration experiment (commit `923d87f`); this parenthetical
+quoted the code seed-defaults, not the sheet. Reverted to 74.5/73.0 on
+2026-08-02 (Dom); the Sizing Rules sheet is authoritative — see rule 26.]*
 
 **Sheet:** the cohort-relative Value Score (col J) and Quality Score (col O) can't
 be per-row Excel formulas, so they are **recalc-maintained VALUES** written by
