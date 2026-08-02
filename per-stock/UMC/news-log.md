@@ -8,3 +8,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-04-29 | BusinessWire / earnings call | Q1 2026: rev NT$61.04B (+5.5% YoY, −1.2% QoQ), GM 29.2%, NI NT$16.17B, EPS NT$1.29; 22nm record 14% of rev; util 79%. New buyback. |
 | 2026-04-29 | Q1 2026 earnings call | Q2 guide: shipments +high-single-digit QoQ, GM ~30%, util low-80%; 2026 capex US$1.5B. CFO expects high-teens 22nm growth, H2 2026 wafer price HIKES (cycle/pricing reversal). |
 | 2026 | newkerala / TechPowerUp | Intel 12nm collaboration on track; certification by YE2026, production from 2027 (capital-light FinFET access; no 2026 rev). |
+| 2026-07-29 ⚠️ | weekly scan (Benzinga / StockTitan) | Q2 EPS beat 255% ($0.54 vs. $0.15 est.); raised 2026 capex guide to $2.0B (from $1.5B) on AI demand, utilization 85%; board approved a Singapore cleanroom + silicon-photonics expansion and a new Tainan fab shell. |
