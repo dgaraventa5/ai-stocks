@@ -65,6 +65,14 @@ AI-Supply-Chain/
 refreshes fail — the 2026-06-12 scan had to be re-run locally for this reason.
 If blocked, complete what runs locally, flag the gap, and do not fabricate data.
 
+**Branching discipline (added 2026-08-04 after the L11/exit-clock merge collision):**
+every session — local or cloud — must branch from **origin/main** (fetch first),
+never from a local `main` that may be stale or unpushed. Work that lands on local
+`main` without an immediate push is how two "rule 26"s and a three-file binary
+merge conflict happened: parallel sessions each believed they were on main. If a
+push is blocked (sandbox egress, permission classifier), leave the work on its
+feature branch and flag it — do not park it on local main.
+
 ## Scoring system reference
 
 The scoring spreadsheet at `00-master/ai_supply_chain_scoring.xlsx` has 5 sheets:
