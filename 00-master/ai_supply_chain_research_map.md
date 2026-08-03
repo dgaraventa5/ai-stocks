@@ -66,7 +66,7 @@ The transformer shortage is real. Lead times for large power transformers have s
 - **GE Vernova (GEV)** — gas turbines, transformers, grid software
 - **Eaton (ETN)** — electrical equipment, data center power distribution
 - **Schneider Electric (SBGSY)** — data center power, prefab DC modules
-- **ABB Ltd (ABBNY)** — electrification, transformers
+- **ABB Ltd (ABBNY)** — electrification, transformers. ⚠️ 2026-08-02: selling its entire robotics division ($2.3B rev) to SoftBank for $5.375B, closing mid-late 2026 — any robotics-flavored AI-thesis credit becomes wrong at close
 - **Hitachi Energy (HTHIY)** — grid transformers
 - **Hubbell (HUBB)** — electrical components
 - **Quanta Services (PWR)** — electric grid construction
@@ -103,7 +103,7 @@ The capital equipment that enables every AI chip.
 - **Lam Research (LRCX)** — etch, deposition (memory exposure)
 - **KLA Corp (KLAC)** — process control / inspection
 - **Tokyo Electron (TOELY)** — Japanese equipment giant
-- **Teradyne (TER)** — semiconductor test
+- **Teradyne (TER)** — semiconductor test. ⚠️ 2026-08-02: Teradyne Robotics (Universal Robots >50% cobot share + MiR) hit its first-ever $100M quarter (Q2 2026, +33% YoY); electronics/semi (AI-datacenter construction) is now its largest end market — the robotics franchise is understated if scored as ATE only (rule-12 refresh trigger)
 - **Onto Innovation (ONTO)** — metrology
 - **Camtek (CAMT)** — inspection, advanced packaging
 - **Kulicke & Soffa (KLIC)** — packaging equipment
@@ -185,6 +185,11 @@ Outsourced Semiconductor Assembly & Test — back-end **contract manufacturers**
 - **NXP Semiconductors (NXPI)** — auto/industrial/IoT; edge-AI (Kinara NPUs) not hyperscale-buildout; ~0-5% genuine AI-DC exposure
 - **Microchip (MCHP)** — MCU/analog/FPGA; Data Center Solutions unit (PCIe switches/retimers, NVMe controllers) ~8% of revenue; deep cyclical recovery
 - **STMicroelectronics (STM)** — analog + SiC/GaN power + MCU; NVIDIA 800VDC collaboration, datacenter guided >$1B for 2027; foreign filer (20-F/6-K), deep cyclical trough
+
+### Magnetic & position sensing (robotics-levered)
+*Added 2026-08-02 with the Layer 11 build-out. Sensor semis whose robotics thesis is real but whose financial profile belongs in the silicon cohort (rule 24 — percentile-ranking a fabless against industrial-motion names would distort both).*
+- **Allegro MicroSystems (ALGM)** — magnetic/inductive position sensors + motor drivers; the only US-listed component name with humanoid exposure in its 10-K (~$150 content per humanoid, 30–50 sensors); design wins at Chinese + North American humanoid OEMs; AI-datacenter cooling also named
+- **Melexis (MELE.BR)** — global #1 automotive magnetic-position ICs; humanoid revenue booking today (Arcminaxis joint encoder, Tactaxis tactile); 5%+ dividend yield while you wait
 
 ### RF front-end & application processors
 *Added 2026-06-15 (SMH gap). Handset/connectivity-centric; AI exposure is edge/on-device or immaterial, not hyperscale infrastructure.*
@@ -324,6 +329,69 @@ Most foundation model labs are private (OpenAI, Anthropic, xAI, Mistral). Public
 ---
 
 > **Layer 11 (AI Adopters / Bucket 3) experiment — tried and reverted 2026-06-22.** A two-pass deep-research effort scored 8 demand-side AI *adopters* (JPM, NU, LMND, RDDT, MA, PERI, RXRX, HOOD) as a separate layer with a reinterpreted AI-Thesis rubric + an "AI-materiality gate." Dom's call: the apparatus was over-engineered for the yield (only ~1–2 keepers). **Reddit (RDDT) was re-homed to Layer 10 / AI advertising** (above) for its data-licensing AI-revenue hook; the other 7 were dropped. The durable lesson is kept elsewhere: for would-be adopters, ~80% of the rubric measures business quality (orthogonal to AI), so quality can masquerade as AI exposure — judge AI *materiality to the return* before adding any "uses AI" name. **Update 2026-07-08:** HOOD was re-added to Layer 10 (Consumer fintech, AI adopter) at Dom's request as a tracked watchlist name — the adopter caveat still applies (AI = Cortex + efficiency tooling, no AI-revenue line), and HOOD's brokerage-artifact margins inflate its cohort Quality percentile (flagged in the scoring pass).
+
+## Layer 11 — Robotics & Physical AI
+
+Added 2026-08-02 at Dom's request ("we're underexposed on the robotics innovations"). **Naming note:** unrelated to the reverted "Layer 11 (AI Adopters)" experiment above — that one scored demand-side AI *users* and was killed on materiality; this layer is supply-side **embodied AI**: companies that build robots or sell the scarce components inside them. Full decision record (inclusions, ~50 investigated-and-excluded names with reasons, watch-items): `11-robotics/robotics-universe-2026-08-02.md`; six research appendices under `11-robotics/research/`.
+
+Foreign names use local listings (5347.TWO / 0981.HK precedent) so trading currency == reporting currency where a clean line exists. HK lines (HKD-trade/CNY-report), AUTO.OL (NOK/USD) and HSAI (USD/CNY) rely on the rule-19 general FX branch.
+
+### Humanoid & service robot makers
+- **UBTech Robotics (9880.HK)** — only listed industrial-humanoid pure play with real orders; Walker S2 mass production, >RMB 800M order book
+- **Serve Robotics (SERV)** — Nvidia-backed sidewalk-delivery AMRs, 2,000+ robots/44 cities; speculative (78x sales)
+- **Tennant (TNC)** — X4/X2 ROVR autonomous scrubbers (BrainOS); robotics ~5% → $250M/~20% target by 2028 on a profitable industrial base
+
+### Industrial automation & robot arms
+- **FANUC (6954.T)** — global #1 robot arms; NVIDIA Isaac + Google Gemini/Intrinsic deals on a 1.1M installed base; net cash
+- **Yaskawa Electric (6506.T)** — #1 servos; MOTOMAN NEXT ships with NVIDIA GPUs standard; Tokyo Robotics humanoid acquisition
+
+### Warehouse & logistics automation
+- **Symbotic (SYM)** — $22.7B backlog; Walmart 84.5% of revenue (both the thesis and the risk); restatement history
+- **AutoStore (AUTO.OL)** — cube-storage ASRS; 72.7% GM / 44% adj-EBITDA margin; partner-channel model
+- **Daifuku (6383.T)** — #1 material handling AND dominant fab cleanroom OHT — warehouse + semi capex double exposure
+- **KION Group (KGX.DE)** — Dematic (~29% of revenue, +18%); deepest NVIDIA warehouse-AI partnership; 71% cyclical forklifts
+- **Geekplus (2590.HK)** — world's only listed AMR pure play; first profitability FY2025
+
+### Surgical & medical robotics
+- **Intuitive Surgical (ISRG)** — the franchise; 2026 is the year the monopoly broke (Hugo, Ottava, Versius) — moat now contested
+- **PROCEPT BioRobotics (PRCT)** — Aquablation razor-and-blade at the inflection; AI surgical planning FDA-cleared
+- **Globus Medical (GMED)** — Excelsius robotics as spine-share-gain engine; cheapest growth in the bucket
+- **SS Innovations (SSII)** — SSi Mantra at <1/3 da Vinci cost; FDA 510(k) decision due 2026 (binary catalyst); India-operating small cap
+- **MicroPort MedBot (2252.HK)** — Toumai; first guided profit on +200–230% revenue; global telesurgery leader
+
+### Components: motion & actuation (the humanoid supply chain)
+- **Harmonic Drive Systems (6324.T)** — ~80–85% global strain-wave share; THE humanoid pick-and-shovel, priced accordingly; Chinese price attack is the bear case
+- **Nabtesco (6268.T)** — ~60% global RV cycloidal share; 25.8% disclosed robotics revenue at ~1/5th HDS's multiple
+- **THK (6481.T)** — linear-motion near-duopoly; Optimus-style designs are linear-actuator-heavy
+- **Hiwin (2049.TW)** — Taiwan linear-motion champion; robotics 12% of revenue and rising
+- **Timken (TKR)** — only Western owner of both strain-wave (Cone Drive) AND cycloidal (Spinea) franchises; 25–30% humanoid-BOM participation claim
+- **Regal Rexnord (RRX)** — fullest US humanoid joint stack (Kollmorgen/Thomson); real 2026 driver is DC switchgear/ePOD (overlaps ETN/VRT/POWL)
+- **Allient (ALNT)** — small-cap frameless/axial-flux torque motors; ramp is material at $1.5B
+- **Novanta (NOVT)** — only audited robotics revenue in the screen (32.5%); owns ATI, merchant #1 in force/torque sensing (a named humanoid bottleneck)
+- **Vishay Precision Group (VPG)** — strain gauges inside joint-torque sensors; disclosed humanoid orders, 4 developer engagements; +257% 1yr expectations flag
+
+### Machine vision & perception
+- **Cognex (CGNX)** — only US-listed vision pure play at scale; NVIDIA/Qualcomm edge-AI camera cycle; NOT a humanoid story (zero filings mentions)
+- **Keyence (6861.T)** — the eyes of physical AI; 51%+ operating margin; quality anchor at a full price
+- **Ouster (OUST)** — US merchant perception platform (lidar + StereoLabs cameras + software); ~90% non-auto
+- **Hesai (HSAI)** — lidar volume #1, only profitable lidar at scale; robotics units +138%; DoD 1260H listing is a permanent overhang
+- **Aeva (AEVA)** — FMCW 4D lidar; robotics > auto shipments; Daimler Truck exclusive; venture-risk multiple
+- **RoboSense (2498.HK)** — robotics lidar units +1,459% YoY, surpassed ADAS; ~1/10th Hesai's multiple; brutal ASP deflation
+- **Basler (BSL.DE)** — pure-play cameras; Q1 orders +64%; Orbbec mobile-robot 3D partnership; €1M/day size limit
+
+### Autonomy platforms & defense
+- **Mobileye (MBLY)** — cheapest profitable autonomy asset; Mentee humanoid acquisition = free option; rule-15 EPS blank (goodwill impairment)
+- **Kratos (KTOS)** — attritable jet aircraft + owns the engine; Valkyrie = USMC program of record
+- **AeroVironment (AVAV)** — scaled unmanned incumbent; underwrite the FY27 deceleration (+7–11%), not the past
+- **Red Cat (RCAT)** — US Army SRR program of record; production ramp IS the thesis
+- **Ondas (ONDS)** — counter-UAS roll-up with $1.48B war chest; worst financial hygiene in the layer; rule-15 EPS blank (warrant gains)
+- **Unusual Machines (UMAC)** — NDAA drone-component picks-and-shovels; 59x sales
+- **DroneShield (DRO.AX)** — only profitable counter-UAS pure play; de-rated 75% on decelerating guide
+- **Palladyne AI (PDYN)** — only listed autonomy-software pure play; $247M microcap, flags carried in Risk
+
+**Watch (not scored):** Agility Robotics SPAC (CCXI→AGLT, first Western listed humanoid on close), Hexagon AEON (Schaeffler 1,000-unit commitment; unscoreable until post-Octave-spin data cleans up), Schaeffler (binding actuator contracts, materiality fail), SKF (bought 60% of Leaderdrive), Boston Dynamics IPO (contradictory reports), Unitree STAR IPO (Aug 2026). Korea/A-share names (Rainbow, Hyundai Mobis, the Optimus supplier complex) documented in the universe file — access-blocked.
+
+---
 
 ## Per-Stock Research Framework
 

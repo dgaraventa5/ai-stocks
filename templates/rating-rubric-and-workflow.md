@@ -60,6 +60,8 @@ Do not hand-tune these here. Category-weight changes are gated on measured Infor
 
 **Sourcing rule:** Cite the specific filing (10-K segment data, 10-Q MD&A, or earnings call transcript) where AI revenue is disclosed or can be reasonably estimated. If estimating, show the math.
 
+**Layer 11 convention (approved by Dom 2026-08-02):** for Robotics & Physical AI names, D1 measures **robotics/physical-AI revenue as the demand driver** (e.g., Harmonic Drive's reducers = robot joints → high D1 even though the *humanoid* slice is ~4%), discounted where the exposure is automation-*adjacent* capex rather than robotics-driven. Humanoid-ramp specificity is deliberately carried by D5, not double-counted here. AI-datacenter revenue (e.g., RRX switchgear, ALGM's 17% DC) counts toward D1 as AI-infrastructure revenue under the standard definition.
+
 ---
 
 #### D2. Supply Chain Position
@@ -175,9 +177,12 @@ Do not hand-tune these here. Category-weight changes are gated on measured Infor
 
 **Cross-framework comparability (P5 / finding F9, examined 2026-07-02).** F9 flagged that a "5" encodes two different constructs yet is ranked across layers in one Total Score. Examined empirically: Layer-9 (buyer) mean D5 = 3.7 vs supplier mean 3.3, and half of Layer 9 rates 5 — but those are the mega-hyperscalers (META/MSFT/GOOGL/AMZN) genuinely spending $30–80B/yr, i.e. the actual AI-buildout leaders, so the higher buyer mean is *real*, not a calibration error. **Decision: keep both lenses on the common absolute 5-max-for-role scale; do NOT normalize D5 within-framework.** Percentile-within-framework normalization was tested and would dock those four ~1 Total pt each for being (correctly) common in their layer — under-crediting the real AI leaders, the opposite of an improvement. The parallel 1→5 structure already puts the lenses on one comparable strength scale by construction. (See CLAUDE.md rule 23.)
 
+**Criteria — Layer 11 (robotics/physical-AI framework, approved by Dom 2026-08-02):** same single dimension — strength of tie to the AI buildout — read through a third lens: **strength of contracted/quantified tie to the physical-AI/robotics ramp for this company's role**, on the same parallel 5-max-for-role scale (rule 23). Bands: **5** material quantified robot-program revenue with named commitments · **4** quantified orders/dated ramp with identified counterparties (HDS's dated humanoid orders; OUST's named platform wins; NOVT's contracted e-commerce win) · **3** shipping samples/qualification into identified programs · **2** roadmap/lineup/deck claims only · **1** thematic marketing only. Deck-only BOM claims (e.g., TKR's 25–30% humanoid BOM slide) do NOT reach 4 — that is the D4 press-release failure mode transplanted here.
+
 **Anchor examples:**
 - *Supplier framework:* CoreWeave (Microsoft is anchor), Vertiv: 5. Coherent, Lumentum: 4. Most semi-equipment: 3-4. Utilities with DC load: 2-3.
 - *Hyperscaler framework:* META ($40B+ capex, $100B AMD deal, multi-GW nuclear PPAs): 5. MSFT ($80B+ capex, OpenAI partnership): 5. ORCL (growing but smaller scale): 4-5.
+- *L11 framework:* Daifuku (cleanroom OHT into AI-fab capex, disclosed): 5. HDS (dated humanoid orders, unnamed customers): 4. Hiwin (shipping samples, volume guided post-2027): 3. Nabtesco/THK/TKR (roadmap or deck only): 2.
 
 **Common failure modes:**
 - Counting "data center" exposure as hyperscaler exposure (data centers include enterprise, gov, second-tier clouds)
@@ -270,6 +275,11 @@ Do not hand-tune these here. Category-weight changes are gated on measured Infor
 
 **The key question:** Is anyone BUYING? Absence of buying matters more than presence of selling. If a CEO believes the stock is undervalued after a pullback, they can demonstrate that with a meaningful open-market purchase. If no insider does that across multiple opportunities, the absence is the signal.
 
+**Edge-case precedents (approved by Dom 2026-08-02, from the L11 batch):**
+- **Private-placement subscriptions** are not open-market buys and do not trigger step 1's automatic 5 — but a placement at a *premium* to concurrent outside pricing is meaningful discretionary capital and rates **4** (SSII precedent: 3 insiders subscribed $5.2M at ~33% above the outside-investor price → 4, not 5, not 3).
+- **De-minimis buys keep the mechanical rating** (PDYN precedent: two P-code buyers totalling ~$37k → 5 per step 1 and the CEVA no-size-downgrade rule) — but flag when buy dollars are trivial against concurrent equity grants; if calibration later shows these 5s are noise, add a de-minimis floor as a rubric change, don't nudge per-name.
+- **The foreign-filer default of 3 exists for absence of data, not to suppress adverse public data.** Where non-US disclosure documents insider conduct, rate it (DroneShield precedent: executives sold entire holdings around a retracted announcement, regulator investigating → 1, overriding the default).
+
 ---
 
 ### Risk (5 dimensions, 15% category weight) — 5 = LOWEST risk
@@ -288,6 +298,8 @@ This is inverted from the others. **5 means the stock has LOW risk on this dimen
 | **1** | Single customer >60%, or near-single-buyer market structure. |
 
 **Sourcing rule:** 10-K usually discloses any customer >10% of revenue. Industry knowledge fills gaps.
+
+**Government-customer convention (approved by Dom 2026-08-02):** the US Government is a monopsony, not a single counterparty — do not mechanically floor every defense name at 1. Grade on program/branch/geography diversification *within* the government book plus non-USG revenue: single-program dependence (RCAT: one Army program = 56%, top-2 = 75%) → 1; USG ~85% via one dominant service line (AVAV) → 1; USG ~69% across many programs/branches with ~30% intl+commercial (KTOS) → 2.
 
 ---
 
