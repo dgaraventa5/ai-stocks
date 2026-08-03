@@ -1,9 +1,7 @@
 # Weekly rating refresh — 2026-08-03
 
-> Branch `refresh/ratings-2026-08-03` (pushed). PR creation was blocked by the
-> session's permission classifier, so this file is the persisted deliverable per the
-> routine's step-6 fallback. To open the PR manually:
-> `gh pr create --title "Weekly rating refresh 2026-08-03" --body-file tracking/rating-refresh-2026-08-03.md --base main --head refresh/ratings-2026-08-03`
+> Branch `refresh/ratings-2026-08-03` → **PR [#24](https://github.com/dgaraventa5/ai-stocks/pull/24)**.
+> This file mirrors the PR body so the findings persist in-repo after the branch merges.
 
 ---
 
