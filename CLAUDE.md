@@ -434,6 +434,30 @@ the last model event (measured against the event's stored tiers, NOT the Targets
 sheet, so an out-of-band score edit can't hide staleness). Rule 18 (refresh_targets
 is the single Targets writer) still holds — this just makes running it non-optional.
 
+### 26. Layer 11 — Robotics & Physical AI (added 2026-08-02, approved by Dom)
+
+**Context:** Dom flagged robotics underexposure; a six-pass research sweep added 41 names
+(38 in new Layer 11, ALGM/MELE.BR in Layer 6 for cohort coherence). Decision record +
+exclusions + watch-items: `11-robotics/robotics-universe-2026-08-02.md`.
+
+**Conventions (all approved 2026-08-02):**
+- **D1 for L11** = robotics/physical-AI revenue *as the demand driver* (not strictly
+  AI-driven revenue); humanoid-ramp specificity lives in D5, not double-counted. AI-DC
+  revenue counts toward D1 under the standard definition.
+- **D5 for L11** = third lens on the rule-23 parallel scale: contracted/quantified tie to
+  the robotics ramp for the company's role (bands in the rubric; deck-only BOM claims cap at 2).
+- **R1 government-customer convention:** USG is a monopsony — grade program/branch
+  diversification within the government book, don't mechanically floor defense names at 1.
+- **M3 edge-case precedents** (premium placement buys = 4; de-minimis buys keep the
+  mechanical rating, flagged; foreign default-3 yields to adverse public data) — rubric M3 section.
+- **Tickers:** foreign L11 names use local lines (6954.T, KGX.DE, DRO.AX, AUTO.OL, HK lines)
+  per the 5347.TWO/0981.HK precedent; mixed-currency rows ride the rule-19 general FX branch.
+  Col F stays standard EV/EBITDA bands (not EV/FCF or EV/MW). R5 defaults to 5 (rule 16 scope
+  unchanged). Denylist: LAZR (recycled to an ETF), ASTVF (≠ AutoStore).
+- **Market-cap corruption check:** after any split/ADS-ratio change/dual-class event, verify
+  yfinance caps against an independent source before trusting cap-derived ratios (HSAI 1:8-split
+  and MBLY Class-A-only artifacts, both corrected + audit-logged 2026-08-02).
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash
@@ -475,7 +499,7 @@ deployed by `.github/workflows/deploy-site.yml` on push to `main`.
 ## What I'm NOT trying to optimize for
 
 - Speed of single ticker analysis (10 minutes per name is fine)
-- Comprehensive coverage of all stocks ever (~150 names max in watchlist)
+- Comprehensive coverage of all stocks ever (no hard cap — Dom raised the old ~150 ceiling 2026-08-02 with the Layer-11 build-out; ~214 as of that date. Coverage breadth is fine; what matters is every rated name stays research-backed per rule 12)
 - Real-time prices (15-min delay is fine)
 - Beating the market on a daily/weekly basis
 
