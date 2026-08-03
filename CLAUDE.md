@@ -312,7 +312,11 @@ capital-heavy mean-Quality gap was **+28**; now **+6**). Before/after:
 the single source of truth for every consumer (`export_site_data`,
 `refresh_targets`). `mode='absolute'` reproduces the pre-P1 scores. Tier bands
 (85/70/55/40) and portfolio entry/exit (74.5/73.0) were reviewed and **held
-unchanged** — the overall score scale barely compressed.
+unchanged** — the overall score scale barely compressed. *[Correction
+2026-08-02: the live sheet params were actually 76/74.5 at the time — the
+2026-06-18 concentration experiment (commit `923d87f`); this parenthetical
+quoted the code seed-defaults, not the sheet. Reverted to 74.5/73.0 on
+2026-08-02 (Dom); the Sizing Rules sheet is authoritative — see rule 26.]*
 
 **Sheet:** the cohort-relative Value Score (col J) and Quality Score (col O) can't
 be per-row Excel formulas, so they are **recalc-maintained VALUES** written by
@@ -434,7 +438,33 @@ the last model event (measured against the event's stored tiers, NOT the Targets
 sheet, so an out-of-band score edit can't hide staleness). Rule 18 (refresh_targets
 is the single Targets writer) still holds — this just makes running it non-optional.
 
-### 26. Layer 11 — Robotics & Physical AI (added 2026-08-02, approved by Dom)
+### 26. Exit-pending clock lives in performance-config.json (added 2026-08-02, approved by Dom)
+
+**Context:** The 2-run exit confirm clock was persisted only in the Targets sheet's
+Status column, but freeze-snapshot gating (rule 18 spec) rewrites that sheet only
+when a rebalance fires. A holding drifting below the exit score **without** a tier
+crossing keeps membership unchanged (hysteresis holds it while pending), so the
+freshly computed EXIT PENDING was printed to stdout and discarded — the clock
+restarted every run and the exit could never confirm. Observed 2026-08-02:
+GOOGL/META/AMZN flagged EXIT PENDING while the sheet showed HOLD from 2026-07-16.
+Same failure family as the MU tier/weight inversion (rule 18): cross-run state
+stored in a display artifact instead of the model of record.
+
+**Rule:** The clock is a top-level `exit_pending: {ticker: since-date}` map in
+`tracking/performance-config.json`, maintained by `refresh_targets.py` on every
+real run — below-exit names start/keep a clock; recovery above exit clears it; a
+prior-date clock still below exit confirms the EXIT (fires a rebalance). Frozen
+runs save only the config; the workbook stays byte-untouched and the sheet's
+Status column is display-only, written at rebalances. Dry runs (`--dry-run`,
+`pending_rebalance()`, the rule-25 gate) never mutate the map. **Enforcement:**
+once a clock is a day old and the name is still below exit, `pending_rebalance()`
+turns True — the rule-25 gate fails until the confirming run executes the exit
+(the suite going red the day after a clock starts is the design working, not a
+bug). The Sizing Rules sheet is authoritative for entry/exit params; the
+`NEW_PARAMS` code defaults only seed missing rows — keep them in sync. Spec:
+`docs/superpowers/specs/2026-08-02-exit-pending-clock-persistence-design.md`.
+
+### 27. Layer 11 — Robotics & Physical AI (added 2026-08-02, approved by Dom; renumbered from 26 in the 2026-08-04 merge — the exit-clock rule above landed on main first)
 
 **Context:** Dom flagged robotics underexposure; a six-pass research sweep added 41 names
 (38 in new Layer 11, ALGM/MELE.BR in Layer 6 for cohort coherence). Decision record +
