@@ -26,9 +26,9 @@ members: ACLS, AEIS, AIP, AMAT, AMKR, ARM, ASML, ASX, BESIY, CAMT, CDNS, CEVA, C
 metrics: ev_ebitda=pct(8)  fcf_yield=pct(8)  ps=pct(8)  roic=abs(5)  gm=pct(8)  fcf_mgn=pct(8)
 members: 0981.HK, 5347.TWO, GFS, HHUSF, INTC, TSEM, TSM, UMC
 
-## Layer 06 — 20 names
-metrics: ev_ebitda=pct(20)  fcf_yield=pct(20)  ps=pct(20)  roic=pct(17)  gm=pct(20)  fcf_mgn=pct(20)
-members: ADI, ALAB, AMBA, AMD, AVGO, LSCC, MCHP, MPWR, MRVL, MU, NVDA, NVTS, NXPI, ON, QCOM, RMBS, SNDK, STM, SWKS, TXN
+## Layer 06 — 22 names
+metrics: ev_ebitda=pct(22)  fcf_yield=pct(22)  ps=pct(22)  roic=pct(17)  gm=pct(22)  fcf_mgn=pct(22)
+members: ADI, ALAB, ALGM, AMBA, AMD, AVGO, LSCC, MCHP, MELE.BR, MPWR, MRVL, MU, NVDA, NVTS, NXPI, ON, QCOM, RMBS, SNDK, STM, SWKS, TXN
 
 ## Layer 07 — 12 names
 metrics: ev_ebitda=pct(12)  fcf_yield=pct(12)  ps=pct(12)  roic=pct(11)  gm=pct(12)  fcf_mgn=pct(12)
@@ -45,4 +45,8 @@ members: AMZN, APLD, BTDR, CIFR, CLSK, CORZ, CRWV, GOOGL, HIVE, HUT, IREN, KEEL,
 ## Layer 10 — 22 names
 metrics: ev_ebitda=pct(20)  fcf_yield=pct(21)  ps=pct(22)  roic=pct(11)  gm=pct(22)  fcf_mgn=pct(21)
 members: AAPL, ADBE, ADSK, APP, CRM, CRWD, DDOG, FTNT, HOOD, INTU, MDB, NOW, PANW, PATH, PLTR, RDDT, SNOW, SPCX, TEM, TSLA, WDAY, ZS
+
+## Layer 11 — 39 names
+metrics: ev_ebitda=pct(33)  fcf_yield=pct(33)  ps=pct(39)  roic=abs(0)  gm=pct(39)  fcf_mgn=pct(33)
+members: 2049.TW, 2252.HK, 2498.HK, 2590.HK, 6268.T, 6324.T, 6383.T, 6481.T, 6506.T, 6861.T, 6954.T, 9880.HK, AEVA, ALNT, AUTO.OL, AVAV, BSL.DE, CGNX, DRO.AX, GMED, HSAI, ISRG, KGX.DE, KTOS, MBLY, NOVT, ONDS, OUST, PDYN, PRCT, RCAT, RRX, SERV, SSII, SYM, TKR, TNC, UMAC, VPG
 
