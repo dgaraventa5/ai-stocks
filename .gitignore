@@ -34,3 +34,7 @@ site/data/
 # Generated chart artifacts (backtest / perf-vs-benchmarks PNGs) — regenerable,
 # not source of truth; the series JSON + site exporter are.
 tracking/*.png
+
+# macOS/iCloud sync-conflict duplicate copies ("name 2.ext") — never commit
+# (150 appeared 2026-08-04 during parallel local/cloud sessions; all were byte-identical dupes)
+* 2.*
