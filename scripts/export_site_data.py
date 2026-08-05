@@ -25,7 +25,7 @@ LAYERS = {
     '01': 'Power Generation', '02': 'Grid Equipment', '03': 'Data Centers',
     '04': 'Semi Equipment', '05': 'Fabs & Foundries', '06': 'Silicon',
     '07': 'Optical Networking', '08': 'Servers', '09': 'Cloud',
-    '10': 'Applications',
+    '10': 'Applications', '11': 'Robotics',
 }
 
 TARGETS_HEADERS = ['Ticker', 'Layer', 'TOTAL', 'Tier', 'Rank', 'Status',
