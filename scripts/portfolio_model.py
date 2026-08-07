@@ -51,6 +51,28 @@ def save_cfg(cfg: dict) -> None:
     CONFIG.write_text(json.dumps(cfg, indent=2) + '\n')
 
 
+PCONFIG = ROOT / 'tracking' / 'portfolio-config.json'
+
+DEFAULT_PCFG = {
+    # Construction-v2 params, spec 2026-08-07 §A1/§B1/§C1. Do NOT tune against
+    # the 10-week history that motivated the change (spec Non-goals).
+    'sizing': {'mode': 'tier', 'lookback': 60, 'sigma_floor': 0.005,
+               'max_weight': 0.12, 'min_weight': 0.03, 'drift_band': 0.25},
+    'selection': {'mode': 'score'},
+    'shadows': {'top': 15, 'next': 25, 'tail': 40},
+}
+
+
+def load_pcfg() -> dict:
+    """Construction-v2 config: committed values merged over defaults, so a
+    missing file or missing key falls back to current (tier/score) behavior."""
+    try:
+        raw = json.loads(PCONFIG.read_text())
+    except (OSError, ValueError):
+        raw = {}
+    return {k: {**v, **(raw.get(k) or {})} for k, v in DEFAULT_PCFG.items()}
+
+
 def _series(ticker: str, earliest: str):
     """Dividend-adjusted close series from `earliest`, cached per run."""
     if ticker not in _series_cache:

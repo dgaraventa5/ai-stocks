@@ -1,0 +1,13 @@
+{
+  "_comment": "Portfolio-construction v2 switches + params (spec 2026-08-07). Modes stay tier/score until Dom approves the migration (scripts/migrate_portfolio_v2.py --apply). Selection N/M live on the Sizing Rules sheet (rule 26); this file owns sizing params and the mode switches. Do NOT tune params against the 10-week history (spec Non-goals).",
+  "sizing": {
+    "mode": "tier",
+    "lookback": 60,
+    "sigma_floor": 0.005,
+    "max_weight": 0.12,
+    "min_weight": 0.03,
+    "drift_band": 0.25
+  },
+  "selection": { "mode": "score" },
+  "shadows": { "top": 15, "next": 25, "tail": 40 }
+}
