@@ -44,8 +44,11 @@ from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill
 
 from common import flag
-from portfolio_model import load_cfg, log_rebalance, save_cfg
-from portfolio_sizing import tier_changes, build_reason, weights_score_monotonic
+from portfolio_model import (current_weights, load_cfg, load_pcfg,
+                             log_rebalance, save_cfg)
+from portfolio_sizing import (build_reason, rank_by_score, tier_changes,
+                              topn_membership, weights_score_monotonic)
+from position_sizing import drift_band_filter, inverse_vol_weights
 from recalc_watchlist import recalc
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -73,8 +76,11 @@ NEW_PARAMS = [
     ('Layer cap %', 1.0, 'Max weight per layer. 1.0 = off (Dom 2026-06-10: caps '
                          'manage label- not factor-concentration; use single-name '
                          'cap + capex tripwire instead).'),
-    ('Entry rank', 15, '(inert) legacy rank backstop'),
-    ('Exit rank', 25, '(inert) legacy rank backstop'),
+    ('Entry rank', 15, 'selection.mode=rank: non-holding ENTERs at rank <= N '
+                       '(v2 spec B1); inert under mode=score'),
+    ('Exit rank', 18, 'selection.mode=rank: holding EXITs below rank M; '
+                      'N+1..M is the hysteresis dead-band; inert under '
+                      'mode=score'),
 ]
 
 
@@ -164,8 +170,56 @@ def current_price(ticker: str) -> float | None:
     return round(float(hist['Close'].iloc[-1]), 2)
 
 
+def _price_frame(tickers: list[str], lookback: int):
+    """Wide adjusted-close frame for the inverse-vol sizing window, via the
+    tracker's cached _series (dividend-adjusted, serialized fetches). Lazy
+    imports keep the module importable in the openpyxl-only deploy CI."""
+    import pandas as pd
+
+    from portfolio_model import _series
+    earliest = (dt.date.today()
+                - dt.timedelta(days=int(lookback * 2.2) + 10)).isoformat()
+    cols = {}
+    for t in tickers:
+        s = _series(t, earliest)
+        if s is not None:
+            cols[t] = s
+    return pd.DataFrame(cols)
+
+
+def _update_band_shadows(cfg: dict, live: list, pcfg: dict, today: str) -> bool:
+    """Refresh BAND_TOP/NEXT/TAIL rosters from today's ranks (v2 spec C1).
+    Pure-score ranking (no incumbency tie-break): the bands are unsized
+    scouts, not the book. Appends a shadow event only when a roster actually
+    changed; same-day re-runs replace, prior days are never rewritten;
+    forward-only (first event = first real run after deploy). Returns True
+    when anything changed (caller persists cfg)."""
+    sh = pcfg['shadows']
+    ranked = [x['ticker'] for x in
+              sorted(live, key=lambda x: (-x['TOTAL'], x['ticker']))]
+    rosters = {'BAND_TOP': ranked[:sh['top']],
+               'BAND_NEXT': ranked[sh['top']:sh['next']],
+               'BAND_TAIL': ranked[sh['next']:sh['tail']]}
+    events = cfg.setdefault('shadow_events', {})
+    changed = False
+    for name, roster in rosters.items():
+        evs = events.setdefault(name, [])
+        if not roster and not evs:
+            continue          # watchlist smaller than the band: nothing to log
+        if evs and sorted(evs[-1]['roster']) == sorted(roster):
+            continue
+        if evs and evs[-1]['date'] == today:
+            evs[-1] = {'date': today, 'roster': roster}   # same-day idempotence
+        else:
+            evs.append({'date': today, 'roster': roster})
+        changed = True
+        flag(f'shadow {name}: roster refreshed ({len(roster)} names)')
+    return changed
+
+
 def refresh(dry_run: bool = False, resize: bool = False,
-            portfolio: str | None = None, check_freshness: bool = True) -> None:
+            portfolio: str | None = None, check_freshness: bool = True,
+            migration: bool = False) -> None:
     today = dt.date.today().isoformat()
     path = portfolio or PORTFOLIO
     wb = load_workbook(path, data_only=False)
@@ -229,13 +283,46 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # ---- live scores ----
     live = [x for x in recalc() if x['TOTAL'] is not None]
     live.sort(key=lambda x: -x['TOTAL'])
-    rank = {x['ticker']: i + 1 for i, x in enumerate(live)}
     info = {x['ticker']: x for x in live}
     layers = {x['ticker']: (x['layer'] or '')[:2] for x in live}
+    if not dry_run and portfolio is None:
+        # Point-in-time score panel (v2 spec C2); date-deduped, so the
+        # sync_scores hook and this one never double-log a pass. Gated to the
+        # real workbook (portfolio=None) so test runs on temp workbooks never
+        # touch the committed panel.
+        from score_history import append_snapshot
+        append_snapshot(live)
+
+    # ---- selection form (v2 spec B1): score thresholds or top-N ranks ----
+    pcfg = load_pcfg()
+    sel_mode = pcfg['selection']['mode']
+    if sel_mode == 'rank':
+        # Top-N with hysteresis: outsiders ENTER at rank <= N, incumbents HOLD
+        # through rank <= M; N+1..M is the dead-band. The rule-26 2-run exit
+        # confirm clock still wraps every exit crossing (continuity decision,
+        # plan Task 5): below-M starts the clock, the next run confirms.
+        entry_rank = int(p.get('Entry rank', 15))
+        exit_rank = int(p.get('Exit rank', 18))
+        ranked = rank_by_score(live, prior_include)
+        rank = {t: i + 1 for i, t in enumerate(ranked)}   # incumbency tie-break
+        order = ranked
+        keeps = lambda t: t in rank and rank[t] <= exit_rank
+        enters = lambda t: rank[t] <= entry_rank
+        why = lambda t: f'rank {rank[t]}, score {info[t]["TOTAL"]:.1f}'
+        below = lambda t: f'rank {rank.get(t, "?")} > exit rank {exit_rank}'
+        in_play = {t for t in info if rank[t] <= exit_rank}
+    else:
+        rank = {x['ticker']: i + 1 for i, x in enumerate(live)}
+        order = [x['ticker'] for x in live]
+        keeps = lambda t: t in info and info[t]['TOTAL'] >= exit_score
+        enters = lambda t: info[t]['TOTAL'] >= entry_score
+        why = lambda t: f'score {info[t]["TOTAL"]:.1f}'
+        below = lambda t: f'score {info[t]["TOTAL"]:.1f} < {exit_score}'
+        in_play = {t for t in info if info[t]['TOTAL'] >= exit_score}
 
     # ---- freshness gate on every name that could end up included ----
     candidates = sorted(
-        {t for t in info if info[t]['TOTAL'] >= exit_score} | prior_include
+        in_play | prior_include
         | {t for t, v in overrides.items() if v == 'INCLUDE'})
     dead: set[str] = set()
     if check_freshness:   # network; skipped by the offline pending_rebalance() gate
@@ -255,65 +342,105 @@ def refresh(dry_run: bool = False, resize: bool = False,
         if t in dead or overrides.get(t) == 'EXCLUDE':
             statuses[t] = 'EXIT (dead/override)'
             continue
-        keep = t in info and info[t]['TOTAL'] >= exit_score
-        if keep:
+        if keeps(t):
             include.append(t)
             statuses[t] = 'HOLD'
         elif resize:
             # Intentional re-sizing: drop below-threshold names immediately.
-            statuses[t] = f'EXIT (resize, score {info[t]["TOTAL"]:.1f} < {exit_score})'
-            flag(f'{t}: EXIT (resize — score {info[t]["TOTAL"]:.1f} < exit {exit_score})')
+            statuses[t] = f'EXIT (resize, {below(t)})'
+            flag(f'{t}: EXIT (resize — {below(t)})')
         elif t in exit_pending and exit_pending[t] != today:
             # EXIT PENDING on a PRIOR refresh date → confirmed now. Same-day
             # re-runs don't count as the second look — the confirm exists to
             # require two independent data points, not two script invocations.
             statuses[t] = f'EXIT (pending since {exit_pending[t]}, confirmed)'
-            flag(f'{t}: exit confirmed (score {info[t]["TOTAL"]:.1f}, '
+            flag(f'{t}: exit confirmed ({below(t)}, '
                  f'pending since {exit_pending[t]})')
         else:
             include.append(t)   # still held while pending
             new_pending[t] = exit_pending.get(t, today)   # start/keep the clock
-            statuses[t] = (f'EXIT PENDING (score {info[t]["TOTAL"]:.1f}, '
-                           f'since {new_pending[t]})')
-            flag(f'{t}: below exit score ({info[t]["TOTAL"]:.1f} < {exit_score}) — '
-                 f'EXIT PENDING, confirms next refresh')
-    for x in live:
-        t = x['ticker']
+            statuses[t] = f'EXIT PENDING ({below(t)}, since {new_pending[t]})'
+            flag(f'{t}: {below(t)} — EXIT PENDING, confirms next refresh')
+    for t in order:
         if t in include or t in statuses or t in dead:
             continue
         if overrides.get(t) == 'EXCLUDE':
-            if x['TOTAL'] >= entry_score:
-                flag(f'{t}: score {x["TOTAL"]:.1f} would enter but Override=EXCLUDE '
+            if enters(t):
+                flag(f'{t}: would enter ({why(t)}) but Override=EXCLUDE '
                      f'({notes.get(t, "no note")[:80]})')
             continue
         forced = overrides.get(t) == 'INCLUDE'
-        if x['TOTAL'] >= entry_score or forced:
+        if enters(t) or forced:
             if len(include) < max_positions:
                 include.append(t)
                 statuses[t] = ('ENTER (forced)' if forced
-                               else f'ENTER (score {x["TOTAL"]:.1f})')
-                flag(f'{t}: ENTER (score {x["TOTAL"]:.1f} >= entry {entry_score})')
+                               else f'ENTER ({why(t)})')
+                flag(f'{t}: ENTER ({why(t)})')
             else:
-                statuses[t] = f'BLOCKED (score {x["TOTAL"]:.1f}, max positions full)'
-                flag(f'{t}: score {x["TOTAL"]:.1f} qualifies but max positions '
+                statuses[t] = f'BLOCKED ({why(t)}, max positions full)'
+                flag(f'{t}: qualifies ({why(t)}) but max positions '
                      f'({max_positions}) full')
 
-    # ---- sizing ----
-    base = {t: base_weight(info[t]['TOTAL'], p['tiers']) for t in include}
-    weights = cap_and_normalize(base, layers, 1.0 - cash, max_single, layer_cap)
+    # ---- sizing (v2 spec A1): tier bands or inverse trailing volatility ----
+    siz = pcfg['sizing']
+    if siz['mode'] == 'inverse_vol':
+        # The score chooses the names; trailing vol chooses the sizes.
+        prices = _price_frame(include, int(siz['lookback']))
+        inv = inverse_vol_weights(prices, include, siz,
+                                  layers={t: layers.get(t, '') for t in include})
+        weights = {t: w * (1.0 - cash) for t, w in inv.items()}
+    else:
+        base = {t: base_weight(info[t]['TOTAL'], p['tiers']) for t in include}
+        weights = cap_and_normalize(base, layers, 1.0 - cash, max_single,
+                                    layer_cap)
 
     # ---- rebalance gate: membership change OR a held name crossed a tier band ----
     # (--resize forces it). Crossing baseline is the LAST MODEL EVENT's stored
     # tiers, NOT the Targets sheet: the sheet can carry a fresh tier from an
     # out-of-band score edit (the bug this fixes), so it is not a trustworthy
     # baseline. Within-tier drift changes nothing — hysteresis preserved.
+    # Under inverse-vol sizing a tier crossing carries no weight information
+    # (v2 spec A0: stop using the score as sizer), so it does not fire.
     last_ev = cfg['events'][-1]
     prior_model = set(last_ev['allocations'])
     last_tiers = last_ev.get('tiers', {})
     tier_chg = tier_changes(include, info, last_tiers)
+    tier_fire = bool(tier_chg) and siz['mode'] != 'inverse_vol'
     entered = sorted(set(include) - prior_model)
     exited = sorted(prior_model - set(include))
-    fire = bool(entered or exited) or bool(tier_chg) or resize
+    fire = bool(entered or exited) or tier_fire or resize
+    kind = ('sizing_migration_invvol' if migration else
+            'membership' if (entered or exited) else
+            'tier' if tier_fire else 'manual_resize')
+
+    # ---- monthly drift-band re-size (v2 spec A2) ----
+    # First real online run of a new calendar month; trades ONLY names outside
+    # the drift band. Dry runs and the offline rule-25 gate never see or
+    # advance it, so pending_rebalance() stays offline-pure; a vol spike alone
+    # never trades intra-month.
+    monthly_traded: list[str] = []
+    state_changed = False
+    if (siz['mode'] == 'inverse_vol' and not fire and not dry_run
+            and check_freshness):
+        state = cfg.setdefault('sizing_state', {})
+        if today[:7] > state.get('last_resize_check', ''):
+            cur = current_weights(cfg)
+            state['last_resize_check'] = today[:7]
+            state_changed = True
+            if cur is None:
+                flag('monthly re-size skipped: no prices to mark the book')
+            else:
+                new_w, monthly_traded = drift_band_filter(
+                    cur, weights, float(siz['drift_band']))
+                if monthly_traded:
+                    weights = new_w
+                    fire, kind = True, 'resize_monthly'
+                    flag(f'monthly re-size: {", ".join(monthly_traded)} '
+                         f'outside ±{float(siz["drift_band"]):.0%} band — '
+                         f'trading to target')
+                else:
+                    flag('monthly re-size: all names inside the drift band — '
+                         'no trades')
 
     # ---- tier-change reporting (allocation delta vs prior model weight) ----
     denom = sum(last_ev['allocations'].values()) + last_ev.get('cash', 0)
@@ -329,11 +456,19 @@ def refresh(dry_run: bool = False, resize: bool = False,
         if v > 0.25:
             flag(f'layer {lay}: {v:.0%} of portfolio (no layer cap active)')
 
-    # ---- sanity: freshly computed weights must be monotonic in score ----
-    viol = weights_score_monotonic([(info[t]['TOTAL'], weights.get(t, 0))
-                                    for t in include])
-    if viol:
-        flag(f'non-monotonic weights {viol} — investigate base_weight/caps')
+    # ---- sanity: tier-sized weights must be monotonic in score (rule 18).
+    # Scoped to tier mode: inverse-vol weights are deliberately NOT
+    # score-ordered (v2 spec A0) — the EW_ROSTER shadow audits sizing there.
+    if siz['mode'] != 'inverse_vol':
+        viol = weights_score_monotonic([(info[t]['TOTAL'], weights.get(t, 0))
+                                        for t in include])
+        if viol:
+            flag(f'non-monotonic weights {viol} — investigate base_weight/caps')
+
+    # ---- band shadow roster upkeep (v2 spec C1): every real run, frozen or
+    # not — the scouts track today's ranks regardless of the book.
+    shadows_changed = False if dry_run else _update_band_shadows(
+        cfg, live, pcfg, today)
 
     if dry_run:
         print(f'\n{"Tkr":<7}{"Rank":>5}{"Score":>7}{"Status":<34}{"Wt %":>6}')
@@ -347,14 +482,16 @@ def refresh(dry_run: bool = False, resize: bool = False,
                 'tier_chg': tier_chg, 'wrote': False, 'pending': new_pending}
 
     if not fire:
-        # The workbook snapshot stays frozen, but the exit-pending clock is
-        # cross-run state and MUST survive this run — persist it to the config
-        # (the confirm leg evaluates it next run; rule 26).
-        if new_pending != dict(cfg.get('exit_pending', {})):
+        # The workbook snapshot stays frozen, but the exit-pending clock,
+        # band-shadow rosters and monthly-resize stamp are cross-run state and
+        # MUST survive this run — persist them to the config (rule 26).
+        if (new_pending != dict(cfg.get('exit_pending', {}))
+                or shadows_changed or state_changed):
             cfg['exit_pending'] = new_pending
             save_cfg(cfg)
-            print(f'exit-pending clock persisted to config: '
-                  f'{new_pending or "(cleared)"}')
+            print(f'cross-run state persisted to config (pending clock'
+                  f'{"/shadows" if shadows_changed else ""}'
+                  f'{"/resize stamp" if state_changed else ""})')
         print('membership & tiers unchanged since last rebalance — '
               'snapshot frozen, nothing written')
         return {'fire': False, 'entered': [], 'exited': [], 'tier_chg': [],
@@ -438,9 +575,19 @@ def refresh(dry_run: bool = False, resize: bool = False,
 
     # ---- log the rebalance event (membership and/or tier change, or resize) ----
     cfg['exit_pending'] = new_pending   # persisted by log_rebalance's save_cfg
-    reason = build_reason(entered, exited, tier_chg, resize)
+    if kind == 'resize_monthly':
+        reason = (f'resize_monthly: {", ".join(monthly_traded)} outside '
+                  f'drift band')
+    elif kind == 'sizing_migration_invvol':
+        reason = ('sizing_migration_invvol: one-time switch to inverse-vol '
+                  'sizing + rank selection (v2 spec A3)')
+    else:
+        reason = build_reason(entered, exited, tier_chg, resize)
     tiers_now = {t: info[t]['Tier'] for t in include}
-    ev = log_rebalance(cfg, weights, reason, tiers_now)
+    if siz['mode'] == 'inverse_vol':
+        # Any fired full re-size IS that month's scheduled re-size (spec A2).
+        cfg.setdefault('sizing_state', {})['last_resize_check'] = today[:7]
+    ev = log_rebalance(cfg, weights, reason, tiers_now, kind=kind)
     print(f'model rebalanced: {reason} — value at rebalance '
           f'${sum(ev["allocations"].values()) + ev["cash"]:,.0f}')
     return {'fire': True, 'entered': entered, 'exited': exited,
