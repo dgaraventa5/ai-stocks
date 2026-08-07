@@ -428,7 +428,115 @@
         "6861.T": "\u2713\u2713"
       },
       "cash": 0.02
+    },
+    {
+      "date": "2026-08-07",
+      "reason": "sizing_migration_invvol: one-time switch to inverse-vol sizing + rank selection (v2 spec A3)",
+      "kind": "sizing_migration_invvol",
+      "allocations": {
+        "SNDK": 305.06,
+        "MU": 342.4,
+        "MSFT": 823.87,
+        "ANET": 650.63,
+        "EME": 704.19,
+        "CRDO": 371.07,
+        "TSM": 769.48,
+        "FIX": 623.27,
+        "GMED": 947.68,
+        "META": 824.15,
+        "6861.T": 875.53,
+        "AVGO": 708.74,
+        "NVDA": 935.18,
+        "VRT": 515.27,
+        "RDDT": 452.74,
+        "ALAB": 319.46
+      },
+      "tiers": {
+        "MU": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "CRDO": "\u2713\u2713",
+        "TSM": "\u2713\u2713",
+        "FIX": "\u2713\u2713",
+        "GMED": "\u2713\u2713",
+        "SNDK": "\u2713\u2713",
+        "META": "\u2713\u2713",
+        "6861.T": "\u2713\u2713",
+        "AVGO": "\u2713\u2713",
+        "NVDA": "\u2713\u2713",
+        "VRT": "\u2713\u2713",
+        "RDDT": "\u2713\u2713",
+        "ALAB": "\u2713\u2713"
+      },
+      "cash": -0.0
     }
   ],
-  "exit_pending": {}
+  "exit_pending": {},
+  "shadow_events": {
+    "BAND_TOP": [
+      {
+        "date": "2026-08-07",
+        "roster": [
+          "NVDA",
+          "FIX",
+          "TSM",
+          "MU",
+          "CRDO",
+          "SNDK",
+          "ANET",
+          "MSFT",
+          "AVGO",
+          "GMED",
+          "EME",
+          "6861.T",
+          "VRT",
+          "RDDT",
+          "ALAB"
+        ]
+      }
+    ],
+    "BAND_NEXT": [
+      {
+        "date": "2026-08-07",
+        "roster": [
+          "META",
+          "AMZN",
+          "APP",
+          "GOOGL",
+          "TER",
+          "APH",
+          "WDC",
+          "VST",
+          "ISRG",
+          "CGNX"
+        ]
+      }
+    ],
+    "BAND_TAIL": [
+      {
+        "date": "2026-08-07",
+        "roster": [
+          "EQT",
+          "PLTR",
+          "6268.T",
+          "KEYS",
+          "NTAP",
+          "AR",
+          "CIEN",
+          "FN",
+          "ARM",
+          "ORCL",
+          "HSAI",
+          "BSL.DE",
+          "GLW",
+          "DELL",
+          "HTHIY"
+        ]
+      }
+    ]
+  },
+  "sizing_state": {
+    "last_resize_check": "2026-08"
+  }
 }

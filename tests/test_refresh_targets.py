@@ -52,6 +52,14 @@ def _mock_env(monkeypatch, live, cfg):
     monkeypatch.setattr(rt, 'current_price', lambda t: 100.0)
     monkeypatch.setattr(rt.time, 'sleep', lambda *_a, **_k: None)
     monkeypatch.setattr(rt, 'load_cfg', lambda: cfg)
+    # Pin legacy tier/score modes so these tests stay hermetic against the
+    # committed portfolio-config.json (live modes flipped to inverse_vol/rank
+    # at the 2026-08-07 migration). v2-mode tests override after _mock_env.
+    monkeypatch.setattr(rt, 'load_pcfg', lambda: {
+        'selection': {'mode': 'score'},
+        'sizing': {'mode': 'tier', 'lookback': 60, 'sigma_floor': 0.005,
+                   'max_weight': 0.12, 'min_weight': 0.03, 'drift_band': 0.25},
+        'shadows': {'top': 15, 'next': 25, 'tail': 40}})
     calls, saves = [], []
 
     def fake_log(cfg_, w, reason, tiers=None, kind='membership'):
