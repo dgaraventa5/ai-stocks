@@ -198,3 +198,23 @@ def test_privacy_no_real_dollars_anywhere(repo):
             pattern = r'(?<![\d.])' + _re.escape(planted)
             assert not _re.search(pattern, text), \
                 f'{planted} leaked into {p.name}'
+
+
+def test_performance_shadow_series_null_padded(repo):
+    """v2 shadow series (EW_ROSTER / BAND_*) pass through null-padded and
+    notional-scaled; vs_ew_roster measures MODEL − EW_ROSTER over the
+    shadow's own life (spec A4/C1)."""
+    import json
+    sp = repo / 'tracking' / 'performance-series.json'
+    series = json.loads(sp.read_text())
+    series['bench']['EW_ROSTER'] = [1.0, 1.01, 1.02]
+    series['bench']['BAND_TOP'] = [None, 1.0, 1.05]     # forward-only shadow
+    sp.write_text(json.dumps(series))
+
+    perf = ex.export_performance(repo)
+
+    top = perf['bench']['BAND_TOP']
+    assert top[0] is None                               # null preserved
+    assert top[1] == 10000.0 and top[2] == 10500.0      # scaled to notional
+    assert perf['summary']['vs_ew_roster'] == (
+        pytest.approx((perf['model'][-1] / perf['model'][0] - 1) - 0.02))

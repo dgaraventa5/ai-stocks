@@ -103,7 +103,11 @@ def export_performance(root: Path) -> dict:
     capital = float(cfg['capital'])
     k = NOTIONAL / capital
     model = [round(v * k, 2) for v in raw['model']]
-    bench = {name: [round(g * NOTIONAL, 2) for g in series]
+    # v2 shadow series (EW_ROSTER / BAND_*) start mid-history and are
+    # null-padded before their first event (forward-only, spec C1) — scale
+    # non-null points, pass nulls through (the chart renders them as gaps).
+    bench = {name: [None if g is None else round(g * NOTIONAL, 2)
+                    for g in series]
              for name, series in raw['bench'].items()}
 
     def total(series):
@@ -116,6 +120,13 @@ def export_performance(root: Path) -> dict:
         'vs_spy': total(model) - total(bench['SPY']),
         'vs_ew': total(model) - total(bench['EW']),
     }
+    # MODEL − EW_ROSTER over the shadow's own life: the standing measurement
+    # of what the sizing rule adds (spec A4 tripwire input).
+    ewr = bench.get('EW_ROSTER')
+    if ewr and any(v is not None for v in ewr) and ewr[-1] is not None:
+        i0 = next(i for i, v in enumerate(ewr) if v is not None)
+        summary['vs_ew_roster'] = ((model[-1] / model[i0] - 1)
+                                   - (ewr[-1] / ewr[i0] - 1))
 
     monthly: list[dict] = []
     by_month: dict[str, list[int]] = {}
