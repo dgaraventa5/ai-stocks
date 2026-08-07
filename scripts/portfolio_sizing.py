@@ -39,6 +39,31 @@ def build_reason(entered, exited, tier_chg, resize):
     return '; '.join(parts) or 'rebalance'
 
 
+def rank_by_score(live, prior):
+    """Watchlist tickers ranked by TOTAL desc for top-N selection (spec B1).
+
+    Boundary ties break by higher score first (the sort key), then by
+    incumbency (an incumbent outranks an equal-scored outsider), then by
+    ticker for determinism. live: [{'ticker','TOTAL',...}] with TOTAL set."""
+    return [x['ticker'] for x in sorted(
+        live, key=lambda x: (-x['TOTAL'],
+                             0 if x['ticker'] in prior else 1, x['ticker']))]
+
+
+def topn_membership(prior, ranked, n, m):
+    """Top-N selection with rank hysteresis (spec B1): outsiders ENTER at
+    rank <= n; incumbents HOLD through rank <= m; ranks n+1..m are the
+    dead-band. Returns (include, entered, exit_crossers) — exit_crossers are
+    incumbents past rank m, which the caller runs through the rule-26 2-run
+    exit-confirm clock (this function never exits a name itself)."""
+    rank = {t: i + 1 for i, t in enumerate(ranked)}
+    entered = [t for t in ranked[:n] if t not in prior]
+    stay = [t for t in prior if rank.get(t, 10 ** 9) <= m]
+    exit_crossers = sorted(t for t in prior if rank.get(t, 10 ** 9) > m)
+    include = sorted(set(stay) | set(entered), key=lambda t: rank[t])
+    return include, entered, exit_crossers
+
+
 def weights_score_monotonic(rows, tol=1e-4):
     """rows: iterable of (score, weight). Returns [] if, sorted by score
     descending, weight is non-increasing (ties OK — cap-clipped names); else the
