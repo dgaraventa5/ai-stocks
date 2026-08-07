@@ -17,8 +17,8 @@ Run alongside objective refreshes (rule 9).
 """
 from __future__ import annotations
 
+import argparse
 import json
-import sys
 import time
 from pathlib import Path
 
@@ -71,12 +71,23 @@ def _ev_over_fcf(ticker):
     return None
 
 
-def main(argv):
+def parse_args(argv=None):
+    """Uppercased ticker list from argv; empty list = all watchlist names."""
+    ap = argparse.ArgumentParser(
+        description="Refresh EV/FCF multiples into 00-master/reverse-dcf.json "
+                    "(rule 21). Run alongside objective refreshes (rule 9).")
+    ap.add_argument("tickers", nargs="*",
+                    help="tickers to refresh (default: all watchlist names)")
+    args = ap.parse_args(argv)
+    return [t.upper() for t in args.tickers]
+
+
+def main(argv=None):
     # Timestamp passed in (scripts can't call Date.now equivalents in some envs);
     # here we're a normal CLI so use today.
     import datetime as dt
     today = dt.date.today().isoformat()
-    targets = [a.upper() for a in argv[1:]] or _watchlist_tickers()
+    targets = parse_args(argv) or _watchlist_tickers()
 
     data = {}
     if JSON_PATH.exists():
@@ -101,4 +112,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
