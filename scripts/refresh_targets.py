@@ -183,7 +183,11 @@ def _price_frame(tickers: list[str], lookback: int):
     for t in tickers:
         s = _series(t, earliest)
         if s is not None:
-            cols[t] = s
+            # Normalize tz-aware exchange timestamps to plain dates so mixed
+            # calendars (Tokyo/US/EU listings) align instead of interleaving.
+            s = s.copy()
+            s.index = pd.Index([ts.date() for ts in s.index])
+            cols[t] = s[~s.index.duplicated(keep='last')]
     return pd.DataFrame(cols)
 
 

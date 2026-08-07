@@ -57,12 +57,14 @@ def inverse_vol_weights(prices, roster: list[str], cfg: dict,
 
     lookback = int(cfg.get('lookback', 60))
     sigma_floor = float(cfg.get('sigma_floor', 0.005))
-    rets = prices.pct_change()
     sigma: dict[str, float] = {}
     short: list[str] = []
     for t in roster:
-        r = (rets[t].dropna().iloc[-lookback:] if t in rets.columns
-             else pd.Series(dtype=float))
+        # Per-ticker returns over the name's OWN trading days: a mixed-calendar
+        # frame (e.g. 6861.T Tokyo sessions vs US names) interleaves indexes,
+        # and a shared pct_change would see a NaN gap at every step.
+        r = (prices[t].dropna().pct_change().dropna().iloc[-lookback:]
+             if t in prices.columns else pd.Series(dtype=float))
         if len(r) >= lookback:
             sigma[t] = float(r.std())
         else:
