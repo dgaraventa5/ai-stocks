@@ -355,6 +355,14 @@ def sync_scores(xlsx=XLSX):
     formulas here) and after any objective-input refresh. Returns rows written.
     """
     results = recalc(xlsx, mode='percentile')
+    # Point-in-time score panel (v2 spec C2): --sync is the finalize step of
+    # every scoring pass (rule 25), so logging here catches weekly scans,
+    # quarterly rescores and ad-hoc passes without per-caller wiring.
+    try:
+        from score_history import append_snapshot
+        append_snapshot(results)
+    except OSError as e:
+        print(f'score-history append failed (non-fatal): {e}')
     wb = load_workbook(xlsx, data_only=False)
     ws = wb['Watchlist']
     n = 0

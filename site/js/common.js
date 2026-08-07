@@ -45,7 +45,8 @@ function renderNav(active) {
   ).join('');
 }
 
-const CHART_COLORS = { model: '#3fb950', SMH: '#58a6ff', QQQ: '#bc8cff', SPY: '#e3b341', EW: '#8b949e' };
+const CHART_COLORS = { model: '#3fb950', SMH: '#58a6ff', QQQ: '#bc8cff', SPY: '#e3b341', EW: '#8b949e',
+  EW_ROSTER: '#56d364', BAND_TOP: '#1f6feb', BAND_NEXT: '#d29922', BAND_TAIL: '#f85149' };
 
 function lineDataset(label, data, color, emphasized = false) {
   return { label, data, borderColor: color, backgroundColor: color,

@@ -51,6 +51,28 @@ def save_cfg(cfg: dict) -> None:
     CONFIG.write_text(json.dumps(cfg, indent=2) + '\n')
 
 
+PCONFIG = ROOT / 'tracking' / 'portfolio-config.json'
+
+DEFAULT_PCFG = {
+    # Construction-v2 params, spec 2026-08-07 §A1/§B1/§C1. Do NOT tune against
+    # the 10-week history that motivated the change (spec Non-goals).
+    'sizing': {'mode': 'tier', 'lookback': 60, 'sigma_floor': 0.005,
+               'max_weight': 0.12, 'min_weight': 0.03, 'drift_band': 0.25},
+    'selection': {'mode': 'score'},
+    'shadows': {'top': 15, 'next': 25, 'tail': 40},
+}
+
+
+def load_pcfg() -> dict:
+    """Construction-v2 config: committed values merged over defaults, so a
+    missing file or missing key falls back to current (tier/score) behavior."""
+    try:
+        raw = json.loads(PCONFIG.read_text())
+    except (OSError, ValueError):
+        raw = {}
+    return {k: {**v, **(raw.get(k) or {})} for k, v in DEFAULT_PCFG.items()}
+
+
 def _series(ticker: str, earliest: str):
     """Dividend-adjusted close series from `earliest`, cached per run."""
     if ticker not in _series_cache:
@@ -92,20 +114,35 @@ def mark(cfg: dict) -> tuple[float, dict[str, float], list[str]]:
     return value, pnl, missing
 
 
+def current_weights(cfg: dict) -> dict[str, float] | None:
+    """Mark-to-market weight of each held name as a fraction of model value —
+    the drifted 'current' side of the v2-spec-A2 drift band. None if every
+    price is missing (never guess; rule 3)."""
+    ev = cfg['events'][-1]
+    value, pnl, missing = mark(cfg)
+    if not value or len(missing) == len(ev['allocations']):
+        return None
+    return {t: (alloc + pnl.get(t, 0.0)) / value
+            for t, alloc in ev['allocations'].items()}
+
+
 def log_rebalance(cfg: dict, weights: dict[str, float], reason: str,
-                  tiers: dict[str, str] | None = None) -> dict:
+                  tiers: dict[str, str] | None = None,
+                  kind: str = 'membership') -> dict:
     """Mark the model, re-allocate at today's value, append (or same-day
     replace) the event, and persist. `weights` are fractions of total value
     (summing to 1 - cash buffer, as refresh_targets produces them). `tiers` is
     the per-name tier at rebalance time — the baseline the tier-crossing detector
-    compares future runs against."""
+    compares future runs against. `kind` is the machine-readable event type
+    (v2 spec A2): membership | tier | resize_monthly | manual_resize |
+    sizing_migration_invvol; the human-readable `reason` stays alongside."""
     today = dt.date.today().isoformat()
     value, _, missing = mark(cfg)
     if missing:
         flag(f'rebalance marked with carried values for: {", ".join(missing)}')
     alloc = {t: round(w * value, 2) for t, w in weights.items()}
-    event = {'date': today, 'reason': reason, 'allocations': alloc,
-             'tiers': dict(tiers or {}),
+    event = {'date': today, 'reason': reason, 'kind': kind,
+             'allocations': alloc, 'tiers': dict(tiers or {}),
              'cash': round(value - sum(alloc.values()), 2)}
     if cfg['events'] and cfg['events'][-1]['date'] == today:
         cfg['events'][-1] = event       # idempotent same-day re-runs
@@ -132,31 +169,23 @@ def ew_roster_events(cfg: dict) -> list[dict]:
     return sorted(evs, key=lambda e: e['date'])
 
 
-def ew_growth(cfg: dict, idx=None):
-    """Chain-linked equal-weight growth-of-1 series for the EW benchmark.
+def chain_linked_growth(events, inception: str, idx):
+    """Chain-linked equal-weight growth-of-1 over [{date, roster}] events.
 
-    Within each roster period the value is an equal-weight (daily-rebalanced)
-    basket of that period's names, re-based to the prior period's closing level
-    at the splice. A roster change therefore injects NO return on the splice
-    itself and NO look-ahead: dates before a splice keep the old roster, and the
-    new roster drives returns only after it — so a name that ran INTO the >=70
-    universe gets no retroactive credit for the run-up that admitted it. The
-    splice day still reflects the new roster's real move off the prior close."""
+    Extracted from ew_growth (2026-08-07) so the EW benchmark, the EW_ROSTER
+    sizing-null shadow (v2 spec A4) and the band shadows (v2 spec C1) share
+    one engine. Within each roster period the value is an equal-weight
+    (daily-rebalanced at splices) basket of that period's names, re-based to
+    the prior period's closing level at the splice — a roster change injects
+    NO return on the splice itself and NO look-ahead: dates before a splice
+    keep the old roster, the new roster drives returns only after it. The
+    trailing ffill never BACKfills, so a shadow whose first event postdates
+    inception stays NaN before it (forward-only guarantee, spec C1)."""
     import pandas as pd
 
-    inception = cfg['inception']
     inc_date = dt.date.fromisoformat(inception)
 
-    if idx is None:
-        s = _series('SMH', inception)
-        if s is None:
-            return None
-        s = s[s.index.date >= inc_date]
-        if s.empty:
-            return None
-        idx = s.index
-
-    # growth-of-1 from inception per name, aligned to the benchmark calendar;
+    # growth-of-1 from inception per name, aligned to the calendar;
     # period normalization divides by the anchor value, recovering price ratios.
     def gfull(t):
         s = _series(t, inception)
@@ -167,8 +196,8 @@ def ew_growth(cfg: dict, idx=None):
             return None
         return (s / s.iloc[0]).reindex(idx).ffill()
 
-    events = ew_roster_events(cfg)
-    ew = pd.Series(index=idx, dtype=float)
+    events = sorted(events, key=lambda e: e['date'])
+    out = pd.Series(index=idx, dtype=float)
     level = 1.0
     anchor = None                       # prior period's last calendar timestamp
     for i, ev in enumerate(events):
@@ -193,11 +222,35 @@ def ew_growth(cfg: dict, idx=None):
         if not parts:
             continue
         seg = level * pd.concat(parts, axis=1).mean(axis=1)
-        ew[seg_idx] = seg
+        out[seg_idx] = seg
         level = float(seg.iloc[-1])
         anchor = seg_idx[-1]
-    ew = ew.ffill()
-    return None if ew.isna().all() else ew
+    out = out.ffill()
+    return None if out.isna().all() else out
+
+
+def model_roster_events(cfg: dict) -> list[dict]:
+    """[{date, roster}] mirroring the model's actual event history — the
+    EW_ROSTER sizing-null (v2 spec A4): same names, same event dates, equal
+    weights. MODEL − EW_ROSTER is the standing measure of what the sizing
+    rule adds; the permanent tripwire input."""
+    return [{'date': ev['date'], 'roster': sorted(ev['allocations'])}
+            for ev in cfg['events']]
+
+
+def ew_growth(cfg: dict, idx=None):
+    """Chain-linked equal-weight growth-of-1 series for the EW benchmark
+    (see chain_linked_growth for the splice/look-ahead semantics)."""
+    inception = cfg['inception']
+    if idx is None:
+        s = _series('SMH', inception)
+        if s is None:
+            return None
+        s = s[s.index.date >= dt.date.fromisoformat(inception)]
+        if s.empty:
+            return None
+        idx = s.index
+    return chain_linked_growth(ew_roster_events(cfg), inception, idx)
 
 
 def ew_return_since(cfg: dict, frm: str) -> float | None:
@@ -296,6 +349,22 @@ def build_daily_series(cfg: dict) -> dict | None:
                             / sub.iloc[0]).fillna(1.0)
         model[idx[mask]] = seg
 
+    # v2 shadows (spec A4/C1): EW_ROSTER = the sizing-null twin of the model's
+    # own event history; BAND_* = forward-only rank-band scouts from
+    # cfg['shadow_events'] (maintained by refresh_targets). NaN before a
+    # shadow's first event (pre-deploy) becomes JSON null — never backfilled.
+    shadows = {}
+    ew_roster = chain_linked_growth(model_roster_events(cfg), inception, idx)
+    if ew_roster is not None:
+        shadows['EW_ROSTER'] = ew_roster
+    for name, evs in (cfg.get('shadow_events') or {}).items():
+        s = chain_linked_growth(evs, inception, idx)
+        if s is not None:
+            shadows[name] = s
+
+    def pad(series):
+        return [None if v != v else round(float(v), 6) for v in series]
+
     out = {
         'start': inception,
         'as_of': str(idx[-1].date()),
@@ -306,10 +375,12 @@ def build_daily_series(cfg: dict) -> dict | None:
             'QQQ': [round(float(v), 6) for v in qqq.reindex(idx).ffill()],
             'SPY': [round(float(v), 6) for v in spy.reindex(idx).ffill()],
             'EW': [round(float(v), 6) for v in ew],
+            **{name: pad(s) for name, s in shadows.items()},
         },
     }
-    if any(v != v for series in (out['model'], *out['bench'].values())
-           for v in series):
+    strict = [out['model']] + [out['bench'][k]
+                               for k in ('SMH', 'QQQ', 'SPY', 'EW')]
+    if any(v != v for series in strict for v in series):
         flag('series: NaN in output — series not written')
         return None
     if not _may_overwrite_series(out):

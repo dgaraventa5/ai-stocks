@@ -496,6 +496,48 @@ exclusions + watch-items: `11-robotics/robotics-universe-2026-08-02.md`.
   yfinance caps against an independent source before trusting cap-derived ratios (HSAI 1:8-split
   and MBLY Class-A-only artifacts, both corrected + audit-logged 2026-08-02).
 
+### 28. Portfolio construction v2: rank selection, inverse-vol sizing, shadow instrumentation (added 2026-08-07; BUILT, migration pending Dom)
+
+Spec: `docs/superpowers/specs/2026-08-07-portfolio-construction-v2-spec.md`. One
+sentence: the score chooses the names by rank, trailing volatility chooses the
+sizes, equal-weight rides shotgun as the permanent null, and three score-bands
+run ahead as scouts.
+
+- **Mode switches** live in `tracking/portfolio-config.json` (defaults
+  `sizing.mode=tier` / `selection.mode=score` reproduce pre-v2 behavior
+  exactly). **The live portfolio does NOT change until Dom approves the
+  migration table** — `python3 scripts/migrate_portfolio_v2.py` prints it;
+  `--apply` (Dom-gated) flips the modes, sets sheet Entry/Exit rank to 15/18,
+  and logs ONE `sizing_migration_invvol` event (the history seam; nothing
+  restated).
+- **Selection (rank mode):** enter at rank ≤ N=15, exit below rank M=18;
+  16–18 is the hysteresis dead-band; ties break score→incumbency. N/M live on
+  the Sizing Rules sheet (rule 26); the rule-26 2-run exit-confirm clock still
+  wraps every rank exit. Do NOT tune N/M against the 10-week history.
+- **Sizing (inverse_vol mode):** 1/max(σ₆₀d, 0.005) normalized, 12% cap / 3%
+  floor (`position_sizing.py`, pure). Re-size trades only on membership events
+  and a monthly drift-band pass (±25% relative; stamp in config
+  `sizing_state.last_resize_check`); never intra-month on vol alone. Tier
+  crossings no longer fire events in this mode, and the rule-18 monotonicity
+  gate self-scopes to tier mode (inverse-vol weights are deliberately not
+  score-ordered).
+- **Event `kind`:** every rebalance event now carries
+  `membership | tier | resize_monthly | manual_resize | sizing_migration_invvol`
+  alongside the human-readable reason.
+- **Shadows (live now, forward-only, no backfill):** `EW_ROSTER` (equal-weight
+  twin of the model's own events — MODEL − EW_ROSTER is the standing sizing
+  audit; tripwire: two consecutive quarters behind → revert to equal-weight,
+  pending Dom's confirm) and `BAND_TOP/NEXT/TAIL` (EW of ranks 1–15/16–25/26–40,
+  rosters kept in config `shadow_events` by refresh_targets). All on the site's
+  Performance tab, hidden by default. Pre-registered decision rule: after two
+  full quarters, BAND_NEXT keeping pace with BAND_TOP justifies raising N;
+  lagging materially holds N.
+- **Score panel:** every scoring pass appends `date,ticker,total_score,rank,tier`
+  per name to `tracking/score-history.csv` (hooked in `sync_scores` and real
+  `refresh_targets` runs; date-deduped, append-only, NEVER rewritten or
+  backfilled — treat like the site privacy gate). This is the panel all future
+  IC/cutoff work requires.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

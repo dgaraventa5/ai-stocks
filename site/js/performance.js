@@ -3,22 +3,31 @@ renderNav('performance.html');
 (async () => {
   try {
     const perf = await loadJSON('data/performance.json');
+    // [label, data, color, emphasized, visible-by-default]. The v2 shadow
+    // series (sizing null + score-band scouts, spec A4/C1) ship hidden so the
+    // default view stays clean; they start mid-history (null gap before their
+    // deploy date). Filter tolerates data files exported before v2.
     const series = [
-      ['Model', perf.model, CHART_COLORS.model, true],
-      ['SMH', perf.bench.SMH, CHART_COLORS.SMH, false],
-      ['QQQ', perf.bench.QQQ, CHART_COLORS.QQQ, false],
-      ['S&P 500', perf.bench.SPY, CHART_COLORS.SPY, false],
-    ];
+      ['Model', perf.model, CHART_COLORS.model, true, true],
+      ['SMH', perf.bench.SMH, CHART_COLORS.SMH, false, true],
+      ['QQQ', perf.bench.QQQ, CHART_COLORS.QQQ, false, true],
+      ['S&P 500', perf.bench.SPY, CHART_COLORS.SPY, false, true],
+      ['EW roster (sizing null)', perf.bench.EW_ROSTER, CHART_COLORS.EW_ROSTER, false, false],
+      ['Band 1–15', perf.bench.BAND_TOP, CHART_COLORS.BAND_TOP, false, false],
+      ['Band 16–25', perf.bench.BAND_NEXT, CHART_COLORS.BAND_NEXT, false, false],
+      ['Band 26–40', perf.bench.BAND_TAIL, CHART_COLORS.BAND_TAIL, false, false],
+    ].filter(([, d]) => Array.isArray(d));
     const chart = new Chart(document.getElementById('chart'), {
       type: 'line',
       data: { labels: perf.dates,
-        datasets: series.map(([l, d, c, em]) => lineDataset(l, d, c, em)) },
+        datasets: series.map(([l, d, c, em, vis]) =>
+          ({ ...lineDataset(l, d, c, em), hidden: !vis, spanGaps: false })) },
       options: { ...baseChartOptions(),
         plugins: { legend: { display: false } } },
     });
 
-    document.getElementById('toggles').innerHTML = series.map(([l], i) =>
-      `<label><input type="checkbox" data-i="${i}" checked> ${l}</label>`).join('');
+    document.getElementById('toggles').innerHTML = series.map(([l, , , , vis], i) =>
+      `<label><input type="checkbox" data-i="${i}" ${vis ? 'checked' : ''}> ${l}</label>`).join('');
     document.getElementById('toggles').addEventListener('change', e => {
       const i = Number(e.target.dataset.i);
       chart.setDatasetVisibility(i, e.target.checked);
