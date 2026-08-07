@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import openpyxl
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'scripts'))
 
@@ -51,7 +52,13 @@ def test_weights_monotonic_accepts_sorted():
 def test_targets_weights_monotonic():
     """Data gate: the committed Targets sheet's included weights must be monotonic
     in score — a ✓✓✓ name can never be weighted below a ✓✓ name (the MU bug).
-    openpyxl only, so it runs in the deploy CI; green once the corrective is committed."""
+    openpyxl only, so it runs in the deploy CI; green once the corrective is committed.
+    Scoped to tier sizing: inverse-vol weights (v2 spec A0) are deliberately NOT
+    score-ordered — the EW_ROSTER shadow series audits sizing there instead."""
+    from portfolio_model import load_pcfg
+    if load_pcfg()['sizing']['mode'] == 'inverse_vol':
+        pytest.skip('rule-18 monotonicity gate applies to tier sizing only '
+                    '(v2 spec A0: the score is no longer the sizer)')
     ws = openpyxl.load_workbook(_REPO / '00-master' / 'portfolio.xlsx')['Targets']
     rows = [(float(r[2]), float(r[8]))
             for r in ws.iter_rows(min_row=3, values_only=True)

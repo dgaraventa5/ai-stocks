@@ -384,11 +384,19 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # ---- sizing (v2 spec A1): tier bands or inverse trailing volatility ----
     siz = pcfg['sizing']
     if siz['mode'] == 'inverse_vol':
-        # The score chooses the names; trailing vol chooses the sizes.
-        prices = _price_frame(include, int(siz['lookback']))
-        inv = inverse_vol_weights(prices, include, siz,
-                                  layers={t: layers.get(t, '') for t in include})
-        weights = {t: w * (1.0 - cash) for t, w in inv.items()}
+        if dry_run and not check_freshness:
+            # Offline probe (pending_rebalance / rule-25 gate): the gate reads
+            # only membership + tier state, never weights — keep it networkless
+            # with an equal-weight placeholder rather than fetching prices.
+            weights = {t: (1.0 - cash) / len(include) for t in include} \
+                if include else {}
+        else:
+            # The score chooses the names; trailing vol chooses the sizes.
+            prices = _price_frame(include, int(siz['lookback']))
+            inv = inverse_vol_weights(prices, include, siz,
+                                      layers={t: layers.get(t, '')
+                                              for t in include})
+            weights = {t: w * (1.0 - cash) for t, w in inv.items()}
     else:
         base = {t: base_weight(info[t]['TOTAL'], p['tiers']) for t in include}
         weights = cap_and_normalize(base, layers, 1.0 - cash, max_single,

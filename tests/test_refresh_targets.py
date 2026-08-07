@@ -427,3 +427,116 @@ def test_shadow_events_not_touched_on_dry_run(monkeypatch, tmp_path):
 
     assert 'shadow_events' not in cfg
     assert saves == [] and calls == []
+
+
+# ---- v2: inverse-vol sizing mode + monthly drift-band re-size (spec A1/A2) --
+
+def _invvol_pcfg():
+    return {'selection': {'mode': 'score'},
+            'sizing': {'mode': 'inverse_vol', 'lookback': 60,
+                       'sigma_floor': 0.005, 'max_weight': 1.0,
+                       'min_weight': 0.0, 'drift_band': 0.25},
+            'shadows': {'top': 15, 'next': 25, 'tail': 40}}
+
+
+def _vol_frame():
+    """NVDA at 2x TSM's daily vol -> inverse-vol targets 1/3 vs 2/3."""
+    pd = pytest.importorskip('pandas')
+    np = pytest.importorskip('numpy')
+    idx = pd.bdate_range('2026-05-01', periods=61)
+    return pd.DataFrame(
+        {'NVDA': 100 * np.cumprod([1] + [1.02, 0.98] * 30)[:61],
+         'TSM': 100 * np.cumprod([1] + [1.01, 0.99] * 30)[:61]}, index=idx)
+
+
+def _two_name_live():
+    return [{'ticker': 'NVDA', 'layer': '06 Silicon', 'TOTAL': 86.0,
+             'Tier': '✓✓✓'},
+            {'ticker': 'TSM', 'layer': '05 Fabs', 'TOTAL': 78.0, 'Tier': '✓✓'}]
+
+
+def _invvol_env(monkeypatch, tmp_path, cfg):
+    path = tmp_path / 'portfolio.xlsx'
+    _build_portfolio(path, [('NVDA', '06 Silicon', 86.0, '✓✓✓'),
+                            ('TSM', '05 Fabs', 78.0, '✓✓')])
+    calls, saves = _mock_env(monkeypatch, _two_name_live(), cfg)
+    monkeypatch.setattr(rt, 'load_pcfg', _invvol_pcfg)
+    monkeypatch.setattr(rt, '_price_frame', lambda tickers, lb: _vol_frame())
+    return path, calls, saves
+
+
+def test_invvol_mode_weights_from_vol_not_score(monkeypatch, tmp_path):
+    """Higher-vol NVDA gets the SMALLER weight despite the higher score —
+    the score chooses the names, trailing vol chooses the sizes (spec A0/A1)."""
+    cfg = _seed_cfg()
+    path, calls, _saves = _invvol_env(monkeypatch, tmp_path, cfg)
+
+    rt.refresh(portfolio=str(path), resize=True)     # force a re-size event
+
+    assert len(calls) == 1 and calls[0]['kind'] == 'manual_resize'
+    w = calls[0]['weights']
+    assert w['TSM'] == pytest.approx(2 * w['NVDA'], rel=1e-2)   # half the vol
+
+
+def test_monthly_resize_fires_outside_band(monkeypatch, tmp_path):
+    cfg = _seed_cfg()                                # no sizing_state yet
+    path, calls, _saves = _invvol_env(monkeypatch, tmp_path, cfg)
+    # Book drifted to 60/40; inverse-vol targets ~33/67 -> both outside ±25%.
+    monkeypatch.setattr(rt, 'current_weights',
+                        lambda c: {'NVDA': 0.60, 'TSM': 0.40})
+    import datetime as dt
+
+    rt.refresh(portfolio=str(path))
+
+    assert len(calls) == 1 and calls[0]['kind'] == 'resize_monthly'
+    assert 'NVDA' in calls[0]['reason'] and 'TSM' in calls[0]['reason']
+    assert cfg['sizing_state']['last_resize_check'] == \
+        dt.date.today().isoformat()[:7]
+
+
+def test_monthly_resize_noop_inside_band(monkeypatch, tmp_path):
+    cfg = _seed_cfg()
+    path, calls, saves = _invvol_env(monkeypatch, tmp_path, cfg)
+    probes = []
+
+    def cur(c):
+        probes.append(1)
+        # match the invvol targets (1/3, 2/3) -> inside the band
+        return {'NVDA': 1 / 3, 'TSM': 2 / 3}
+
+    monkeypatch.setattr(rt, 'current_weights', cur)
+    import datetime as dt
+
+    rt.refresh(portfolio=str(path))
+
+    assert calls == []                               # no event
+    assert cfg['sizing_state']['last_resize_check'] == \
+        dt.date.today().isoformat()[:7]              # month stamped
+    assert saves                                     # stamp persisted (frozen run)
+    rt.refresh(portfolio=str(path))                  # same month: no re-check
+    assert probes == [1]                             # evaluated exactly once
+
+
+def test_dry_run_never_touches_sizing_state(monkeypatch, tmp_path):
+    cfg = _seed_cfg()
+    path, calls, saves = _invvol_env(monkeypatch, tmp_path, cfg)
+    monkeypatch.setattr(rt, 'current_weights',
+                        lambda c: {'NVDA': 0.60, 'TSM': 0.40})
+
+    rt.refresh(dry_run=True, portfolio=str(path))
+
+    assert 'sizing_state' not in cfg
+    assert calls == [] and saves == []
+
+
+def test_offline_gate_stays_networkless_in_invvol_mode(monkeypatch, tmp_path):
+    """pending_rebalance (rule-25 gate) must not fetch prices under invvol."""
+    cfg = _seed_cfg()
+    path, calls, saves = _invvol_env(monkeypatch, tmp_path, cfg)
+
+    def boom(tickers, lb):
+        raise AssertionError('offline gate fetched prices')
+
+    monkeypatch.setattr(rt, '_price_frame', boom)
+    assert rt.pending_rebalance(portfolio=str(path)) is False
+    assert 'sizing_state' not in cfg and saves == []
