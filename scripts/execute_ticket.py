@@ -291,6 +291,20 @@ class RobinhoodTransport:
                 out[q['symbol']] = float(px)
         return out
 
+    def positions(self) -> dict[str, float]:
+        """READ: {ticker: shares} for the agentic account."""
+        d = self._call('get_equity_positions',
+                       {'account_number': self.account_number()})['data']
+        return {p['symbol']: float(p['quantity'])
+                for p in d.get('positions', []) if p.get('symbol')}
+
+    def orders(self) -> list[dict]:
+        """READ: recent order states, for reconciliation fill-verification."""
+        d = self._call('get_equity_orders',
+                       {'account_number': self.account_number()})['data']
+        return [{'order_id': o.get('id') or o.get('order_id'),
+                 'state': o.get('state')} for o in d.get('orders', [])]
+
     def place_equity_order(self, order: dict) -> dict:
         r = self._call('place_equity_order', {   # THE only order-tool call site
             'account_number': self.account_number(),

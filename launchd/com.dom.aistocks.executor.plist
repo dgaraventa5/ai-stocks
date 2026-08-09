@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Phase-3 scheduled executor (agentic-execution spec §C5).
+     ACTIVATION IS DOM'S ACTION, never Claude's:
+       cp launchd/com.dom.aistocks.executor.plist ~/Library/LaunchAgents/
+       launchctl load ~/Library/LaunchAgents/com.dom.aistocks.executor.plist
+     Deactivate (the rollback lever):
+       launchctl unload ~/Library/LaunchAgents/com.dom.aistocks.executor.plist
+     Runs weekdays 06:35 PT (5 min after NYSE open). Logs land inside the
+     gitignored privacy boundary. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.dom.aistocks.executor</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/python3</string>
+    <string>scripts/executor_cron.py</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/dom/Desktop/ai-stocks</string>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
+    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
+    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
+    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
+  </array>
+  <key>StandardOutPath</key>
+  <string>/Users/dom/Desktop/ai-stocks/tracking/live/cron-executor.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/dom/Desktop/ai-stocks/tracking/live/cron-executor.log</string>
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>
