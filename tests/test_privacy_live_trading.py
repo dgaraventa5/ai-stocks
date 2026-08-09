@@ -94,6 +94,34 @@ def test_recon_committed_outputs_pass_sanitizers(tmp_path):
     ra.assert_sanitized_lvm(json.loads(lvm.read_text()))
 
 
+# ---- local tripwire: real identifiers must appear NOWHERE in tracked text ----
+# tracking/live/private-strings.json (gitignored) holds the REAL account
+# numbers/identifiers. This test greps every git-tracked text file for them.
+# CI never has the file (skip); Dom's machine always does — so any future
+# commit containing a real identifier fails locally before it can be pushed.
+# Born of an actual incident (2026-08-09): the real account number was used
+# as a fixture value in THIS file and briefly committed to the public repo.
+
+def test_no_real_identifiers_in_any_tracked_file():
+    private = REPO / 'tracking' / 'live' / 'private-strings.json'
+    if not private.exists():
+        pytest.skip('no private-strings.json (CI or fresh clone)')
+    secrets = json.loads(private.read_text())['strings']
+    assert secrets, 'private-strings.json exists but is empty — seed it'
+    tracked = subprocess.run(
+        ['git', 'ls-files', '*.py', '*.md', '*.json', '*.yml', '*.yaml',
+         '*.html', '*.js', '*.txt', '*.csv', '*.plist'],
+        cwd=REPO, capture_output=True, text=True).stdout.splitlines()
+    hits = []
+    for rel in tracked:
+        try:
+            text = (REPO / rel).read_text(errors='ignore')
+        except OSError:
+            continue
+        hits += [f'{s[:4]}… in {rel}' for s in secrets if s in text]
+    assert not hits, f'REAL identifier(s) in tracked files: {hits}'
+
+
 # ---- the real committed files, whenever they exist, must stay clean ----
 
 def test_real_committed_live_files_pass_sanitizers():
