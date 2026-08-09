@@ -602,6 +602,19 @@ def refresh(dry_run: bool = False, resize: bool = False,
     ev = log_rebalance(cfg, weights, reason, tiers_now, kind=kind)
     print(f'model rebalanced: {reason} — value at rebalance '
           f'${sum(ev["allocations"].values()) + ev["cash"]:,.0f}')
+
+    # ---- trade ticket hook (agentic-execution spec B1): every real fired
+    # event generates an executable ticket from ACTUAL account state. Gated to
+    # the real workbook (portfolio=None) like the score panel; a failure is
+    # flagged, never fatal — the model event already logged.
+    if portfolio is None:
+        try:
+            from generate_trade_ticket import on_model_event
+            on_model_event({'date': today, 'kind': kind, 'reason': reason},
+                           weights)
+        except Exception as e:
+            flag(f'trade ticket not generated ({e}) — run '
+                 f'scripts/generate_trade_ticket.py manually')
     return {'fire': True, 'entered': entered, 'exited': exited,
             'tier_chg': tier_chg, 'wrote': True, 'pending': new_pending}
 

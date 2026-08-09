@@ -127,8 +127,16 @@ If data is missing, ambiguous, or contradicts another source, flag it explicitly
 ### 4. Prefer formulas over hardcoded values in Excel
 When updating any .xlsx file, calculated cells must be Excel formulas, not Python-computed values pasted in. This keeps the workbook live when source data changes.
 
-### 5. Don't recommend trades
+### 5. Don't recommend trades (amended 2026-08-09 for the execution pipeline)
 This project produces research, not trade recommendations. You can identify high-scoring opportunities, flag thesis changes, and surface contradictions. The decision to buy, hold, or sell is mine.
+
+**Amendment (agentic-execution spec §G):** the project now also produces
+*executable trade tickets* for the Robinhood Agentic account — generated
+mechanically by `scripts/generate_trade_ticket.py` from the model's own rules
+(rank selection, inverse-vol sizing, exit clocks). A ticket is the model's
+output, not Claude's discretionary advice; buy/hold/sell authority is
+unchanged (the model decides, Dom executes). Claude still doesn't recommend
+discretionary trades outside the system.
 
 ### 6. Update the news log, not just the thesis
 For every material development on a ticker, append to `/per-stock/{TICKER}/news-log.md` with date + source + 1-line summary. The thesis only changes when the development materially affects an existing section.
@@ -537,6 +545,43 @@ run ahead as scouts.
   `refresh_targets` runs; date-deduped, append-only, NEVER rewritten or
   backfilled — treat like the site privacy gate). This is the panel all future
   IC/cutoff work requires.
+
+### 29. Live execution boundary — read-only Claude, one order writer, tracking/live/ privacy (added 2026-08-09, approved by Dom)
+
+Spec: `docs/superpowers/specs/2026-08-09-agentic-execution-pipeline-spec.md`.
+Three invariants, each with rule-18/site-gate standing (never weaken):
+
+- **Execution boundary:** Claude — any session: local, cloud, or scheduled —
+  uses Robinhood MCP **read tools only** (accounts, positions, balances,
+  orders, quotes, history). No session may call an MCP order/write tool, and
+  no LLM may be inserted between a ticket and an order. This is an Anthropic
+  platform rule, not a preference; designing around it is out of scope.
+- **One order writer:** `scripts/execute_ticket.py`, run by Dom, is the ONLY
+  code path that transmits orders (the order-tool name appears nowhere else in
+  the repo). It validates the full C2 gate set (checksum, expiry,
+  executed-once receipt, roster allowlist, notional/cash/turnover/ACCOUNT_CAP
+  caps, kill switch `tracking/live/trading-halt.flag`, live-quote sanity) and
+  refuses the whole ticket on any failure. Default is dry-run; `--confirm`
+  sends. Caps live in `tracking/live/executor-config.json` (deliberate edit,
+  never a CLI flag). Cap values live ONLY in that gitignored config — never in
+  committed text (the repo is public; even the account's size is §E-scoped).
+- **Privacy boundary:** everything with real dollars, share counts, account
+  numbers, or order IDs lives under `tracking/live/` (gitignored — tickets,
+  receipts, recon snapshots, executor config). Committed artifacts
+  (`tracking/live-status.json`, `tracking/live-vs-model.json`) carry only
+  booleans, dates, counts, tickers, and relative percentages, enforced by
+  fail-closed sanitizers in `reconcile_account.py` +
+  `tests/test_privacy_live_trading.py`. The friend-facing site shows nothing
+  from the live pipeline.
+
+Operational notes: reconciliation (`scripts/reconcile_account.py`) runs in
+attended sessions + weekly-scan — NOT a headless cron, because MCP OAuth does
+not survive headless runs (O1, answered 2026-08-09; re-test after token-handling
+updates). Ticket generation hooks every real `refresh_targets` model event and
+computes share deltas from the latest recon snapshot (actuals, never assumed
+holdings); no snapshot → loud refusal, no ticket. Anomaly recon auto-raises the
+halt flag (unknown-provenance position, negative cash, unexplained equity move)
+— the halt stops future executions, it never sells.
 
 ## Common tools and libraries (pre-approved for installation)
 
