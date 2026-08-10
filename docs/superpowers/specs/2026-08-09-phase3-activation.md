@@ -17,9 +17,19 @@ directions.
 ## What activation changes
 
 - `launchd/com.dom.aistocks.executor.plist` runs `scripts/executor_cron.py`
-  weekdays 06:35 PT. It picks the newest unexecuted, unexpired ticket and runs
-  the executor with `--confirm` — no human eyeball between model event and
-  order transmission.
+  twice each weekday (launchd coalesces missed runs to next wake):
+  - **06:35 PT (open mode):** generate a ticket if the newest model event
+    isn't covered by one (closes the cloud-fired-event gap) → pick the newest
+    unexecuted, unexpired ticket and run the executor with `--confirm` →
+    reconcile. No human eyeball between model event and order transmission.
+  - **13:35 PT (close mode):** rebuild the performance series and push it
+    from this machine (residential IP; the flaky GH cron stays as an
+    idempotent backstop) → reconcile (daily snapshot).
+- Every successful step stamps `tracking/live/heartbeat.json`;
+  `executor_cron.py --heartbeat-check` (weekly-scan Step 10) flags any job
+  silent >3 days. Quotes come RH-first with yfinance fallback
+  (`price_source.py`), so ticket generation no longer depends on Yahoo's
+  rate-limiting mood.
 - **C5 safety posture switches on:** macOS notification on every execution
   attempt; ANY validation failure auto-raises `trading-halt.flag` (not just
   investigate-later flags); full-turnover tickets are never auto-executed

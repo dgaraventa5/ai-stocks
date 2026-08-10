@@ -100,6 +100,73 @@ def test_transport_error_notifies_without_halt(live_dir):
     assert any('token' in n.lower() for n in notes)
 
 
+# ---- heartbeat (autonomy improvement #3) ----
+
+def test_heartbeat_stamp_merges_jobs(live_dir):
+    ec.heartbeat_stamp(live_dir, 'series', today='2026-08-13')
+    ec.heartbeat_stamp(live_dir, 'recon', today='2026-08-14')
+    hb = json.loads((live_dir / 'heartbeat.json').read_text())
+    assert hb == {'series': '2026-08-13', 'recon': '2026-08-14'}
+
+
+def test_stale_jobs_flags_old_and_missing(live_dir):
+    ec.heartbeat_stamp(live_dir, 'series', today='2026-08-01')
+    ec.heartbeat_stamp(live_dir, 'recon', today='2026-08-13')
+    stale = ec.stale_jobs(live_dir, ['series', 'recon', 'execute'],
+                          today='2026-08-14', max_age_days=3)
+    assert 'series' in stale          # 13 days old
+    assert 'execute' in stale         # never ran
+    assert 'recon' not in stale
+
+
+# ---- daily runner orchestration (autonomy improvement #1) ----
+
+def test_daily_run_stamps_success_and_isolates_failure(live_dir):
+    ran, notes = [], []
+
+    def ok(name):
+        return lambda: ran.append(name)
+
+    def boom():
+        raise RuntimeError('yahoo hiccup')
+    rc = ec.daily_run(live_dir,
+                      steps=[('series', boom), ('recon', ok('recon')),
+                             ('execute', ok('execute'))],
+                      notifier=notes.append, today='2026-08-13')
+    assert rc == 1
+    assert ran == ['recon', 'execute']            # failure didn't block later steps
+    assert any('series' in n and 'yahoo' in n for n in notes)
+    hb = json.loads((live_dir / 'heartbeat.json').read_text())
+    assert set(hb) == {'recon', 'execute'}        # only successes stamped
+
+
+def test_ticket_gen_when_model_event_newer_than_newest_ticket(live_dir):
+    write_ticket(live_dir / 'tickets', '2026-08-10-tier', '2026-08-12T20:00:00Z')
+    (live_dir / 'tickets' / 'ticket-2026-08-10-tier.json').write_text(json.dumps(
+        {'ticket_id': '2026-08-10-tier', 'expires_at': '2026-08-12T20:00:00Z',
+         'basis_event': {'date': '2026-08-10', 'kind': 'tier'}, 'orders': []}))
+    gen_calls = []
+    ec.ticket_gen_if_stale(
+        live_dir,
+        last_event={'date': '2026-08-12', 'kind': 'membership',
+                    'reason': 'TSM enters'},
+        gen=lambda ev: gen_calls.append(ev))
+    assert gen_calls and gen_calls[0]['date'] == '2026-08-12'
+
+
+def test_ticket_gen_skips_when_ticket_already_covers_event(live_dir):
+    (live_dir / 'tickets' / 'ticket-2026-08-12-membership.json').write_text(
+        json.dumps({'ticket_id': '2026-08-12-membership',
+                    'expires_at': '2026-08-14T20:00:00Z',
+                    'basis_event': {'date': '2026-08-12', 'kind': 'membership'},
+                    'orders': []}))
+    gen_calls = []
+    ec.ticket_gen_if_stale(
+        live_dir, last_event={'date': '2026-08-12', 'kind': 'membership'},
+        gen=lambda ev: gen_calls.append(ev))
+    assert gen_calls == []
+
+
 def test_full_turnover_ticket_never_auto_executed(live_dir):
     """The wrapper runs the executor WITHOUT --allow-full-turnover; a
     full-redeploy refusal therefore halts + notifies rather than sneaking a

@@ -22,11 +22,18 @@
   <string>/Users/dom/Desktop/ai-stocks</string>
   <key>StartCalendarInterval</key>
   <array>
+    <!-- open-mode 06:35 PT: ticket-gen → execute → recon -->
     <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
     <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
     <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
     <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
     <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
+    <!-- close-mode 13:35 PT (16:35 ET, post-close): series + push → recon -->
+    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>35</integer></dict>
+    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>35</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>35</integer></dict>
+    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>35</integer></dict>
+    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>35</integer></dict>
   </array>
   <key>StandardOutPath</key>
   <string>/Users/dom/Desktop/ai-stocks/tracking/live/cron-executor.log</string>

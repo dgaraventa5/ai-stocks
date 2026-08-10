@@ -32,16 +32,8 @@ def _latest_snapshot(live_dir: Path) -> dict | None:
     return json.loads(snaps[-1].read_text()) if snaps else None
 
 
-def _yf_last_close(ticker: str) -> float | None:
-    import yfinance as yf   # lazy (minimal-CI convention)
-    hist = yf.Ticker(ticker).history(period='5d', auto_adjust=False)
-    if hist is None or hist.empty:
-        return None
-    return round(float(hist['Close'].iloc[-1]), 2)
-
-
 def generate(target_weights: dict[str, float], event: dict, *,
-             live_dir: Path = LIVE_DIR, prices_fn=_yf_last_close,
+             live_dir: Path = LIVE_DIR, prices_fn=None,
              now: str | None = None) -> Path | None:
     """Build + write the ticket. Returns the path, or None (flagged) when no
     reconciliation snapshot exists — deltas from assumed holdings are exactly
@@ -60,11 +52,16 @@ def generate(target_weights: dict[str, float], event: dict, *,
         cfg.update(json.loads(cfg_path.read_text()))
 
     tickers = sorted(set(target_weights) | set(snap['positions']))
-    prices = {}
-    for t in tickers:
-        px = prices_fn(t)
-        if px:
-            prices[t] = px
+    if prices_fn is None:
+        # Default: one batched RH-first / yfinance-fallback fetch.
+        import price_source
+        prices = price_source.ref_prices(tickers)
+    else:
+        prices = {}
+        for t in tickers:
+            px = prices_fn(t)
+            if px:
+                prices[t] = px
     result = tt.compute_orders(target_weights, snap['positions'],
                                snap['cash'], prices, cfg)
     for u in result['untradeable']:

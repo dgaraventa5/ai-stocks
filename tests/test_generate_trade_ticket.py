@@ -65,6 +65,22 @@ def test_regenerated_ticket_is_a_new_file(live_dir):
     assert p1 != p2 and p1.exists() and p2.exists()   # append-only (B3)
 
 
+def test_default_price_path_is_price_source_batch(live_dir, monkeypatch):
+    """No prices_fn → one batched price_source.ref_prices call (RH-first,
+    yfinance fallback), not per-name yfinance."""
+    import price_source
+    calls = []
+
+    def fake_batch(tickers, transport=None):
+        calls.append(sorted(tickers))
+        return {t: 100.0 for t in tickers}
+    monkeypatch.setattr(price_source, 'ref_prices', fake_batch)
+    p = gt.generate({'NVDA': 0.5, 'TSM': 0.4}, EVENT, live_dir=live_dir,
+                    now='2026-08-13T21:30:00Z')
+    assert calls == [['NVDA', 'TSM']]
+    assert p is not None
+
+
 # ---- §B1 hook inside refresh_targets ----
 
 def _fired_refresh(monkeypatch, tmp_path, hook_calls, hook=None):
