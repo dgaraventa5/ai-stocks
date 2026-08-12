@@ -229,15 +229,14 @@ def test_mcp_order_params_are_strings():
     params = ex.mcp_order_params('123456789', {
         'ticker': 'ANET', 'side': 'buy', 'shares': 0.1785,
         'limit_price': 199.25, 'tif': 'day', 'notional_est': 35.30})
-    assert params['quantity'] == '0.1785'
-    assert params['limit_price'] == '199.25'
+    assert params['quantity'] == '0.1785'          # string, 4dp
     assert params['symbol'] == 'ANET' and params['side'] == 'buy'
     assert params['account_number'] == '123456789'
-    # trailing-zero shares keep 4dp precision, prices 2dp
+    # whole-share limit orders: price is a 2dp string
     p2 = ex.mcp_order_params('1', {'ticker': 'MSFT', 'side': 'buy',
-                                   'shares': 0.088, 'limit_price': 507.5,
-                                   'tif': 'day', 'notional_est': 44.0})
-    assert p2['quantity'] == '0.0880'
+                                   'shares': 3.0, 'limit_price': 507.5,
+                                   'tif': 'day', 'notional_est': 1522.5})
+    assert p2['quantity'] == '3.0000'
     assert p2['limit_price'] == '507.50'
 
 
@@ -269,3 +268,65 @@ def test_receipt_with_any_placed_order_still_refuses(tmp_path, live_dir):
     res = run(p, live_dir, transport=FakeTransport(quotes={'NVDA': 100.0}),
               confirm=True)
     assert_refused(res, 'already executed')
+
+
+# ---- 2026-08-12: fractional = market-only (Robinhood platform rule) ---------
+# place_equity_order schema: "Fractional shares: only on type=market with
+# market_hours=regular_hours". Fractional limit orders don't exist — the
+# limit stays in the ticket as the quote-sanity reference only.
+
+def test_mcp_params_fractional_is_market_regular_hours():
+    o = {'ticker': 'ANET', 'side': 'buy', 'shares': 0.1785,
+         'limit_price': 199.25, 'tif': 'day', 'notional_est': 35.30,
+         'ref_id': 'abc-123'}
+    params = ex.mcp_order_params('123456789', o)
+    assert params['type'] == 'market'
+    assert 'limit_price' not in params
+    assert params['market_hours'] == 'regular_hours'
+    assert params['quantity'] == '0.1785'
+    assert params['ref_id'] == 'abc-123'
+
+
+def test_mcp_params_whole_share_keeps_limit():
+    o = {'ticker': 'NVDA', 'side': 'buy', 'shares': 2.0,
+         'limit_price': 219.11, 'tif': 'day', 'notional_est': 438.22}
+    params = ex.mcp_order_params('123456789', o)
+    assert params['type'] == 'limit'
+    assert params['limit_price'] == '219.11'
+    assert params['quantity'] == '2.0000'
+
+
+def test_order_ref_id_deterministic_per_logical_order():
+    o = {'ticker': 'ANET', 'side': 'buy', 'shares': 0.1785}
+    a = ex.order_ref_id('2026-08-11-membership', o)
+    b = ex.order_ref_id('2026-08-11-membership', o)
+    c = ex.order_ref_id('2026-08-11-membership', {**o, 'ticker': 'AVGO'})
+    d = ex.order_ref_id('2026-08-12-membership', o)
+    assert a == b                       # same logical order -> same ref_id
+    assert len({a, c, d}) == 3          # ticker or ticket changes it
+    import uuid
+    uuid.UUID(a)                        # valid UUID string
+
+
+def test_fractional_outside_regular_hours_refused(tmp_path, live_dir):
+    orders = [{'ticker': 'NVDA', 'side': 'buy', 'shares': 0.5,
+               'limit_price': 100.75, 'tif': 'day', 'notional_est': 50.0}]
+    p = make_ticket(tmp_path, orders=orders)
+    t = FakeTransport(quotes={'NVDA': 100.0})
+    # 02:18 UTC = 10:18pm ET the prior evening — market closed
+    res = ex.run(p, live_dir=live_dir, roster={'NVDA'}, transport=t,
+                 now='2026-08-13T02:18:00Z', confirm=True)
+    assert_refused(res, 'regular market hours')
+    assert t.placed == []
+
+
+def test_fractional_inside_regular_hours_sends(tmp_path, live_dir):
+    orders = [{'ticker': 'NVDA', 'side': 'buy', 'shares': 0.5,
+               'limit_price': 100.75, 'tif': 'day', 'notional_est': 50.0}]
+    p = make_ticket(tmp_path, orders=orders)
+    t = FakeTransport(quotes={'NVDA': 100.0})
+    # NOW = 14:00 UTC Thu 2026-08-13 = 10:00am ET — market open
+    res = run(p, live_dir, transport=t, confirm=True)
+    assert res['sent'] is True
+    assert t.placed[0]['ref_id'] == ex.order_ref_id(
+        '2026-08-12-membership', t.placed[0])

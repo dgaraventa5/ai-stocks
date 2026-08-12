@@ -36,6 +36,14 @@ def _parse_iso(ts: str) -> dt.datetime:
     return dt.datetime.fromisoformat(ts.replace('Z', '+00:00'))
 
 
+def _in_regular_hours(now_iso: str) -> bool:
+    """9:30–16:00 ET, Mon–Fri (holidays not modeled — the broker's own
+    rejection covers those)."""
+    from zoneinfo import ZoneInfo
+    t = _parse_iso(now_iso).astimezone(ZoneInfo('America/New_York'))
+    return t.weekday() < 5 and (9, 30) <= (t.hour, t.minute) and t.hour < 16
+
+
 def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
              cash: float, equity: float, quotes: dict[str, float],
              receipt_path: Path, halt_path: Path, now: str,
@@ -80,6 +88,15 @@ def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
         else:   # placed, partial, empty, or unreadable: fail closed
             fails.append(f'already executed — receipt exists: '
                          f'{receipt_path.name}')
+
+    # Fractional orders transmit as market-type (no fractional limit orders
+    # on Robinhood) and are accepted only in regular hours — refuse rather
+    # than let the broker bounce them one by one.
+    if (any(o['shares'] % 1 != 0 for o in orders)
+            and not _in_regular_hours(now)):
+        fails.append('fractional orders are market-type and accepted only '
+                     'during regular market hours (9:30–16:00 ET Mon–Fri) — '
+                     're-run while the market is open')
 
     # C2.4 — kill switch
     if halt_path.exists():
@@ -167,6 +184,7 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
 
     results = []
     for o in ticket['orders']:
+        o = {**o, 'ref_id': order_ref_id(ticket['ticket_id'], o)}
         try:
             r = transport.place_equity_order(o)
             results.append({**o, 'order_id': r.get('order_id'),
@@ -187,18 +205,37 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
     return {'failures': [], 'sent': True, 'receipt': receipt_path}
 
 
+def order_ref_id(ticket_id: str, order: dict) -> str:
+    """Deterministic idempotency key: same ticket + same logical order ->
+    same UUID, so a retry after a transport failure can never double-place
+    (the upstream deduplicates by ref_id)."""
+    import uuid
+    return str(uuid.uuid5(uuid.NAMESPACE_URL,
+                          f'ai-stocks:{ticket_id}:{order["ticker"]}:'
+                          f'{order["side"]}:{order["shares"]:.4f}'))
+
+
 def mcp_order_params(account_number: str, order: dict) -> dict:
-    """Robinhood MCP place_equity_order arguments. The tool schema types
-    quantity and limit_price as STRINGS — JSON numbers are rejected with
-    -32602 before any order is created (all 10 orders of the 2026-08-11
-    ticket bounced on this). Shares carry the ticket's 4dp, prices 2dp."""
-    return {
+    """Robinhood MCP place_equity_order arguments. Schema constraints
+    (discovered 2026-08-11/12, both bounced the first live ticket):
+    - quantity/limit_price are STRINGS; JSON numbers fail -32602.
+    - Fractional shares exist ONLY as type=market + regular_hours; there is
+      no fractional limit order. The ticket's limit price stays behind as
+      the quote-sanity reference; whole-share orders keep real limits."""
+    fractional = order['shares'] % 1 != 0
+    params = {
         'account_number': account_number,
         'symbol': order['ticker'], 'side': order['side'],
-        'quantity': f"{order['shares']:.4f}", 'type': 'limit',
-        'limit_price': f"{order['limit_price']:.2f}",
+        'quantity': f"{order['shares']:.4f}",
+        'type': 'market' if fractional else 'limit',
         'time_in_force': 'gfd',
+        'market_hours': 'regular_hours',
     }
+    if not fractional:
+        params['limit_price'] = f"{order['limit_price']:.2f}"
+    if order.get('ref_id'):
+        params['ref_id'] = order['ref_id']
+    return params
 
 
 # ------------------------------------------------- live transport (Phase 2)
@@ -297,7 +334,14 @@ class RobinhoodTransport:
             raise RuntimeError(payload['error'])
         content = payload['result'].get('content', [])
         text = next((c['text'] for c in content if c.get('type') == 'text'), '{}')
-        return json.loads(text)
+        try:
+            return json.loads(text)
+        except ValueError:
+            # Surface WHAT came back — the 2026-08-12 re-run failed with a
+            # bare 'Expecting value: char 0' that hid the server's response.
+            raise RuntimeError(
+                f'{tool}: unparseable result text {text[:300]!r} '
+                f'(full payload keys: {sorted(payload["result"])})')
 
     def account_number(self) -> str:
         if self._account is None:
