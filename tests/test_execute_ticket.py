@@ -218,3 +218,54 @@ def test_partial_transmit_failure_recorded_in_receipt(tmp_path, live_dir):
     states = {o['ticker']: o['state'] for o in receipt['orders']}
     assert states['NVDA'] == 'queued'
     assert states['TSM'] == 'transmit_error'     # flagged, not silently dropped
+
+
+# ---- 2026-08-12: MCP param typing + failed-transmit re-run ------------------
+# The 2026-08-11 ticket had all 10 orders bounce at the MCP schema (-32602:
+# quantity/limit_price sent as JSON numbers, schema wants strings). Nothing
+# was placed, but the receipt then blocked the legitimate re-run.
+
+def test_mcp_order_params_are_strings():
+    params = ex.mcp_order_params('123456789', {
+        'ticker': 'ANET', 'side': 'buy', 'shares': 0.1785,
+        'limit_price': 199.25, 'tif': 'day', 'notional_est': 35.30})
+    assert params['quantity'] == '0.1785'
+    assert params['limit_price'] == '199.25'
+    assert params['symbol'] == 'ANET' and params['side'] == 'buy'
+    assert params['account_number'] == '123456789'
+    # trailing-zero shares keep 4dp precision, prices 2dp
+    p2 = ex.mcp_order_params('1', {'ticker': 'MSFT', 'side': 'buy',
+                                   'shares': 0.088, 'limit_price': 507.5,
+                                   'tif': 'day', 'notional_est': 44.0})
+    assert p2['quantity'] == '0.0880'
+    assert p2['limit_price'] == '507.50'
+
+
+def test_all_failed_receipt_allows_rerun_and_archives(tmp_path, live_dir):
+    p = make_ticket(tmp_path)
+    rp = live_dir / 'receipts' / 'receipt-2026-08-12-membership.json'
+    rp.write_text(json.dumps({
+        'ticket_id': '2026-08-12-membership', 'sent_at': '2026-08-13T02:00:00Z',
+        'checksum': 'x', 'orders': [
+            {'ticker': 'NVDA', 'side': 'buy', 'shares': 1.0, 'state':
+             'transmit_error', 'order_id': None, 'error': 'invalid params'}]}))
+    t = FakeTransport(quotes={'NVDA': 100.0})
+    res = run(p, live_dir, transport=t, confirm=True)
+    assert res['sent'] is True and len(t.placed) == 1
+    assert json.loads(rp.read_text())['orders'][0]['state'] == 'queued'
+    superseded = list((live_dir / 'receipts').glob('*superseded*'))
+    assert len(superseded) == 1        # failed attempt archived, not erased
+
+
+def test_receipt_with_any_placed_order_still_refuses(tmp_path, live_dir):
+    p = make_ticket(tmp_path)
+    rp = live_dir / 'receipts' / 'receipt-2026-08-12-membership.json'
+    rp.write_text(json.dumps({
+        'ticket_id': '2026-08-12-membership', 'sent_at': '2026-08-13T02:00:00Z',
+        'checksum': 'x', 'orders': [
+            {'ticker': 'NVDA', 'state': 'queued', 'order_id': 'rh-1'},
+            {'ticker': 'TSM', 'state': 'transmit_error', 'order_id': None,
+             'error': 'boom'}]}))
+    res = run(p, live_dir, transport=FakeTransport(quotes={'NVDA': 100.0}),
+              confirm=True)
+    assert_refused(res, 'already executed')
