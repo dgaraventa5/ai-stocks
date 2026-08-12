@@ -330,3 +330,51 @@ def test_fractional_inside_regular_hours_sends(tmp_path, live_dir):
     assert res['sent'] is True
     assert t.placed[0]['ref_id'] == ex.order_ref_id(
         '2026-08-12-membership', t.placed[0])
+
+
+# ---- 2026-08-12: order-ack extraction (receipt lost broker order ids) -------
+# The 2026-08-12-manual receipt recorded order_id=None/state='submitted' for
+# 10 orders that all reached Robinhood and filled: the ack was nested deeper
+# than the d.get('id') lookup expected. The extractor now walks the payload;
+# if nothing order-shaped is found, the raw response is preserved in the
+# receipt so the true shape is never lost again.
+
+def test_extract_order_ack_top_level():
+    ack = ex.extract_order_ack({'id': 'abc', 'state': 'queued'})
+    assert ack['id'] == 'abc' and ack['state'] == 'queued'
+
+
+def test_extract_order_ack_nested_under_data_order():
+    r = {'data': {'order': {'id': '6a7c-1', 'state': 'confirmed',
+                            'symbol': 'NVDA'}}, 'guide': 'ignore me'}
+    ack = ex.extract_order_ack(r)
+    assert ack['id'] == '6a7c-1' and ack['state'] == 'confirmed'
+
+
+def test_extract_order_ack_nested_in_list():
+    r = {'data': {'results': [{'order': {'order_id': 'x-9',
+                                         'state': 'filled'}}]}}
+    ack = ex.extract_order_ack(r)
+    assert ack['order_id'] == 'x-9' and ack['state'] == 'filled'
+
+
+def test_extract_order_ack_absent_returns_empty():
+    assert ex.extract_order_ack({'data': {'message': 'ok'}}) == {}
+    assert ex.extract_order_ack({}) == {}
+
+
+def test_receipt_preserves_raw_response_when_ack_missing(tmp_path, live_dir):
+    class OpaqueTransport(FakeTransport):
+        def place_equity_order(self, order):
+            self.placed.append(order)
+            return {'order_id': None, 'state': 'submitted',
+                    'raw_response': {'data': {'message': 'accepted'}}}
+
+    p = make_ticket(tmp_path)
+    t = OpaqueTransport(quotes={'NVDA': 100.0})
+    res = run(p, live_dir, transport=t, confirm=True)
+    assert res['sent'] is True
+    receipt = json.loads(
+        (live_dir / 'receipts' / 'receipt-2026-08-12-membership.json').read_text())
+    assert receipt['orders'][0]['raw_response'] == {
+        'data': {'message': 'accepted'}}

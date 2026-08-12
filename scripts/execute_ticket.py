@@ -188,7 +188,9 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
         try:
             r = transport.place_equity_order(o)
             results.append({**o, 'order_id': r.get('order_id'),
-                            'state': r.get('state', 'submitted')})
+                            'state': r.get('state', 'submitted'),
+                            **({'raw_response': r['raw_response']}
+                               if 'raw_response' in r else {})})
         except Exception as e:   # record, never silently drop (rule 3)
             results.append({**o, 'order_id': None, 'state': 'transmit_error',
                             'error': str(e)})
@@ -203,6 +205,31 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
     receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
     print(f'receipt written: {receipt_path}')
     return {'failures': [], 'sent': True, 'receipt': receipt_path}
+
+
+def extract_order_ack(payload) -> dict:
+    """Find the order acknowledgement in a place_equity_order response.
+
+    The 2026-08-12 execution proved the ack is nested deeper than a top-level
+    d['id'] (all 10 receipts recorded order_id=None while the orders filled).
+    Walk the payload for the first dict that looks order-shaped — has a state
+    plus an id/order_id — wherever the server nests it. Returns {} when
+    nothing matches; the caller then preserves the raw response instead."""
+    def walk(node):
+        if isinstance(node, dict):
+            if 'state' in node and ('id' in node or 'order_id' in node):
+                return node
+            for v in node.values():
+                hit = walk(v)
+                if hit is not None:
+                    return hit
+        elif isinstance(node, list):
+            for v in node:
+                hit = walk(v)
+                if hit is not None:
+                    return hit
+        return None
+    return walk(payload) or {}
 
 
 def order_ref_id(ticket_id: str, order: dict) -> str:
@@ -387,9 +414,12 @@ class RobinhoodTransport:
     def place_equity_order(self, order: dict) -> dict:
         r = self._call('place_equity_order',     # THE only order-tool call site
                        mcp_order_params(self.account_number(), order))
-        d = r.get('data', r)
-        return {'order_id': d.get('id') or d.get('order_id'),
-                'state': d.get('state', 'submitted')}
+        ack = extract_order_ack(r)
+        out = {'order_id': ack.get('id') or ack.get('order_id'),
+               'state': ack.get('state', 'submitted')}
+        if not ack:   # unknown shape: keep the evidence in the receipt
+            out['raw_response'] = r
+        return out
 
 
 def _load_roster() -> set[str]:
