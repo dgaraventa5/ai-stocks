@@ -62,7 +62,24 @@ def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
         fails.append(f'ticket expired at {ticket["expires_at"]} '
                      f'(stale market context — regenerate)')
     if receipt_path.exists():
-        fails.append(f'already executed — receipt exists: {receipt_path.name}')
+        # Executed-once guard — but a receipt where EVERY order died at
+        # transmit (schema rejection, transport down) means nothing reached
+        # the broker, so the re-run is legitimate (2026-08-11: all 10 orders
+        # bounced on MCP param typing and the receipt then blocked the fix).
+        # Any order without a transmit_error state may exist broker-side:
+        # refuse — double-execution risk beats convenience.
+        try:
+            prior_orders = json.loads(receipt_path.read_text()).get('orders')
+        except ValueError:
+            prior_orders = None
+        all_failed = bool(prior_orders) and all(
+            o.get('state') == 'transmit_error' for o in prior_orders)
+        if all_failed:
+            print(f're-run allowed: prior receipt {receipt_path.name} shows '
+                  f'all orders transmit_error (nothing was placed)')
+        else:   # placed, partial, empty, or unreadable: fail closed
+            fails.append(f'already executed — receipt exists: '
+                         f'{receipt_path.name}')
 
     # C2.4 — kill switch
     if halt_path.exists():
@@ -161,9 +178,27 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
     receipt = {'ticket_id': ticket['ticket_id'], 'sent_at': now,
                'checksum': ticket['checksum'], 'orders': results}
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    if receipt_path.exists():   # all-transmit_error re-run: archive, don't erase
+        stamp = now.replace(':', '').replace('-', '')[:15]
+        receipt_path.rename(receipt_path.with_name(
+            f'{receipt_path.stem}.superseded-{stamp}.json'))
     receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
     print(f'receipt written: {receipt_path}')
     return {'failures': [], 'sent': True, 'receipt': receipt_path}
+
+
+def mcp_order_params(account_number: str, order: dict) -> dict:
+    """Robinhood MCP place_equity_order arguments. The tool schema types
+    quantity and limit_price as STRINGS — JSON numbers are rejected with
+    -32602 before any order is created (all 10 orders of the 2026-08-11
+    ticket bounced on this). Shares carry the ticket's 4dp, prices 2dp."""
+    return {
+        'account_number': account_number,
+        'symbol': order['ticker'], 'side': order['side'],
+        'quantity': f"{order['shares']:.4f}", 'type': 'limit',
+        'limit_price': f"{order['limit_price']:.2f}",
+        'time_in_force': 'gfd',
+    }
 
 
 # ------------------------------------------------- live transport (Phase 2)
@@ -306,13 +341,8 @@ class RobinhoodTransport:
                  'state': o.get('state')} for o in d.get('orders', [])]
 
     def place_equity_order(self, order: dict) -> dict:
-        r = self._call('place_equity_order', {   # THE only order-tool call site
-            'account_number': self.account_number(),
-            'symbol': order['ticker'], 'side': order['side'],
-            'quantity': order['shares'], 'type': 'limit',
-            'limit_price': order['limit_price'],
-            'time_in_force': 'gfd',
-        })
+        r = self._call('place_equity_order',     # THE only order-tool call site
+                       mcp_order_params(self.account_number(), order))
         d = r.get('data', r)
         return {'order_id': d.get('id') or d.get('order_id'),
                 'state': d.get('state', 'submitted')}
