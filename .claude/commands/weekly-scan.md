@@ -76,6 +76,14 @@ Run the weekly news scan per CLAUDE.md.
    ```
    Report newly **resolved** outcomes (id, outcome, the cited evidence string), anything routed to **needs_review** (needs a human-confirmed resolution), and the running **void/needs_review rate** (a high rate means the resolution rules are too vague — fix the rules, don't fudge the grades). Resolution only appends a new snapshot to `tracking/forecasts.jsonl`; it never edits a prior line.
 
+10. **Live-pipeline health (rule #29, added 2026-08-09; ATTENDED SESSIONS ONLY — headless MCP OAuth fails, O1).** Skip silently in cloud/headless runs.
+
+   a. Heartbeat: `python3 scripts/executor_cron.py --heartbeat-check` — report any stale pipeline jobs (series/recon/execute/ticket_gen with no successful run in >3 days). A stale heartbeat means the launchd runner is silently dead; that's a prominent flag, not a footnote.
+
+   b. Reconcile: pull account state via the Robinhood MCP **read tools** (portfolio, positions, orders), write it to a scratchpad JSON, and run `python3 scripts/reconcile_account.py --account-json <path>`. Report: halt status (if `tracking/live/trading-halt.flag` exists, surface its contents FIRST), drift flags, fills since last week, and any `regen_needed` names (dead unfilled orders → regenerate the ticket on the next model event).
+
+   c. Never call MCP order tools in this or any step. Execution is `execute_ticket.py`, run by Dom or his launchd schedule only.
+
 ## Output
 
 Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
@@ -84,6 +92,7 @@ Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **💼 Portfolio pipeline** (ENTER/EXIT/pending/blocked changes; tier-change reallocations for existing holdings with old→new Target %; weekly mark vs benchmarks; any concentration flags)
 - **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
 - **🎯 Calibration** (newly resolved forecasts + needs_review items from Step 9; only if any)
+- **🔴 Live pipeline** (halt flag contents if raised; stale heartbeats; drift/regen flags from Step 10; only in attended runs)
 - **Routine filings** (one-line each: ticker, filing type, generic descriptor)
 - **New 13F activity** (only if any)
 

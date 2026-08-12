@@ -31,6 +31,11 @@ site/data/
 # Wrangler local dev cache
 .wrangler/
 
+# Live-trading privacy boundary (agentic-execution spec §E, CLAUDE.md rule 29):
+# tickets, receipts, recon snapshots, executor config — real dollars, share
+# counts, account numbers, order IDs. NEVER commit anything under here.
+tracking/live/
+
 # Generated chart artifacts (backtest / perf-vs-benchmarks PNGs) — regenerable,
 # not source of truth; the series JSON + site exporter are.
 tracking/*.png
