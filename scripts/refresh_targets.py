@@ -46,8 +46,9 @@ from openpyxl.styles import Font, PatternFill
 from common import flag
 from portfolio_model import (current_weights, load_cfg, load_pcfg,
                              log_rebalance, save_cfg)
-from portfolio_sizing import (build_reason, rank_by_score, tier_changes,
-                              topn_membership, weights_score_monotonic)
+from portfolio_sizing import (build_reason, is_tradable, rank_by_score,
+                              tier_changes, topn_membership,
+                              weights_score_monotonic)
 from position_sizing import drift_band_filter, inverse_vol_weights
 from recalc_watchlist import recalc
 
@@ -297,8 +298,19 @@ def refresh(dry_run: bool = False, resize: bool = False,
         from score_history import append_snapshot
         append_snapshot(live)
 
-    # ---- selection form (v2 spec B1): score thresholds or top-N ranks ----
+    # ---- tradability filter (spec 2026-08-11): selection ranks over the
+    # buyable universe only; info/layers/score-panel stay full-universe.
     pcfg = load_pcfg()
+    tradable_only = bool(pcfg['selection'].get('tradable_only'))
+    sel_live = ([x for x in live if is_tradable(x['ticker'])]
+                if tradable_only else live)
+    untradable = ({t for t in info if not is_tradable(t)}
+                  if tradable_only else set())
+    for _t, _v in overrides.items():
+        if _v == 'INCLUDE' and _t in untradable:
+            flag(f'{_t}: Override=INCLUDE but untradable — filter wins, stays out')
+
+    # ---- selection form (v2 spec B1): score thresholds or top-N ranks ----
     sel_mode = pcfg['selection']['mode']
     if sel_mode == 'rank':
         # Top-N with hysteresis: outsiders ENTER at rank <= N, incumbents HOLD
@@ -307,22 +319,23 @@ def refresh(dry_run: bool = False, resize: bool = False,
         # plan Task 5): below-M starts the clock, the next run confirms.
         entry_rank = int(p.get('Entry rank', 15))
         exit_rank = int(p.get('Exit rank', 18))
-        ranked = rank_by_score(live, prior_include)
+        ranked = rank_by_score(sel_live, prior_include)
         rank = {t: i + 1 for i, t in enumerate(ranked)}   # incumbency tie-break
         order = ranked
         keeps = lambda t: t in rank and rank[t] <= exit_rank
         enters = lambda t: rank[t] <= entry_rank
         why = lambda t: f'rank {rank[t]}, score {info[t]["TOTAL"]:.1f}'
         below = lambda t: f'rank {rank.get(t, "?")} > exit rank {exit_rank}'
-        in_play = {t for t in info if rank[t] <= exit_rank}
+        in_play = {t for t in rank if rank[t] <= exit_rank}
     else:
-        rank = {x['ticker']: i + 1 for i, x in enumerate(live)}
-        order = [x['ticker'] for x in live]
+        rank = {x['ticker']: i + 1 for i, x in enumerate(sel_live)}
+        order = [x['ticker'] for x in sel_live]
         keeps = lambda t: t in info and info[t]['TOTAL'] >= exit_score
         enters = lambda t: info[t]['TOTAL'] >= entry_score
         why = lambda t: f'score {info[t]["TOTAL"]:.1f}'
         below = lambda t: f'score {info[t]["TOTAL"]:.1f} < {exit_score}'
-        in_play = {t for t in info if info[t]['TOTAL'] >= exit_score}
+        in_play = {x['ticker'] for x in sel_live
+                   if x['TOTAL'] >= exit_score}
 
     # ---- freshness gate on every name that could end up included ----
     candidates = sorted(
@@ -343,8 +356,13 @@ def refresh(dry_run: bool = False, resize: bool = False,
     statuses: dict[str, str] = {}
     new_pending: dict[str, str] = {}    # next state of the exit-pending clock
     for t in prior_include:
-        if t in dead or overrides.get(t) == 'EXCLUDE':
-            statuses[t] = 'EXIT (dead/override)'
+        if t in dead or overrides.get(t) == 'EXCLUDE' or t in untradable:
+            # Untradable is a constraint, not a signal — it can't mean-revert
+            # next refresh, so it skips the 2-run confirm clock (CTRA precedent).
+            statuses[t] = ('EXIT (untradable)' if t in untradable
+                           else 'EXIT (dead/override)')
+            if t in untradable:
+                flag(f'{t}: held but untradable on US brokerages — EXIT')
             continue
         if keeps(t):
             include.append(t)
@@ -366,7 +384,7 @@ def refresh(dry_run: bool = False, resize: bool = False,
             statuses[t] = f'EXIT PENDING ({below(t)}, since {new_pending[t]})'
             flag(f'{t}: {below(t)} — EXIT PENDING, confirms next refresh')
     for t in order:
-        if t in include or t in statuses or t in dead:
+        if t in include or t in statuses or t in dead or t in untradable:
             continue
         if overrides.get(t) == 'EXCLUDE':
             if enters(t):
@@ -480,7 +498,7 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # ---- band shadow roster upkeep (v2 spec C1): every real run, frozen or
     # not — the scouts track today's ranks regardless of the book.
     shadows_changed = False if dry_run else _update_band_shadows(
-        cfg, live, pcfg, today)
+        cfg, sel_live, pcfg, today)
 
     if dry_run:
         print(f'\n{"Tkr":<7}{"Rank":>5}{"Score":>7}{"Status":<34}{"Wt %":>6}')
@@ -532,7 +550,7 @@ def refresh(dry_run: bool = False, resize: bool = False,
         if x['TOTAL'] < 55 and t not in include and t not in overrides:
             continue   # keep the sheet to ✓-and-better plus anything tracked
         targets.append([
-            t, x['layer'], round(x['TOTAL'], 2), x['Tier'], rank[t],
+            t, x['layer'], round(x['TOTAL'], 2), x['Tier'], rank.get(t),
             statuses.get(t, ''), 'Y' if t in include else 'N',
             overrides.get(t, ''), round(weights.get(t, 0) * 100, 2) or None,
             notes.get(t, ''),

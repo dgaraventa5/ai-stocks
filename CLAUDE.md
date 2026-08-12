@@ -583,6 +583,25 @@ holdings); no snapshot → loud refusal, no ticket. Anomaly recon auto-raises th
 halt flag (unknown-provenance position, negative cash, unexplained equity move)
 — the halt stops future executions, it never sells.
 
+### 30. Tradability filter: foreign listings can't enter the portfolio (added 2026-08-11, approved by Dom)
+
+**Context:** 6861.T (Keyence) entered the model at rank 12 / 8.61% — a weight the
+execution pipeline can never fill (Robinhood/Fidelity trade US listings only).
+19 foreign local lines (rule 27 tickers) shared the selection universe.
+
+**Rule:** `selection.tradable_only: true` in `tracking/portfolio-config.json`.
+A ticker is untradable iff it contains an exchange-suffix dot
+(`portfolio_sizing.is_tradable`). When on: selection entry/exit ranks are
+computed over the tradable universe only; a held untradable name exits
+**immediately** via the dead/delisted branch (a constraint is not a signal — no
+2-run clock); BAND_TOP/NEXT/TAIL rosters rank the same filtered universe
+(forward-only seam, 2026-08-11). **Unchanged by design:** Watchlist membership
+and all scoring (rule-24 cohorts intact — do NOT remove foreign names from the
+Watchlist; that would shift the survivors' percentile scores), the full-universe
+`score-history.csv` panel, and the site. Flag off (or absent) reproduces
+pre-2026-08-11 behavior exactly. Spec:
+`docs/superpowers/specs/2026-08-11-tradability-filter-design.md`.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

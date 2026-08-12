@@ -548,3 +548,73 @@ def test_offline_gate_stays_networkless_in_invvol_mode(monkeypatch, tmp_path):
     monkeypatch.setattr(rt, '_price_frame', boom)
     assert rt.pending_rebalance(portfolio=str(path)) is False
     assert 'sizing_state' not in cfg and saves == []
+
+
+# ---- tradability filter (spec 2026-08-11) ----------------------------------
+
+def _tradability_pcfg():
+    p = _rank_pcfg()
+    p['selection']['tradable_only'] = True
+    return p
+
+
+def _mixed_live():
+    """Ranks 1-17 with a foreign name at raw rank 3 and one at 16."""
+    tickers = ['T01', 'T02', '6861.T', 'T04', 'T05', 'T06', 'T07', 'T08',
+               'T09', 'T10', 'T11', 'T12', 'T13', 'T14', 'T15', '6268.T', 'T17']
+    return [{'ticker': t, 'layer': '11 Robotics', 'TOTAL': 90.0 - i,
+             'Tier': '✓✓'} for i, t in enumerate(tickers)]
+
+
+def test_tradable_only_blocks_foreign_entry_and_exits_held(monkeypatch, tmp_path):
+    """Held 6861.T exits IMMEDIATELY (no pending clock); foreign outsiders
+    never enter; tradable names below them shift up into the entry band."""
+    path = tmp_path / 'portfolio.xlsx'
+    prior = ['T01', 'T02', '6861.T', 'T04', 'T05', 'T06', 'T07', 'T08',
+             'T09', 'T10', 'T11', 'T12', 'T13', 'T14']
+    _build_portfolio(path, [(t, '11 Robotics', 90.0, '✓✓') for t in prior])
+    calls, _saves = _mock_env(monkeypatch, _mixed_live(), _rank_cfg(prior))
+    monkeypatch.setattr(rt, 'load_pcfg', _tradability_pcfg)
+
+    rep = rt.refresh(portfolio=str(path))
+
+    assert '6861.T' in rep['exited']                 # immediate, this run
+    assert rep['pending'] == {}                      # never on the clock
+    assert 'T15' in rep['entered']                   # shifted into rank<=15
+    assert '6268.T' not in rep['entered']
+    assert len(calls) == 1 and calls[0]['kind'] == 'membership'
+    assert '6861.T' not in calls[0]['weights']
+    tg = openpyxl.load_workbook(path)['Targets']
+    rows = {r[0]: r for r in tg.iter_rows(min_row=3, values_only=True) if r[0]}
+    assert rows['6861.T'][6] == 'N'
+    assert 'untradable' in str(rows['6861.T'][5])    # Status column
+
+
+def test_tradable_only_off_keeps_foreign(monkeypatch, tmp_path):
+    """Flag off (default): foreign names rank and hold exactly as before."""
+    path = tmp_path / 'portfolio.xlsx'
+    prior = ['T01', 'T02', '6861.T', 'T04', 'T05', 'T06', 'T07', 'T08',
+             'T09', 'T10', 'T11', 'T12', 'T13', 'T14']
+    _build_portfolio(path, [(t, '11 Robotics', 90.0, '✓✓') for t in prior])
+    calls, _saves = _mock_env(monkeypatch, _mixed_live(), _rank_cfg(prior))
+    monkeypatch.setattr(rt, 'load_pcfg', _rank_pcfg)   # no tradable_only key
+
+    rep = rt.refresh(portfolio=str(path))
+
+    assert rep['exited'] == []
+    assert '6861.T' not in rep.get('pending', {})
+
+
+def test_band_shadows_exclude_untradable(monkeypatch, tmp_path):
+    path = tmp_path / 'portfolio.xlsx'
+    prior = ['T01', 'T02', 'T04', 'T05']
+    _build_portfolio(path, [(t, '11 Robotics', 90.0, '✓✓') for t in prior])
+    cfg = _rank_cfg(prior)
+    _mock_env(monkeypatch, _mixed_live(), cfg)
+    monkeypatch.setattr(rt, 'load_pcfg', _tradability_pcfg)
+
+    rt.refresh(portfolio=str(path))
+
+    rosters = [e['roster'] for evs in cfg['shadow_events'].values() for e in evs]
+    assert all('.' not in t for r in rosters for t in r)
+    assert 'T15' in cfg['shadow_events']['BAND_TOP'][-1]['roster']

@@ -66,3 +66,23 @@ def test_targets_weights_monotonic():
             and r[2] is not None and r[8] is not None]
     assert rows, 'no included Targets rows found'
     assert weights_score_monotonic(rows) == []
+
+
+# ---- tradability filter (spec 2026-08-11) ----------------------------------
+
+def test_is_tradable_us_listings():
+    from portfolio_sizing import is_tradable
+    assert all(is_tradable(t) for t in ('NVDA', 'BRK-B', 'TSM', 'MELI'))
+
+
+def test_is_tradable_rejects_exchange_suffixes():
+    from portfolio_sizing import is_tradable
+    foreign = ('6861.T', '6268.T', 'KGX.DE', '0981.HK', '5347.TWO',
+               'AUTO.OL', 'MELE.BR', 'DRO.AX', '2049.TW')
+    assert not any(is_tradable(t) for t in foreign)
+
+
+def test_pcfg_defaults_tradable_only_false(monkeypatch, tmp_path):
+    import portfolio_model as pm
+    monkeypatch.setattr(pm, 'PCONFIG', tmp_path / 'missing.json')
+    assert pm.load_pcfg()['selection']['tradable_only'] is False

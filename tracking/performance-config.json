@@ -470,6 +470,46 @@
         "ALAB": "\u2713\u2713"
       },
       "cash": -0.0
+    },
+    {
+      "date": "2026-08-11",
+      "reason": "membership: -6861.T",
+      "kind": "membership",
+      "allocations": {
+        "NVDA": 1043.98,
+        "MSFT": 904.45,
+        "EME": 773.46,
+        "RDDT": 493.97,
+        "GMED": 1016.65,
+        "MU": 377.81,
+        "ANET": 720.45,
+        "FIX": 683.91,
+        "TSM": 857.99,
+        "SNDK": 310.29,
+        "META": 908.42,
+        "ALAB": 352.43,
+        "CRDO": 405.72,
+        "AVGO": 791.92,
+        "VRT": 561.94
+      },
+      "tiers": {
+        "NVDA": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "RDDT": "\u2713\u2713",
+        "GMED": "\u2713\u2713",
+        "MU": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "FIX": "\u2713\u2713",
+        "TSM": "\u2713\u2713",
+        "SNDK": "\u2713\u2713",
+        "META": "\u2713\u2713",
+        "ALAB": "\u2713\u2713",
+        "CRDO": "\u2713\u2713",
+        "AVGO": "\u2713\u2713",
+        "VRT": "\u2713\u2713"
+      },
+      "cash": -0.0
     }
   ],
   "exit_pending": {},
@@ -494,6 +534,26 @@
           "RDDT",
           "ALAB"
         ]
+      },
+      {
+        "date": "2026-08-11",
+        "roster": [
+          "NVDA",
+          "FIX",
+          "TSM",
+          "MU",
+          "CRDO",
+          "SNDK",
+          "ANET",
+          "MSFT",
+          "AVGO",
+          "GMED",
+          "EME",
+          "VRT",
+          "RDDT",
+          "ALAB",
+          "META"
+        ]
       }
     ],
     "BAND_NEXT": [
@@ -510,6 +570,21 @@
           "VST",
           "ISRG",
           "CGNX"
+        ]
+      },
+      {
+        "date": "2026-08-11",
+        "roster": [
+          "AMZN",
+          "APP",
+          "GOOGL",
+          "TER",
+          "APH",
+          "WDC",
+          "VST",
+          "ISRG",
+          "CGNX",
+          "EQT"
         ]
       }
     ],
@@ -532,6 +607,26 @@
           "GLW",
           "DELL",
           "HTHIY"
+        ]
+      },
+      {
+        "date": "2026-08-11",
+        "roster": [
+          "PLTR",
+          "KEYS",
+          "NTAP",
+          "AR",
+          "CIEN",
+          "FN",
+          "ARM",
+          "ORCL",
+          "HSAI",
+          "GLW",
+          "DELL",
+          "HTHIY",
+          "RMBS",
+          "AMD",
+          "CSCO"
         ]
       }
     ]
