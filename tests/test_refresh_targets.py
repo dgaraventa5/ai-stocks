@@ -603,3 +603,18 @@ def test_tradable_only_off_keeps_foreign(monkeypatch, tmp_path):
 
     assert rep['exited'] == []
     assert '6861.T' not in rep.get('pending', {})
+
+
+def test_band_shadows_exclude_untradable(monkeypatch, tmp_path):
+    path = tmp_path / 'portfolio.xlsx'
+    prior = ['T01', 'T02', 'T04', 'T05']
+    _build_portfolio(path, [(t, '11 Robotics', 90.0, '✓✓') for t in prior])
+    cfg = _rank_cfg(prior)
+    _mock_env(monkeypatch, _mixed_live(), cfg)
+    monkeypatch.setattr(rt, 'load_pcfg', _tradability_pcfg)
+
+    rt.refresh(portfolio=str(path))
+
+    rosters = [e['roster'] for evs in cfg['shadow_events'].values() for e in evs]
+    assert all('.' not in t for r in rosters for t in r)
+    assert 'T15' in cfg['shadow_events']['BAND_TOP'][-1]['roster']

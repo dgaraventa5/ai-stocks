@@ -498,7 +498,7 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # ---- band shadow roster upkeep (v2 spec C1): every real run, frozen or
     # not — the scouts track today's ranks regardless of the book.
     shadows_changed = False if dry_run else _update_band_shadows(
-        cfg, live, pcfg, today)
+        cfg, sel_live, pcfg, today)
 
     if dry_run:
         print(f'\n{"Tkr":<7}{"Rank":>5}{"Score":>7}{"Status":<34}{"Wt %":>6}')
