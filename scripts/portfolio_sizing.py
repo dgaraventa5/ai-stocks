@@ -77,3 +77,10 @@ def weights_score_monotonic(rows, tol=1e-4):
         if w_lo > w_hi + tol:
             viol.append((s_hi, w_hi, s_lo, w_lo))
     return viol
+
+
+def is_tradable(ticker: str) -> bool:
+    """US-brokerage tradability (spec 2026-08-11): foreign local lines carry
+    an exchange-suffix dot (6861.T, KGX.DE, 0981.HK); US listings never do.
+    Deterministic and offline by design — no per-name list, no API."""
+    return '.' not in ticker
