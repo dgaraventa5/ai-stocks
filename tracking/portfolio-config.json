@@ -9,7 +9,8 @@
     "drift_band": 0.25
   },
   "selection": {
-    "mode": "rank"
+    "mode": "rank",
+    "tradable_only": true
   },
   "shadows": {
     "top": 15,
