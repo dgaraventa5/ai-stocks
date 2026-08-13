@@ -1652,7 +1652,10 @@ Include these exact steps in the hand-back report:
 4. Create an API token (Dashboard → My Profile → API Tokens → "Edit Cloudflare Workers" template, scoped to the account) and add GitHub repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (account ID is on the dashboard right sidebar).
 5. Merge this branch to `main` (the deploy workflow only triggers there); first deploy can also be run manually: `python3 scripts/export_site_data.py && npx wrangler pages deploy site --project-name=ai-supply-chain`.
 6. Paste the routine instruction line from Task 8 Step 4 into the Cowork "Weekly scanner" routine.
-7. Share `https://ai-supply-chain.pages.dev` + the password with friends.
+7. Share `https://ai-supply-chain-eki.pages.dev` + the password with friends.
+   (NOT `ai-supply-chain.pages.dev` — that plain name was taken by an
+   unrelated public project; Cloudflare assigned the `-eki` suffix at deploy.
+   Verified against the deploy-site.yml wrangler logs, 2026-08-12.)
 
 ---
 
