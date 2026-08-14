@@ -353,3 +353,115 @@ def test_module_imports_without_yfinance():
     r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
                        cwd=str(repo_root))
     assert r.returncode == 0, f"import-without-yfinance failed:\n{r.stderr}"
+
+
+# ---------------------------------------------------------------------------
+# Dry-run preview: a dry run must report what a live run WOULD change.
+# Regression for the 2026-08-13 earnings-sentinel finding — `touched` was
+# computed only inside `if not dry_run:`, so --dry-run always reported an
+# empty list and the step-4 review gate could not see a tier-moving change.
+# ---------------------------------------------------------------------------
+
+def _preview_scoring(tmp_path, name="scoring.xlsx"):
+    """Watchlist with one row carrying pre-existing objective values."""
+    wb = Workbook(); ws = wb.active; ws.title = "Watchlist"
+    ws.append(["Ticker", "Company", "Layer", "Last Updated"] + [None] * 34)
+    ws.append(["NVDA", "Nvidia", "06 Silicon", "2026-01-01"] + [None] * 34)
+    ws.cell(row=2, column=5, value=30.0)    # fwd_pe — will change to 10.0
+    ws.cell(row=2, column=8, value=10.0)    # ps     — fetched value is identical
+    ws.cell(row=2, column=29, value=44.2)   # 50DMA  — will change to 70.0
+    p = tmp_path / name
+    wb.save(p)
+    return p
+
+
+def _preview_fetch(ticker, layer):
+    return {"financialCurrency": "USD"}, {k: 10.0 for k in roi.OBJ_COLS}
+
+
+def test_dry_run_reports_same_touched_cols_as_live(tmp_path):
+    dry_path = _preview_scoring(tmp_path, "dry.xlsx")
+    live_path = _preview_scoring(tmp_path, "live.xlsx")
+
+    kw = dict(fetcher=_preview_fetch, dma_fetcher=lambda t: 70.0,
+              today=dt.date(2026, 8, 13))
+    dry = roi.refresh(["NVDA"], dry_run=True, scoring_path=dry_path, **kw)
+    live = roi.refresh(["NVDA"], dry_run=False, scoring_path=live_path, **kw)
+
+    assert dry["rows"][0]["touched"] == live["rows"][0]["touched"]
+    assert dry["rows"][0]["touched"], "dry run must not report an empty touched set"
+
+    # ...and the dry run still wrote nothing
+    ws = load_workbook(dry_path)["Watchlist"]
+    assert ws.cell(row=2, column=4).value == "2026-01-01"
+    assert ws.cell(row=2, column=5).value == 30.0
+    assert ws.cell(row=2, column=29).value == 44.2
+    assert dry["wrote"] is False
+
+
+def test_dry_run_reports_old_to_new_per_changed_column(tmp_path):
+    sp = _preview_scoring(tmp_path)
+    rep = roi.refresh(["NVDA"], dry_run=True, scoring_path=sp,
+                      fetcher=_preview_fetch, dma_fetcher=lambda t: 70.0,
+                      today=dt.date(2026, 8, 13))
+
+    changes = {c["col"]: c for c in rep["rows"][0]["changes"]}
+
+    # fwd_pe 30.0 -> 10.0 is exactly the kind of value the review gate exists
+    # to surface (rule 27 market-cap corruption shows up as a ratio like this)
+    assert changes[5]["field"] == "fwd_pe"
+    assert changes[5]["old"] == 30.0
+    assert changes[5]["new"] == 10.0
+
+    assert changes[29]["old"] == 44.2 and changes[29]["new"] == 70.0
+    assert changes[4]["old"] == "2026-01-01" and changes[4]["new"] == "2026-08-13"
+
+    # a column whose fetched value equals the existing one is written but is
+    # NOT a change — it must not add noise to the review
+    assert 8 not in changes
+
+
+def test_live_run_reports_the_same_changes_as_the_dry_run(tmp_path):
+    dry_path = _preview_scoring(tmp_path, "dry.xlsx")
+    live_path = _preview_scoring(tmp_path, "live.xlsx")
+
+    kw = dict(fetcher=_preview_fetch, dma_fetcher=lambda t: 70.0,
+              today=dt.date(2026, 8, 13))
+    dry = roi.refresh(["NVDA"], dry_run=True, scoring_path=dry_path, **kw)
+    live = roi.refresh(["NVDA"], dry_run=False, scoring_path=live_path, **kw)
+
+    assert dry["rows"][0]["changes"] == live["rows"][0]["changes"]
+
+
+def test_format_row_lines_show_old_to_new(tmp_path):
+    """The operator must SEE the deltas — the report dict alone never reaches them."""
+    row_rep = {
+        "ticker": "VST",
+        "touched": [4, 5, 17],
+        "changes": [
+            {"col": 5, "field": "fwd_pe", "old": 14.117, "new": 14.124},
+            {"col": 17, "field": "rev_yoy", "old": 43.4, "new": -5.5},
+        ],
+        "flags": [],
+    }
+    lines = roi.format_row_lines(row_rep, dry_run=True)
+    text = "\n".join(lines)
+
+    assert "VST" in text
+    assert "would write" in text          # dry run must not claim it wrote
+    assert "rev_yoy" in text
+    assert "43.4" in text and "-5.5" in text
+    assert "->" in text or "→" in text
+
+
+def test_format_row_lines_live_says_wrote(tmp_path):
+    row_rep = {"ticker": "VST", "touched": [4], "changes": [], "flags": []}
+    text = "\n".join(roi.format_row_lines(row_rep, dry_run=False))
+    assert "wrote" in text and "would write" not in text
+
+
+def test_format_row_lines_flags_no_change_explicitly(tmp_path):
+    """An empty change set must read as 'nothing would change', not as silence."""
+    row_rep = {"ticker": "NVDA", "touched": [4, 5], "changes": [], "flags": []}
+    text = "\n".join(roi.format_row_lines(row_rep, dry_run=True))
+    assert "no value changes" in text.lower()
