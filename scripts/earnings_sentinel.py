@@ -81,3 +81,20 @@ def due_events(scope, calendar, latest_close, state, now):
                 out["rescore_due"].append(ev)
             # else: reaction close not printed yet (incl. holidays) — quiet defer
     return out
+
+
+def load_state(path: Path = STATE_PATH) -> dict:
+    path = Path(path)
+    if not path.exists():
+        return {"tickers": {}}
+    return json.loads(path.read_text())
+
+
+def mark(path: Path, phase: str, ticker: str, report_date: str) -> None:
+    if phase not in ("briefed", "rescored"):
+        raise ValueError(f"unknown phase {phase!r}")
+    path = Path(path)
+    state = load_state(path)
+    state.setdefault("tickers", {}).setdefault(ticker, {})[phase] = report_date
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n")

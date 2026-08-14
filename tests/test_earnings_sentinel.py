@@ -135,3 +135,28 @@ def test_holiday_no_new_close_defers_rescore():
     out = due_events(["AAA"], cal, {"AAA": dt.date(2026, 8, 11)}, st, NOW_WED_EVE)
     assert out["rescore_due"] == []
     assert "AAA" not in out["flagged"]       # quiet defer, not an error
+
+
+# ---- state / mark ----------------------------------------------------------
+from earnings_sentinel import load_state, mark
+
+
+def test_load_state_missing_file(tmp_path):
+    assert load_state(tmp_path / "state.json") == {"tickers": {}}
+
+
+def test_mark_roundtrip(tmp_path):
+    p = tmp_path / "state.json"
+    mark(p, "briefed", "AAA", "2026-08-11")
+    mark(p, "rescored", "AAA", "2026-08-11")
+    mark(p, "briefed", "BBB", "2026-08-12")
+    st = load_state(p)
+    assert st["tickers"]["AAA"] == {"briefed": "2026-08-11",
+                                    "rescored": "2026-08-11"}
+    assert st["tickers"]["BBB"] == {"briefed": "2026-08-12"}
+
+
+def test_mark_rejects_bad_phase(tmp_path):
+    import pytest
+    with pytest.raises(ValueError):
+        mark(tmp_path / "s.json", "executed", "AAA", "2026-08-11")
