@@ -54,6 +54,11 @@ Holdings are always tradable (rule 30 exits untradables immediately), so the
 scope is all-US-listed — which is also where yfinance earnings-date coverage
 is reliable.
 
+The top-25 is taken **over the tradable-filtered ranking**, matching
+selection's own tradable-universe ranking (rule 30) — foreign lines vacate
+slots rather than occupying them, so in full-universe terms (Watchlist rank,
+foreign names included) the effective scope can reach roughly rank 35.
+
 ## 4. Detection: `scripts/earnings_sentinel.py`
 
 Pure detector — **no side effects on any workbook or tracking artifact except
@@ -71,6 +76,13 @@ its own state file**. Responsibilities:
      day.
    - Timestamp missing/unparseable → treat as AMC (conservative: waits one
      extra day rather than re-scoring on a pre-reaction close).
+
+`MAX_REPORT_AGE_DAYS = 5`: a report that is already more than 5 days old the
+first time the sentinel sees it (first deployment, or a name newly entering
+scope) is left to the weekly cadence rather than briefed/rescored — a
+self-healing guard against dumping a backlog of stale reports into a single
+run.
+
 4. Emit two event lists against per-ticker state:
    - **`briefing_due`** — report has dropped (report timestamp ≤ now) and no
      briefing has been recorded for it. Fires the evening of the print (T+0).
@@ -79,9 +91,13 @@ its own state file**. Responsibilities:
      for this report. Fires the evening of the reaction day.
 
 **State:** `tracking/earnings-sentinel-state.json` — per ticker, the report
-date last briefed and last re-scored. Both phases are idempotent: re-running
-the sentinel after a completed phase emits nothing. State updates only after
-the corresponding phase actually completes — the task calls back
+date last briefed and last re-scored. **Machine-local and gitignored** (not
+committed): the sentinel always runs on Dom's own machine, and this file is
+process state, not project state — committing it would create nightly
+diff/merge churn on a file with no research content. Both phases are
+idempotent: re-running the sentinel after a completed phase emits nothing.
+State updates only after the corresponding phase actually completes — the
+task calls back
 `earnings_sentinel.py --mark {briefed|rescored} {TICKER} {report-date}` when a
 phase finishes, never at detection time — so a failed run retries next
 evening.
@@ -115,9 +131,14 @@ seconds.
   needs human-researched MW data, rule 13) and TTM-vs-MRQ divergence >10pts
   on any quality metric (rule 9).
 
-**Git:** branch from origin/main (fetch first — branching discipline), commit,
-push, PR; on the known headless PR/push blocks, leave the branch + write the
-run report and flag it (weekly-refresh fallback behavior).
+**Git:** before branching, an **unmerged-branch guard**
+(`git branch --list 'earnings/*' --no-merged origin/main`) checks for a prior
+`earnings/*` branch that never merged; if one exists, the run does not
+proceed with any phase — it logs, notifies, and stops. This prevents the
+nightly-run/binary-xlsx merge collision that motivated the guard. Otherwise:
+branch from origin/main (fetch first — branching discipline), commit, push,
+PR; on the known headless PR/push blocks, leave the branch + write the run
+report and flag it (weekly-refresh fallback behavior).
 
 **Run report:** append a dated section to
 `tracking/earnings-sentinel-log.md` — names briefed, names re-scored, score

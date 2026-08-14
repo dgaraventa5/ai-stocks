@@ -137,6 +137,25 @@ def test_holiday_no_new_close_defers_rescore():
     assert "AAA" not in out["flagged"]       # quiet defer, not an error
 
 
+def test_latest_close_fetch_error_is_flagged_not_deferred_forever():
+    # I2: a persistent price-fetch failure must not look like a quiet holiday
+    # defer forever — it gets flagged. Briefing still fires (unaffected).
+    cal = {"AAA": [_ts(2026, 8, 11, 16, 30)]}
+    out = due_events(["AAA"], cal, {"AAA": "error"}, _state(), NOW_WED_EVE)
+    assert out["flagged"]["AAA"] == "latest-close lookup failed"
+    assert out["rescore_due"] == []
+    assert out["briefing_due"] == [
+        {"ticker": "AAA", "report_date": "2026-08-11", "session": "AMC"}]
+
+
+def test_calendar_fetch_error_is_flagged_without_iterating_string():
+    # M5: an "error" sentinel must never reach the `past = [ts for ts in dates]`
+    # comprehension (iterating a string char-by-char would crash on ts <= now).
+    out = due_events(["AAA"], {"AAA": "error"}, {}, _state(), NOW_WED_EVE)
+    assert out["flagged"]["AAA"] == "earnings-date lookup failed"
+    assert out["briefing_due"] == [] and out["rescore_due"] == []
+
+
 # ---- state / mark ----------------------------------------------------------
 from earnings_sentinel import load_state, mark
 

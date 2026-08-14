@@ -60,6 +60,9 @@ def due_events(scope, calendar, latest_close, state, now):
     tickers_state = state.get("tickers", {})
     for t in scope:
         dates = calendar.get(t)
+        if dates == "error":
+            out["flagged"][t] = "earnings-date lookup failed"
+            continue                      # M5: never let the sentinel reach iteration
         if not dates:
             out["flagged"][t] = "no earnings date available (rule 3: flagged, not guessed)"
             continue
@@ -77,7 +80,11 @@ def due_events(scope, calendar, latest_close, state, now):
             out["briefing_due"].append(ev)
         if st.get("rescored") != ev["report_date"]:
             lc = latest_close.get(t)
-            if lc is not None and lc >= reaction_day(report):
+            if lc == "error":
+                # I2: a persistent fetch failure must not look like a quiet
+                # holiday defer forever — flag it (rule 3), don't rescore_due.
+                out["flagged"][t] = "latest-close lookup failed"
+            elif lc is not None and lc >= reaction_day(report):
                 out["rescore_due"].append(ev)
             # else: reaction close not printed yet (incl. holidays) — quiet defer
     return out
@@ -103,7 +110,8 @@ def mark(path: Path, phase: str, ticker: str, report_date: str) -> None:
 # ---- I/O layer --------------------------------------------------------------
 
 def latest_ranked_rows(csv_path: Path = SCORE_HISTORY):
-    rows = list(csv.DictReader(open(csv_path)))
+    with open(csv_path, newline="") as f:
+        rows = list(csv.DictReader(f))
     if not rows:
         return []
     newest = max(r["date"] for r in rows)
@@ -129,7 +137,7 @@ def _fetch_calendar(tickers):
             out[t] = ([ts.to_pydatetime().astimezone(ET) for ts in df.index]
                       if df is not None and len(df) else [])
         except Exception:
-            out[t] = []                                  # → flagged downstream
+            out[t] = "error"                             # → flagged downstream (M5)
         time.sleep(0.1)
     return out
 
@@ -142,7 +150,7 @@ def _fetch_latest_close(tickers):
             h = yf.Ticker(t).history(period="5d")
             out[t] = h.index[-1].date() if len(h) else None
         except Exception:
-            out[t] = None
+            out[t] = "error"                             # → flagged downstream (I2)
         time.sleep(0.1)
     return out
 
@@ -163,12 +171,14 @@ def main(argv=None) -> int:
     scope = build_scope(_holdings(), latest_ranked_rows(SCORE_HISTORY), args.top_n)
     now = _now()
     calendar = _fetch_calendar(scope)
-    # closes are only needed for names with a recent past report
+    # closes are only needed for names with a recent past report; a calendar
+    # fetch failure is the "error" string sentinel (M5), never an iterable
     recent = [t for t in scope
-              if any(ts <= now and
+              if isinstance(calendar.get(t), list) and
+                 any(ts <= now and
                      (now.astimezone(ET).date() - ts.astimezone(ET).date()).days
                      <= MAX_REPORT_AGE_DAYS
-                     for ts in calendar.get(t, []))]
+                     for ts in calendar.get(t))]
     latest_close = _fetch_latest_close(recent)
     out = due_events(scope, calendar, latest_close, load_state(STATE_PATH), now)
     out["scope_size"] = len(scope)

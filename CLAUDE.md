@@ -608,7 +608,8 @@ Spec: `docs/superpowers/specs/2026-08-13-earnings-sentinel-design.md`. A
 weekday 18:30 ET scheduled task (`earnings-sentinel`, prompt versioned at
 `docs/ops/earnings-sentinel-task.md`) watches **current holdings ∪ top 25
 tradable ranks** and, per `scripts/earnings_sentinel.py` (state:
-`tracking/earnings-sentinel-state.json`), fires two phases per report:
+`tracking/earnings-sentinel-state.json`, machine-local/gitignored — process
+state, not project state), fires two phases per report:
 **briefing** the evening of the print (context briefing + news-log + rule-9
 >15%-surprise flag; ratings untouched per rule 12) and **mechanical re-score**
 on the first post-reaction close (objective chain → `recalc --sync` →
