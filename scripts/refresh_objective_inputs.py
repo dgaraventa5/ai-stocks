@@ -250,6 +250,49 @@ def read_existing(ws, row):
     return {k: ws.cell(row=row, column=c).value for k, c in OBJ_COLS.items()}
 
 
+def _same(a, b):
+    """True when two cell values are equivalent (blank == blank)."""
+    if _blank(a) and _blank(b):
+        return True
+    return a == b
+
+
+def plan_row(ws, row, writes, dma_value, today_iso):
+    """Compute what write_row WOULD do, without writing anything.
+
+    Split out so `--dry-run` can report the same column set as a live run and
+    show old → new per changed cell. Before this existed, dry runs reported an
+    empty touched list, so the review step that is supposed to catch corrupt
+    values (rule 27) could not see them — the 2026-08-13 VST refresh moved a
+    name a full tier after a dry run printed no changes at all.
+
+    Args:
+        ws: openpyxl worksheet.
+        row: Row number that would be written.
+        writes: dict mapping input-key → value (same contract as write_row).
+        dma_value: Value for DMA_COL, or None to skip it.
+        today_iso: ISO date string for LAST_UPDATED_COL.
+
+    Returns:
+        (touched, changes) where touched is the sorted list of column indices
+        that would be written, and changes is a list of
+        {"col", "field", "old", "new"} dicts for the subset whose value would
+        actually differ from what is in the cell now.
+    """
+    planned = [(OBJ_COLS[k], k, v) for k, v in writes.items()]
+    if dma_value is not None:
+        planned.append((DMA_COL, "50dma", dma_value))
+    planned.append((LAST_UPDATED_COL, "last_updated", today_iso))
+
+    changes = []
+    for col, field, new in planned:
+        old = ws.cell(row=row, column=col).value
+        if not _same(old, new):
+            changes.append({"col": col, "field": field, "old": old, "new": new})
+    changes.sort(key=lambda c: c["col"])
+    return sorted({c for c, _f, _v in planned}), changes
+
+
 def write_row(ws, row, writes, dma_value, today_iso):
     """Write objective inputs and metadata to a row, never touching subjective columns.
 
@@ -264,17 +307,14 @@ def write_row(ws, row, writes, dma_value, today_iso):
     Returns:
         list[int]: Sorted list of column indices actually written.
     """
-    touched = []
+    # Plan first so the dry-run preview and the live write can never drift apart.
+    touched, _changes = plan_row(ws, row, writes, dma_value, today_iso)
     for key, val in writes.items():
-        c = OBJ_COLS[key]
-        ws.cell(row=row, column=c).value = val
-        touched.append(c)
+        ws.cell(row=row, column=OBJ_COLS[key]).value = val
     if dma_value is not None:
         ws.cell(row=row, column=DMA_COL).value = dma_value
-        touched.append(DMA_COL)
     ws.cell(row=row, column=LAST_UPDATED_COL).value = today_iso
-    touched.append(LAST_UPDATED_COL)
-    return sorted(set(touched))
+    return touched
 
 
 # ---------------------------------------------------------------------------
@@ -349,7 +389,8 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
             # the ~167-name `all` run where one transient yfinance error would
             # otherwise abort the whole pass and save nothing.
             report["flags"].append(f"{ticker}: fetch error — {e} — skipped (row unchanged).")
-            report["rows"].append({"ticker": ticker, "touched": [], "flags": [f"fetch error — {e}"]})
+            report["rows"].append({"ticker": ticker, "touched": [], "changes": [],
+                                   "flags": [f"fetch error — {e}"]})
             if fetcher is _default_fetcher:
                 time.sleep(0.3)
             continue
@@ -366,11 +407,14 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
             dma_value = None
             flags.append(f"50DMA: fetch error — {e}")
 
-        touched = []
+        # Plan unconditionally so a dry run reports exactly what a live run
+        # would do; only the write itself is gated on dry_run.
+        touched, changes = plan_row(ws, row, writes, dma_value, today.isoformat())
         if not dry_run:
-            touched = write_row(ws, row, writes, dma_value, today.isoformat())
+            write_row(ws, row, writes, dma_value, today.isoformat())
 
-        report["rows"].append({"ticker": ticker, "touched": touched, "flags": flags})
+        report["rows"].append({"ticker": ticker, "touched": touched,
+                               "changes": changes, "flags": flags})
         report["flags"].extend(f"{ticker}: {f}" for f in flags)
 
         # Throttle only for the real yfinance fetcher; injected test fakes are fast
@@ -382,6 +426,28 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
         report["wrote"] = True
 
     return report
+
+
+def _fmt(v):
+    return "(blank)" if _blank(v) else str(v)
+
+
+def format_row_lines(row_rep, dry_run):
+    """Render one row's plan as operator-facing lines: cols, then old → new.
+
+    The report dict never reaches the human running the script; these lines are
+    what the rule-27 "review before you write" step actually reads.
+    """
+    verb = "would write" if dry_run else "wrote"
+    changes = row_rep.get("changes") or []
+    head = f"  {row_rep['ticker']:<8} {verb} cols: {row_rep['touched']}"
+    if not changes:
+        return [head + "  — no value changes"]
+    lines = [head + f"  — {len(changes)} value change(s)"]
+    width = max(len(c["field"]) for c in changes)
+    for c in changes:
+        lines.append(f"      {c['field']:<{width}}  {_fmt(c['old'])} -> {_fmt(c['new'])}")
+    return lines
 
 
 def main():
@@ -404,7 +470,8 @@ def main():
     rep = refresh(targets, dry_run=args.dry_run)
 
     for r in rep["rows"]:
-        print(f"  {r['ticker']:<6} touched cols: {r['touched']}")
+        for line in format_row_lines(r, args.dry_run):
+            print(line)
 
     if rep["flags"]:
         print("\nJUDGMENT FLAGS (human ruling needed):")
