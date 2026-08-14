@@ -602,6 +602,23 @@ Watchlist; that would shift the survivors' percentile scores), the full-universe
 pre-2026-08-11 behavior exactly. Spec:
 `docs/superpowers/specs/2026-08-11-tradability-filter-design.md`.
 
+### 31. Earnings sentinel: event-driven refresh for portfolio-relevant names (added 2026-08-13, approved by Dom)
+
+Spec: `docs/superpowers/specs/2026-08-13-earnings-sentinel-design.md`. A
+weekday 18:30 ET scheduled task (`earnings-sentinel`, prompt versioned at
+`docs/ops/earnings-sentinel-task.md`) watches **current holdings ∪ top 25
+tradable ranks** and, per `scripts/earnings_sentinel.py` (state:
+`tracking/earnings-sentinel-state.json`), fires two phases per report:
+**briefing** the evening of the print (context briefing + news-log + rule-9
+>15%-surprise flag; ratings untouched per rule 12) and **mechanical re-score**
+on the first post-reaction close (objective chain → `recalc --sync` →
+rule-25/29 ticket on a real model event; trades execute via Dom's launchd
+executor next morning, ~26h/~41h print-to-trade for BMO/AMC reporters).
+Reports with no yfinance date, or older than 5 days when first seen, fall to
+the weekly scan — which remains the rule-9 catch-all (Yahoo statement lag).
+The sentinel session is read-only toward Robinhood (rule 29 unchanged); a
+ticket refusal on a stale recon snapshot is notified, never worked around.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash
