@@ -36,6 +36,9 @@ site/data/
 # counts, account numbers, order IDs. NEVER commit anything under here.
 tracking/live/
 
+# earnings sentinel machine-local state (spec 2026-08-13)
+tracking/earnings-sentinel-state.json
+
 # Generated chart artifacts (backtest / perf-vs-benchmarks PNGs) — regenerable,
 # not source of truth; the series JSON + site exporter are.
 tracking/*.png
