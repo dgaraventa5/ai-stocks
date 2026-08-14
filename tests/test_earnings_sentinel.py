@@ -160,3 +160,48 @@ def test_mark_rejects_bad_phase(tmp_path):
     import pytest
     with pytest.raises(ValueError):
         mark(tmp_path / "s.json", "executed", "AAA", "2026-08-11")
+
+
+# ---- I/O layer -------------------------------------------------------------
+import json as _json
+
+from earnings_sentinel import latest_ranked_rows, main
+
+
+def test_latest_ranked_rows_uses_newest_date_only(tmp_path):
+    p = tmp_path / "score-history.csv"
+    p.write_text(
+        "date,ticker,total_score,rank,tier\n"
+        "2026-08-07,OLD,80.0,1,X\n"
+        "2026-08-11,AAA,84.0,1,X\n"
+        "2026-08-11,BBB.T,82.0,2,X\n")
+    assert latest_ranked_rows(p) == [("AAA", 1), ("BBB.T", 2)]
+
+
+def test_main_detect_prints_json(tmp_path, monkeypatch, capsys):
+    import earnings_sentinel as es
+    import datetime as dt
+    monkeypatch.setattr(es, "STATE_PATH", tmp_path / "state.json")
+    hist = tmp_path / "score-history.csv"
+    hist.write_text("date,ticker,total_score,rank,tier\n"
+                    "2026-08-11,AAA,84.0,1,X\n")
+    monkeypatch.setattr(es, "SCORE_HISTORY", hist)
+    monkeypatch.setattr(es, "_holdings", lambda: ["AAA"])
+    monkeypatch.setattr(es, "_fetch_calendar",
+                        lambda ts: {"AAA": [dt.datetime(2026, 8, 11, 16, 30,
+                                                        tzinfo=es.ET)]})
+    monkeypatch.setattr(es, "_fetch_latest_close",
+                        lambda ts: {"AAA": dt.date(2026, 8, 12)})
+    monkeypatch.setattr(es, "_now",
+                        lambda: dt.datetime(2026, 8, 12, 18, 30, tzinfo=es.ET))
+    assert main([]) == 0
+    out = _json.loads(capsys.readouterr().out)
+    assert out["rescore_due"][0]["ticker"] == "AAA"
+
+
+def test_main_mark_updates_state(tmp_path, monkeypatch):
+    import earnings_sentinel as es
+    monkeypatch.setattr(es, "STATE_PATH", tmp_path / "state.json")
+    assert main(["--mark", "briefed", "AAA", "2026-08-11"]) == 0
+    from earnings_sentinel import load_state
+    assert load_state(tmp_path / "state.json")["tickers"]["AAA"]["briefed"] == "2026-08-11"

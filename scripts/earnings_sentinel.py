@@ -98,3 +98,83 @@ def mark(path: Path, phase: str, ticker: str, report_date: str) -> None:
     state.setdefault("tickers", {}).setdefault(ticker, {})[phase] = report_date
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n")
+
+
+# ---- I/O layer --------------------------------------------------------------
+
+def latest_ranked_rows(csv_path: Path = SCORE_HISTORY):
+    rows = list(csv.DictReader(open(csv_path)))
+    if not rows:
+        return []
+    newest = max(r["date"] for r in rows)
+    return [(r["ticker"], int(r["rank"])) for r in rows if r["date"] == newest]
+
+
+def _holdings() -> list[str]:
+    from generate_trade_ticket import _targets_weights   # openpyxl-only, offline
+    weights, _meta = _targets_weights()
+    return sorted(weights)
+
+
+def _now() -> dt.datetime:
+    return dt.datetime.now(tz=ET)
+
+
+def _fetch_calendar(tickers):
+    import yfinance as yf                                # lazy (CI minimal-env)
+    out = {}
+    for t in tickers:
+        try:
+            df = yf.Ticker(t).get_earnings_dates(limit=8)
+            out[t] = ([ts.to_pydatetime().astimezone(ET) for ts in df.index]
+                      if df is not None and len(df) else [])
+        except Exception:
+            out[t] = []                                  # → flagged downstream
+        time.sleep(0.1)
+    return out
+
+
+def _fetch_latest_close(tickers):
+    import yfinance as yf                                # lazy (CI minimal-env)
+    out = {}
+    for t in tickers:
+        try:
+            h = yf.Ticker(t).history(period="5d")
+            out[t] = h.index[-1].date() if len(h) else None
+        except Exception:
+            out[t] = None
+        time.sleep(0.1)
+    return out
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="Earnings sentinel (detection only).")
+    ap.add_argument("--mark", nargs=3, metavar=("PHASE", "TICKER", "REPORT_DATE"),
+                    help="record a completed phase: briefed|rescored TICKER YYYY-MM-DD")
+    ap.add_argument("--top-n", type=int, default=DEFAULT_TOP_N)
+    args = ap.parse_args(argv)
+
+    if args.mark:
+        phase, ticker, report_date = args.mark
+        mark(STATE_PATH, phase, ticker, report_date)
+        print(f"marked {ticker} {phase} for report {report_date}")
+        return 0
+
+    scope = build_scope(_holdings(), latest_ranked_rows(SCORE_HISTORY), args.top_n)
+    now = _now()
+    calendar = _fetch_calendar(scope)
+    # closes are only needed for names with a recent past report
+    recent = [t for t in scope
+              if any(ts <= now and
+                     (now.astimezone(ET).date() - ts.astimezone(ET).date()).days
+                     <= MAX_REPORT_AGE_DAYS
+                     for ts in calendar.get(t, []))]
+    latest_close = _fetch_latest_close(recent)
+    out = due_events(scope, calendar, latest_close, load_state(STATE_PATH), now)
+    out["scope_size"] = len(scope)
+    print(json.dumps(out, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
