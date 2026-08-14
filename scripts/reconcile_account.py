@@ -14,6 +14,16 @@ Outputs:
 
 Usage (attended session):
   python3 scripts/reconcile_account.py --account-json state.json
+  python3 scripts/reconcile_account.py --account-json state.json \
+      --external-flow 500.00   # declare a deposit (withdrawal: negative)
+
+External cash flows (deposits/withdrawals) are DECLARED, never inferred: an
+undeclared equity jump is indistinguishable from an executor bug, so it halts
+(D3). A declared flow goes to the append-only ledger
+tracking/live/recon/flows.jsonl (gitignored, §E) where every later run — the
+attended session and the launchd cron alike — can explain the same move, and
+the live-vs-model baseline is divisor-adjusted so a deposit doesn't print as
+performance.
 """
 from __future__ import annotations
 
@@ -73,6 +83,45 @@ def assert_sanitized_lvm(doc: dict) -> None:
                 raise ValueError(f'live-vs-model field {key!r}: bad type')
 
 
+# §D external-flow ledger — Dom-declared deposits/withdrawals. Append-only,
+# gitignored (real dollars). Declarations are idempotent per (date, amount) so
+# the attended run and the cron's same-day recon can't double-count one flow.
+
+def _flows_path(live_dir: Path) -> Path:
+    return Path(live_dir) / 'recon' / 'flows.jsonl'
+
+
+def read_flows(live_dir: Path) -> list[dict]:
+    path = _flows_path(live_dir)
+    if not path.exists():
+        return []
+    return [json.loads(line) for line in path.read_text().splitlines()
+            if line.strip()]
+
+
+def declare_flow(live_dir: Path, date: str, amount: float) -> None:
+    """Record an external cash flow (deposit > 0, withdrawal < 0), dated to
+    the recon that first sees it. No-op on zero or on an exact duplicate."""
+    if not amount:
+        return
+    entry = {'date': date, 'amount': round(float(amount), 2)}
+    if entry in read_flows(live_dir):
+        print(f'external flow already declared for {date} — ledger unchanged')
+        return
+    path = _flows_path(live_dir)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('a') as fh:
+        fh.write(json.dumps(entry) + '\n')
+    print(f'external flow declared: {amount:+.2f} on {date}')
+
+
+def flows_between(live_dir: Path, after: str, through: str) -> float:
+    """Sum of declared flows dated in (after, through] — the window between
+    the prior snapshot and the current recon."""
+    return sum(f['amount'] for f in read_flows(live_dir)
+               if after < f['date'] <= through)
+
+
 def _receipts(live_dir: Path) -> list[dict]:
     rdir = live_dir / 'receipts'
     if not rdir.is_dir():
@@ -121,9 +170,11 @@ def _prior_snapshot(live_dir: Path, as_of: str) -> dict | None:
 
 
 def detect_anomalies(state: dict, target_weights: dict, receipts: list[dict],
-                     prior: dict | None) -> list[str]:
+                     prior: dict | None, declared_flow: float = 0.0) -> list[str]:
     """D3 halt conditions. Any entry here raises the kill switch (which stops
-    future EXECUTIONS only — it never sells anything)."""
+    future EXECUTIONS only — it never sells anything). declared_flow: net
+    Dom-declared external cash flow since the prior snapshot (ledger above) —
+    an EXPLAINED equity move; undeclared moves still halt."""
     anomalies = []
     known = set(target_weights) | {o['ticker'] for r in receipts
                                    for o in r.get('orders', [])}
@@ -141,7 +192,7 @@ def detect_anomalies(state: dict, target_weights: dict, receipts: list[dict],
         filled_since = any(o.get('state') == 'filled'
                            for o in state.get('orders', []))
         if not filled_since:
-            expected = prior['cash']
+            expected = prior['cash'] + declared_flow
             for t, pos in prior['positions'].items():
                 px = state['positions'].get(t, {}).get('price', pos.get('price'))
                 expected += pos['shares'] * px
@@ -150,7 +201,8 @@ def detect_anomalies(state: dict, target_weights: dict, receipts: list[dict],
                 if gap > EQUITY_TOL:
                     anomalies.append(
                         f'equity move unexplained by market moves of held '
-                        f'names ({gap:.1%} vs expected)')
+                        f'names ({gap:.1%} vs expected) — if this is a '
+                        f'deposit/withdrawal, declare it with --external-flow')
     return anomalies
 
 
@@ -159,10 +211,33 @@ def live_vs_model(state: dict, live_dir: Path, model_series_path: Path,
     """Implementation-shortfall line (D5): cumulative live vs model return
     since the live baseline. COMMITTED — relative percentages only."""
     base_path = live_dir / 'recon' / 'baseline.json'
+    flows = read_flows(live_dir)
     if not base_path.exists():
+        # Flows dated at/before creation are embedded in the creation equity.
         base_path.write_text(json.dumps(
-            {'date': state['as_of'], 'equity': state['equity']}) + '\n')
+            {'date': state['as_of'], 'equity': state['equity'],
+             'applied_flows': [f for f in flows
+                               if f['date'] <= state['as_of']]}) + '\n')
     base = json.loads(base_path.read_text())
+    base.setdefault('applied_flows', [])
+
+    # Divisor adjustment (index-style): a declared external flow F at current
+    # equity E scales the baseline by E/(E−F), so live_pct is unchanged by the
+    # flow itself and later market moves compound correctly. Applied exactly
+    # once per ledger entry (applied_flows), whichever run sees it first.
+    pending = [f for f in flows
+               if f['date'] > base['date'] and f not in base['applied_flows']]
+    if pending:
+        total = sum(f['amount'] for f in pending)
+        if state['equity'] - total > 0:
+            base['equity'] = round(
+                base['equity'] * state['equity'] / (state['equity'] - total), 4)
+        else:
+            print(f'FLAG: declared flow {total:+.2f} >= current equity — '
+                  f'baseline NOT adjusted; live-vs-model needs a manual '
+                  f'baseline reset (rule 3: flagged, not guessed)')
+        base['applied_flows'].extend(pending)
+        base_path.write_text(json.dumps(base) + '\n')
     live_pct = round((state['equity'] / base['equity'] - 1) * 100, 2)
 
     model_pct = None
@@ -196,15 +271,21 @@ def live_vs_model(state: dict, live_dir: Path, model_series_path: Path,
 
 def run(state: dict, *, live_dir: Path, target_weights: dict[str, float],
         model_series_path: Path = SERIES_PATH,
-        status_path: Path = STATUS_PATH, lvm_path: Path = LVM_PATH) -> dict:
+        status_path: Path = STATUS_PATH, lvm_path: Path = LVM_PATH,
+        external_flow: float = 0.0) -> dict:
     live_dir = Path(live_dir)
     (live_dir / 'recon').mkdir(parents=True, exist_ok=True)
+    if external_flow:
+        declare_flow(live_dir, state['as_of'], external_flow)
     receipts = _receipts(live_dir)
     prior = _prior_snapshot(live_dir, state['as_of'])
+    declared = flows_between(live_dir, prior['as_of'] if prior else '',
+                             state['as_of'])
 
     fills, regen = verify_fills(receipts, state.get('orders', []))
     drift = drift_check(state, target_weights)
-    anomalies = detect_anomalies(state, target_weights, receipts, prior)
+    anomalies = detect_anomalies(state, target_weights, receipts, prior,
+                                 declared_flow=declared)
 
     halt_path = live_dir / 'trading-halt.flag'
     if anomalies:
@@ -270,6 +351,13 @@ if __name__ == '__main__':
     ap.add_argument('--account-json', required=True,
                     help='account state JSON pulled via MCP READ tools '
                          '(attended session — O1: no headless OAuth)')
+    ap.add_argument('--external-flow', type=float, default=0.0,
+                    metavar='AMOUNT',
+                    help='declare an external cash flow since the prior '
+                         'snapshot (deposit > 0, withdrawal < 0): explains '
+                         'the equity move to the D3 anomaly check and '
+                         'divisor-adjusts the live-vs-model baseline')
     args = ap.parse_args()
     payload = json.loads(Path(args.account_json).read_text())
-    run(payload, live_dir=LIVE_DIR, target_weights=_targets_from_workbook())
+    run(payload, live_dir=LIVE_DIR, target_weights=_targets_from_workbook(),
+        external_flow=args.external_flow)

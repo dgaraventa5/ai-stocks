@@ -80,7 +80,7 @@ Run the weekly news scan per CLAUDE.md.
 
    a. Heartbeat: `python3 scripts/executor_cron.py --heartbeat-check` — report any stale pipeline jobs (series/recon/execute/ticket_gen with no successful run in >3 days). A stale heartbeat means the launchd runner is silently dead; that's a prominent flag, not a footnote.
 
-   b. Reconcile: pull account state via the Robinhood MCP **read tools** (portfolio, positions, orders), write it to a scratchpad JSON, and run `python3 scripts/reconcile_account.py --account-json <path>`. Report: halt status (if `tracking/live/trading-halt.flag` exists, surface its contents FIRST), drift flags, fills since last week, and any `regen_needed` names (dead unfilled orders → regenerate the ticket on the next model event).
+   b. Reconcile: pull account state via the Robinhood MCP **read tools** (portfolio, positions, orders), write it to a scratchpad JSON, and run `python3 scripts/reconcile_account.py --account-json <path>`. If Dom deposited or withdrew cash since the last snapshot, he must declare it with `--external-flow AMOUNT` (deposit > 0, withdrawal < 0) — an undeclared flow correctly halts as an unexplained equity move (see `docs/ops/deploy-cash-runbook.md`). Report: halt status (if `tracking/live/trading-halt.flag` exists, surface its contents FIRST), drift flags, fills since last week, and any `regen_needed` names (dead unfilled orders → regenerate the ticket on the next model event).
 
    c. Never call MCP order tools in this or any step. Execution is `execute_ticket.py`, run by Dom or his launchd schedule only.
 
