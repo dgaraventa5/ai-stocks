@@ -586,6 +586,21 @@
           "CGNX",
           "EQT"
         ]
+      },
+      {
+        "date": "2026-08-13",
+        "roster": [
+          "AMZN",
+          "APP",
+          "GOOGL",
+          "TER",
+          "APH",
+          "WDC",
+          "ISRG",
+          "CGNX",
+          "EQT",
+          "PLTR"
+        ]
       }
     ],
     "BAND_TAIL": [
@@ -627,6 +642,26 @@
           "RMBS",
           "AMD",
           "CSCO"
+        ]
+      },
+      {
+        "date": "2026-08-13",
+        "roster": [
+          "KEYS",
+          "NTAP",
+          "AR",
+          "CIEN",
+          "FN",
+          "ARM",
+          "ORCL",
+          "HSAI",
+          "GLW",
+          "DELL",
+          "HTHIY",
+          "RMBS",
+          "AMD",
+          "CSCO",
+          "STX"
         ]
       }
     ]
