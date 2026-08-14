@@ -645,3 +645,66 @@ TSM/NVDA/MU). **Zero rating changes from the revision itself.**
 **Rule 15** (Dom-approved): blank EPS YoY when dominated by documented non-operating items. First application GEV (+1,768% Prolec gain) — Growth 63.3→45, Total 70.3 ✓✓ → ~67.6 ✓. A tier change from a data-honesty correction; logged in Rating Audit.
 
 **Refresh outcomes (expectations-flag priority queue):** GEV — flag fired but research strengthened the thesis (supply-capped revenue, pricing +10-20%, DC orders inflecting); only D5 4→5; risk is valuation, not execution. MPWR — flag fired and research validated it (restatement + open material weakness, Vera Rubin recapture is sell-side projection not company-confirmed, 800V contested with Infineon leading); D2 4→3, M1 5→4, M3 3→2, R4 4→3 → ~67.6 ✓ (tier drop). The rule-14 screen's first two priority refreshes produced one false-positive-ish (GEV) and one true-positive (MPWR) — the flag is doing its job as a research trigger, not a verdict.
+
+---
+
+## 2026-08-14 — Rev YoY / Rev 3y CAGR carry derivative marks for merchant IPPs (documented, NOT patched)
+
+### What surfaced
+The 2026-08-13 earnings sentinel re-scored VST after Q2 2026 and it fell 70.65 → 64.70, rank 23 → 69, ✓✓ → ✓. The entire move was one input: **Rev YoY 43.4 → −5.5**, which dropped Growth to 22.5.
+
+That −5.5% is real GAAP "Operating revenues" (Q2 2026 $4,017M vs Q2 2025 $4,250M, 8-K 2026-08-07 EX-99.1 p.6). But for a merchant IPP that line **includes unrealized mark-to-market on commodity derivatives** — the same $472M future-settling hedge loss that produced the quarter's −53.4% GAAP EPS "miss" while Ongoing Ops Adjusted EBITDA rose **+31% YoY** to $1,767M.
+
+### Why it is NOT a rule-15 blank
+Rule 15 blanks EPS YoY when the change is dominated by **one-time** items (divestiture gains, tax one-offs). A hedge-book mark is **recurring** — Vistra remarks it every quarter (~100% of 2026 generation hedged, 94% of 2027, 72% of 2028). Blanking a recurring line is not "skip this quarter's garbage," it is "this metric does not describe this business," which is a permanent claim.
+
+This is also the trap already logged in the 2026-06-24 EPS-YoY review, where 4 of ~6 inferred blanks were overturned because yfinance mislabels recurring MTM/FX/SBC as one-offs. Same error shape.
+
+And blanking would have gutted the category: VST's EPS YoY is already blank, so Growth would have rested entirely on Rev 3y CAGR — the one metric rule 21 already flags as a noisy proxy for commodity/cyclical names.
+
+### The distortion runs BOTH ways — this is the important part
+Marks do **not** wash out over a fiscal year. Contract revenue (SEC XBRL `RevenueFromContractWithCustomerExcludingAssessedTax`) vs reported total revenue (`Revenues`), VST:
+
+Gap convention throughout this entry: **(reported − contract) ÷ contract** — i.e. what the marks add to reported revenue. Positive = marks inflate the reported line.
+
+| FY | Contract | Reported | Gap |
+|---|---|---|---|
+| 2022 | $15,631M | $13,728M | **−12.2%** |
+| 2023 | $13,804M | $14,779M | +7.1% |
+| 2024 | $14,761M | $17,224M | **+16.7%** |
+| 2025 | $17,586M | $17,738M | +0.9% |
+
+Recomputing VST's Growth inputs on contract revenue:
+
+| Metric | Reported (live) | Contract-revenue basis | Band score |
+|---|---|---|---|
+| Rev YoY | −5.5% | **+17.3%** | 15 → 60 |
+| Rev 3y CAGR | 8.92% | **4.0%** | 30 → 15 |
+
+Growth 22.5 → 37.5 = **+2.25 TOTAL** (15% weight) → ~66.9, still ✓. **The principled fix does not restore the ✓✓ and is not close.** The marks that crushed the quarter had been flattering the three-year trend for years. This is noise, not bias — which is the main reason it is tolerable.
+
+**Discipline note:** fixing Rev YoY alone would have handed VST +45 band points and looked like vindication. Any future proposal here must move the whole metric family, or it is a rating nudge wearing a methodology costume.
+
+### Why we did NOT switch to an XBRL contract-revenue basis (Dom's call, 2026-08-14)
+Standard applied: *only use metrics we can compute for every company.* SEC XBRL fails it.
+
+- **19 foreign local lines** (6861.T, KGX.DE, 0981.HK, DRO.AX, 2049.TW, …) — no SEC filings at all
+- **IFRS filers** — TSM, UMC, ASX expose `ifrs-full` only, no `us-gaap` taxonomy
+- **Unsponsored ADRs** — TOELY, BESIY, SBGSY are not in SEC's ticker file
+
+That is **25+ of 214 names (>11%)** with no path to the number. The trade — a better revenue figure for 4 merchant-power names, bought with a growth metric a tenth of the field cannot have — fails the universality test. Same wall `expectations_flag.py` (rule 14) already self-skips on.
+
+Tag naming is per-company but is NOT the blocker: a name reports the contract tag only when it has non-contract revenue, so "contract tag when present, else `Revenues`" is well-defined for US filers and identical for clean names (RRC and ANET both show a 0.0% gap). Recorded so this is not re-litigated as a tag problem — it is a coverage problem.
+
+### Affected cohort (Layer 01, merchant IPPs)
+FY2025 gap (same convention): **CEG +12.7%**, **TLN +4.3%**, **NRG +1.2%**, **VST +0.9%**. Controls confirm the cohort is narrow — RRC and ANET both come in at exactly +0.0%. Gas E&P is clean (EQT/AR/RRC ≈ 0.0%) — their hedges sit below the revenue line as a separate derivative item.
+
+**Do not screen this cohort on the latest-year gap.** VST's FY2025 gap is just +0.9% and would pass any materiality filter, yet its 3y CAGR still moves 8.92% → 4.0% because the distortion sits in the *base* year. The whole series matters, which is a further reason an automatic detector was rejected.
+
+### How to read these names
+When VST, CEG, TLN or NRG show a Growth swing, check adjusted EBITDA and the derivative-mark disclosure before treating the move as operational. The rule-31 sentinel briefing does this automatically on an earnings trigger (per-stock/VST/context-2026-08-13.md is the worked example) — the score is noisy, the briefing is not.
+
+### Process lesson
+The XBRL path tested beautifully against VST — the case that prompted it. Universality is a **population** property and cannot be seen by examining the motivating example. Testing a fix against the bug is how you ship a fix that only works on the bug.
+
+Related: rule 21 (Rev-3y-CAGR noisy for commodity/cyclical — same "documented, not hidden" treatment), rule 15 (one-time EPS blanking — deliberately NOT extended here), rule 8 (methodology changes need explicit approval; this one was proposed and **declined**).
