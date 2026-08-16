@@ -155,6 +155,59 @@ def test_declare_flow_idempotent_per_date_amount(live_dir, tmp_path):
     assert ra.flows_between(live_dir, '2026-08-12', '2026-08-14') == 400.0
 
 
+def test_flow_equal_to_cash_balance_refused(live_dir, tmp_path):
+    """--external-flow takes the amount that MOVED, not the resulting balance.
+
+    The 2026-08-14 incident: a deposit onto an account that already held cash
+    was declared as the post-deposit balance. Both are dollars, so nothing
+    caught it; the over-declaration then poisoned the baseline divisor and
+    printed a phantom negative live return. Fail closed, like the executor
+    gates. (Figures here are the fixture's fictional values, not live ones.)
+    """
+    run(STATE, live_dir, tmp_path)                       # prior: cash = CASH
+    dep = 500.0
+    nxt = dict(STATE, as_of='2026-08-14', cash=round(CASH + dep, 2),
+               equity=round(EQUITY + dep, 2))
+    with pytest.raises(ValueError, match='resulting balance'):
+        ra.run(nxt, live_dir=live_dir, target_weights=TARGETS,
+               model_series_path=tmp_path / 'performance-series.json',
+               status_path=tmp_path / 'live-status.json',
+               lvm_path=tmp_path / 'live-vs-model.json',
+               external_flow=round(CASH + dep, 2))       # the balance, not the delta
+    assert ra.read_flows(live_dir) == []                  # ledger untouched
+
+
+def test_refusal_names_the_probable_intended_amount(live_dir, tmp_path):
+    """The refusal must be actionable: say what the flow probably was."""
+    run(STATE, live_dir, tmp_path)
+    dep = 500.0
+    nxt = dict(STATE, as_of='2026-08-14', cash=round(CASH + dep, 2),
+               equity=round(EQUITY + dep, 2))
+    with pytest.raises(ValueError, match=r'500\.00'):
+        ra.run(nxt, live_dir=live_dir, target_weights=TARGETS,
+               model_series_path=tmp_path / 'performance-series.json',
+               status_path=tmp_path / 'live-status.json',
+               lvm_path=tmp_path / 'live-vs-model.json',
+               external_flow=round(CASH + dep, 2))
+
+
+def test_flow_equal_to_cash_balance_allowed_when_prior_cash_zero(live_dir,
+                                                                 tmp_path):
+    """A deposit into a fully-deployed account legitimately EQUALS the
+    resulting balance — the guard must not fire on the honest case."""
+    zero = dict(STATE, cash=0.0, equity=round(EQUITY - CASH, 2))
+    run(zero, live_dir, tmp_path)
+    dep = 500.0
+    nxt = dict(zero, as_of='2026-08-14', cash=dep,
+               equity=round(EQUITY - CASH + dep, 2))
+    res = ra.run(nxt, live_dir=live_dir, target_weights=TARGETS,
+                 model_series_path=tmp_path / 'performance-series.json',
+                 status_path=tmp_path / 'live-status.json',
+                 lvm_path=tmp_path / 'live-vs-model.json', external_flow=dep)
+    assert res['halted'] is False
+    assert ra.read_flows(live_dir) == [{'date': '2026-08-14', 'amount': dep}]
+
+
 def test_declared_withdrawal_no_halt(live_dir, tmp_path):
     run(STATE, live_dir, tmp_path)
     wd = -60.0

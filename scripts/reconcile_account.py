@@ -115,6 +115,31 @@ def declare_flow(live_dir: Path, date: str, amount: float) -> None:
     print(f'external flow declared: {amount:+.2f} on {date}')
 
 
+def guard_flow_is_delta(flow: float, cash: float, prior: dict | None) -> None:
+    """Refuse a declared flow that looks like a BALANCE rather than a DELTA.
+
+    --external-flow wants the amount that moved. A resulting cash balance
+    passed by mistake is also a float of dollars, so nothing catches it: on
+    2026-08-14 a deposit was declared as the post-deposit balance, over-stating
+    the flow by the pre-existing cash. That over-declaration then inflated the
+    baseline divisor and printed a large phantom negative live return. The
+    fingerprint is the declared deposit equalling current cash while the
+    account already held cash. Prior cash ~0 is the honest case (balance ==
+    delta) — no guard there.
+    """
+    if flow <= 0 or not prior:
+        return
+    prior_cash = float(prior.get('cash', 0.0))
+    if prior_cash < 0.01 or abs(flow - float(cash)) >= 0.01:
+        return
+    raise ValueError(
+        f'declared flow {flow:,.2f} equals the resulting cash balance — '
+        f'--external-flow takes the amount that MOVED, not the resulting '
+        f'balance. The account already held {prior_cash:,.2f} in cash before '
+        f'this recon; did you mean {float(cash) - prior_cash:,.2f}? '
+        f'(rule 3: flagged, not guessed)')
+
+
 def flows_between(live_dir: Path, after: str, through: str) -> float:
     """Sum of declared flows dated in (after, through] — the window between
     the prior snapshot and the current recon."""
@@ -275,10 +300,11 @@ def run(state: dict, *, live_dir: Path, target_weights: dict[str, float],
         external_flow: float = 0.0) -> dict:
     live_dir = Path(live_dir)
     (live_dir / 'recon').mkdir(parents=True, exist_ok=True)
+    prior = _prior_snapshot(live_dir, state['as_of'])
     if external_flow:
+        guard_flow_is_delta(external_flow, state['cash'], prior)
         declare_flow(live_dir, state['as_of'], external_flow)
     receipts = _receipts(live_dir)
-    prior = _prior_snapshot(live_dir, state['as_of'])
     declared = flows_between(live_dir, prior['as_of'] if prior else '',
                              state['as_of'])
 

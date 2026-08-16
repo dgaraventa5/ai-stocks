@@ -85,9 +85,41 @@ def cron_run(live_dir: Path, runner, notifier, now: str) -> int:
     return 0
 
 
+def wait_for_network(host: str = 'agent.robinhood.com', attempts: int = 5,
+                     delay: float = 3.0, resolver=None, sleeper=None) -> bool:
+    """True once `host` resolves, retrying between attempts.
+
+    launchd fires this job during DarkWake (a display-off maintenance wake).
+    On battery, Power Nap restricts network access for user processes, so DNS
+    fails instantly (Errno 8) and the machine returns to sleep ~2s later —
+    2026-08-12..14, where every scheduled recon AND every benchmark fetch
+    failed while attended runs worked fine. Retrying rides out a wake race;
+    a genuinely restricted DarkWake still fails, but now says so plainly.
+    """
+    if resolver is None:
+        import socket
+        resolver = socket.gethostbyname
+    if sleeper is None:
+        import time
+        sleeper = time.sleep
+    for i in range(attempts):
+        try:
+            resolver(host)
+            return True
+        except OSError:
+            if i < attempts - 1:
+                sleeper(delay)
+    return False
+
+
 def _reconcile_via_transport(transport, notifier) -> None:
     """Post-execution recon using READ methods only (D). Failure here is
     flagged, never fatal — the orders are already safely receipted."""
+    if not wait_for_network():
+        notifier('recon skipped: network unavailable (likely a DarkWake '
+                 'maintenance wake on battery — see plist caffeinate note) — '
+                 'run reconcile_account.py in an attended session')
+        return
     try:
         import reconcile_account as ra
         positions = transport.positions()
