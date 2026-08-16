@@ -180,3 +180,49 @@ def test_full_turnover_ticket_never_auto_executed(live_dir):
                      notifier=notes.append, now=NOW)
     assert rc == 1
     assert 'turnover' in (live_dir / 'trading-halt.flag').read_text()
+
+
+# ---- DarkWake network race (2026-08-12..14: every scheduled recon failed) ----
+
+def test_wait_for_network_true_without_sleeping_when_resolvable():
+    slept = []
+    ok = ec.wait_for_network(resolver=lambda h: '1.2.3.4',
+                             sleeper=slept.append)
+    assert ok is True
+    assert slept == []
+
+
+def test_wait_for_network_retries_then_succeeds():
+    """launchd fires the job during DarkWake; Wi-Fi reassociates a beat later."""
+    calls, slept = [], []
+    def resolver(host):
+        calls.append(host)
+        if len(calls) < 3:
+            raise OSError(8, 'nodename nor servname provided, or not known')
+        return '1.2.3.4'
+    assert ec.wait_for_network(resolver=resolver, sleeper=slept.append) is True
+    assert len(calls) == 3
+    assert len(slept) == 2          # slept only between attempts
+
+
+def test_wait_for_network_gives_up_and_does_not_sleep_after_last_attempt():
+    slept = []
+    def resolver(host):
+        raise OSError(8, 'nodename nor servname provided, or not known')
+    ok = ec.wait_for_network(attempts=3, resolver=resolver,
+                             sleeper=slept.append)
+    assert ok is False
+    assert len(slept) == 2          # n-1 sleeps for n attempts
+
+
+def test_recon_skipped_with_clear_message_when_network_down(live_dir,
+                                                            monkeypatch):
+    """The old failure surfaced as a cryptic urlopen error. Name the cause."""
+    monkeypatch.setattr(ec, 'wait_for_network', lambda **kw: False)
+    notes = []
+    class Boom:
+        def positions(self): raise AssertionError('must not touch the network')
+    ec._reconcile_via_transport(Boom(), notes.append)
+    assert len(notes) == 1
+    assert 'network unavailable' in notes[0].lower()
+    assert 'darkwake' in notes[0].lower()

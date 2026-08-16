@@ -13,8 +13,18 @@
 <dict>
   <key>Label</key>
   <string>com.dom.aistocks.executor</string>
+  <!-- caffeinate (-s system, -i idle) holds the machine awake for the run.
+       Without it the job fired during DarkWake and the Mac returned to sleep
+       ~2s later, before DNS was usable: 2026-08-12..14 every scheduled recon
+       and benchmark fetch failed with Errno 8 while attended runs worked.
+       On battery, Power Nap can still restrict network in DarkWake — for a
+       hard guarantee also schedule a real wake (Dom, needs sudo):
+         sudo pmset repeat wakeorpoweron MTWRF 06:30:00 -->
   <key>ProgramArguments</key>
   <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-s</string>
+    <string>-i</string>
     <string>/opt/homebrew/bin/python3</string>
     <string>scripts/executor_cron.py</string>
   </array>

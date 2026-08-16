@@ -93,6 +93,158 @@ def test_unexplained_equity_move_halts(live_dir, tmp_path):
     assert 'unexplained' in (live_dir / 'trading-halt.flag').read_text()
 
 
+def test_undeclared_deposit_halts(live_dir, tmp_path):
+    """A cash deposit that nobody declared is indistinguishable from an
+    executor bug — it must halt (the 2026-08-14 deploy-cash scenario)."""
+    run(STATE, live_dir, tmp_path)
+    dep = 500.0
+    nxt = dict(STATE, as_of='2026-08-14', cash=CASH + dep,
+               equity=round(EQUITY + dep, 2))
+    res = run(nxt, live_dir, tmp_path)
+    assert res['halted'] is True
+    assert 'external-flow' in (live_dir / 'trading-halt.flag').read_text()
+
+
+def test_declared_deposit_no_halt_and_flat_lvm(live_dir, tmp_path):
+    run(STATE, live_dir, tmp_path)                       # prior + baseline
+    dep = 500.0
+    nxt = dict(STATE, as_of='2026-08-14', cash=CASH + dep,
+               equity=round(EQUITY + dep, 2))
+    res = ra.run(nxt, live_dir=live_dir, target_weights=TARGETS,
+                 model_series_path=tmp_path / 'performance-series.json',
+                 status_path=tmp_path / 'live-status.json',
+                 lvm_path=tmp_path / 'live-vs-model.json',
+                 external_flow=dep)
+    assert res['halted'] is False
+    assert res['anomalies'] == []
+    # The deposit is not performance: live_pct stays ~0.
+    lvm = json.loads((tmp_path / 'live-vs-model.json').read_text())
+    assert lvm['series'][-1]['live_pct'] == pytest.approx(0.0, abs=0.05)
+    # Privacy: the flow amount never reaches committed artifacts.
+    for text in ((tmp_path / 'live-vs-model.json').read_text(),
+                 (tmp_path / 'live-status.json').read_text()):
+        assert '500' not in text
+
+
+def test_declared_flow_persists_for_later_undeclared_runs(live_dir, tmp_path):
+    """The launchd cron recons WITHOUT the flag — the ledger must keep
+    explaining the same deposit against the same pre-deposit prior."""
+    run(STATE, live_dir, tmp_path)
+    dep = 500.0
+    nxt = dict(STATE, as_of='2026-08-14', cash=CASH + dep,
+               equity=round(EQUITY + dep, 2))
+    ra.run(nxt, live_dir=live_dir, target_weights=TARGETS,
+           model_series_path=tmp_path / 'performance-series.json',
+           status_path=tmp_path / 'live-status.json',
+           lvm_path=tmp_path / 'live-vs-model.json', external_flow=dep)
+    res = run(nxt, live_dir, tmp_path)   # same-day re-run, no flag (cron)
+    assert res['halted'] is False
+    # ...and the baseline was divisor-adjusted exactly once.
+    base = json.loads((live_dir / 'recon' / 'baseline.json').read_text())
+    assert len(base['applied_flows']) == 1
+    lvm = json.loads((tmp_path / 'live-vs-model.json').read_text())
+    assert lvm['series'][-1]['live_pct'] == pytest.approx(0.0, abs=0.05)
+
+
+def test_declare_flow_idempotent_per_date_amount(live_dir, tmp_path):
+    ra.declare_flow(live_dir, '2026-08-14', 500.0)
+    ra.declare_flow(live_dir, '2026-08-14', 500.0)
+    assert len(ra.read_flows(live_dir)) == 1
+    ra.declare_flow(live_dir, '2026-08-14', -100.0)      # distinct entry
+    assert len(ra.read_flows(live_dir)) == 2
+    assert ra.flows_between(live_dir, '2026-08-12', '2026-08-14') == 400.0
+
+
+def test_flow_equal_to_cash_balance_refused(live_dir, tmp_path):
+    """--external-flow takes the amount that MOVED, not the resulting balance.
+
+    The 2026-08-14 incident: a deposit onto an account that already held cash
+    was declared as the post-deposit balance. Both are dollars, so nothing
+    caught it; the over-declaration then poisoned the baseline divisor and
+    printed a phantom negative live return. Fail closed, like the executor
+    gates. (Figures here are the fixture's fictional values, not live ones.)
+    """
+    run(STATE, live_dir, tmp_path)                       # prior: cash = CASH
+    dep = 500.0
+    nxt = dict(STATE, as_of='2026-08-14', cash=round(CASH + dep, 2),
+               equity=round(EQUITY + dep, 2))
+    with pytest.raises(ValueError, match='resulting balance'):
+        ra.run(nxt, live_dir=live_dir, target_weights=TARGETS,
+               model_series_path=tmp_path / 'performance-series.json',
+               status_path=tmp_path / 'live-status.json',
+               lvm_path=tmp_path / 'live-vs-model.json',
+               external_flow=round(CASH + dep, 2))       # the balance, not the delta
+    assert ra.read_flows(live_dir) == []                  # ledger untouched
+
+
+def test_refusal_names_the_probable_intended_amount(live_dir, tmp_path):
+    """The refusal must be actionable: say what the flow probably was."""
+    run(STATE, live_dir, tmp_path)
+    dep = 500.0
+    nxt = dict(STATE, as_of='2026-08-14', cash=round(CASH + dep, 2),
+               equity=round(EQUITY + dep, 2))
+    with pytest.raises(ValueError, match=r'500\.00'):
+        ra.run(nxt, live_dir=live_dir, target_weights=TARGETS,
+               model_series_path=tmp_path / 'performance-series.json',
+               status_path=tmp_path / 'live-status.json',
+               lvm_path=tmp_path / 'live-vs-model.json',
+               external_flow=round(CASH + dep, 2))
+
+
+def test_flow_equal_to_cash_balance_allowed_when_prior_cash_zero(live_dir,
+                                                                 tmp_path):
+    """A deposit into a fully-deployed account legitimately EQUALS the
+    resulting balance — the guard must not fire on the honest case."""
+    zero = dict(STATE, cash=0.0, equity=round(EQUITY - CASH, 2))
+    run(zero, live_dir, tmp_path)
+    dep = 500.0
+    nxt = dict(zero, as_of='2026-08-14', cash=dep,
+               equity=round(EQUITY - CASH + dep, 2))
+    res = ra.run(nxt, live_dir=live_dir, target_weights=TARGETS,
+                 model_series_path=tmp_path / 'performance-series.json',
+                 status_path=tmp_path / 'live-status.json',
+                 lvm_path=tmp_path / 'live-vs-model.json', external_flow=dep)
+    assert res['halted'] is False
+    assert ra.read_flows(live_dir) == [{'date': '2026-08-14', 'amount': dep}]
+
+
+def test_declared_withdrawal_no_halt(live_dir, tmp_path):
+    run(STATE, live_dir, tmp_path)
+    wd = -60.0
+    nxt = dict(STATE, as_of='2026-08-14', cash=round(CASH + wd, 2),
+               equity=round(EQUITY + wd, 2))
+    res = ra.run(nxt, live_dir=live_dir, target_weights=TARGETS,
+                 model_series_path=tmp_path / 'performance-series.json',
+                 status_path=tmp_path / 'live-status.json',
+                 lvm_path=tmp_path / 'live-vs-model.json', external_flow=wd)
+    assert res['halted'] is False
+
+
+def test_market_move_after_deposit_still_measured(live_dir, tmp_path):
+    """Divisor math: the deposit is invisible but the subsequent rally is not."""
+    run(STATE, live_dir, tmp_path)
+    dep = 500.0
+    d1 = dict(STATE, as_of='2026-08-14', cash=CASH + dep,
+              equity=round(EQUITY + dep, 2))
+    ra.run(d1, live_dir=live_dir, target_weights=TARGETS,
+           model_series_path=tmp_path / 'performance-series.json',
+           status_path=tmp_path / 'live-status.json',
+           lvm_path=tmp_path / 'live-vs-model.json', external_flow=dep)
+    px = NVDA_PX * 1.10                                  # +10% on the position
+    gain = NVDA_SH * (px - NVDA_PX)
+    d2 = {'as_of': '2026-08-15', 'cash': CASH + dep,
+          'equity': round(EQUITY + dep + gain, 2),
+          'positions': {'NVDA': {'shares': NVDA_SH, 'price': px}},
+          'orders': []}
+    ra.run(d2, live_dir=live_dir, target_weights={'NVDA': 0.40},
+           model_series_path=tmp_path / 'performance-series.json',
+           status_path=tmp_path / 'live-status.json',
+           lvm_path=tmp_path / 'live-vs-model.json')
+    lvm = json.loads((tmp_path / 'live-vs-model.json').read_text())
+    expected = (d2['equity'] / (EQUITY + dep) - 1) * 100
+    assert lvm['series'][-1]['live_pct'] == pytest.approx(expected, abs=0.05)
+
+
 def test_price_explained_equity_move_no_halt(live_dir, tmp_path):
     run(STATE, live_dir, tmp_path)
     px = 250.0                                           # NVDA rallied
