@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-08-14",
+  "as_of": "2026-08-16",
   "halted": true,
   "positions": 10,
   "open_orders": 0,
@@ -21,5 +21,5 @@
     "VRT"
   ],
   "regen_needed": [],
-  "anomaly_count": 1
+  "anomaly_count": 0
 }
