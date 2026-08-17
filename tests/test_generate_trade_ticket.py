@@ -46,7 +46,9 @@ def test_generate_writes_ticket_from_snapshot_actuals(live_dir):
     # NVDA: target 250 vs held 300.006 → sell ~50; TSM: buy 200
     assert by['NVDA']['side'] == 'sell'
     assert by['TSM']['side'] == 'buy'
-    assert abs(by['TSM']['notional_est'] - 200.0) < 1.0
+    # 40% of equity, sized against the 2% CASH_BUFFER_PCT slack (real DEFAULTS
+    # path): 500.01 * 0.98 * 0.40 ≈ 196. Equity itself is reported unbuffered.
+    assert abs(by['TSM']['notional_est'] - 196.0) < 1.0
 
 
 def test_generate_refuses_without_snapshot(tmp_path, capsys):

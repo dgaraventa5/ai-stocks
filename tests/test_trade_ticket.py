@@ -5,10 +5,15 @@ dust suppression, untradeable-name renormalization, canonical checksum.
 """
 import json
 
+import pytest
+
 import trade_ticket as tt
 
+# CASH_BUFFER_PCT pinned to 0 so these cases isolate limit math, dust,
+# renormalization and delta-from-actuals from cash sizing. The buffer's own
+# behavior is covered against the real DEFAULTS in the cash-buffer tests below.
 CFG = {'MIN_ORDER_NOTIONAL': 25.0, 'LIMIT_TOL': 0.0075,
-       'MAX_WEIGHT': 0.12, 'TICKET_TTL_HOURS': 48}
+       'MAX_WEIGHT': 0.12, 'TICKET_TTL_HOURS': 48, 'CASH_BUFFER_PCT': 0.0}
 
 
 def orders_by_ticker(result):
@@ -151,3 +156,35 @@ def test_build_ticket_fields_and_expiry():
     assert tk['checksum'] == tt.ticket_checksum(tk['orders'])
     # round-trips through JSON
     assert json.loads(json.dumps(tk)) == tk
+
+
+# ---- cash buffer (2026-08-17: the last order failed on insufficient funds) ----
+
+def test_buys_leave_a_cash_buffer_for_slippage():
+    """Full redeploy must not consume ~100% of cash.
+
+    Robinhood places fractional orders as MARKET orders (the limit price is
+    advisory), and the executor sends them sequentially, so every prior fill's
+    slippage accumulates against the last one. On 2026-08-17 a ticket sized to
+    99.98% of cash filled 14 of 15 and the alphabetically-last name came back
+    "You can only purchase 0 shares of VRT" — broker-speak for insufficient
+    funds. Whichever ticker sorts last is systematically the casualty, so the
+    fix belongs in sizing, not in retry.
+    """
+    cash = 1000.0
+    weights = {t: 0.25 for t in ('AAA', 'BBB', 'CCC', 'DDD')}
+    prices = {t: 100.0 for t in weights}
+    res = tt.compute_orders(weights, {}, cash, prices, dict(tt.DEFAULTS))
+    spend = sum(o['shares'] * o['limit_price'] for o in res['orders']
+                if o['side'] == 'buy')
+    assert spend <= cash * 0.99, f'spent {spend} of {cash} — no slack for slippage'
+    assert spend >= cash * 0.95, f'spent only {spend} — buffer is too fat to be useful'
+
+
+def test_cash_buffer_is_configurable():
+    cash = 1000.0
+    weights, prices = {'AAA': 1.0}, {'AAA': 100.0}
+    cfg = dict(tt.DEFAULTS, CASH_BUFFER_PCT=0.10, MAX_WEIGHT=1.0)
+    res = tt.compute_orders(weights, {}, cash, prices, cfg)
+    spend = sum(o['shares'] * o['limit_price'] for o in res['orders'])
+    assert spend == pytest.approx(900.0, rel=0.01)
