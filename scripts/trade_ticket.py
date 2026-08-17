@@ -19,6 +19,7 @@ DEFAULTS = {
     'LIMIT_TOL': 0.0075,          # marketable-limit tolerance
     'MAX_WEIGHT': 0.12,           # renormalization cap (mirrors sizing cap)
     'TICKET_TTL_HOURS': 48,
+    'CASH_BUFFER_PCT': 0.02,      # undeployed slack for slippage (see below)
 }
 
 
@@ -85,7 +86,17 @@ def compute_orders(target_weights: dict[str, float],
 
     mv = {t: p['shares'] * prices[t]
           for t, p in positions.items() if t in prices}
-    equity = cash + sum(mv.values())
+    # Deploy against equity MINUS a cash buffer. Robinhood places fractional
+    # orders as MARKET orders (limit_price below is advisory) and the executor
+    # sends them sequentially, so each fill's slippage accumulates against the
+    # orders still to come — the ticker sorting last is systematically the one
+    # that runs out of money. Worse, limits are marked up by LIMIT_TOL, so
+    # targeting 100% of equity overspends by that tolerance before slippage is
+    # even considered. Keep the buffer > LIMIT_TOL. (2026-08-17: a 99.98%
+    # ticket filled 14 of 15; VRT came back "You can only purchase 0 shares".)
+    buffer_pct = float(cfg.get('CASH_BUFFER_PCT', DEFAULTS['CASH_BUFFER_PCT']))
+    equity = cash + sum(mv.values())          # true equity — reported as-is
+    deployable = equity * (1.0 - buffer_pct)  # what targets are sized against
 
     orders, suppressed, skipped = [], [], []
     tickers = sorted(set(tradeable) | set(positions))
@@ -96,7 +107,7 @@ def compute_orders(target_weights: dict[str, float],
                                       '(rule 3: flagged, not guessed)'})
             continue
         ref = float(prices[t])
-        target_notional = tradeable.get(t, 0.0) * equity
+        target_notional = tradeable.get(t, 0.0) * deployable
         delta = target_notional - mv.get(t, 0.0)
         if abs(delta) < min_notional:
             if abs(delta) > 1e-9:
