@@ -30,6 +30,12 @@
       "live_pct": -0.46,
       "model_pct": 2.86,
       "shortfall_pct": -3.32
+    },
+    {
+      "date": "2026-08-17",
+      "live_pct": -0.42,
+      "model_pct": 3.27,
+      "shortfall_pct": -3.69
     }
   ]
 }
