@@ -48,7 +48,8 @@ DEAD_STATES = ('cancelled', 'expired', 'rejected', 'failed', 'voided')
 # unknown field. Same standing as the site privacy gate: never weaken.
 _STATUS_SCHEMA = {'as_of': str, 'halted': bool, 'positions': int,
                   'open_orders': int, 'drift_flags': list,
-                  'regen_needed': list, 'anomaly_count': int}
+                  'regen_needed': list, 'anomaly_count': int,
+                  'cap_exceeded': bool}
 _LVM_ENTRY_SCHEMA = {'date': str, 'live_pct': (float, int, type(None)),
                      'model_pct': (float, int, type(None)),
                      'shortfall_pct': (float, int, type(None))}
@@ -113,6 +114,30 @@ def declare_flow(live_dir: Path, date: str, amount: float) -> None:
     with path.open('a') as fh:
         fh.write(json.dumps(entry) + '\n')
     print(f'external flow declared: {amount:+.2f} on {date}')
+
+
+def cap_exceeded(live_dir: Path, equity: float) -> bool:
+    """True when account equity has outgrown the executor's ACCOUNT_CAP.
+
+    The cap is the ceiling on how much money this system is authorised to
+    manage. A deposit can push equity past it, after which execute_ticket
+    refuses EVERY ticket — but nothing announced that: the halt flag and the
+    anomaly check both stayed quiet, and model events are rare, so on
+    2026-08-17 the condition only surfaced days later when a rebalance
+    happened to be attempted. Surfacing it at recon closes that gap.
+
+    FLAG, never halt: the executor already fails closed on its own, so a halt
+    would add no safety while blocking unrelated work and requiring a manual
+    clear. Missing config means the cap is unknown — claim nothing (rule 3).
+    """
+    path = Path(live_dir) / 'executor-config.json'
+    if not path.exists():
+        return False
+    try:
+        cap = float(json.loads(path.read_text())['ACCOUNT_CAP'])
+    except (ValueError, KeyError, TypeError, json.JSONDecodeError):
+        return False
+    return float(equity) > cap
 
 
 def guard_flow_is_delta(flow: float, cash: float, prior: dict | None) -> None:
@@ -333,6 +358,7 @@ def run(state: dict, *, live_dir: Path, target_weights: dict[str, float],
     # percentages. No dollars, no share counts, no order ids (§E).
     open_orders = sum(1 for o in state.get('orders', [])
                       if o.get('state') in OPEN_STATES)
+    over_cap = cap_exceeded(live_dir, state['equity'])
     status = {
         'as_of': state['as_of'],
         'halted': halted,
@@ -341,6 +367,7 @@ def run(state: dict, *, live_dir: Path, target_weights: dict[str, float],
         'drift_flags': [d['ticker'] for d in drift],
         'regen_needed': regen,
         'anomaly_count': len(anomalies),
+        'cap_exceeded': over_cap,
     }
     assert_sanitized_status(status)              # §E gate before committed write
     Path(status_path).write_text(json.dumps(status, indent=2) + '\n')
@@ -351,11 +378,15 @@ def run(state: dict, *, live_dir: Path, target_weights: dict[str, float],
     for t in regen:
         print(f'unfilled order dead: {t} — regenerate on next model event '
               f'or --regen-unfilled')
+    if over_cap:
+        print('[FLAG] account equity exceeds ACCOUNT_CAP — execute_ticket will '
+              'REFUSE every ticket until the cap is raised in '
+              'tracking/live/executor-config.json (deliberate edit, §C2)')
     print(f'recon {state["as_of"]}: {len(state["positions"])} positions, '
           f'{open_orders} open orders, halted={halted}')
     return {'halted': halted, 'drift': drift, 'fills': fills,
             'regen_needed': regen, 'anomalies': anomalies,
-            'snapshot': snap_path}
+            'cap_exceeded': over_cap, 'snapshot': snap_path}
 
 
 def _targets_from_workbook() -> dict[str, float]:

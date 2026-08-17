@@ -321,3 +321,42 @@ def test_live_vs_model_baseline_then_relative(live_dir, tmp_path):
     for planted in (str(EQUITY), str(CASH)):
         assert planted not in text                       # relative % only
     assert res['halted'] is False
+
+
+# ---- ACCOUNT_CAP staleness (2026-08-17: a deposit silently outgrew the cap) ----
+
+def _cfg(live_dir, cap):
+    (live_dir / 'executor-config.json').write_text(json.dumps({'ACCOUNT_CAP': cap}))
+
+
+def test_equity_over_account_cap_flags_without_halting(live_dir, tmp_path):
+    """A deposit can push equity past ACCOUNT_CAP, after which every execution
+    refuses — but nothing said so until a rebalance happened to be attempted.
+    Surface it at recon. FLAG, never halt: the executor already fails closed,
+    and a halt would block unrelated work and need manual clearing.
+    """
+    _cfg(live_dir, EQUITY - 100)                 # equity above the cap
+    res = run(STATE, live_dir, tmp_path)
+    assert res['cap_exceeded'] is True
+    assert res['halted'] is False
+    assert res['anomalies'] == []
+
+
+def test_equity_under_account_cap_not_flagged(live_dir, tmp_path):
+    _cfg(live_dir, EQUITY + 100)
+    assert run(STATE, live_dir, tmp_path)['cap_exceeded'] is False
+
+
+def test_no_executor_config_means_no_cap_claim(live_dir, tmp_path):
+    """No config = the cap is unknown. Don't invent a verdict (rule 3)."""
+    assert run(STATE, live_dir, tmp_path)['cap_exceeded'] is False
+
+
+def test_cap_flag_reaches_committed_status_without_dollars(live_dir, tmp_path):
+    """§E: the committed artifact may carry the boolean, never the figures."""
+    _cfg(live_dir, EQUITY - 100)
+    run(STATE, live_dir, tmp_path)
+    text = (tmp_path / 'live-status.json').read_text()
+    assert json.loads(text)['cap_exceeded'] is True
+    for planted in (str(EQUITY), str(EQUITY - 100), str(CASH)):
+        assert planted not in text
