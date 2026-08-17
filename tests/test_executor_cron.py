@@ -6,6 +6,7 @@ execution, full-turnover tickets NEVER auto-executed, expired/receipted
 tickets skipped silently.
 """
 import json
+import subprocess
 
 import pytest
 
@@ -226,3 +227,58 @@ def test_recon_skipped_with_clear_message_when_network_down(live_dir,
     assert len(notes) == 1
     assert 'network unavailable' in notes[0].lower()
     assert 'darkwake' in notes[0].lower()
+
+
+# ---- series step must not commit to a feature branch (2026-08-17) ----
+
+class FakeGit:
+    """Records git invocations; series always reports as changed."""
+    def __init__(self, branch='main'):
+        self.branch, self.calls = branch, []
+
+    def __call__(self, argv, **kw):
+        self.calls.append(argv)
+        if argv[:3] == ['git', 'rev-parse', '--abbrev-ref']:
+            return subprocess.CompletedProcess(argv, 0, self.branch + '\n', '')
+        if argv[:3] == ['git', 'diff', '--quiet']:
+            return subprocess.CompletedProcess(argv, 1)   # 1 = changed
+        return subprocess.CompletedProcess(argv, 0, '', '')
+
+    def ran(self, verb):
+        return [c for c in self.calls if c[:2] == ['git', verb]]
+
+
+def test_series_does_not_commit_on_a_feature_branch():
+    """The runner fires on a schedule, so it lands on whatever branch happens
+    to be checked out. On 2026-08-17 it committed the series onto an in-flight
+    feature branch, which then conflicted with main's copy of the same day.
+    Rebuild the series always; commit only on main.
+    """
+    git, notes = FakeGit(branch='fix/some-work'), []
+    ec._series_step(run=git, notifier=notes.append)
+    assert git.ran('commit') == []
+    assert git.ran('push') == []
+    assert any('branch' in n.lower() for n in notes), notes
+
+
+def test_series_commits_and_pushes_on_main():
+    git = FakeGit(branch='main')
+    ec._series_step(run=git, notifier=lambda m: None)
+    assert len(git.ran('commit')) == 1
+    assert len(git.ran('push')) == 1
+
+
+def test_series_commit_is_scoped_to_the_series_file():
+    """`git add X` then a bare `git commit` also commits anything else already
+    staged. Scope the commit to the path so unrelated staged work is safe."""
+    git = FakeGit(branch='main')
+    ec._series_step(run=git, notifier=lambda m: None)
+    commit = git.ran('commit')[0]
+    assert 'tracking/performance-series.json' in commit
+    assert commit.index('--') < commit.index('tracking/performance-series.json')
+
+
+def test_series_unchanged_commits_nothing():
+    git = FakeGit(branch='main')
+    git.__call__ = lambda argv, **kw: subprocess.CompletedProcess(argv, 0, 'main\n', '')
+    ec._series_step(run=git.__call__, notifier=lambda m: None)
