@@ -207,23 +207,44 @@ def daily_run(live_dir: Path, steps: list[tuple], notifier,
     return rc
 
 
-def _series_step() -> None:
+SERIES_FILE = 'tracking/performance-series.json'
+
+
+def _series_step(run=None, notifier=None) -> None:
     """Rebuild the performance series and push it if it changed — from this
     machine (residential IP, real git creds), replacing dependence on the
-    flaky GH cron (which stays as an idempotent backstop)."""
-    subprocess.run([sys.executable, 'scripts/track_performance.py',
-                    '--series-only'], cwd=_REPO_ROOT, check=True, timeout=600)
-    series = 'tracking/performance-series.json'
-    diff = subprocess.run(['git', 'diff', '--quiet', '--', series],
-                          cwd=_REPO_ROOT)
-    if diff.returncode == 0:
+    flaky GH cron (which stays as an idempotent backstop).
+
+    Commits ONLY on main. This runs on a schedule, so it lands on whatever
+    branch happens to be checked out: on 2026-08-17 it committed the series
+    onto an in-flight feature branch (bare `git push` pushes the current
+    branch), which then conflicted with main's copy of the same day and
+    carried different values, because the series is recomputed from the
+    model's current composition. Off main, rebuild and flag — the next run on
+    main, or the GH backstop, publishes it.
+    """
+    run = run or subprocess.run
+    notifier = notifier or print
+    run([sys.executable, 'scripts/track_performance.py', '--series-only'],
+        cwd=_REPO_ROOT, check=True, timeout=600)
+    if run(['git', 'diff', '--quiet', '--', SERIES_FILE],
+           cwd=_REPO_ROOT).returncode == 0:
         return                               # unchanged (holiday/weekend)
-    subprocess.run(['git', 'add', series], cwd=_REPO_ROOT, check=True)
-    subprocess.run(['git', 'commit', '-m',
-                    f'chore(data): daily performance series '
-                    f'{dt.date.today().isoformat()} (local pipeline runner)'],
-                   cwd=_REPO_ROOT, check=True)
-    subprocess.run(['git', 'push'], cwd=_REPO_ROOT, check=True, timeout=120)
+    branch = (run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], cwd=_REPO_ROOT,
+                  capture_output=True, text=True).stdout or '').strip()
+    if branch != 'main':
+        notifier(f'series rebuilt but NOT committed: on branch {branch!r}, '
+                 f'not main — commit it from main (or let the GH backstop)')
+        return
+    run(['git', 'add', SERIES_FILE], cwd=_REPO_ROOT, check=True)
+    # `--` scopes the commit to this path: a bare `git commit` would also
+    # sweep in whatever else happened to be staged in the working tree.
+    run(['git', 'commit', '-m',
+         f'chore(data): daily performance series '
+         f'{dt.date.today().isoformat()} (local pipeline runner)',
+         '--', SERIES_FILE], cwd=_REPO_ROOT, check=True)
+    run(['git', 'push', 'origin', 'main'], cwd=_REPO_ROOT, check=True,
+        timeout=120)
 
 
 def main(mode: str = 'auto') -> int:
