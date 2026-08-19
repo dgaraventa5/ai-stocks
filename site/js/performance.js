@@ -12,7 +12,7 @@ renderNav('performance.html');
       ['SMH', perf.bench.SMH, CHART_COLORS.SMH, false, true],
       ['QQQ', perf.bench.QQQ, CHART_COLORS.QQQ, false, true],
       ['S&P 500', perf.bench.SPY, CHART_COLORS.SPY, false, true],
-      ['EW roster (sizing null)', perf.bench.EW_ROSTER, CHART_COLORS.EW_ROSTER, false, false],
+      ['Same picks, equal weight', perf.bench.EW_ROSTER, CHART_COLORS.EW_ROSTER, false, false],
       ['Band 1–15', perf.bench.BAND_TOP, CHART_COLORS.BAND_TOP, false, false],
       ['Band 16–25', perf.bench.BAND_NEXT, CHART_COLORS.BAND_NEXT, false, false],
       ['Band 26–40', perf.bench.BAND_TAIL, CHART_COLORS.BAND_TAIL, false, false],
