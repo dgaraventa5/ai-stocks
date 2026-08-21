@@ -86,8 +86,11 @@ pre-scan model. Everything else was already priced into the standing model.
 - **[2026-08-14]** Stock -6% after Bank of America questioned a ~$370B AI-debt financing vehicle tied to leasing
   custom AI accelerators (sector-financing-durability concern, not AVGO balance-sheet debt directly); compounded
   by broad AI-trade profit-taking. — [24/7 Wall St](https://247wallst.com/investing/2026/08/14/broadcom-sinks-6-as-bofa-flags-370b-in-ai-debt-amd-climbs-4-on-bairds-1250-call/)
-- **[2026-08-14, ongoing]** VMware vCenter zero-day (CVE-2026-59310, patch already released July 29) confirmed
-  actively exploited — ~361 IPs across 47 countries compromised.
+- **[2026-08-14, ongoing]** VMware vCenter CVE-2026-59310 (CVSS 9.8) confirmed actively exploited — ~361 IPs
+  across 47 countries compromised. *[Corrected 2026-08-21 by `/refresh-context AVGO`: originally written here as
+  a "zero-day" — it is not. The patch (2026-07-29) preceded first observed exploitation (2026-08-03) by five
+  days; this is n-day mass exploitation of an unpatched estate, which materially changes the liability read.
+  CISA added it to the KEV catalog 2026-08-18, federal deadline 2026-08-21.]*
 - **[2026-08-18/19]** **Marvell announced a custom AI-chip deal with Google**: a warrant for Google to buy up to
   ~$12.2B of Marvell stock (58.97M shares @ $206.58), tied to expanding TPU-ecosystem chip work (inference
   accelerators, storage/NIC). AVGO fell ~4-5% on fears this erodes its Google-TPU relationship; CEO Hock Tan
