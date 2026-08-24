@@ -131,3 +131,78 @@ def test_latest_periodic_filing_picks_newest_and_ignores_8k(tmp_path, monkeypatc
 def test_latest_periodic_filing_none_when_no_dir(tmp_path, monkeypatch):
     monkeypatch.setattr(lc, "per_stock_dir", lambda t, **k: tmp_path / t)
     assert lc.latest_periodic_filing("NOPE") is None
+
+
+class _Resp:
+    def __init__(self, status, payload=None):
+        self.status_code, self._p = status, payload or {}
+    def json(self):
+        return self._p
+
+
+def test_rate_limit_is_retried_then_succeeds(monkeypatch):
+    """429 must not silently shrink sweep coverage — a skipped name reads like
+    a clean one when you are scanning 30 of them."""
+    calls, slept = [], []
+    seq = [_Resp(429), _Resp(429), _Resp(200, {"results": [BW_CHO]})]
+
+    def fake_get(*a, **k):
+        calls.append(1)
+        return seq[len(calls) - 1]
+
+    monkeypatch.setitem(__import__("sys").modules, "requests",
+                        type("m", (), {"get": staticmethod(fake_get)}))
+    res, skip = lc.courtlistener_search("q", filed_after="2023-01-01",
+                                        backoff=0.01, sleep=slept.append)
+    assert skip is None and res == [BW_CHO]
+    assert len(calls) == 3 and len(slept) == 2
+    assert slept[1] > slept[0]  # exponential
+
+
+def test_rate_limit_gives_up_honestly(monkeypatch):
+    monkeypatch.setitem(__import__("sys").modules, "requests",
+                        type("m", (), {"get": staticmethod(lambda *a, **k: _Resp(429))}))
+    res, skip = lc.courtlistener_search("q", filed_after="2023-01-01",
+                                        retries=2, backoff=0.01, sleep=lambda s: None)
+    assert res == [] and "rate-limited" in skip and "rerun" in skip
+
+
+def test_non_429_error_fails_fast(monkeypatch):
+    calls = []
+
+    def fake_get(*a, **k):
+        calls.append(1)
+        return _Resp(503)
+
+    monkeypatch.setitem(__import__("sys").modules, "requests",
+                        type("m", (), {"get": staticmethod(fake_get)}))
+    res, skip = lc.courtlistener_search("q", filed_after="2023-01-01",
+                                        backoff=0.01, sleep=lambda s: None)
+    assert res == [] and "503" in skip and len(calls) == 1
+
+
+def test_search_terms_drops_single_char_debris():
+    # "Nebius Group N.V." -> "Nebius Group N V"; a bare "N" term made the
+    # CourtListener query return zero dockets, i.e. a false clean (2026-08-24).
+    assert lc.search_terms("Nebius Group N.V.") == ["Nebius"]
+    assert lc.search_terms("T1 Energy Inc.") == ["T1", "Energy"]  # T1 survives
+
+
+def test_search_variants_includes_former_names():
+    # Dockets are captioned under the entity name AT FILING. KEEL read as clean
+    # on its current name while "Bitfarms" returns a pending securities case.
+    assert lc.search_variants("Keel Infrastructure Corp. (fka Bitfarms)") == \
+        [["Keel", "Infrastructure"], ["Bitfarms"]]
+    assert lc.search_variants("Foo Corp. formerly known as Bar Industries") == \
+        [["Foo"], ["Bar", "Industries"]]
+    assert lc.search_variants("T1 Energy Inc.") == [["T1", "Energy"]]
+    assert lc.search_variants("") == []
+
+
+def test_every_hit_lands_in_some_bucket():
+    """A name whose only dockets are contract/employment must not print an
+    empty report — that reads identically to 'clean' (KN, AEVA, 2026-08-24)."""
+    contract = {"caseName": "Acme v. Knowles Corp", "docketNumber": "1:24-cv-1",
+                "dateFiled": "2024-01-01", "dateTerminated": None,
+                "suitNature": "190 Contract: Other", "cause": "28:1332 Diversity"}
+    assert not lc.is_securities(contract) and not lc.is_ip(contract)

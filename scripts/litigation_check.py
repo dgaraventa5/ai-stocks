@@ -75,6 +75,7 @@ from pathlib import Path
 from common import per_stock_dir
 
 CL_SEARCH = "https://www.courtlistener.com/api/rest/v4/search/"
+_OTHER_SHOWN = 3  # low-precision bucket; cap the noise
 USER_AGENT = "Dom Researcher dgaraventa5@gmail.com"
 
 # Dropped when deriving search terms from a company's legal name. CourtListener
@@ -105,8 +106,34 @@ def search_terms(company: str, *, max_terms: int = 2) -> list[str]:
     during development).
     """
     cleaned = re.sub(r"[^\w\s]", " ", (company or "").replace("&", " "))
-    tokens = [t for t in cleaned.split() if t and t.lower() not in _SUFFIXES]
+    tokens = [t for t in cleaned.split()
+              # len>1 drops the debris punctuation-stripping leaves behind:
+              # "Nebius Group N.V." -> "Nebius Group N V", and a bare "N"
+              # search token silently returns zero dockets (found in the
+              # 2026-08-24 sweep, where NBIS read as clean).
+              if len(t) > 1 and t.lower() not in _SUFFIXES]
     return tokens[:max_terms]
+
+
+def search_variants(company: str) -> list[list[str]]:
+    """Term sets to search: the current name plus any former name.
+
+    Dockets are captioned under the entity name AT FILING. A renamed company
+    therefore hides its own litigation from a current-name search — found the
+    hard way in the 2026-08-24 sweep: KEEL ("Keel Infrastructure Corp. (fka
+    Bitfarms)") read as clean, while a search for "Bitfarms" returns a pending
+    securities class action (1:25-cv-02630, E.D.N.Y.). Rebrands are endemic in
+    this universe (miner->AI pivots, de-SPACs), so this is not an edge case.
+    """
+    text = company or ""
+    variants: list[list[str]] = []
+    primary = re.split(r"\(?\s*(?:f/?k/?a|formerly(?:\s+known\s+as)?)\b",
+                       text, flags=re.I)
+    for chunk in primary:
+        terms = search_terms(chunk)
+        if terms and terms not in variants:
+            variants.append(terms)
+    return variants
 
 
 def build_query(terms: list[str], *, securities_only: bool = False) -> str:
@@ -141,27 +168,43 @@ def matches_company(docket: dict, terms: list[str]) -> bool:
     return all(t.lower() in name for t in terms) if terms else False
 
 
-def courtlistener_search(query: str, *, filed_after: str,
-                         timeout: int = 30) -> tuple[list[dict], str | None]:
-    """Federal dockets from the RECAP index. Returns (results, skip_reason)."""
+def courtlistener_search(query: str, *, filed_after: str, timeout: int = 30,
+                         retries: int = 4, backoff: float = 15.0,
+                         sleep=time.sleep) -> tuple[list[dict], str | None]:
+    """Federal dockets from the RECAP index. Returns (results, skip_reason).
+
+    Anonymous CourtListener throttles hard: a 32-name sweep on 2026-08-24 hit
+    HTTP 429 after ~15 queries at 1s spacing. 429 is retried with exponential
+    backoff (15s, 30s, 60s, 120s) because the alternative — reporting a skip —
+    silently shrinks sweep coverage, and a skipped name looks a lot like a
+    clean one when you are scanning 30 of them. Everything else fails fast.
+    """
     import requests  # lazy: deploy-site CI installs only openpyxl+pytest
 
-    try:
-        resp = requests.get(
-            CL_SEARCH,
-            params={"q": query, "type": "r", "filed_after": filed_after,
-                    "order_by": "dateFiled desc"},
-            headers={"User-Agent": USER_AGENT}, timeout=timeout)
-    except Exception as e:  # network down, DNS, TLS
-        return [], f"CourtListener unreachable ({type(e).__name__}: {e})"
-    if resp.status_code == 429:
-        return [], "CourtListener rate-limited (HTTP 429) — retry later"
-    if resp.status_code != 200:
-        return [], f"CourtListener returned HTTP {resp.status_code}"
-    try:
-        return resp.json().get("results") or [], None
-    except Exception as e:
-        return [], f"CourtListener response unparseable ({type(e).__name__}: {e})"
+    delay = backoff
+    for attempt in range(retries + 1):
+        try:
+            resp = requests.get(
+                CL_SEARCH,
+                params={"q": query, "type": "r", "filed_after": filed_after,
+                        "order_by": "dateFiled desc"},
+                headers={"User-Agent": USER_AGENT}, timeout=timeout)
+        except Exception as e:  # network down, DNS, TLS
+            return [], f"CourtListener unreachable ({type(e).__name__}: {e})"
+        if resp.status_code == 429:
+            if attempt == retries:
+                return [], (f"CourtListener rate-limited (HTTP 429) after "
+                            f"{retries + 1} attempts — rerun this ticker later")
+            sleep(delay)
+            delay *= 2
+            continue
+        if resp.status_code != 200:
+            return [], f"CourtListener returned HTTP {resp.status_code}"
+        try:
+            return resp.json().get("results") or [], None
+        except Exception as e:
+            return [], f"CourtListener response unparseable ({type(e).__name__}: {e})"
+    return [], "CourtListener rate-limited (HTTP 429)"
 
 
 def latest_periodic_filing(ticker: str) -> tuple[Path, str] | None:
@@ -208,21 +251,30 @@ def _fmt(d: dict) -> str:
             f"{d.get('cause') or 'cause n/a'} · judge {d.get('assignedTo') or 'n/a'}")
 
 
-def check(ticker: str, company: str | None = None, years: int = 3) -> str:
+def check(ticker: str, company: str | None = None, years: int = 3,
+          all_other: bool = False) -> str:
     from datetime import date, timedelta
 
     company = company or _company_from_watchlist(ticker) or ticker
-    terms = search_terms(company)
-    if not terms:
+    variants = search_variants(company)
+    if not variants:
         return f"{ticker} SKIPPED — no usable search terms from company name {company!r}"
 
     filed_after = (date.today() - timedelta(days=365 * years)).isoformat()
-    results, skip = courtlistener_search(build_query(terms), filed_after=filed_after)
-    if skip:
-        return (f"{ticker} SKIPPED — {skip}. Absence of a result here is NOT "
-                f"evidence of no litigation; note the skip in the briefing.")
-
-    hits = [d for d in results if matches_company(d, terms)]
+    hits, seen, queries = [], set(), []
+    for terms in variants:
+        queries.append(" ".join(terms))
+        results, skip = courtlistener_search(build_query(terms),
+                                             filed_after=filed_after)
+        if skip:
+            return (f"{ticker} SKIPPED — {skip}. Absence of a result here is NOT "
+                    f"evidence of no litigation; note the skip in the briefing.")
+        for d in results:
+            key = (d.get("docketNumber"), d.get("court"))
+            if key not in seen and matches_company(d, terms):
+                seen.add(key)
+                hits.append(d)
+    terms = variants[0]
     securities = [d for d in hits if is_securities(d)]
     ip = [d for d in hits if is_ip(d) and d not in securities]
 
@@ -231,7 +283,7 @@ def check(ticker: str, company: str | None = None, years: int = 3) -> str:
     mismatches = disclosure_mismatch(securities, filing, mentions)
 
     out = [f"=== {ticker} ({company}) — federal dockets since {filed_after} "
-           f"[caseName:({' '.join(terms)})] ==="]
+           f"[caseName queries: {'; '.join(queries)}] ==="]
     if not hits:
         out.append("  No federal docket found in RECAP. NOTE: RECAP mirrors "
                    "PACER and is not guaranteed complete — record this as "
@@ -242,6 +294,23 @@ def check(ticker: str, company: str | None = None, years: int = 3) -> str:
     if ip:
         out.append(f"  IP/patent dockets ({len(ip)}) — may bear on D3 moat:")
         out += [_fmt(d) for d in ip]
+    # Residual bucket. Without this a name whose only hits are contract /
+    # employment / bankruptcy dockets prints NO docket line at all, which reads
+    # identically to a clean run (KN and AEVA in the 2026-08-24 sweep). Never
+    # let the report be silently empty.
+    other = [d for d in hits if d not in securities and d not in ip]
+    if other:
+        out.append(f"  Other dockets ({len(other)}) — not securities or IP. "
+                   f"Single-token company names match unrelated people and "
+                   f"entities (a 'Knowles' search returns a serial ADA "
+                   f"plaintiff's suits and personal bankruptcies), so treat "
+                   f"this bucket as low-precision. Showing "
+                   f"{len(other) if all_other else min(len(other), _OTHER_SHOWN)}:")
+        out += [_fmt(d) for d in (other if all_other
+                                  else other[:_OTHER_SHOWN])]
+        if not all_other and len(other) > _OTHER_SHOWN:
+            out.append(f"      … and {len(other) - _OTHER_SHOWN} more not shown "
+                       f"(rerun with --all-other to list them)")
 
     if filing:
         path, fdate = filing
@@ -295,13 +364,20 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--years", type=int, default=3,
                     help="lookback window for dateFiled (default 3)")
     ap.add_argument("--company", help="override company name (single ticker)")
+    ap.add_argument("--all-other", action="store_true",
+                    help="list every low-precision 'other' docket, not just "
+                         "the first %d" % _OTHER_SHOWN)
+    ap.add_argument("--delay", type=float, default=4.0,
+                    help="seconds between tickers (default 4; anonymous "
+                         "CourtListener 429s at ~1s spacing)")
     args = ap.parse_args(argv)
 
     for i, t in enumerate(args.tickers):
         if i:
-            time.sleep(1.0)  # be polite to a free service
-        print(check(t.upper(), args.company if len(args.tickers) == 1 else None,
-                    args.years))
+            time.sleep(args.delay)
+        print(check(t.upper(),
+                    args.company if len(args.tickers) == 1 else None,
+                    args.years, all_other=args.all_other))
         print()
     return 0
 
