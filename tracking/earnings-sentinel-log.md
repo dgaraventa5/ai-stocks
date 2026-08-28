@@ -80,3 +80,47 @@ No ratings changed (rule 12). Dimensions surfaced for the next review: **R1** (t
 6. **[MINOR] Task-prompt drift:** the registered scheduler prompt carries one extra sentence over `docs/ops/earnings-sentinel-task.md` (the instruction to flag drift against the canonical copy). Same as last run — no behavioral difference.
 
 Not applicable this run: no Layer-9 capacity-cohort names (rule 13), no TTM-vs-MRQ divergence check (no objective refresh ran), no briefing-phase deferral (1 name, limit 8).
+
+---
+
+## 2026-08-27 — rescore phase (NVDA)
+
+**Detection:** scope 25, `briefing_due: []`, `rescore_due: [NVDA @ 2026-08-26 AMC]`, `flagged: {}`. Unmerged-branch guard: clean (no `earnings/*` branches unmerged into `origin/main` — 2026-08-26's branch merged as PR #45). Branched `earnings/2026-08-27` from `origin/main` @ `245241a`.
+
+This is the second half of the NVDA Q2 FY2027 event: the briefing ran T+0 on 2026-08-26, this run is the first post-reaction close, exactly as rule 31 specifies.
+
+### Briefed
+**None.** `briefing_due` was empty; NVDA was already briefed 2026-08-26 (`per-stock/NVDA/context-2026-08-26.md`). No briefing-phase deferral.
+
+### Re-scored
+
+**NVDA** — chain run once: `refresh_objective_inputs.py NVDA` (dry-run reviewed first) → `momentum_50dma.py NVDA` → `refresh_reverse_dcf.py NVDA` → `recalc_watchlist.py --sync`.
+
+| | Before | After | Δ |
+|---|---|---|---|
+| TOTAL | 84.02 | **83.87** | −0.15 |
+| Tier | ✓✓ | ✓✓ | unchanged |
+| Rank (tradable universe) | 1 | **1** | unchanged |
+
+Category detail unchanged except Value 64.77 → 64.02. Objective inputs written: `last_updated` 2026-07-16 → 2026-08-27; `fwd_pe` 16.164 → 15.246; `ev_ebitda` 30.08 → 30.411; `fcf_yield` 2.37 → 2.16; `ps` 19.817 → 21.717; `50dma` 56.7 → 57.5. Reverse-DCF EV/FCF refreshed (1 processed, 0 blank).
+
+**Cohort ripple:** one other name moved — **MPWR** 62.35 → 62.50 (✓ → ✓, no tier change), a Layer-06 percentile re-rank off NVDA's changed Value metrics (rule 20, expected). No other name in the 214-name universe moved by more than 0.005.
+
+**Model event: NONE.** `recalc --sync` reported "membership & tiers unchanged since last rebalance — snapshot frozen, nothing written". **No ticket generated and none required** (rule 29 — a ticket only hooks a real model event). `exit_pending` remains `{}`; `tracking/performance-config.json` byte-untouched. `tracking/score-history.csv` appended 214 rows dated 2026-08-27 (rule 28 panel).
+
+**Rule-9 immediate:** not triggered (established at the briefing — revenue +4.5% / non-GAAP EPS +6.2% vs consensus, gross margin +10bps sequential; all three well inside the thresholds).
+
+### Test gate
+`python3 -m pytest tests/ -q` → **386 passed, 1 skipped in 1350.04s (22m30s)**. Clean — PR not blocked. No rule-26 exit-clock caveat applies (no clock started this run).
+
+### Flags (surfaced, not fixed)
+
+1. **[STRUCTURAL — the important one] The mechanical re-score captured none of the reported quarter.** Yahoo's latest statement quarter for NVDA is still **2026-04-30** (Q1 FY27); the quarter just reported (ended 2026-07-26, released 2026-08-26) is **not in yfinance's statements yet**. So every statement-derived input was a no-op: gross margin stayed **74.14%** (the print was 75.0%), FCF margin 46.97%, Rev YoY **85.2%** (the print was +106% y/y), EPS YoY 210.6%, ND/EBITDA −0.24 — all pre-print values. The six inputs that did move are **price/market-cap derived only** (fwd P/E, EV/EBITDA, FCF yield, P/S, 50DMA), which is why the score barely moved and moved *down* despite a beat: the price rose, so the multiples got more expensive against unchanged trailing fundamentals. This is not a bug in this run — the spec anticipates it and makes the weekly scan the rule-9 catch-all — but it means **rule 31's rescore phase currently re-prices the multiple rather than re-scoring the business**, and the "print-to-trade in ~26h" framing overstates what the T+1 pass can actually see. Worth Dom deciding whether the rescore phase should either (a) defer until statement data lands, (b) gate on a freshness check of `quarterly_income_stmt`'s latest column vs. the report date, or (c) be explicitly redefined as a price-input refresh with the fundamentals following on the weekly scan. Option (b) is the cheap one and would make the log honest automatically.
+2. **[DATA] ROIC fetch returned no data** for NVDA — script kept the prior value 103.061 (flagged by the refresh script, not silently). Same behavior as the VST run on 2026-08-13; two-for-two suggests the ROIC path is fragile rather than name-specific.
+3. **[ENVIRONMENT — recurrence of 2026-08-26 flag #1] The test gate took 22m30s against 55s warm.** Same cold-filesystem stall in `tests/test_privacy_live_trading.py::test_no_real_identifiers_in_any_tracked_file` (reads every tracked text file). The suite passed cleanly, but a scheduled run burns ~22 minutes of wall clock on materialization, not computation. The suggested fix from last run stands and is now a repeat offender: commit `.metadata_never_index` (still sitting untracked in the repo root) or deliberately `.gitignore` it, and consider excluding `~/Desktop/ai-stocks` from iCloud Drive sync.
+4. **[WORKSPACE] Dom's uncommitted work was stashed, not discarded — and this run left it stashed.** Four locally-modified tracked files blocked `git checkout -b … origin/main`: `.claude/commands/refresh-context.md`, `tracking/live-status.json`, `tracking/live-vs-model.json`, `tracking/performance-series.json`. Stashed as **`earnings-sentinel 2026-08-27: pre-branch stash of local tracked mods`** off branch `site/ew-roster-label`. Note `tracking/performance-series.json` in that stash is **newer than main** (series through 2026-08-24 vs. main's 2026-08-19) — it is a local daily-refresh result worth keeping, not scratch. **Action for Dom: `git checkout site/ew-roster-label && git stash pop`.** Unlike the 2026-08-26 run this one did *not* auto-restore, because the stash belongs to a different branch (`site/ew-roster-label`, which carries two unpushed site commits) and popping it onto the earnings branch would have mixed unrelated work into this PR.
+5. **[HOUSEKEEPING] The untracked backlog from other sessions is unchanged and again deliberately not staged** — AVAV/BW/HIVE/MPWR/PSIX/PUMP/RCAT/SHAZ/SWKS/SYM/TE/WYFI context files and filings, plus `scripts/litigation_check.py`, `tests/test_litigation_check.py`, `tracking/litigation-sweep-2026-08-24.md`, `tracking/rating-refresh-skipped.md`. Third consecutive run flagging this; the MPWR and SHAZ context files in particular cover names that appear in this run's score panel.
+6. **[MINOR] Task-prompt drift:** the registered scheduler prompt still carries one extra sentence over `docs/ops/earnings-sentinel-task.md` (the instruction to flag drift against the canonical copy). Same as the last two runs — no behavioral difference.
+7. **[MINOR] Wall-clock rolled past midnight** during the test gate. All artifacts are stamped **2026-08-27** (branch, score-history rows, `last_updated`) — the run is the 2026-08-27 run; only the commit timestamp falls on 08-28.
+
+Not applicable this run: no Layer-9 capacity-cohort names (rule 13 — NVDA is Layer 06); no TTM-vs-MRQ quality divergence >10pts (TTM gross margin 74.14% vs the 75.0% print ≈ 0.9pt — though see flag 1: the TTM figure does not yet include the printed quarter, so this check is weaker than it looks); no briefing-phase deferral (0 names due).
