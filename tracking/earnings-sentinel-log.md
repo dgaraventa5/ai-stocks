@@ -124,3 +124,39 @@ Category detail unchanged except Value 64.77 → 64.02. Objective inputs written
 7. **[MINOR] Wall-clock rolled past midnight** during the test gate. All artifacts are stamped **2026-08-27** (branch, score-history rows, `last_updated`) — the run is the 2026-08-27 run; only the commit timestamp falls on 08-28.
 
 Not applicable this run: no Layer-9 capacity-cohort names (rule 13 — NVDA is Layer 06); no TTM-vs-MRQ quality divergence >10pts (TTM gross margin 74.14% vs the 75.0% print ≈ 0.9pt — though see flag 1: the TTM figure does not yet include the printed quarter, so this check is weaker than it looks); no briefing-phase deferral (0 names due).
+
+### Addendum — 2026-08-28: re-run after Yahoo caught up (Dom-approved, option 1)
+
+Flag 1 above turned out to be **a one-run timing miss, not a structural blind spot** — and the fix is cheap. Re-checked Yahoo the next morning at Dom's request:
+
+- **Statement tables are still stale** — `quarterly_income_stmt` / `_balance_sheet` / `_cashflow` all still top out at **2026-04-30**.
+- **The `info` TTM fields have caught up** — `mostRecentQuarter` now reads **2026-07-26**, the printed quarter; `revenueGrowth` 1.059 matches the press release's +106%; TTM revenue moved ~$253.5B → **$302.97B**.
+
+The two Yahoo paths update on **different schedules**, and the one `refresh_objective_inputs.py` actually reads is the one that came current overnight. So the correct diagnosis is a ~1-day lag on the `info` path, not the multi-day/multi-week statement lag assumed in flag 1.
+
+**Re-ran the full chain on the same branch.** Dry run showed 11 changed inputs vs. the 6 of 2026-08-27:
+
+| Input | 2026-08-27 (T+1) | 2026-08-28 (T+2) |
+|---|---|---|
+| P/S | 21.717 | **17.314** |
+| EV/EBITDA | 30.411 | **27.181** |
+| Rev YoY % | 85.2 | **105.9** |
+| Gross Mgn % | 74.14 | **74.67** |
+| FCF Mgn % | 46.97 | **39.30** |
+| EPS YoY % | 210.6 | **125.9** |
+| ND/EBITDA | −0.24 | **−0.12** |
+| Fwd P/E | 15.246 | 14.323 |
+| FCF Yield % | 2.16 | 2.27 |
+| 50DMA % | 57.5 | 58.3 |
+
+The FCF-margin drop and the ND/EBITDA move are the Q2 facts the briefing flagged arriving in the data — $21.3B quarterly FCF (from $48.6B) and the $25B senior-notes issuance.
+
+**Result:** NVDA **83.87 → 84.22**, tier **✓✓ unchanged**, tradable rank **1 unchanged**. Value 64.02 → 68.03 (P/S re-based on the higher TTM revenue); Quality 94.72 → 92.45 (FCF margin). Four sub-0.35 cohort ripples, no tier crossings: RMBS, AVGO, MRVL, MPWR.
+
+**Model event: still NONE** — `--sync` again reported "membership & tiers unchanged since last rebalance — snapshot frozen, nothing written". **No ticket generated and none required.** `exit_pending` still `{}`; `performance-config.json` byte-untouched. `score-history.csv` gained 214 rows dated 2026-08-28 (the 2026-08-27 rows are retained — the panel is append-only, never rewritten, rule 28). ROIC again returned no data and kept 103.061 (flag 2 now three-for-three).
+
+The projection was computed on a scratch copy before applying and matched the live result to the cent (84.22), so the sheet was never speculatively written.
+
+**Revised recommendation for flag 1.** The gate is smaller than first proposed: have the rescore phase compare `info['mostRecentQuarter']` against the detected report date and defer one run when the quarter has not landed. That single check would have deferred this event exactly one day and captured all 11 inputs on the first try, with no change to rule 31's cadence. Options (a) and (c) from the original flag are over-corrections given the lag is ~1 day, not open-ended. **Still Dom's call** (rules 3/8) — not applied.
+
+**Test gate (addendum run):** `python3 -m pytest tests/ -q` → **386 passed, 1 skipped in 6.15s**. That number settles flag 3: the identical suite took **1350s cold and 6.15s warm — a 219× spread**, which is conclusively filesystem materialization rather than anything in the tests. A scheduled 18:30 run always hits the cold path. Committing `.metadata_never_index` (or excluding `~/Desktop/ai-stocks` from iCloud Drive sync) is now a well-evidenced fix, not a guess.
