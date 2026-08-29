@@ -46,3 +46,9 @@ tracking/*.png
 # macOS/iCloud sync-conflict duplicate copies ("name 2.ext") — never commit
 # (150 appeared 2026-08-04 during parallel local/cloud sessions; all were byte-identical dupes)
 * 2.*
+
+# Empty marker file that tells macOS Spotlight to skip indexing this folder.
+# Machine-local (it only matters on the Mac it sits on), so it is not committed.
+# Related: the privacy test reads all ~1,100 tracked files, and on an
+# iCloud-synced Desktop that took 1350s cold vs 6.15s warm (2026-08-27/28).
+.metadata_never_index
