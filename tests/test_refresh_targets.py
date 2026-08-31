@@ -618,3 +618,96 @@ def test_band_shadows_exclude_untradable(monkeypatch, tmp_path):
     rosters = [e['roster'] for evs in cfg['shadow_events'].values() for e in evs]
     assert all('.' not in t for r in rosters for t in r)
     assert 'T15' in cfg['shadow_events']['BAND_TOP'][-1]['roster']
+
+
+# ---- rule 32-C: methodology-seam damping (added 2026-08-31) -----------------
+# Context: all three of the model's costliest exits (CRM 2026-06-10, ZS
+# 2026-06-18, PLTR 2026-07-02) were triggered on methodology-deploy days — the
+# 50DMA launch, the threshold experiment, the P1 go-live — not on company news,
+# and the 2-run clock confirmed within ~a day. A seam stamp gives the market
+# SEAM_DAYS to disagree before a methodology-triggered exit can confirm.
+
+def _seam_cfg(seam_date, clock_date):
+    cfg = _seed_cfg(exit_pending={'TSM': clock_date})
+    cfg['methodology_seam'] = {'date': seam_date, 'reason': 'test deploy'}
+    return cfg
+
+
+def test_seam_damps_confirm_inside_window(monkeypatch, tmp_path):
+    """A clock started on the seam date cannot confirm while the window is
+    open: the name stays held, the clock keeps its ORIGINAL start date."""
+    import datetime as dt
+    path = tmp_path / 'portfolio.xlsx'
+    _build_portfolio(path, [('NVDA', '06 Silicon', 86.0, '✓✓✓'),
+                            ('TSM', '05 Fabs', 71.0, '✓✓')])
+    d3 = (dt.date.today() - dt.timedelta(days=3)).isoformat()
+    calls, saves = _mock_env(monkeypatch, _below_exit_live(),
+                             _seam_cfg(seam_date=d3, clock_date=d3))
+    before = path.read_bytes()
+
+    rep = rt.refresh(portfolio=str(path))
+
+    assert calls == []                          # no exit event fired
+    assert path.read_bytes() == before          # workbook frozen
+    assert rep['pending'] == {'TSM': d3}        # clock kept, not restarted
+
+
+def test_seam_expired_allows_confirm(monkeypatch, tmp_path):
+    """Once the window closes, the damped clock confirms like any other."""
+    import datetime as dt
+    path = tmp_path / 'portfolio.xlsx'
+    _build_portfolio(path, [('NVDA', '06 Silicon', 86.0, '✓✓✓'),
+                            ('TSM', '05 Fabs', 71.0, '✓✓')])
+    d10 = (dt.date.today() - dt.timedelta(days=10)).isoformat()
+    calls, saves = _mock_env(monkeypatch, _below_exit_live(),
+                             _seam_cfg(seam_date=d10, clock_date=d10))
+
+    rep = rt.refresh(portfolio=str(path))
+
+    assert len(calls) == 1 and '-TSM' in calls[0]['reason']
+    assert rep['pending'] == {}
+
+
+def test_seam_ignores_clocks_started_before_window(monkeypatch, tmp_path):
+    """A clock that predates the seam was started by DATA, not the deploy —
+    it confirms on schedule."""
+    import datetime as dt
+    path = tmp_path / 'portfolio.xlsx'
+    _build_portfolio(path, [('NVDA', '06 Silicon', 86.0, '✓✓✓'),
+                            ('TSM', '05 Fabs', 71.0, '✓✓')])
+    d5 = (dt.date.today() - dt.timedelta(days=5)).isoformat()
+    d2 = (dt.date.today() - dt.timedelta(days=2)).isoformat()
+    calls, saves = _mock_env(monkeypatch, _below_exit_live(),
+                             _seam_cfg(seam_date=d2, clock_date=d5))
+
+    rep = rt.refresh(portfolio=str(path))
+
+    assert len(calls) == 1 and '-TSM' in calls[0]['reason']
+
+
+def test_pending_rebalance_false_while_seam_damped(monkeypatch, tmp_path):
+    """The rule-25 gate must stay green while a seam forbids the confirming
+    run — a week of red builds would just train people to ignore the gate."""
+    import datetime as dt
+    path = tmp_path / 'portfolio.xlsx'
+    _build_portfolio(path, [('NVDA', '06 Silicon', 86.0, '✓✓✓'),
+                            ('TSM', '05 Fabs', 71.0, '✓✓')])
+    d3 = (dt.date.today() - dt.timedelta(days=3)).isoformat()
+    calls, saves = _mock_env(monkeypatch, _below_exit_live(),
+                             _seam_cfg(seam_date=d3, clock_date=d3))
+
+    assert rt.pending_rebalance(portfolio=str(path)) is False
+    assert calls == [] and saves == []
+
+
+def test_seam_blocks_confirm_unit():
+    assert rt.seam_blocks_confirm(
+        '2026-07-02', '2026-07-05',
+        {'date': '2026-07-02', 'reason': 'x'}) is True
+    assert rt.seam_blocks_confirm(          # window closed
+        '2026-07-02', '2026-07-09',
+        {'date': '2026-07-02', 'reason': 'x'}) is False
+    assert rt.seam_blocks_confirm(          # clock predates seam
+        '2026-06-30', '2026-07-05',
+        {'date': '2026-07-02', 'reason': 'x'}) is False
+    assert rt.seam_blocks_confirm('2026-07-02', '2026-07-05', None) is False

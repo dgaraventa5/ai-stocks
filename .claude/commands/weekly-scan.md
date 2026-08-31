@@ -60,6 +60,12 @@ Run the weekly news scan per CLAUDE.md.
 
    EXIT PENDING names confirm on the *next* weekly run — call out anything confirming next week so it isn't a surprise.
 
+   d. **Capitulation check on the exit side (Rule #32-A, added 2026-08-31).** For every name that is EXIT PENDING, EXIT, or seam-damped this run:
+   ```bash
+   python3 scripts/capitulation_flag.py {TICKERS} --log-forecast
+   ```
+   The flag is the mirror of the rule-14 expectations flag: P/S in the bottom decile of the name's own 3-year range while revenue growth holds at/above its 3-year median — the CRM-2026-06 setup (exited at max pessimism, then +53%). A firing changes NOTHING mechanically (the exit still proceeds per the rules — flag, don't assume), but surface it prominently: it says the model is selling a name priced for much worse than its fundamentals show. `--log-forecast` appends a rule-17 forecast per firing so the calibration loop learns whether the signal predicts anything before it is ever allowed near a score.
+
    c. Include the weekly mark (model value, returns vs SMH/QQQ/equal-weight universe) in the output. The model is the portfolio of record — membership changes logged by refresh_targets.py are rebalance events Dom mirrors in his account. Tier-driven weight shifts are reported for awareness but do not auto-log a rebalance event (only ENTER/EXIT does).
 
 8. **Subjective-rating integrity (Rule #12, added 2026-06-10).** Run the gate + staleness audit:
@@ -90,6 +96,7 @@ Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **⚠️ Material events** (full one-sentence summary per item, plus ticker)
 - **📊 Earnings refreshed** (tickers that reported this week: before/after score, TTM vs MRQ flags, any tier changes)
 - **💼 Portfolio pipeline** (ENTER/EXIT/pending/blocked changes; tier-change reallocations for existing holdings with old→new Target %; weekly mark vs benchmarks; any concentration flags)
+- **🩸 Capitulation flags** (Step 7d firings on exit-side names + forecasts logged; only if any)
 - **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
 - **🎯 Calibration** (newly resolved forecasts + needs_review items from Step 9; only if any)
 - **🔴 Live pipeline** (halt flag contents if raised; stale heartbeats; drift/regen flags from Step 10; only in attended runs)
