@@ -620,6 +620,53 @@ the weekly scan — which remains the rule-9 catch-all (Yahoo statement lag).
 The sentinel session is read-only toward Robinhood (rule 29 unchanged); a
 ticket refusal on a stale recon snapshot is notified, never worked around.
 
+### 32. Unseen-value fixes: capitulation flag, acceleration-aware P2, methodology-seam damping (added 2026-08-31, approved by Dom)
+
+**Context:** Post-mortem on the CRM (exited 2026-06-10, +53% after), ZS
+(2026-06-18, +50%) and PLTR (2026-07-02, +44%) exit misses — vs QQQ ~flat and
+SMH −6 to −16% over the same windows. The exit engine was NET GOOD (the same
+period's exits dodged APP −41%, WDC −31%, ALAB −28%, VRT −23%, ARM −22%), so
+these are targeted mechanism fixes, not a re-tuning; rule 28's
+don't-fit-the-short-window discipline applies. Spec:
+`docs/superpowers/specs/2026-08-31-unseen-value-abc-design.md`. Three parts:
+
+- **A — Capitulation flag** (`scripts/capitulation_flag.py`): mirror of rule
+  14. Fires when P/S ≤ 10th percentile of the name's own 3-year range AND
+  rev YoY ≥ its 3-year median (trough multiple, fundamentals intact — the
+  CRM-2026-06 setup; verified it fires on CRM's exit date and correctly does
+  NOT on ZS, whose growth was genuinely decelerating). **Qualitative red flag,
+  NOT a scored metric.** Runs in `/refresh-context` and weekly-scan Step 7d
+  (on every exit-side name). Each firing logs a rule-17 forecast
+  (`--log-forecast`, dimension `signal.capitulation`, template
+  REL_STRENGTH_1Q, base-rate 0.55, one open forecast per name) — the signal
+  must earn ~30 resolved forecasts of calibration evidence before any scored
+  version is even proposed.
+- **B — Acceleration-aware P2 grounded growth** (`reverse_dcf.py`): the
+  rule-21 grounded-growth clamp stays 25% by default, but when BOTH trailing
+  3-yr CAGR AND current rev YoY ≥ 30% (sustained + current hypergrowth), the
+  cap extends to 40% with grounded = min(max(CAGR, YoY), 40). Fixes the
+  PLTR-shaped blindness (implied growth 30% vs actual 85% read as
+  "overpriced") without turning P2 back into a growth factor; decelerators
+  and one-quarter spikes keep the conservative clamp. Deploy impact
+  (2026-08-31): 6 names up ≤1.5 pts (NVDA/CRDO/ALAB/PLTR/FIX/SNOW), zero
+  rank-15/18 crossings.
+- **C — Methodology-seam damping** (`refresh_targets.py --seam "reason"`):
+  all three misses were exited on methodology-DEPLOY days (50DMA launch,
+  threshold experiment, P1 go-live), not company news. A deploying session
+  stamps a seam (`methodology_seam` in performance-config.json); exit clocks
+  STARTED inside the 7-day window cannot confirm until it closes, so the
+  market gets a week to disagree with new methodology before the model trades
+  on it. Clocks predating the seam (data-driven) confirm on schedule;
+  `--resize` and dead/untradable exits bypass as before; the rule-25 gate
+  stays green while a confirm is seam-damped. **Stamping the seam before
+  `recalc --sync` is part of every methodology deploy** — same standing as
+  the rule-10 rebuild-formulas note.
+
+**Boundary (do not weaken):** A stays qualitative until calibration proves it;
+B's gate/cap constants are principled priors, not fit parameters — do not tune
+them against realized returns (rule 28); C damps only methodology-triggered
+exits — it must never be widened into a general reluctance to exit.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

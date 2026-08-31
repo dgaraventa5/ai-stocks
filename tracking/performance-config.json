@@ -708,5 +708,9 @@
   },
   "sizing_state": {
     "last_resize_check": "2026-08"
+  },
+  "methodology_seam": {
+    "date": "2026-08-31",
+    "reason": "rule 32-B deploy: acceleration-aware P2 grounded growth"
   }
 }

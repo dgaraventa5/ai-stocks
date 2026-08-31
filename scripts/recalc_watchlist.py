@@ -260,8 +260,9 @@ def _assemble(row, ms, w):
     for the six style-biased metrics and live absolute bands for the rest."""
     value = avg_nonnull([score_fwd_pe(row['fwd_pe']), ms['ev'], ms['fcf_yield'],
                          ms['ps'], score_peg(row['peg']),
-                         reverse_dcf.reverse_dcf_score(row.get('ev_fcf'),
-                                                       _num(row['rev_cagr']))])
+                         reverse_dcf.reverse_dcf_score(
+                             row.get('ev_fcf'), _num(row['rev_cagr']),
+                             rev_yoy_pct=_num(row['rev_yoy']))])
     quality = avg_nonnull([ms['roic'], ms['gm'], ms['fcf_mgn'],
                            score_nd_ebitda(row['nd_eb'])])
     growth = avg_nonnull([score_rev_cagr(row['rev_cagr']), score_rev_yoy(row['rev_yoy']),

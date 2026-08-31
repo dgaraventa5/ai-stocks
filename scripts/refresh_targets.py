@@ -58,6 +58,39 @@ PORTFOLIO = str(_REPO_ROOT / '00-master/portfolio.xlsx')
 HEADER_FILL = PatternFill('solid', fgColor='1F4E78')
 HEADER_FONT = Font(bold=True, color='FFFFFF')
 
+# Methodology-seam damping (rule 32-C, added 2026-08-31). All three of the
+# model's costliest exits (CRM 2026-06-10, ZS 2026-06-18, PLTR 2026-07-02 —
+# +53%/+50%/+44% after exit vs QQQ ~flat) were triggered on methodology-deploy
+# days (50DMA launch, threshold experiment, P1 go-live), not on company news,
+# and the 2-run clock confirmed within ~a day. When a methodology change
+# deploys, the deploying session stamps a seam (`--seam "reason"`); exit clocks
+# STARTED inside the window cannot confirm until it closes, so the market gets
+# SEAM_DAYS to disagree with the new methodology before the model trades on it.
+# Deliberately narrow: clocks that predate the seam are data-driven and confirm
+# on schedule; --resize and the dead/untradable branches bypass as before.
+SEAM_DAYS = 7
+
+
+def seam_blocks_confirm(clock_start: str, today: str, seam: dict | None,
+                        seam_days: int = SEAM_DAYS) -> bool:
+    """True while the seam window forbids confirming an exit whose pending
+    clock started inside it (ISO-date strings; seam = {'date','reason'})."""
+    if not seam or not seam.get('date'):
+        return False
+    start = dt.date.fromisoformat(seam['date'])
+    end = start + dt.timedelta(days=seam_days)
+    return (start <= dt.date.fromisoformat(clock_start) < end
+            and dt.date.fromisoformat(today) < end)
+
+
+def stamp_seam(reason: str) -> dict:
+    """Record a methodology seam starting today in the performance config."""
+    cfg = load_cfg()
+    cfg['methodology_seam'] = {'date': dt.date.today().isoformat(),
+                               'reason': reason}
+    save_cfg(cfg)
+    return cfg['methodology_seam']
+
 # Defaults for parameters added 2026-06-09; written to Sizing Rules if absent
 # so they are visible and editable in the workbook, not buried here.
 # THE SHEET IS AUTHORITATIVE for live values — ensure_params only seeds missing
@@ -371,6 +404,22 @@ def refresh(dry_run: bool = False, resize: bool = False,
             # Intentional re-sizing: drop below-threshold names immediately.
             statuses[t] = f'EXIT (resize, {below(t)})'
             flag(f'{t}: EXIT (resize — {below(t)})')
+        elif (t in exit_pending and exit_pending[t] != today
+              and seam_blocks_confirm(exit_pending[t], today,
+                                      cfg.get('methodology_seam'))):
+            # Rule 32-C: the clock started inside an open methodology-seam
+            # window — hold the name and keep the ORIGINAL clock date until
+            # the window closes, so a methodology deploy alone can't trade
+            # the book before the market gets SEAM_DAYS to disagree.
+            include.append(t)
+            new_pending[t] = exit_pending[t]
+            seam = cfg['methodology_seam']
+            damp_end = (dt.date.fromisoformat(seam['date'])
+                        + dt.timedelta(days=SEAM_DAYS)).isoformat()
+            statuses[t] = (f'EXIT PENDING (seam-damped until {damp_end}, '
+                           f'{below(t)})')
+            flag(f'{t}: {below(t)} — confirm seam-damped until {damp_end} '
+                 f'({seam.get("reason", "methodology change")})')
         elif t in exit_pending and exit_pending[t] != today:
             # EXIT PENDING on a PRIOR refresh date → confirmed now. Same-day
             # re-runs don't count as the second look — the confirm exists to
@@ -664,7 +713,19 @@ if __name__ == '__main__':
     ap.add_argument('--check', action='store_true',
                     help='exit 1 if the Targets are stale vs live scores (a '
                          'rebalance is pending) — the CI/commit gate; writes nothing')
+    ap.add_argument('--seam', metavar='REASON',
+                    help='stamp a methodology seam starting today (rule 32-C): '
+                         'exit clocks started inside the next SEAM_DAYS cannot '
+                         'confirm until the window closes. Run this BEFORE the '
+                         'recalc --sync that deploys a methodology change.')
     args = ap.parse_args()
+    if args.seam:
+        if args.dry_run or args.check:
+            ap.error('--seam stamps the config — cannot combine with '
+                     '--dry-run/--check')
+        seam = stamp_seam(args.seam)
+        print(f'methodology seam stamped: {seam["date"]} + {SEAM_DAYS}d '
+              f'— {seam["reason"]}')
     if args.check:
         import sys
         if pending_rebalance(portfolio=args.portfolio_path):

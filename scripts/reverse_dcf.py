@@ -141,11 +141,41 @@ def mispricing_score(ev: float, fcf0: float, wacc: float, grounded_g: float,
 GROUNDED_FLOOR_PCT = 0.0
 GROUNDED_CAP_PCT = 25.0
 
+# Acceleration-aware extension (rule 32-B, added 2026-08-31, approved by Dom).
+# The 25% clamp blinded the metric to genuine accelerators: PLTR exited
+# 2026-07-02 with current rev YoY 84.7% vs 3y CAGR 32.9% — implied growth was
+# ~30%, i.e. BELOW what the company was actually delivering, yet the clamp
+# forced grounded=25 and scored it 30/100 (the stock then returned +44% vs QQQ
+# flat). The gate requires BOTH the trailing CAGR and the current YoY at/above
+# 30% — sustained AND current hypergrowth — before the cap extends to 40%, so
+# decelerating cyclicals (rule-21 known limitation) and single-quarter spikes
+# off a low base keep the conservative clamp. 40% is still a cap: P2 stays a
+# mispricing signal, not a growth factor.
+HYPERGROWTH_GATE_PCT = 30.0
+EXTENDED_CAP_PCT = 40.0
+
+
+def grounded_estimate(grounded_growth_pct: float, rev_yoy_pct: Number = None,
+                      floor: float = GROUNDED_FLOOR_PCT,
+                      cap: float = GROUNDED_CAP_PCT) -> float:
+    """Clamped grounded-growth estimate (in PERCENT) for the mispricing gap.
+
+    Default: clamp the trailing CAGR to [floor, cap]. When rev_yoy_pct is
+    provided and BOTH inputs sit at/above HYPERGROWTH_GATE_PCT, ground on
+    min(max(cagr, yoy), EXTENDED_CAP_PCT) instead."""
+    if (rev_yoy_pct is not None
+            and grounded_growth_pct >= HYPERGROWTH_GATE_PCT
+            and rev_yoy_pct >= HYPERGROWTH_GATE_PCT):
+        return max(floor, min(EXTENDED_CAP_PCT,
+                              max(grounded_growth_pct, rev_yoy_pct)))
+    return max(floor, min(cap, grounded_growth_pct))
+
 
 def reverse_dcf_score(ev_over_fcf, grounded_growth_pct, wacc: float = 0.10,
                       years: int = 10, terminal_growth: float = 0.03,
                       grounded_floor: float = GROUNDED_FLOOR_PCT,
-                      grounded_cap: float = GROUNDED_CAP_PCT) -> Number:
+                      grounded_cap: float = GROUNDED_CAP_PCT,
+                      rev_yoy_pct: Number = None) -> Number:
     """The live P2 metric (§5-3): a 0-100 mispricing score computed straight from
     the EV/FCF multiple and a grounded growth estimate (in PERCENT, e.g. 8.0),
     clamped to a plausible durable range [grounded_floor, grounded_cap].
@@ -157,7 +187,8 @@ def reverse_dcf_score(ev_over_fcf, grounded_growth_pct, wacc: float = 0.10,
     growth is missing, so the Value average simply skips it."""
     if ev_over_fcf is None or ev_over_fcf <= 0 or grounded_growth_pct is None:
         return None
-    g = max(grounded_floor, min(grounded_cap, grounded_growth_pct))
+    g = grounded_estimate(grounded_growth_pct, rev_yoy_pct,
+                          floor=grounded_floor, cap=grounded_cap)
     implied = implied_growth(ev_over_fcf, 1.0, wacc, years=years,
                              terminal_growth=terminal_growth)
     if implied is None:

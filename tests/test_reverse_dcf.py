@@ -159,3 +159,47 @@ def test_richly_valued_megacap_scores_worse_than_cheap_cyclical():
     cyclical = rd.mispricing_score(ev=100.0, fcf0=20.0, wacc=WACC,
                                    grounded_g=grounded)  # EV/FCF = 5, cheap
     assert cyclical > megacap
+
+
+# ---- acceleration-aware grounded cap (rule 32-B, added 2026-08-31) ----------
+# Context: PLTR exited 2026-07-02 with rev YoY 84.7% vs 3y CAGR 32.9% — the
+# 25% clamp read "market implies more than anyone delivers" when the honest
+# reading was "market implies 30% from a company currently doing 85%". The
+# extended cap opens ONLY when both the trailing CAGR and the current YoY sit
+# at/above the hypergrowth gate, so decelerating names and one-quarter spikes
+# keep the conservative 25% clamp.
+
+def test_extended_cap_requires_both_cagr_and_yoy_at_gate():
+    ev_fcf = 106.87                      # implied growth ~30.1%
+    base = rd.reverse_dcf_score(ev_fcf, 32.9)                     # clamped to 25
+    accel = rd.reverse_dcf_score(ev_fcf, 32.9, rev_yoy_pct=84.7)  # gate passes
+    assert accel > base
+    # YoY below the gate -> no extension, identical to the base path
+    assert rd.reverse_dcf_score(ev_fcf, 32.9, rev_yoy_pct=20.0) == base
+    # CAGR below the gate -> a one-off YoY spike alone must not extend
+    assert rd.reverse_dcf_score(ev_fcf, 12.0, rev_yoy_pct=84.7) == \
+        rd.reverse_dcf_score(ev_fcf, 12.0)
+
+
+def test_extended_cap_is_still_a_cap():
+    # grounded = min(max(cagr, yoy), 40): a 200% YoY never grounds above 40%.
+    assert rd.reverse_dcf_score(106.87, 35.0, rev_yoy_pct=200.0) == \
+        rd.reverse_dcf_score(106.87, 35.0, rev_yoy_pct=40.0)
+
+
+def test_yoy_none_reproduces_pre_change_behavior():
+    for ev_fcf, g in [(106.87, 32.9), (12.37, 9.82), (20.0, 5.0)]:
+        assert rd.reverse_dcf_score(ev_fcf, g, rev_yoy_pct=None) == \
+            rd.reverse_dcf_score(ev_fcf, g)
+
+
+def test_pltr_regression_lands_in_75_band():
+    # PLTR at exit: EV/FCF 106.87, CAGR 32.92, YoY 84.7 -> grounded 40,
+    # implied ~30.1% -> gap ~+9.9pp -> the 75 band (not saturated).
+    assert rd.reverse_dcf_score(106.87, 32.92) == 30.0
+    assert rd.reverse_dcf_score(106.87, 32.92, rev_yoy_pct=84.7) == 75.0
+
+
+def test_crm_style_moderate_grower_unchanged():
+    assert rd.reverse_dcf_score(12.37, 9.82, rev_yoy_pct=13.3) == \
+        rd.reverse_dcf_score(12.37, 9.82)
