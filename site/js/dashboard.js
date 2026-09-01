@@ -12,7 +12,7 @@ renderNav('index.html');
     document.getElementById('stats').innerHTML = [
       [fmtMoney(value), 'Model value ($10k base)', pctClass(s.total_return)],
       [fmtPct(s.total_return), 'Since inception', pctClass(s.total_return)],
-      [fmtPct(s.vs_smh), 'vs SMH', pctClass(s.vs_smh)],
+      [fmtPct(s.vs_spy), 'vs S&amp;P 500', pctClass(s.vs_spy)],
       [String(meta.holdings), 'Holdings', ''],
       [esc(meta.as_of), 'Data as of', 'dim'],
     ].map(([v, k, cls]) =>
@@ -23,7 +23,7 @@ renderNav('index.html');
       type: 'line',
       data: { labels: perf.dates, datasets: [
         lineDataset('Model', perf.model, CHART_COLORS.model, true),
-        lineDataset('SMH', perf.bench.SMH, CHART_COLORS.SMH),
+        lineDataset('S&P 500', perf.bench.SPY, CHART_COLORS.SPY),
       ]},
       options: baseChartOptions(),
     });
