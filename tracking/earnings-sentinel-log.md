@@ -160,3 +160,97 @@ The projection was computed on a scratch copy before applying and matched the li
 **Revised recommendation for flag 1.** The gate is smaller than first proposed: have the rescore phase compare `info['mostRecentQuarter']` against the detected report date and defer one run when the quarter has not landed. That single check would have deferred this event exactly one day and captured all 11 inputs on the first try, with no change to rule 31's cadence. Options (a) and (c) from the original flag are over-corrections given the lag is ~1 day, not open-ended. **Still Dom's call** (rules 3/8) — not applied.
 
 **Test gate (addendum run):** `python3 -m pytest tests/ -q` → **386 passed, 1 skipped in 6.15s**. That number settles flag 3: the identical suite took **1350s cold and 6.15s warm — a 219× spread**, which is conclusively filesystem materialization rather than anything in the tests. A scheduled 18:30 run always hits the cold path. Committing `.metadata_never_index` (or excluding `~/Desktop/ai-stocks` from iCloud Drive sync) is now a well-evidenced fix, not a guess.
+
+## 2026-09-02
+
+**Scope:** 25 names (holdings ∪ top-25 tradable ranks). **Briefed:** AVGO. **Re-scored:** CRDO.
+**Model event: NO. Ticket: none generated** (no membership or tier change → `recalc --sync` reported
+"membership & tiers unchanged since last rebalance — snapshot frozen, nothing written"; the frozen
+path never reaches ticket generation, so this is *not* a refusal on a stale recon snapshot).
+**Test gate: PASS — 401 passed, 1 skipped in 5.96s** (`python3 -m pytest tests/ -q`, exit 0).
+**Rule-25 gate:** `refresh_targets.py --check` → "Targets reflect current scores ✓". `exit_pending` = `{}` (no clocks started or confirmed).
+
+### Briefing phase — AVGO (Q3 FY2026, quarter ended 2026-08-02, released AMC 2026-09-02)
+
+No deferral (1 name due, well under the 8-name cap). Briefing: `per-stock/AVGO/context-2026-09-02.md`;
+news-log line appended; 8-K + Ex-99.1 saved to `per-stock/AVGO/filings/`.
+Source: [8-K acc. 0001730168-26-000076](https://www.sec.gov/Archives/edgar/data/1730168/000173016826000076/avgo-08022026x8kxex99.htm) (Items 2.02/8.01/9.01) plus the Q3 FY26 call transcript.
+
+- Revenue **$29,591M +86% YoY** (guide ~$29.4B → +0.6%; consensus $29.43–29.47B → +0.4–0.5%);
+  non-GAAP EPS **$3.32 +96%** (consensus $3.16–3.24 → +2.5–5.1%); FCF $13,665M = 46% of revenue.
+- **No ⚠️ RULE-9 IMMEDIATE.** Revenue and EPS surprises are far inside ±15%; sequential gross margin
+  moved −35bps GAAP (69.48% → 69.13%) and −211bps non-GAAP (77.11% → 75.0%), both inside 500bps.
+- The news is the guide: Q4 revenue ~$34.8B (+93%), AI semi revenue $21.7B (+236%), FY26 AI revenue
+  raised to ~$58B from ~$56B, and "secured supply" claimed for ~$115B FY27 / ~$230B FY28.
+  AI semis hit **56% of revenue** — the >50% threshold event pre-registered in `context-2026-08-17.md` has fired.
+- **No ratings changed (rule 12).** Dimensions flagged for the next research-backed review: R3 (the
+  off-balance-sheet RVG question), R1 (levered counterparties), D2/D3 (no new evidence — do not move).
+
+**Flags carried out of the briefing:**
+- ⚠️ **The Q3 10-Q is not yet filed**, so the VIE / residual-value-guarantee footnote — the pre-registered
+  highest-value document for this name — is still unread. Management confirmed the $35B AI XPV platform with
+  Apollo and Blackstone and called the guarantees "low risk," but that is a characterisation, not an
+  accounting treatment. **Re-check when the 10-Q lands.**
+- ⚠️ **No AI bookings or backlog dollar figure was disclosed for Q3**, so part 2 of thesis-test §10 #1
+  (Q2 was $30B booked vs $10.8B shipped) is neither confirmed nor falsified. Scored neither way.
+- ⚠️ **Receivables did not normalise:** $13,707M vs $7,145M at FYE25 (+92%) against three-quarter revenue
+  +55%; inventory doubled to $4,523M. FCF has not yet suffered. Still on the watch list.
+- ⚠️ **No management commentary on Marvell / the Google warrant at all**; the 2026-08-19 question stays open.
+- ⚠️ **Conflicting after-hours reports (rule 3, unresolved):** TradingKey reports −6% narrowing to −3.5%
+  (~$354.43); TipRanks headlines a gain. Not settled here — AVGO's own mechanical re-score on the first
+  post-reaction close (2026-09-03) will read the actual price.
+- AVGO's Watchlist objective inputs are stale (`Last Updated: 2026-07-16`; sheet carries Rev YoY 47.9% vs
+  actual +86%). It becomes `rescore_due` on the 2026-09-03 run — expected per rule 31, no action tonight.
+
+### Rescore phase — CRDO (Q1 FY2027, reported AMC 2026-09-01; briefed by the 09-01 run)
+
+Chain run exactly once: `refresh_objective_inputs.py CRDO` (dry-run reviewed first) →
+`momentum_50dma.py CRDO` → `refresh_reverse_dcf.py CRDO` → `recalc_watchlist.py --sync`.
+
+| | Before | After |
+|---|---|---|
+| Total Score | 81.20 | **82.40** |
+| Rank (full watchlist) | #4 | **#3** |
+| Tier | ✓✓ | ✓✓ (unchanged) |
+| Value / Momentum sub-scores | 53.5 / 80.0 | 57.4 / 83.8 |
+
+Inputs written: fwd P/E 23.18 → **17.17**, P/S 29.05 → **23.26**, EV/EBITDA 78.00 → 77.38,
+FCF yield 1.05 → 1.31, 50DMA% 54.2 → **63.3**, EV/FCF **91.19** (`reverse-dcf.json`, as-of 2026-09-02).
+Only knock-on elsewhere: **GLW 68.50 → 68.20 (#37 → #39)**, a shared Layer-07 P1 cohort-percentile effect
+(rule 20) from CRDO's Value moving. No other row changed by ≥0.05.
+
+**Flags (not fixed here):**
+- ⚠️⚠️ **The re-score captured the price move, not the new fundamentals.** yfinance had not yet ingested
+  CRDO's Q1 FY27 statements, so Rev YoY (157%), Rev 3y CAGR (93.53%), gross margin (68.04%), FCF margin
+  (30.48%) and EPS YoY (362.2%) are **all still pre-earnings values**. This is the known Yahoo statement lag
+  (rule 31); the weekly scan remains the rule-9 catch-all and should re-run the objective refresh once the
+  statements land.
+- ⚠️ **CRDO's score ROSE 1.2 points on a −20.0% single-day crash** ($206.63 → $165.22 on 29.9M shares vs
+  ~3.5M normal). Mechanically correct — Value cheapens as price falls, and the rolling 120-day 50DMA window
+  ticked *up* even though today's close is far below the 50-day SMA — but it is exactly the
+  "a value-quality screen rewards a falling name *because* it is falling" dynamic that motivated rule 16.
+  With the fundamentals stale on top of it, **do not read 82.40 / #3 as a post-earnings verdict.**
+  The 2026-09-01 briefing's substantive findings (beat cadence compressing to +7.1%, first opex guidance
+  miss, goodwill+intangibles now 45% of assets, SBC at 18.4% of revenue) are **not** in this number.
+- ⚠️ `roic`: yfinance fetch returned no data — prior value 49.5 retained (not refreshed).
+- ⚠️ Rule-15 judgment flag surfaced: fresh EPS YoY +362% ≥ 300%, withheld as a possible one-off.
+  **Reviewed and left as-is (no blank):** the figure is unchanged from the stored 362.2 (same stale
+  pre-earnings statements), and CRDO's growth is operationally driven — revenue +114.7% YoY, a seventh
+  consecutive triple-digit quarter — which is the "big operational number off a small base stays" case
+  in rule 15, not a divestiture/one-off. Re-confirm against the 10-Q when the statements refresh.
+- No Layer-9 capacity-cohort names touched (rule 13 N/A). No TTM-vs-MRQ divergence assessable this pass —
+  the TTM inputs did not move.
+- Methodology seam active (`2026-08-31`, rule 32-B deploy, expires 2026-09-07). Not exercised: no exit
+  clock started or confirmed this run.
+
+### Housekeeping
+- Unmerged-branch guard: **clean** — `earnings/2026-09-01` is fully merged into origin/main (at 8aa2f2b,
+  ancestor of 29aacb1). Branched `earnings/2026-09-02` from origin/main per branching discipline.
+- ⚠️ A locally-modified `tracking/performance-series.json` blocked the checkout. origin/main already carries
+  a committed 2026-09-02 series (29aacb1) covering the same date, so the local regen was **stashed, not
+  discarded** — `git stash list`, message "sentinel 2026-09-02: local perf-series regen, superseded by
+  origin/main 29aacb1". Recover it if it was wanted.
+- Two peer Claude sessions were live in the shared working tree; both were notified before and after the
+  workbook writes.
+- Scheduled-task prompt matches the canonical `docs/ops/earnings-sentinel-task.md` — **no drift**.
+- Robinhood: read-only throughout (`get_earnings_results` for AVGO consensus). No order/write tool called (rule 29).
