@@ -254,3 +254,83 @@ Only knock-on elsewhere: **GLW 68.50 → 68.20 (#37 → #39)**, a shared Layer-0
   workbook writes.
 - Scheduled-task prompt matches the canonical `docs/ops/earnings-sentinel-task.md` — **no drift**.
 - Robinhood: read-only throughout (`get_earnings_results` for AVGO consensus). No order/write tool called (rule 29).
+
+---
+
+## 2026-09-03 — rescore run (AVGO)
+
+**Detect:** scope 25, `briefing_due` empty, `flagged` empty, `rescore_due` = **AVGO** (report 2026-09-02, AMC).
+This is the second phase of the AVGO event briefed the prior evening (`per-stock/AVGO/context-2026-09-02.md`,
+merged as part of PR #50) — first post-reaction close, per rule 31.
+
+### Briefed
+None. (AVGO's T+0 briefing ran 2026-09-02; no new reporters entered scope.)
+
+### Re-scored — AVGO
+
+| | Before (2026-09-02) | After (2026-09-03) |
+|---|---|---|
+| Total Score | 77.24 | **77.74** (+0.50) |
+| Rank | 9 | **9** (unchanged) |
+| Tier | ✓✓ | **✓✓** (unchanged) |
+
+**Model event: NO.** `recalc_watchlist.py --sync` reported *"membership & tiers unchanged since last rebalance
+— snapshot frozen, nothing written"*. No rebalance fired, so **no trade ticket was generated** (rule 29 path
+not entered — this is the correct outcome, not a refusal). `exit_pending` map is empty; no clock started or
+confirmed.
+
+**Inputs written** (`refresh_objective_inputs.py AVGO`, Last Updated 2026-07-16 → 2026-09-03):
+fwd P/E 19.28 → **18.49**, EV/EBITDA 43.407 → **42.592**, P/S 23.607 → **22.517**,
+FCF yield 1.84 → **1.93**, 50DMA% 38.3 → **43.3**, EV/FCF **54.71** (`reverse-dcf.json`, as-of 2026-09-03).
+
+**Knock-on across the rest of the watchlist: none.** AVGO is the only row that moved by ≥0.05 (all 214 rows
+diffed against the 2026-09-02 score-history snapshot); no rank or tier changed anywhere. Unlike the CRDO pass
+on 2026-09-02, no Layer-06 cohort peer shifted — AVGO's cheaper absolute multiples did **not** move its
+rule-20 cohort percentile rank.
+
+**What actually drove the +0.50 — it is entirely the Momentum 50DMA band, not a re-rating.**
+50DMA% crossed the ≥40 threshold (38.3 → 43.3), so the banded component went 40 → 60, lifting the Momentum
+Score 60.0 → 65.0; at the 10% Momentum weight that is exactly +0.50 — the whole observed delta. Value's
+contribution was **0.00 net** despite every multiple cheapening, because those six metrics are cohort-relative
+(rule 20) and AVGO's rank within Layer 06 did not change.
+
+**Price reaction:** AVGO closed **$357.16** on 2026-09-03 vs the $367.24 close on 2026-09-02 — **−2.75%** on
+~60.1M shares against a ~20M recent norm (Robinhood `get_equity_quotes`, official SIP close; yfinance's
+2026-09-03 bar was still NaN at run time — the known latest-bar flicker). A beat-and-raise sold off modestly.
+
+### Flags (surfaced, not fixed)
+
+- ⚠️⚠️ **The re-score captured the price move, not the new fundamentals — again.** yfinance had not ingested
+  AVGO's Q3 FY26 statements one day after the print, so every statement-derived input is **unchanged from
+  2026-07-16**: Rev YoY **47.9%**, Rev 3y CAGR 24.38%, gross margin 76.28%, FCF margin 43.41%, EPS YoY 87.5%.
+  The dry-run confirmed this directly — cols 12/13/14/16/17/18 were written but produced **zero value
+  changes**. The actual quarter was revenue **+86% YoY** ($29,591M) with **+93%** guided for Q4 and AI
+  semiconductor revenue **+221% YoY** (8-K 2026-09-02 Ex-99.1; Q3 FY26 call). **None of that step-up is in
+  77.74.** This is the known Yahoo statement lag (rule 31); the weekly scan remains the rule-9 catch-all and
+  should re-run the objective refresh for AVGO once the statements land.
+- ⚠️ **Stale-input divergence is large enough to name explicitly.** Sheet Rev YoY 47.9% vs the reported 86%
+  is a ~38pt gap — a growth input, not a quality metric, so it is not a rule-9 TTM-vs-MRQ quality trigger,
+  but it is the single most misleading number on the row right now. On the quality metrics the gap is inside
+  the 10pt rule-9 threshold and definitionally muddy: sheet GM 76.28% vs Q3 GAAP GM 69.13% / non-GAAP 75.0%
+  (different bases), sheet FCF margin 43.41% vs Q3 46.2%.
+- ⚠️ `roic`: yfinance fetch returned no data — prior value **21.3 retained, not refreshed** (same failure
+  mode as CRDO's roic on 2026-09-02).
+- Rule 9 surprise test: **not triggered** (revenue +0.4–0.6% vs consensus, EPS +2.5–5.1%, sequential GM
+  −35bps GAAP). Confirmed in the 2026-09-02 briefing; nothing here changes it.
+- No Layer-9 capacity-cohort names touched — rule 13 EV/MW N/A this pass.
+- **No ratings changed** (rule 12). The briefing's rating implications (D1/D5 on the Anthropic 5 GW / OpenAI
+  1.3 GW / Meta 3 GW XPU disclosures, M2 on the sell-the-news reaction) remain open for a human pass.
+- Methodology seam active (`2026-08-31`, rule 32-B deploy, expires 2026-09-07). **Not exercised** — no exit
+  clock started or confirmed this run.
+
+### Test gate
+`python3 -m pytest tests/ -q` → **401 passed, 1 skipped** in 5.87s. Fully green; no rule-26 exit-clock
+caveat needed.
+
+### Housekeeping
+- Unmerged-branch guard: **clean** — `git branch --list 'earnings/*' --no-merged origin/main` returned
+  nothing. Branched `earnings/2026-09-03` from `origin/main` (eec28af) per branching discipline.
+- No peer `ai-stocks` Claude session was live in the shared working tree at run time (`ListAgents` showed
+  only unrelated sessions), so the workbook writes were uncontended.
+- Scheduled-task prompt matches canonical `docs/ops/earnings-sentinel-task.md` — **no drift**.
+- Robinhood: **read-only** throughout (`get_equity_quotes` for the close). No order/write tool called (rule 29).
