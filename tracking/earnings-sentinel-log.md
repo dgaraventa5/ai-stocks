@@ -431,3 +431,36 @@ dry-run is not a ticket predictor on the first run of a new month.
 ### Test gate
 `python3 -m pytest tests/ -q` → **401 passed, 1 skipped** in 6.02s. Green; no rule-26 caveat.
 Robinhood: read-only throughout (`get_equity_quotes` earlier in the session). No order/write tool called.
+
+---
+
+## 2026-09-04 (later) — AVGO rule-12 rating pass (Dom: "use your best judgement"); ticket left to the executor
+
+### Ratings — one change, twelve evidenced holds (Rating Audit rows 2929–2941, all "Claude proposed")
+
+| Dim | Was | Now | Basis |
+|---|---|---|---|
+| **M1 EPS Revisions** | 5 | **4** | Counts net positive (11 up / 4 down, 30d) but the LEVEL is flat: +1y EPS 19.39 → 19.37 over 90d and **−1.0% in the week after the beat-and-raise** (the ~73% Q4 GM guide trimmed out-quarters). Band 5 needs "consensus moving higher"; it isn't. |
+| M2 Rel Strength | 1 | 1 | Re-measured: 6-mo −40.3pp vs SMH (AVGO +8.7% / SMH +49.0%), 3-mo −6.6pp; 6-mo band governs. The stale 1 was right. |
+| M3 Insider | 4 | 4 | Step 1: exactly one buyer — director Harry You, incl. a **new** open-market buy 2026-06-15 (1,000 sh @ $373.57). Single-fill >$1M path to 5 not met (largest fill $707K). |
+| D1 / D5 | 5 / 5 | 5 / 5 | AI = 56% of Q3 revenue (62% guided); four named hyperscaler/lab anchors. Maxed. |
+| D2 Position | 5 | 5 | June's bookings-vs-shipments evidence was DISCONTINUED (unobserved, not worse); replaced by GW ladders to 2028 + "secured the supply" for FY27 doubling. Rule 23: D2/D3 not moved together. |
+| D3 Moat | 4 | 4 | Erosion vector quantified (Google retained share 55–80% sell-side); no displacement observed. Bias check passed *literally* — the stock IS down ~40pp vs sector. |
+| D4 Capacity | 5 | 5 | Customer-committed ramp is the buildout for a fabless designer; $532M capex is by construction. |
+| R1 Cust Conc | 3 | 3 | 10-Q Q2 FY26: top-5 end customers ≈ **45%** of 1H revenue; top-1 stays in the 25–40% band. |
+| R2 Geo | 4 | 4 | No new regional disclosure; one demand leg. |
+| R3 Balance Sheet | 4 | 4 | **DEFERRED** — Q3 10-Q not filed (EDGAR: latest 2026-06-09). ND/EBITDA 0.68 argues 5; the RVG guarantee argues against; the footnote decides. |
+| R4 Reg | 4 | 4 | 8-K 2026-09-02 Item 8.01 = $0.65 dividend only. |
+| R5 | 5 | 5 | Rule 16 default. |
+
+**⚠️ FLAGGED FOR DOM (M3, not acted on):** officer selling is heavy and NOT 10b5-1-flagged in the filings — Tan (CEO) 548,154 sh / $185.1M ≈ **40% of pre-holdings**; Brazeal (CLO) 312,767 sh / $109.5M ≈ **49%** across 109 fills (cadence reads like an unflagged plan); Spears (CFO) ≈ 26%; Velaga/Kawwas ≈ 52–53%. Samueli's 2.13M sh / $752.9M is 10b5-1 → routine. Rubric step 1 makes buying dispositive, so 4 stands; counting officer selling despite a buyer would be a rubric change (rule 8), not a per-name nudge. Source: 55 Form 4s, 370 transactions, CIK 1730168, 2025-09-10..2026-07-14.
+
+**Score:** AVGO 79.23 → **78.7, rank #6 → #7** (ANET to #6); tier ✓✓ unchanged. Exactly the M1 notch (20 × ¼ × 10% = 0.5).
+**Model event: NO.** `refresh_targets --dry-run` FREEZE; real run frozen, nothing written. The monthly resize was already stamped `2026-09` earlier today, so no second ticket was possible (checked before running, per the new memory note).
+**Score panel:** `score-history.csv` is date-deduped/append-only, so today's AVGO row keeps 79.23; the M1 change enters with the 2026-09-05 rows. Not rewritten, by design.
+**Test gate:** `pytest tests/ -q` → **401 passed, 1 skipped**.
+Rule 6: news-log line appended. Rule 29: read-only (EDGAR + yfinance only; no Robinhood calls this pass).
+
+### Ticket `2026-09-04-resize_monthly` — left in place (judgement call, Dom asked)
+
+Left for the executor. Reasoning: it is the model's designed output under rule 28 (monthly ±25% drift-band pass), the trigger is data (CRDO's −20% week), not a methodology deploy (and rule 32-C damps only exits anyway), the recon snapshot is fresh (2026-09-03), and the executor's own C2 gates (checksum, expiry 2026-09-06 22:11Z, caps, live-quote sanity, halt flag) still stand between the ticket and an order. Deleting it would be a discretionary trade decision by Claude — exactly what rules 5/29 exclude. Executor state checked: last recon 2026-09-03 clean, `halted=False`, 0 open orders; no halt flag present. Dom retains the veto until the next executor run.
