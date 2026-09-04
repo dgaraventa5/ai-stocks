@@ -1,9 +1,17 @@
 {
-  "as_of": "2026-08-17",
+  "as_of": "2026-09-03",
   "halted": false,
   "positions": 15,
   "open_orders": 0,
   "drift_flags": [
+    "ALAB",
+    "CRDO",
+    "EME",
+    "FIX",
+    "META",
+    "MSFT",
+    "NVDA",
+    "SNDK",
     "VRT"
   ],
   "regen_needed": [],

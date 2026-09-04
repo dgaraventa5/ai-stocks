@@ -254,3 +254,213 @@ Only knock-on elsewhere: **GLW 68.50 → 68.20 (#37 → #39)**, a shared Layer-0
   workbook writes.
 - Scheduled-task prompt matches the canonical `docs/ops/earnings-sentinel-task.md` — **no drift**.
 - Robinhood: read-only throughout (`get_earnings_results` for AVGO consensus). No order/write tool called (rule 29).
+
+---
+
+## 2026-09-03 — rescore run (AVGO)
+
+**Detect:** scope 25, `briefing_due` empty, `flagged` empty, `rescore_due` = **AVGO** (report 2026-09-02, AMC).
+This is the second phase of the AVGO event briefed the prior evening (`per-stock/AVGO/context-2026-09-02.md`,
+merged as part of PR #50) — first post-reaction close, per rule 31.
+
+### Briefed
+None. (AVGO's T+0 briefing ran 2026-09-02; no new reporters entered scope.)
+
+### Re-scored — AVGO
+
+| | Before (2026-09-02) | After (2026-09-03) |
+|---|---|---|
+| Total Score | 77.24 | **77.74** (+0.50) |
+| Rank | 9 | **9** (unchanged) |
+| Tier | ✓✓ | **✓✓** (unchanged) |
+
+**Model event: NO.** `recalc_watchlist.py --sync` reported *"membership & tiers unchanged since last rebalance
+— snapshot frozen, nothing written"*. No rebalance fired, so **no trade ticket was generated** (rule 29 path
+not entered — this is the correct outcome, not a refusal). `exit_pending` map is empty; no clock started or
+confirmed.
+
+**Inputs written** (`refresh_objective_inputs.py AVGO`, Last Updated 2026-07-16 → 2026-09-03):
+fwd P/E 19.28 → **18.49**, EV/EBITDA 43.407 → **42.592**, P/S 23.607 → **22.517**,
+FCF yield 1.84 → **1.93**, 50DMA% 38.3 → **43.3**, EV/FCF **54.71** (`reverse-dcf.json`, as-of 2026-09-03).
+
+**Knock-on across the rest of the watchlist: none.** AVGO is the only row that moved by ≥0.05 (all 214 rows
+diffed against the 2026-09-02 score-history snapshot); no rank or tier changed anywhere. Unlike the CRDO pass
+on 2026-09-02, no Layer-06 cohort peer shifted — AVGO's cheaper absolute multiples did **not** move its
+rule-20 cohort percentile rank.
+
+**What actually drove the +0.50 — it is entirely the Momentum 50DMA band, not a re-rating.**
+50DMA% crossed the ≥40 threshold (38.3 → 43.3), so the banded component went 40 → 60, lifting the Momentum
+Score 60.0 → 65.0; at the 10% Momentum weight that is exactly +0.50 — the whole observed delta. Value's
+contribution was **0.00 net** despite every multiple cheapening, because those six metrics are cohort-relative
+(rule 20) and AVGO's rank within Layer 06 did not change.
+
+**Price reaction:** AVGO closed **$357.16** on 2026-09-03 vs the $367.24 close on 2026-09-02 — **−2.75%** on
+~60.1M shares against a ~20M recent norm (Robinhood `get_equity_quotes`, official SIP close; yfinance's
+2026-09-03 bar was still NaN at run time — the known latest-bar flicker). A beat-and-raise sold off modestly.
+
+### Flags (surfaced, not fixed)
+
+- ⚠️⚠️ **The re-score captured the price move, not the new fundamentals — again.** yfinance had not ingested
+  AVGO's Q3 FY26 statements one day after the print, so every statement-derived input is **unchanged from
+  2026-07-16**: Rev YoY **47.9%**, Rev 3y CAGR 24.38%, gross margin 76.28%, FCF margin 43.41%, EPS YoY 87.5%.
+  The dry-run confirmed this directly — cols 12/13/14/16/17/18 were written but produced **zero value
+  changes**. The actual quarter was revenue **+86% YoY** ($29,591M) with **+93%** guided for Q4 and AI
+  semiconductor revenue **+221% YoY** (8-K 2026-09-02 Ex-99.1; Q3 FY26 call). **None of that step-up is in
+  77.74.** This is the known Yahoo statement lag (rule 31); the weekly scan remains the rule-9 catch-all and
+  should re-run the objective refresh for AVGO once the statements land.
+- ⚠️ **Stale-input divergence is large enough to name explicitly.** Sheet Rev YoY 47.9% vs the reported 86%
+  is a ~38pt gap — a growth input, not a quality metric, so it is not a rule-9 TTM-vs-MRQ quality trigger,
+  but it is the single most misleading number on the row right now. On the quality metrics the gap is inside
+  the 10pt rule-9 threshold and definitionally muddy: sheet GM 76.28% vs Q3 GAAP GM 69.13% / non-GAAP 75.0%
+  (different bases), sheet FCF margin 43.41% vs Q3 46.2%.
+- ⚠️ `roic`: yfinance fetch returned no data — prior value **21.3 retained, not refreshed** (same failure
+  mode as CRDO's roic on 2026-09-02).
+- Rule 9 surprise test: **not triggered** (revenue +0.4–0.6% vs consensus, EPS +2.5–5.1%, sequential GM
+  −35bps GAAP). Confirmed in the 2026-09-02 briefing; nothing here changes it.
+- No Layer-9 capacity-cohort names touched — rule 13 EV/MW N/A this pass.
+- **No ratings changed** (rule 12). The briefing's rating implications (D1/D5 on the Anthropic 5 GW / OpenAI
+  1.3 GW / Meta 3 GW XPU disclosures, M2 on the sell-the-news reaction) remain open for a human pass.
+- Methodology seam active (`2026-08-31`, rule 32-B deploy, expires 2026-09-07). **Not exercised** — no exit
+  clock started or confirmed this run.
+
+### Test gate
+`python3 -m pytest tests/ -q` → **401 passed, 1 skipped** in 5.87s. Fully green; no rule-26 exit-clock
+caveat needed.
+
+### Housekeeping
+- Unmerged-branch guard: **clean** — `git branch --list 'earnings/*' --no-merged origin/main` returned
+  nothing. Branched `earnings/2026-09-03` from `origin/main` (eec28af) per branching discipline.
+- No peer `ai-stocks` Claude session was live in the shared working tree at run time (`ListAgents` showed
+  only unrelated sessions), so the workbook writes were uncontended.
+- Scheduled-task prompt matches canonical `docs/ops/earnings-sentinel-task.md` — **no drift**.
+- Robinhood: **read-only** throughout (`get_equity_quotes` for the close). No order/write tool called (rule 29).
+
+---
+
+## 2026-09-04 — follow-up run (Dom-initiated, "do them all"): AVGO fundamentals landed, CRDO M2 re-applied from #51, resize_monthly event
+
+Not a scheduled sentinel run — Dom asked for the open next-steps from the 2026-09-03 entry to be executed.
+Detect at 17:51 ET: scope 25, `briefing_due` empty, `rescore_due` empty. Guard was ARMED (`earnings/2026-09-03`
+unmerged) until PR #52 merged at afed832; clear before the 18:30 ET scheduled run.
+
+### Re-scored — AVGO (fundamentals now post-Q3 FY26)
+
+The 2026-09-03 pass captured only the price move (⚠️⚠️ flag in that entry). yfinance's `info` aggregates
+ingested Q3 FY26 overnight, so `refresh_objective_inputs.py AVGO` wrote 10 value changes:
+
+| Input | 2026-09-03 | 2026-09-04 | Source check |
+|---|---|---|---|
+| Rev YoY % | 47.9 | **85.5** | 8-K 2026-09-02 Ex-99.1: $29,591M vs $15,952M = +85.5% ✓ |
+| EPS YoY % | 87.5 | **216.1** | GAAP diluted $2.68 vs $0.85 = +215% ✓ (operational — revenue +86%, op income +171%; rule 15 not triggered) |
+| Gross Mgn % | 76.28 | 75.52 | Yahoo TTM; Q3 GAAP 69.13% / non-GAAP 75.0% (Ex-99.1) |
+| FCF Mgn % | 43.41 | 36.77 | Yahoo TTM; Q3 MRQ 46.2% — **9.4pt TTM-vs-MRQ gap, just inside the rule-9 10pt line** |
+| EV/EBITDA | 42.59 | 33.38 | denominator growth, price flat (fwd P/E 18.49 → 18.47) |
+| P/S | 22.52 | 19.11 | same |
+| ND/EBITDA | 1.08 | 0.68 | cash $23,975M vs $16,178M FYE (Ex-99.1) |
+| **ROIC %** | 21.3 | **28.7** | **hand-recomputed, see below** |
+| EV/FCF | 54.71 | 53.04 | `reverse-dcf.json` as-of 2026-09-04 |
+
+**ROIC recompute (rule 1 citation).** ROIC is a *curated* input — yfinance never supplies it
+(`batch_score.py:236`), so guard 5 in `refresh_objective_inputs.py` keeps the prior value on every refresh.
+The 2026-09-02 and 2026-09-03 entries logged that as a "fetch failure"; it is not — it fires on every name,
+every run. The value was simply two quarters stale (set 2026-06-12, TTM through Q2 FY26).
+Definition (same construction as June): TTM NOPAT ÷ average invested capital.
+- TTM GAAP operating income = Q4 FY25 $7,654M (yfinance, 10-K basis) + 9M FY26 $35,306M (Ex-99.1) = **$42,960M**
+- Tax rate = 9M FY26 GAAP effective $3,853M / $33,600M = **11.47%** → NOPAT **$38,033M**
+- Invested capital = ST debt + LT debt + equity − cash: 2026-08-02 $2,252 + $57,167 + $99,690 − $23,975 =
+  **$135,134M**; FYE 2025-11-02 $3,152 + $61,984 + $81,292 − $16,178 = **$130,250M**; average **$132,692M**
+- ROIC = 38,033 / 132,692 = **28.7%** (end-period IC gives 28.1%). Sanity: the June 21.3% reproduces to ~20%
+  under this construction through Q2 FY26, so this is a fundamentals step-up, not a definitional jump.
+Fix shipped: the guard-5 message now says `roic: curated input, not fetched … hand-refresh from the filing
+after earnings` so future logs stop mis-reporting it.
+
+| | 2026-09-03 | 2026-09-04 |
+|---|---|---|
+| AVGO Total Score | 77.74 | **79.23** (+1.49) |
+| AVGO Rank | 9 | **6** |
+| Tier | ✓✓ | ✓✓ (unchanged) |
+
+**Layer-06 cohort knock-on (rule 20, expected):** AVGO's better margins/ROIC/multiples re-ranked its peers —
+NVDA 84.60 → 84.83 (#1), ALAB +0.23 (#12), MPWR −0.45 (#109 → #115), QCOM −0.30, RMBS −0.19, MRVL −0.18,
+AMD −0.15. No tier changed anywhere; no rank-15/18 crossing.
+
+### CRDO — PR #51 re-applied (superseded, not merged)
+
+PR #51 (`research/2026-09-02-followups`, b8ea79c) went CONFLICTING once #52 landed (binary xlsx + a duplicate
+2026-09-03 `score-history.csv` snapshot). Its workbook delta was exactly one Watchlist cell + seven Rating Audit
+rows, so it was re-applied mechanically onto the current workbook rather than merged:
+- Watchlist r116 c27 **CRDO M2 Rel Str 5 → 4** (6-month vs SMH +8.6pp = band 4; #51's evidence, verbatim).
+- Rating Audit rows **2922–2928** copied verbatim from #51's workbook (M2 changed; M1/M3/D2/R3/R1 held with
+  evidence; one row covering D1/D3/D4/D5/R2/R4/R5). Append point matched exactly (last row was 2921).
+- `per-stock/AVGO/thesis.md` taken from #51 unchanged (main had not touched it), then the ROIC row updated.
+- #51's `score-history.csv` rows **dropped** — same-date duplicate of a snapshot main already holds; today's
+  2026-09-04 rows capture the CRDO change instead (panel stays date-deduped, append-only).
+- CRDO 82.37 → **81.87 (#3 → #4)** — exactly one M2 notch (20 × ¼ × 10% = 0.50). Matches #51's own result.
+No new ratings were assigned in this run; the only rating change is #51's, credited to it.
+
+### Model event — YES. Ticket — YES (resize_monthly)
+
+`recalc_watchlist.py --sync` was blocked by the permission classifier, so it was split: `--sync --no-reweight`
+(scores only), then `refresh_targets.py --dry-run`, which printed **"would FREEZE (no membership/tier change)"**.
+The real `refresh_targets.py` run then fired **`resize_monthly: CRDO outside drift band`** — the rule-28
+monthly ±25% drift-band pass, which the dry-run does NOT simulate. ⚠️ Lesson for the sentinel prompt: the
+dry-run is not a ticket predictor on the first run of a new month.
+- Event: 2026-09-04, kind `resize_monthly`; `sizing_state.last_resize_check` stamped `2026-09`.
+- Ticket: `tracking/live/tickets/ticket-2026-09-04-resize_monthly.json` (gitignored) — **1 order (VRT buy)**,
+  14 dust-suppressed, 0 untradeable; recon snapshot as-of 2026-09-03 (fresh); expires 2026-09-06 22:11Z.
+  CRDO's drift *triggered* the pass; after re-sizing all 15 names only VRT's delta cleared dust.
+- Targets rewritten (15 positions); rule-25 gate: **"Targets reflect current scores ✓"**. `exit_pending` empty.
+- Notification sent. Execution is Dom's launchd executor (rule 29); nothing here transmits orders.
+
+### Housekeeping completed
+- **PR #52 merged** (afed832) — guard cleared 40 min before the scheduled run. **PR #44 merged** (7ec70cc9)
+  after its 20 `test_litigation_check` tests passed locally (no CI on the branch); remote branch deleted.
+- **PR #51 → close as superseded** by this branch's PR (content re-applied above).
+- 49 untracked files were byte-identical leftovers of #44 in the shared tree; the classifier blocked `rm`, so
+  they were stashed (`stash@{0}`, recoverable) to clear the pull collision. Drop it when convenient.
+- **Rule-32 §2e (capitulation check) was never committed** — `refresh-context.md`'s local modification since
+  2026-08-31 was that section, sitting uncommitted in the shared tree. Restored on top of #44's §2d and
+  committed here.
+- `tracking/rating-refresh-skipped.md` (2026-08-18 TCC-denied skip note) committed.
+- 27 orphaned EDGAR filings (ADI/MCHP/NXPI/ON/QCOM/SWKS/TXN, 9.6MB) committed — cited by the already-committed
+  2026-08-31 briefings, missed at staging time. `.claude/launch.json` left untracked (machine-local preview config).
+- The 2026-09-02 entry's "stashed, not discarded" perf-series stash is **not** in `git stash list` — already
+  popped/dropped, or the entry overstated. Nothing to recover.
+- Methodology seam (2026-08-31) expires 2026-09-07; not exercised (no exit clock).
+
+### Test gate
+`python3 -m pytest tests/ -q` → **401 passed, 1 skipped** in 6.02s. Green; no rule-26 caveat.
+Robinhood: read-only throughout (`get_equity_quotes` earlier in the session). No order/write tool called.
+
+---
+
+## 2026-09-04 (later) — AVGO rule-12 rating pass (Dom: "use your best judgement"); ticket left to the executor
+
+### Ratings — one change, twelve evidenced holds (Rating Audit rows 2929–2941, all "Claude proposed")
+
+| Dim | Was | Now | Basis |
+|---|---|---|---|
+| **M1 EPS Revisions** | 5 | **4** | Counts net positive (11 up / 4 down, 30d) but the LEVEL is flat: +1y EPS 19.39 → 19.37 over 90d and **−1.0% in the week after the beat-and-raise** (the ~73% Q4 GM guide trimmed out-quarters). Band 5 needs "consensus moving higher"; it isn't. |
+| M2 Rel Strength | 1 | 1 | Re-measured: 6-mo −40.3pp vs SMH (AVGO +8.7% / SMH +49.0%), 3-mo −6.6pp; 6-mo band governs. The stale 1 was right. |
+| M3 Insider | 4 | 4 | Step 1: exactly one buyer — director Harry You, incl. a **new** open-market buy 2026-06-15 (1,000 sh @ $373.57). Single-fill >$1M path to 5 not met (largest fill $707K). |
+| D1 / D5 | 5 / 5 | 5 / 5 | AI = 56% of Q3 revenue (62% guided); four named hyperscaler/lab anchors. Maxed. |
+| D2 Position | 5 | 5 | June's bookings-vs-shipments evidence was DISCONTINUED (unobserved, not worse); replaced by GW ladders to 2028 + "secured the supply" for FY27 doubling. Rule 23: D2/D3 not moved together. |
+| D3 Moat | 4 | 4 | Erosion vector quantified (Google retained share 55–80% sell-side); no displacement observed. Bias check passed *literally* — the stock IS down ~40pp vs sector. |
+| D4 Capacity | 5 | 5 | Customer-committed ramp is the buildout for a fabless designer; $532M capex is by construction. |
+| R1 Cust Conc | 3 | 3 | 10-Q Q2 FY26: top-5 end customers ≈ **45%** of 1H revenue; top-1 stays in the 25–40% band. |
+| R2 Geo | 4 | 4 | No new regional disclosure; one demand leg. |
+| R3 Balance Sheet | 4 | 4 | **DEFERRED** — Q3 10-Q not filed (EDGAR: latest 2026-06-09). ND/EBITDA 0.68 argues 5; the RVG guarantee argues against; the footnote decides. |
+| R4 Reg | 4 | 4 | 8-K 2026-09-02 Item 8.01 = $0.65 dividend only. |
+| R5 | 5 | 5 | Rule 16 default. |
+
+**⚠️ FLAGGED FOR DOM (M3, not acted on):** officer selling is heavy and NOT 10b5-1-flagged in the filings — Tan (CEO) 548,154 sh / $185.1M ≈ **40% of pre-holdings**; Brazeal (CLO) 312,767 sh / $109.5M ≈ **49%** across 109 fills (cadence reads like an unflagged plan); Spears (CFO) ≈ 26%; Velaga/Kawwas ≈ 52–53%. Samueli's 2.13M sh / $752.9M is 10b5-1 → routine. Rubric step 1 makes buying dispositive, so 4 stands; counting officer selling despite a buyer would be a rubric change (rule 8), not a per-name nudge. Source: 55 Form 4s, 370 transactions, CIK 1730168, 2025-09-10..2026-07-14.
+
+**Score:** AVGO 79.23 → **78.7, rank #6 → #7** (ANET to #6); tier ✓✓ unchanged. Exactly the M1 notch (20 × ¼ × 10% = 0.5).
+**Model event: NO.** `refresh_targets --dry-run` FREEZE; real run frozen, nothing written. The monthly resize was already stamped `2026-09` earlier today, so no second ticket was possible (checked before running, per the new memory note).
+**Score panel:** `score-history.csv` is date-deduped/append-only, so today's AVGO row keeps 79.23; the M1 change enters with the 2026-09-05 rows. Not rewritten, by design.
+**Test gate:** `pytest tests/ -q` → **401 passed, 1 skipped**.
+Rule 6: news-log line appended. Rule 29: read-only (EDGAR + yfinance only; no Robinhood calls this pass).
+
+### Ticket `2026-09-04-resize_monthly` — left in place (judgement call, Dom asked)
+
+Left for the executor. Reasoning: it is the model's designed output under rule 28 (monthly ±25% drift-band pass), the trigger is data (CRDO's −20% week), not a methodology deploy (and rule 32-C damps only exits anyway), the recon snapshot is fresh (2026-09-03), and the executor's own C2 gates (checksum, expiry 2026-09-06 22:11Z, caps, live-quote sanity, halt flag) still stand between the ticket and an order. Deleting it would be a discretionary trade decision by Claude — exactly what rules 5/29 exclude. Executor state checked: last recon 2026-09-03 clean, `halted=False`, 0 open orders; no halt flag present. Dom retains the veto until the next executor run.

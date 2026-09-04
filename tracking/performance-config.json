@@ -550,6 +550,46 @@
         "TSM": "\u2713\u2713"
       },
       "cash": 0.02
+    },
+    {
+      "date": "2026-09-04",
+      "reason": "resize_monthly: CRDO outside drift band",
+      "kind": "resize_monthly",
+      "allocations": {
+        "SNDK": 305.95,
+        "META": 975.94,
+        "MU": 392.63,
+        "ANET": 693.89,
+        "FIX": 603.24,
+        "VRT": 569.28,
+        "RDDT": 454.3,
+        "NVDA": 1113.07,
+        "GMED": 968.43,
+        "CRDO": 360.58,
+        "AVGO": 730.13,
+        "EME": 697.48,
+        "MSFT": 955.57,
+        "TSM": 886.79,
+        "ALAB": 379.12
+      },
+      "tiers": {
+        "SNDK": "\u2713\u2713",
+        "META": "\u2713\u2713",
+        "MU": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "FIX": "\u2713\u2713",
+        "VRT": "\u2713\u2713",
+        "RDDT": "\u2713\u2713",
+        "NVDA": "\u2713\u2713",
+        "GMED": "\u2713\u2713",
+        "CRDO": "\u2713\u2713",
+        "AVGO": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "TSM": "\u2713\u2713",
+        "ALAB": "\u2713\u2713"
+      },
+      "cash": -0.02
     }
   ],
   "exit_pending": {},
@@ -707,7 +747,7 @@
     ]
   },
   "sizing_state": {
-    "last_resize_check": "2026-08"
+    "last_resize_check": "2026-09"
   },
   "methodology_seam": {
     "date": "2026-08-31",
