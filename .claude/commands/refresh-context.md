@@ -62,6 +62,33 @@ This is a **qualitative red flag, not a scored metric**: a name at its 3-year-hi
 
 The script self-skips with a stated reason on foreign filers (no quarterly us-gaap XBRL) and names using unmapped revenue tags (some crypto miners) — when it skips, note the skip + reason in Section 2; eyeball P/S vs its own history manually if the name is rating-critical.
 
+### 2d. Litigation / docket check (added 2026-08-24, after the BW miss)
+
+```bash
+python3 scripts/litigation_check.py $TICKER
+```
+
+**Why this step exists.** On 2026-08-24 the rating refresh found that BW's subjective ratings rested on research that knew nothing about a pending securities-fraud class action naming the company, its Chairman/CEO and its CFO (*Cho v. Babcock & Wilcox Enterprises*, 5:26-cv-00886, N.D. Ohio, filed 2026-04-14) alleging the flagship $2.4B AI-datacenter contract was a related-party deal with BW's own ~19% shareholder on both sides.
+
+The reason the pipeline missed it is the point: **the case appears in none of BW's periodic filings.** The FY2025 10-K predates the complaint; both 10-Qs filed afterwards say "no new litigation to disclose." So Step 2's filings pull and the rule-9 earnings refresh both came back clean — twice — on a name whose central thesis premise was being contested in federal court. A filings-only view was complete and still wrong. This step goes outside the filing chain, to the court's own docket index.
+
+**What it reports:**
+- **SECURITIES dockets** (nature of suit 850 / Exchange Act cause) — the R4 input.
+- **IP/patent dockets** — lower prominence, but they bear on **D3 moat**. The first live run surfaced ten active MPWR patent suits against Vicor and Reed Semiconductor.
+- **⚠️ DISCLOSURE MISMATCH** — a *pending* securities docket filed before the newest cached 10-K/10-Q went out, where that filing contains no litigation language. This is the BW blind spot, and it is the part worth having: plaintiff-firm press releases already spam "a case exists"; nobody tells you the company's own filings are silent about it.
+
+**Interpretation discipline — a qualitative red flag, NOT a scored metric** (same standing as 2b and 2c):
+
+- A complaint is an **allegation**. Plaintiff firms file reflexively after any sharp drawdown, and most securities class actions settle small or are dismissed. A hit is not established wrongdoing, and it is not automatically an R4 downgrade — read what is actually alleged.
+- **Distinguish a filed case from a solicitation.** "Law firm investigates possible breaches of fiduciary duty" press releases are marketing and carry near-zero information. A docket number is evidence; a press release is not. This step exists partly because that distinction is easy to get backwards in either direction.
+- **A MISMATCH is not an accusation of improper disclosure.** Reg S-K Item 103 covers *material* pending proceedings and ASC 450 covers reasonably-possible material losses — management may legitimately judge a matter immaterial. Report the dates, read the filing's Item 1, and let the briefing reason. Do not draw a legal conclusion.
+- **Check the as-of date.** A 10-Q's "no new litigation" sentence is scoped to **period end**, not filing date. A complaint filed between period end and filing date produces an apparent mismatch that is literally accurate — that is exactly the difference between BW's Q1 10-Q (accurate) and its Q2 10-Q (conflicting). The script prints both dates for this reason.
+- **Absence is weak evidence.** RECAP mirrors PACER and is not guaranteed complete. Record a clean run as **"no federal docket found in RECAP,"** never as "no litigation."
+
+The script self-skips with a stated reason when CourtListener is unreachable or rate-limits (HTTP 429), and reports honestly when no local filing is cached for the cross-check (run `sec_edgar.py` first). When it skips, note the skip + reason in the briefing — a skip is not a clean result.
+
+**Highest-value on:** names where one counterparty carries most of the backlog or revenue, related-party or affiliate-heavy structures, recent sharp drawdowns against good reported numbers, and any name whose thesis rests on a single contract. That is the profile where a filings-only view is most likely to be complete and still wrong.
+
 ### 3. WebSearch with current year in the query
 
 The current year is **mandatory** in search queries — Claude's bias is to assume "latest" means 2024 or 2025. Always include the actual current year.
@@ -86,7 +113,7 @@ Prompt the WebFetch tool: "Extract the key business updates: AI revenue mix, cus
 
 Sections:
 1. **Pre-research mental model** (from Step 1 — quote it verbatim)
-2. **Latest filing highlights** (key quotes from 10-Q MD&A, 8-K disclosures)
+2. **Latest filing highlights** (key quotes from 10-Q MD&A, 8-K disclosures) — record the 2b / 2c / 2d results here, including any **skip + reason** (a skip is not a clean result)
 3. **WebSearch findings** (top 3-5 findings with source URLs)
 4. **Earnings transcript highlights** (if fetched)
 5. **DIFF: what changed since my training** — explicit list
@@ -98,6 +125,7 @@ Surface:
 - The 3-5 most material findings
 - Which rating dimensions are likely affected
 - Any thesis-break signals (severe regulatory escalation, customer loss, product cycle issue)
+- Any **pending securities docket or disclosure mismatch** from Step 2d, stated as what it is: a filed allegation, with the docket number — never as established wrongdoing, and never conflated with a plaintiff-firm "investigation" press release
 
 ## Do not
 
@@ -106,6 +134,8 @@ Surface:
 - Lock any rating before completing Step 5 (the briefing file)
 - Pre-decide what the ratings should be during the research pass — the rating session is separate
 - Use only one search query — diversify across earnings, customers, competitive, regulatory
+- Record a clean Step-2d run as "no litigation" — it means "no federal docket found in RECAP"
+- Treat a Step-2d hit as proven misconduct, or a plaintiff-firm "investigation" press release as a filed case
 
 ## When NOT to run this
 
