@@ -89,6 +89,14 @@ The script self-skips with a stated reason when CourtListener is unreachable or 
 
 **Highest-value on:** names where one counterparty carries most of the backlog or revenue, related-party or affiliate-heavy structures, recent sharp drawdowns against good reported numbers, and any name whose thesis rests on a single contract. That is the profile where a filings-only view is most likely to be complete and still wrong.
 
+### 2e. Capitulation check (rule 32-A, added 2026-08-31)
+
+```bash
+python3 scripts/capitulation_flag.py $TICKER
+```
+
+The mirror of Step 2c: FLAG fires when P/S is at/below the **10th percentile** of the name's own 3-year range while rev YoY growth holds **at/above its 3-year median** — a trough multiple with intact fundamentals (the CRM-2026-06 setup: exited at maximum pessimism, then +53%). Same standing as 2b/2c/2d: a **qualitative red flag, NOT a scored metric**. A name can sit at its 3-year-low multiple for good reason (secular decline the revenue line hasn't caught yet) — the flag forces the briefing to argue why the market is this pessimistic, not to auto-reward the name. If the flag fires on a name the model recently exited or is about to exit, say so explicitly in the briefing, and log the rule-17 forecast (`--log-forecast`) so the calibration loop grades the signal. Same skip caveats as 2c (SEC companyfacts based; foreign filers self-skip).
+
 ### 3. WebSearch with current year in the query
 
 The current year is **mandatory** in search queries — Claude's bias is to assume "latest" means 2024 or 2025. Always include the actual current year.

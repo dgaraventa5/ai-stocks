@@ -1,0 +1,1 @@
+2026-08-18: skipped — no filesystem access to the repo at run time (macOS TCC denied Desktop reads to the session: all project reads, script execution, and git returned EPERM; network was OK). Backlog untouched; no briefings written, no ratings changed.
