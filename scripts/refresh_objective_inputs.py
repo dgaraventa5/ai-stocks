@@ -186,9 +186,19 @@ def apply_guards(info, fresh, existing):
         # missing denominator) blanks win over keep-prior (_BLANK_THROUGH_ON_NONE).
         v = fresh.get(key)
         if v is None and key not in _BLANK_THROUGH_ON_NONE and not _blank(existing.get(key)):
-            flags.append(
-                f"{key}: fetch returned no data — kept prior value {existing.get(key)}."
-            )
+            if key == "roic":
+                # ROIC is never fetched (yfinance.info has no ROIC — batch_score
+                # leaves it blank), so this branch fires on EVERY refresh. Say so:
+                # the earlier wording read as a transient failure and got logged
+                # as one twice (sentinel 2026-09-02/03). It is a curated input.
+                flags.append(
+                    f"roic: curated input, not fetched (yfinance has no ROIC) — kept "
+                    f"{existing.get(key)}; hand-refresh from the filing after earnings."
+                )
+            else:
+                flags.append(
+                    f"{key}: fetch returned no data — kept prior value {existing.get(key)}."
+                )
             continue
         if v is None and key in _BLANK_THROUGH_ON_NONE and not _blank(existing.get(key)):
             flags.append(

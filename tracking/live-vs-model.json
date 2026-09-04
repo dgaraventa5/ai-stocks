@@ -36,6 +36,36 @@
       "live_pct": -0.42,
       "model_pct": 3.27,
       "shortfall_pct": -3.69
+    },
+    {
+      "date": "2026-08-28",
+      "live_pct": -6.18,
+      "model_pct": -2.23,
+      "shortfall_pct": -3.95
+    },
+    {
+      "date": "2026-08-31",
+      "live_pct": -6.3,
+      "model_pct": -2.32,
+      "shortfall_pct": -3.98
+    },
+    {
+      "date": "2026-09-01",
+      "live_pct": -7.53,
+      "model_pct": -3.63,
+      "shortfall_pct": -3.9
+    },
+    {
+      "date": "2026-09-02",
+      "live_pct": -7.75,
+      "model_pct": -3.42,
+      "shortfall_pct": -4.33
+    },
+    {
+      "date": "2026-09-03",
+      "live_pct": -6.78,
+      "model_pct": -2.56,
+      "shortfall_pct": -4.22
     }
   ]
 }
