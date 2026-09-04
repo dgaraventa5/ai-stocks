@@ -422,17 +422,17 @@ AI pulmonary-hypertension product.
   deterioration; ~A$250M sell-off followed; FY26 guidance reaffirmed.
 - **2498.HK (RoboSense)** — [8/26] Interim results: revenue +30.2% YoY, LiDAR units +169.6% YoY.
 
-**Ticker/data-quality issues found this scan (flagging for a spreadsheet check, not acted on):**
-- **P** — does not resolve to a live, independently-traded security. Pandora Media was
-  acquired by SiriusXM in February 2019; the ticker was retired. **Recommend removing or
-  correcting this watchlist row.**
-- **TE** — does not resolve to any standalone ticker; almost certainly intended as TE
-  Connectivity, which trades as **TEL** (already separately on the watchlist). **Recommend
-  checking for a duplicate/mistyped row.**
-- **SPCX** — resolves to a real, currently-listed security: **SpaceX IPO'd 2026-06-12** on
-  Nasdaq (~$2.1T initial market cap) — overturns the prior assumption that SpaceX is not
-  public. It's already appearing in `score-history.csv`, so this may already be handled
-  correctly in the live sheet; flagging in case the watchlist notes still say "not public."
+**Coverage gap (scan-process error, corrected same day):** two real tickers received no
+actual news coverage this scan because the tail-sweep agent was seeded with the wrong company
+names and "confirmed" them as unresolvable — **P is Everpure (fka Pure Storage), Layer 8
+storage**, not a retired Pandora ticker; **TE is T1 Energy Inc., Layer 1 solar/renewables**, not
+a mistyped TE Connectivity. Both rows are valid in the Watchlist (added 2026-07-16). An earlier
+version of this document (and the 2026-09-04 commit message / Notion page) wrongly flagged them
+as dead/mistyped — that was the agent's assumption, unverified against the local spreadsheet,
+not a finding. **Neither name was searched under its real company name this scan — carry both
+into next week's sweep.** `SPCX` (SpaceX, IPO'd 2026-06-12) is already correctly on the
+Watchlist in Layer 10 — no action needed.
+
 - **AMBA** — NXP Semiconductors reportedly in talks to acquire Ambarella (~$3B+), first
   reported 7/31; still open/unresolved, no in-window confirmatory update found — worth a
   dedicated follow-up regardless of window boundaries given the deal size.
@@ -630,7 +630,7 @@ could not confirm reported interim results in-window, needs direct HKEX check).
 | 🟡 | **VRT's legal-risk thread widened, not resolved** — a fourth plaintiffs' firm (Hagens Berman) joined 9/1, still pre-litigation solicitation stage with no filed complaint found. Worth tracking for the next R3/R4 subjective-rating refresh rather than treating each week's item in isolation. |
 | 🟡 | **AVGO's $60-100B AI-debt financing remains unsigned** through window-end — the thesis.md §9 framing noted in the news-log (5/26 debt-treats-as-off-balance-sheet framing) still needs the revisit flagged by `/refresh-context AVGO` on 8/21; this week's earnings call disclosed no new information on it either. |
 | 🟡 | **CRM's Q2 FY27 print is the clearest thesis-relevant data point of the week** (+22-23% stock move) but the headline EPS beat is inflated by a non-operating Anthropic-stake gain, and a hard NRR% could not be located despite the disruption-risk mandate making it the most-watched number this quarter — recommend a direct 10-Q pull once EDGAR access is restored, and consider this for the next Layer-10 R5 absolute-lens review given the Claudeforce announcement's double-edged read (validates the data moat but normalizes off-platform CRM access). |
-| 🟢 | **Ticker data-quality items found this scan:** `P` appears to be a dead ticker (Pandora, delisted 2019 into SIRI) and `TE` doesn't resolve to any standalone security (likely a mistyped duplicate of `TEL`) — recommend a spreadsheet check. `SPCX` resolves to the real, newly-public SpaceX (IPO'd 6/12/2026, ~$2.1T cap) — confirm the watchlist notes reflect this rather than an outdated "not public" assumption. |
+| 🟢 | **Coverage gap, not a data-quality issue:** `P` (Everpure, fka Pure Storage) and `TE` (T1 Energy) got no real news coverage this scan because the sweep agent searched the wrong company names — both are valid Watchlist rows. Carry both into next week's sweep under their correct names. (An earlier version of this scan wrongly flagged them as dead/mistyped tickers — corrected.) |
 | 🟢 | **AMBA/NXP acquisition talks** (first reported 7/31, ~$3B+) remain open with no in-window confirmatory update — worth a dedicated follow-up regardless of window boundaries given the deal size. |
 | 🟢 | **META resolved two of three open legal threads** ($18B child-safety settlement 8/26; AI-discrimination injunction signal went against plaintiffs 8/24) — both worth folding into the next R3/R4 refresh as reduced (not eliminated) legal-risk exposure. |
 | 🟢 | **Whale Rock Capital's tracked CIK was wrong** in `weekly_scan_runner.py` (0001485922 matched no fund) — corrected to 0001387322 based on secondary-aggregator corroboration; flag for primary-EDGAR reverification once access is restored. |
