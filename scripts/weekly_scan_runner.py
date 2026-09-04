@@ -42,7 +42,12 @@ TRACKED_FUNDS = {
     "Baillie Gifford":    "0001048268",
     "Tiger Global":       "0001167483",
     "Coatue Management":  "0001336528",
-    "Whale Rock Capital": "0001485922",
+    "Whale Rock Capital": "0001387322",  # corrected 2026-09-04: 0001485922 didn't match Whale
+                                          # Rock Capital Management LLC in any source; new CIK
+                                          # cross-confirmed via whalewisdom/13f.info/opengovus
+                                          # (secondary aggregators, not primary EDGAR — session's
+                                          # EDGAR access was blocked). Re-verify against primary
+                                          # EDGAR once access is restored.
     "Lone Pine Capital":  "0001061165",
 }
 
