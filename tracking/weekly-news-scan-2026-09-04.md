@@ -38,6 +38,16 @@ One data-quality item corrected this scan: the tracked-fund CIK for **Whale Rock
 corrected to `0001387322` based on secondary-aggregator corroboration (whalewisdom/13f.info/
 opengovus all agree); flagged for primary-EDGAR reverification once access is restored.
 
+**Post-scan update (same day, after PRs #44/#52/#53/#54 merged to main):** Dom's local
+sessions closed most of this scan's open pipeline items before it was even filed — AVGO and
+CRDO post-Q3 fundamentals were ingested and hand-recomputed (`a1739a7`), AVGO got a rule-12
+rating pass (`be9b638`, M1 5→4), CRDO's PR-#51 M2 5→4 was re-applied, and a **`resize_monthly`
+model event fired 2026-09-04** (CRDO outside the ±25% drift band) — Targets rewritten, one
+trade ticket generated. The 📊 / 💼 sections and action items below were **rewritten against
+merged main** rather than the pre-merge state the scan originally captured; the ⚠️ material
+events are unchanged. #44 also landed a 2026-08-24 rating refresh that includes **TE** (T1
+Energy) — confirming the P/TE correction above.
+
 ---
 
 ## Step 0 — Mental Models: Portfolio Holdings (pre-scan articulation)
@@ -63,14 +73,19 @@ MRVL share-loss evidence. **META** watching the AI-hiring-discrimination injunct
 
 **Diff against this week's scan — four genuine, distinct developments, no thesis breaks:**
 1. **CRDO reported Q1 FY27 in-window (9/1): a real beat, but the stock fell ~20% on
-   margin/opex and customer-concentration concerns** — the earnings-sentinel rescored it
-   81.20→82.40 (#3), tier unchanged, but flagged that yfinance hadn't yet ingested the
-   post-earnings fundamentals (score rose on the price-crash-driven inverse-vol/momentum
-   mechanics alone) — **do not read 82.40/#3 as a post-earnings fundamental verdict.**
+   margin/opex and customer-concentration concerns** — the earnings-sentinel's T+1 rescore
+   (81.20→82.40, #3) captured only the price crash; the fundamentals landed 9/4 (PR #53) along
+   with a re-applied M2 Rel-Strength 5→4, netting **81.87 / #4**, tier unchanged. The -20% week
+   pushed CRDO outside the rule-28 ±25% drift band and fired the month's `resize_monthly`
+   event (weight 4.07%→3.57%).
 2. **AVGO reported Q3 FY26 in-window (9/2): beat on revenue/EPS/AI-revenue (AI semis crossed
    the >50%-of-revenue threshold pre-registered in its own context file), but stock fell
    ~5-6% on a Q4 guide that missed consensus by ~0.7%** — no rule-9 trigger (surprises inside
-   15%). The $60-100B AI-debt financing remained **unsigned** through window-end.
+   15%). Fundamentals ingested 9/4 (Rev YoY 47.9→85.5%, ROIC hand-recomputed 21.3→28.7,
+   ND/EBITDA 1.08→0.68): 77.74→**79.23 / #6**; the same-day rule-12 pass then took M1 EPS
+   Revisions 5→4 (consensus level flat post-beat) → **78.7 / #7** (enters the score panel with
+   the 9/5 rows). R3 Balance-Sheet is **deferred** to the unfiled Q3 10-Q guarantee footnote.
+   The $60-100B AI-debt financing remained **unsigned** through window-end.
 3. **META resolved two of its three open legal threads**: the child-safety trial settled for
    ~$18B over 10 years (8/26, court-approved), and the AI-layoff-discrimination
    preliminary-injunction signal went against plaintiffs (8/24, a signal not yet a final
@@ -454,16 +469,26 @@ toggle below.
 
 ## 📊 Earnings refreshed
 
-**CRDO** (portfolio holding, ✓✓ tier): Q1 FY27 reported 9/1, already rescored by the earnings
-sentinel 9/3 (81.20→82.40, #5→#3, tier unchanged) — **flagged, not a fundamental verdict**:
-yfinance had not yet ingested post-earnings statements, so the move reflects the ~20% price
-crash via momentum/inverse-vol mechanics, not updated margin/growth inputs. Recommend a
-follow-up objective refresh once yfinance reflects the new quarter.
+Both held names that reported in-window were fully refreshed by Dom's local sessions on 9/3-9/4
+(merged main, PRs #52/#53/#54) — nothing left for this scan to do on rule 9:
 
-**AVGO** (portfolio holding, ✓✓ tier): Q3 FY26 reported 9/2, already briefed by the earnings
-sentinel same day — **no rule-9 trigger** (revenue/EPS surprises inside 15%, sequential GM
-move inside 500bps). No score/rating change made (rule 12 — ratings untouched by a briefing
-alone).
+| Ticker | Print | Score path | Now | Tier |
+|---|---|---|---|---|
+| **CRDO** | Q1 FY27, 9/1 | 79.72 (8/17) → 82.40 (9/3 T+1, price-only) → fundamentals + M2 5→4 (9/4) | **81.87 / #4** | ✓✓ (unch.) |
+| **AVGO** | Q3 FY26, 9/2 | 77.16 (8/17) → 77.74 (9/3, 50DMA band) → fundamentals + ROIC 28.7 (9/4) → 79.23 / #6 → M1 5→4 (9/4) | **78.7 / #7** (panel 9/5) | ✓✓ (unch.) |
+
+**TTM/MRQ flags:** AVGO Rev YoY 85.5% and EPS YoY +216% are operational (rule 15 reviewed, not
+blanked); ROIC is a hand-recomputed curated input because yfinance never supplies it — the
+"fetch returned no data" guard now says so instead of logging a failure. **No rule-9 immediate
+trigger** on either name (surprises inside 15%, GM moves inside 500bps). **No tier crossings;
+no >5-pt single-cause move.** Layer-06 cohort knock-on from AVGO (rule 20): NVDA/ALAB +0.23,
+MPWR -0.45, QCOM -0.30, rest <0.2.
+
+**Not refreshed (non-held, network-blocked here):** CRM, DELL, HPE, SNOW, CIEN, MDB, CRWD, ZS,
+PANW, INTU, WDAY, ADSK, NTAP and several neoclouds reported in-window — rule-9's "within 1
+week" priority applies, none executable this session. Recommend `/refresh-objective` on this
+set from an on-network session, prioritizing CRM (thematic mandate) and PANW/MDB (post-beat
+margin-compression sell-offs).
 
 **Not refreshed this scan (non-held names, network-blocked):** CRM, DELL, HPE, SNOW, CIEN, MDB,
 CRWD, ZS, PANW, INTU, WDAY, ADSK, NTAP, and several neocloud names all reported strong or
@@ -477,32 +502,64 @@ this week's thematic mandate and DDOG/PANW given their post-earnings margin-comp
 
 ## 💼 Portfolio pipeline
 
-- `refresh_targets.py --check`: **Targets reflect current scores ✓** — no pending rebalance, no
-  ENTER/EXIT/EXIT PENDING/BLOCKED flags, no tier-change reallocations for any of the 15
-  holdings (all held ✓✓ throughout the window; CRDO's earnings-sentinel rescore to #3 did not
-  cross a tier boundary).
-- **Weekly mark** (from `tracking/performance-series.json`, kept current through 2026-09-03 by
-  `daily-refresh.yml` — read, not independently re-verified this session):
+- **Model event: `resize_monthly` fired 2026-09-04** (kind `resize_monthly`, reason "CRDO outside
+  drift band") — the rule-28 monthly ±25% drift-band pass, triggered by CRDO's -20% week (data,
+  not a methodology deploy, so rule 32-C damping doesn't apply). **Membership unchanged (15/15
+  HOLD), no tier changes, no ENTER/EXIT/EXIT PENDING.** Targets rewritten (header now
+  "refreshed 2026-09-04"); `refresh_targets.py --check` green on merged main. The dry-run had
+  said FREEZE — it doesn't simulate the monthly pass — so the real run fired.
+- **Inverse-vol re-size, old → new target %** (biggest moves bold):
 
-  | | Window (8/21→9/3) | Since inception (5/26) |
+  | Ticker | 8/17 | 9/04 | | Ticker | 8/17 | 9/04 |
+  |---|---|---|---|---|---|---|
+  | NVDA | 10.38 | **11.04** | | GMED | 10.05 | 9.60 |
+  | FIX | 6.73 | **5.98** | | EME | 7.62 | **6.92** |
+  | TSM | 8.51 | 8.79 | | ALAB | 3.73 | 3.76 |
+  | CRDO | 4.07 | **3.57** | | VRT | 5.67 | 5.64 |
+  | MU | 3.73 | 3.89 | | RDDT | 4.62 | 4.50 |
+  | AVGO | 7.64 | 7.24 | | META | 8.60 | **9.68** |
+  | ANET | 6.90 | 6.88 | | MSFT | 8.75 | **9.47** |
+  | SNDK | 3.00 | 3.03 | | | | |
+
+- **Trade ticket `2026-09-04-resize_monthly`:** 1 order (**VRT buy** — share delta vs. the 9/3
+  recon actuals, where VRT was a drift-flagged under-hold), 14 names dust-suppressed; **expires
+  2026-09-06 22:11Z**. Deliberately left for the executor (rules 5/29 — deleting it would be a
+  discretionary trade call by Claude). ⚠️ **Timing:** 9/4 is a Friday and the ticket expires
+  Sunday night — if the launchd executor only runs weekday mornings, it dies unexecuted and
+  regenerates on the next model event; if that's not the intent, Dom runs it by hand.
+- **Rank watch (tradable universe, rule 30):** META is tradable-rank **15** (full-universe 16 —
+  6861.T at 13 is untradable), i.e. on the N=15 entry line, first name into the 16-18 dead-band
+  on any further slip; AMZN (16) / APP (17) / GOOGL (18) queue behind it. Exit needs rank >18
+  plus the 2-run clock — nothing pending, `exit_pending` empty.
+- **Live account (sanitized `live-status.json`, as of 9/3):** not halted, 0 open orders, 0
+  anomalies; **9 drift flags** (ALAB, CRDO, EME, FIX, META, MSFT, NVDA, SNDK, VRT); live-vs-model
+  shortfall running **~-3.9pp** (live -7.75% vs model -3.63% at 9/2, baseline 8/9) — the live
+  book is not fully mirroring the model weights; the VRT ticket closes one of the nine.
+- **Methodology seam** (rule 32-C, stamped 2026-08-31 for the P2 acceleration deploy) expires
+  **2026-09-07**; not exercised (no exit clock started inside it).
+- **Weekly mark** (`tracking/performance-series.json`, now current through **2026-09-04** on
+  merged main — the 9/4 session added +1.8% and lifted the whole window):
+
+  | | Window (8/21→9/4) | Since inception (5/26) |
   |---|---|---|
-  | **Model** | **-0.65%** ($9,972.86 → $9,908.19) | **-0.92%** |
-  | SMH | -1.40% | — |
-  | QQQ | +0.59% | — |
-  | SPY | +0.97% | — |
-  | Equal-weight universe (EW) | +0.16% | — |
-  | EW twin of model roster (EW_ROSTER) | -1.74% | — |
-  | BAND_TOP (ranks 1-15) | -1.83% | — |
-  | BAND_NEXT (ranks 16-25) | -0.39% | — |
-  | BAND_TAIL (ranks 26-40) | -1.54% | — |
+  | **Model** | **+1.14%** ($9,972.86 → $10,086.38) | **+0.86%** |
+  | SMH | +1.18% | — |
+  | QQQ | +0.77% | — |
+  | SPY | +0.58% | — |
+  | Equal-weight universe (EW) | -0.45% | — |
+  | EW twin of model roster (EW_ROSTER) | +1.01% | — |
+  | BAND_TOP (ranks 1-15) | +1.13% | — |
+  | BAND_NEXT (ranks 16-25) | **-4.51%** | — |
+  | BAND_TAIL (ranks 26-40) | +0.72% | — |
 
-  Model outperformed SMH and its own EW_ROSTER shadow this window, underperformed QQQ/SPY/broad
-  EW — a mixed, non-material window for the mark itself (the CRDO/AVGO earnings-day drops are
-  visible in the 9/1-9/3 dip).
-- `momentum_50dma.py` and an independent live `refresh_targets.py`/`track_performance.py` run
-  remain blocked this session (yfinance) — the committed state above was produced by other
-  sessions' scheduled runs this week, not by this scan.
-- No concentration, layer-cap, dead-ticker, or manual-override-collision flags observed.
+  Model ≈ SMH, ahead of QQQ/SPY/EW and its own EW_ROSTER shadow (the sizing audit, rule 28:
+  +0.13pp this window). **BAND_NEXT -4.5% vs BAND_TOP +1.1%** is the widest band spread yet —
+  ranks 16-25 absorbed PLTR -6.6%, the AMZN FTC suit, DDOG's -22% month. One fortnight, not the
+  two-full-quarter test rule 28 pre-registers, but it currently reads "hold N=15".
+- `momentum_50dma.py` and an independent live `track_performance.py` run remain blocked this
+  session (yfinance) — the committed state above was produced by Dom's on-network sessions on
+  9/3-9/4, read here, not re-verified.
+- No concentration, layer-cap, dead-ticker, or manual-override-collision flags.
 
 ---
 
@@ -625,10 +682,12 @@ could not confirm reported interim results in-window, needs direct HKEX check).
 
 | Priority | Action |
 |---|---|
-| 🟡 | **CRDO's earnings-sentinel rescore (82.40/#3) should not be read as a post-earnings fundamental verdict** — yfinance hasn't ingested Q1 FY27 statements yet, so the score move is a price-crash-driven momentum/inverse-vol artifact, not updated margins/growth. Recommend a follow-up objective refresh once yfinance catches up, and watching whether the ~20% drop (beat but light-vs-expectations guide + customer-concentration concern) is a one-quarter wobble or an emerging pattern. |
+| 🔴 | **VRT-buy ticket `2026-09-04-resize_monthly` expires Sunday 2026-09-06 22:11Z.** If the launchd executor doesn't run on Saturday morning, the month's only resize order dies unexecuted (the next model event regenerates it, but the nine live-vs-model drift flags keep compounding the ~-3.9pp shortfall). Decide: let it lapse, or run `execute_ticket.py` by hand before Sunday night. |
+| 🟡 | **AVGO officer selling — rubric question for you (rule 8, not a per-name nudge):** Tan ~40% of pre-holdings ($185M), Brazeal ~49% ($110M, 109 fills), Spears ~26%, none 10b5-1-flagged; one director buy keeps M3 at 4 because rubric step 1 makes buying dispositive. Also **R3 is deferred** to the unfiled Q3 10-Q — the RVG guarantee footnote decides between 4 and 5; check EDGAR for the 10-Q (~mid-Sept). |
+| 🟡 | **CRDO is now fully refreshed (81.87 / #4) and re-sized down to 3.57%** — the remaining question is whether the -20% (beat + light guide + concentration) is a one-quarter wobble or the start of a pattern; nothing mechanical pending. |
 | 🟡 | **MU's Taiwan union strike-vote risk** — ~10,000 workers, ~80% informal-poll support, heading toward a September vote over profit-sharing terms vs. Samsung/SK Hynix. No strike yet, mediation ongoing. Taiwan hosts ~60% of Micron's production and most HBM output — worth a direct follow-up next scan. Combined with the leadership reshuffle and the fact that MU's context briefing (5/26) is the stalest of the 15 holdings, this is a strong candidate for the next `/refresh-context MU`. |
 | 🟡 | **VRT's legal-risk thread widened, not resolved** — a fourth plaintiffs' firm (Hagens Berman) joined 9/1, still pre-litigation solicitation stage with no filed complaint found. Worth tracking for the next R3/R4 subjective-rating refresh rather than treating each week's item in isolation. |
-| 🟡 | **AVGO's $60-100B AI-debt financing remains unsigned** through window-end — the thesis.md §9 framing noted in the news-log (5/26 debt-treats-as-off-balance-sheet framing) still needs the revisit flagged by `/refresh-context AVGO` on 8/21; this week's earnings call disclosed no new information on it either. |
+| 🟡 | **AVGO's $60-100B AI-debt financing remains unsigned** through window-end and the Q3 call added nothing on it. PR #53 landed the #51 AVGO `thesis.md` rewrite — verify §9 (thesis-killer #2) now frames the RVG/VIE exposure as contingent debt rather than "exogenous, not AVGO-balance-sheet"; if not, that's the follow-up. |
 | 🟡 | **CRM's Q2 FY27 print is the clearest thesis-relevant data point of the week** (+22-23% stock move) but the headline EPS beat is inflated by a non-operating Anthropic-stake gain, and a hard NRR% could not be located despite the disruption-risk mandate making it the most-watched number this quarter — recommend a direct 10-Q pull once EDGAR access is restored, and consider this for the next Layer-10 R5 absolute-lens review given the Claudeforce announcement's double-edged read (validates the data moat but normalizes off-platform CRM access). |
 | 🟢 | **Coverage gap, not a data-quality issue:** `P` (Everpure, fka Pure Storage) and `TE` (T1 Energy) got no real news coverage this scan because the sweep agent searched the wrong company names — both are valid Watchlist rows. Carry both into next week's sweep under their correct names. (An earlier version of this scan wrongly flagged them as dead/mistyped tickers — corrected.) |
 | 🟢 | **AMBA/NXP acquisition talks** (first reported 7/31, ~$3B+) remain open with no in-window confirmatory update — worth a dedicated follow-up regardless of window boundaries given the deal size. |
@@ -636,6 +695,7 @@ could not confirm reported interim results in-window, needs direct HKEX check).
 | 🟢 | **Whale Rock Capital's tracked CIK was wrong** in `weekly_scan_runner.py` (0001485922 matched no fund) — corrected to 0001387322 based on secondary-aggregator corroboration; flag for primary-EDGAR reverification once access is restored. |
 | 🟢 | **A dense earnings week for non-held Layer-10/software names** (CRM, DELL, HPE, SNOW, CIEN, MDB, CRWD, ZS, PANW, INTU, WDAY, ADSK, NTAP) — none triggered a Rule-9 refresh since none are current holdings, but several (PANW, MDB, DDOG-continuation) showed post-beat stock drops on margin/growth-durability concerns, a pattern worth watching across the SaaS cohort broadly, not just the three focus names. |
 
-**No score or tier changes attributable to new in-window news.** CRDO's rank move (#5→#3) was
-already logged by the earnings sentinel as a price-mechanics artifact, not a new-information
-event from this scan; no holding crossed a tier boundary.
+**Score changes this window (all via Dom's 9/3-9/4 local sessions, merged main):** CRDO
+79.72→81.87 (#4), AVGO 77.16→78.7 (#7, panel 9/5); Layer-06 cohort ripple <0.5 elsewhere.
+**No tier changes; no membership changes.** One `resize_monthly` model event (9/4) with one
+open trade ticket (VRT buy, expires 9/6). This scan itself made no score edits.
