@@ -283,13 +283,15 @@ def apply_guards(info, fresh, existing, override=None):
         v = fresh.get(key)
         if v is None and key not in _BLANK_THROUGH_ON_NONE and not _blank(existing.get(key)):
             if key == "roic":
-                # ROIC is never fetched (yfinance.info has no ROIC — batch_score
-                # leaves it blank), so this branch fires on EVERY refresh. Say so:
-                # the earlier wording read as a transient failure and got logged
-                # as one twice (sentinel 2026-09-02/03). It is a curated input.
+                # Since rule 34 (2026-09-08) ROIC IS computed (TTM, from the
+                # statements). A None here is therefore a REAL gap — foreign
+                # listing, <4 quarters, or non-positive capital employed — not
+                # the old "never fetched" no-op. Say which, and keep the prior
+                # value rather than blanking a good number on a transient miss.
+                why = "; ".join(info.get("_roic_flags") or []) or "no reason reported"
                 flags.append(
-                    f"roic: curated input, not fetched (yfinance has no ROIC) — kept "
-                    f"{existing.get(key)}; hand-refresh from the filing after earnings."
+                    f"roic: not computable this pass ({why}) — kept "
+                    f"{existing.get(key)}."
                 )
             else:
                 flags.append(
@@ -437,7 +439,13 @@ def _default_fetcher(ticker, layer):
     from batch_score import compute_inputs
     t = yf.Ticker(ticker)
     info = t.info or {}
-    fresh, _gaps = compute_inputs(ticker, t, info, layer=layer)
+    fresh, gaps = compute_inputs(ticker, t, info, layer=layer)
+    # Side-channel: the fetcher contract is a 2-tuple (info, fresh) and ~10 test
+    # call sites inject fakes against it, so ROIC's flags (notably the STALE
+    # statement-lag warning, rule 34) ride along on info rather than widening
+    # the signature. apply_guards surfaces them.
+    info = dict(info)
+    info["_roic_flags"] = [g for g in gaps if g.startswith("roic:")]
     return info, fresh
 
 

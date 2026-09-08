@@ -755,6 +755,69 @@ next — the unexecuted 2026-09-07 NTAP entry ticket would have re-executed the
 day after the equal-weight resize filled. Receipted and expired tickets are
 untouched; nothing is deleted (B3 append-only preserved).
 
+### 34. ROIC is computed, not curated: TTM NOPAT / capital employed (added 2026-09-08, approved by Dom)
+
+**Context:** ROIC (Watchlist col 11) was the last hand-curated objective input.
+`refresh_objective_inputs.py` printed "curated input, not fetched" on EVERY
+refresh and kept whatever was last typed, so the column rotted: **84 of 214
+blank** (including all 39 Layer-11 robotics names, and 19 foreign lines blanked
+for an FX reason that does not apply), hand-rounded values sitting beside
+computed ones, and outright garbage (CRWD **−1263%** from a near-zero
+denominator; PLUG **+28%** for a deeply loss-making company). Under rule 20 ROIC
+is percentile-ranked *within* its layer cohort, so a rotten column mis-ranks the
+whole cohort, and 84 blanks kept two cohorts below the n=8 line entirely.
+
+**Definition:**
+
+    ROIC = TTM operating income x (1 - effective tax rate) / (total assets - current liabilities)
+
+- **TTM, not last fiscal year.** Annual statements describe a different company
+  for fast-growing names. Matches the rule-9 TTM convention.
+- **Denominator is capital employed (TA − CL).** The financing form
+  (debt + equity − cash) was tried FIRST and **rejected on the data**:
+  subtracting all cash collapses the denominator for cash-rich names and
+  manufactures returns — NTAP 0.5B of "invested capital" on 6.9B revenue →
+  **262%**; PLTR **451%**; GEV 1.63B on 41B revenue → **110%**. Those rank a
+  storage vendor above NVDA on capital efficiency: an artifact, not a finding.
+  TA − CL is the classic ROCE denominator — bounded, never near-zero for a going
+  concern. Cost: idle cash sits in the base, so cash hoarders score lower
+  (defensible — uninvested cash isn't earning an operating return).
+- **Goodwill INCLUDED** (it is inside total assets). Deliberate: it marks down
+  serial acquirers (AVGO 28.7 → 20.0) rather than letting them look efficient
+  for capital they really did spend. This is a capital-allocation framework, so
+  the denominator is all the capital.
+- **Tax rate** = TTM tax / TTM pretax, clamped to **[0, 0.35]**, 21% fallback
+  when pretax ≤ 0. The floor is 0, NOT 10%: genuinely low effective rates are
+  real (AVGO ~3.8%, CIEN ~8.8%) and a 10% floor understated exactly those names.
+  The floor only stops a net tax *benefit* lifting NOPAT above operating income.
+- **Blank only when capital employed ≤ 0** or <4 quarters exist. Negative ROIC
+  is KEPT — percentile ranking puts a loss-maker last harmlessly, and the value
+  is real information.
+
+**Statement lag (do not assume current):** yfinance quarterly statements can
+trail a company's own reporting by a full quarter, per-name and silently. On
+2026-09-08 CIEN's latest quarterly column was 2026-04-30 though it had reported
+2026-08-01 five days earlier — a naive 4-quarter sum returned the year ending in
+APRIL and looked normal. `roic.statement_roic` compares against
+`info['mostRecentQuarter']` and flags **STALE** (9 names did on deploy day). A
+stale ROIC still beats a frozen one, but it must be visible (rule 3). Upgrade
+path if it bites: SEC XBRL companyfacts, deriving Q4 = FY − 9M (Q4 is never
+tagged standalone).
+
+**Scope:** foreign LOCAL listings are excluded (`batch_score.ROIC_SKIP_FOREIGN`)
+by Dom's choice 2026-09-08 — **not** an FX limitation. ROIC is currency-neutral
+(numerator and denominator share the reporting currency), unlike the rule-19
+price-based ratios. Flip the constant to cover them.
+
+**Deploy impact (2026-09-08):** 191 of 195 non-foreign names computed (63 blanks
+filled, 126 values corrected; the 4 gaps are ADRs without quarterly statements).
+Layer 11 (0 → 23) and Layer 08 (6 → 8) crossed the n=8 line into peer ranking.
+Mean |score move| 0.68 pts, 5 tier changes, top-8 essentially unchanged. New
+values run systematically lower than the old column (NVDA 103 → 60, MSFT 29 →
+21) — irrelevant under percentile scoring, only relative order matters. Seam
+stamped (rule 32-C); NTAP fell to rank 20 and its exit clock is seam-damped to
+2026-09-15. Impact method: rule-24 style before/after against a temp workbook.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

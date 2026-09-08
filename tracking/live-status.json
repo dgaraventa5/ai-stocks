@@ -1,6 +1,6 @@
 {
   "as_of": "2026-09-08",
-  "halted": true,
+  "halted": false,
   "positions": 15,
   "open_orders": 0,
   "drift_flags": [
