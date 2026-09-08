@@ -100,18 +100,105 @@ _ADR_BLANK_KEYS = ("ps", "ev_ebitda", "fcf_yield")
 # existing values from a transient yfinance "no data" return.
 _BLANK_THROUGH_ON_NONE = frozenset({"ev_ebitda", "nd_ebitda"})
 
+# Rule-15 EPS YoY rulings (spec 2026-09-08-eps-yoy-override-design.md): one
+# entry per ticker, keyed to the fiscal quarter it was made for. Applied while
+# yfinance mostRecentQuarter matches; re-raised as STALE once the next print
+# lands. Human-written (same standing as capacity-mw.json); never auto-edited.
+EPS_OVERRIDES_JSON = ROOT / "00-master" / "eps-yoy-overrides.json"
+_OVERRIDE_REQUIRED = ("quarter_end", "value", "basis", "source", "ruled", "audit_row")
+
+
+def load_eps_overrides(path=EPS_OVERRIDES_JSON) -> dict:
+    """Read the rule-15 override file → {ticker: entry}. Missing file → {}.
+
+    A malformed entry (missing a required field, unparseable quarter_end, or a
+    non-numeric value) raises ValueError so a bad edit fails the run loudly
+    rather than being skipped (rule 3: a ruling without its citation is a guess).
+    """
+    path = Path(path)
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text())
+    out = {}
+    for tkr, entry in data.items():
+        if tkr.startswith("_"):
+            continue
+        if not isinstance(entry, dict):
+            raise ValueError(f"eps-yoy-overrides.json: {tkr}: entry must be an object")
+        missing = [k for k in _OVERRIDE_REQUIRED if k not in entry]
+        if missing:
+            raise ValueError(f"eps-yoy-overrides.json: {tkr}: missing {', '.join(missing)}")
+        try:
+            dt.date.fromisoformat(entry["quarter_end"])
+        except (TypeError, ValueError):
+            raise ValueError(f"eps-yoy-overrides.json: {tkr}: quarter_end {entry['quarter_end']!r} is not an ISO date")
+        v = entry["value"]
+        if v is not None and not isinstance(v, (int, float)):
+            raise ValueError(f"eps-yoy-overrides.json: {tkr}: value must be a number or null")
+        out[str(tkr).strip().upper()] = entry
+    return out
+
+
+def _most_recent_quarter(info):
+    """yfinance info['mostRecentQuarter'] (epoch seconds, UTC) → date, or None."""
+    v = info.get("mostRecentQuarter")
+    if v is None:
+        return None
+    try:
+        if isinstance(v, str):
+            return dt.date.fromisoformat(v[:10])
+        return dt.datetime.fromtimestamp(int(v), dt.timezone.utc).date()
+    except (TypeError, ValueError, OverflowError, OSError):
+        return None
+
+
+def _apply_eps_override(info, fresh, override, flags):
+    """Rule-15 override step. Returns (handled, value): handled=True means the
+    EPS YoY decision is final (value written, or withheld on None-with-handled);
+    handled=False means fall through to the ordinary guards."""
+    mrq = _most_recent_quarter(info)
+    q = dt.date.fromisoformat(override["quarter_end"])
+    v = fresh.get("eps_yoy")
+    if mrq is None:
+        flags.append(
+            "EPS YoY: override present but yfinance has no mostRecentQuarter — "
+            "applied nothing; hand-check."
+        )
+        return False, None
+    if q == mrq:
+        what = "blank" if override["value"] is None else f"{override['value']}"
+        flags.append(
+            f"EPS YoY: rule-15 override applied ({what}) for q/e {q.isoformat()}, "
+            f"ruled {override['ruled']}, {override['source']}."
+        )
+        return True, override["value"]
+    if q < mrq:
+        fv = "None" if v is None else f"{v:+.1f}%"
+        flags.append(
+            f"EPS YoY: override for q/e {q.isoformat()} is STALE (latest quarter "
+            f"{mrq.isoformat()}) — fresh GAAP {fv}; withheld. Re-rule (write, blank, "
+            f"or ex-item) and update eps-yoy-overrides.json."
+        )
+        return True, "__withhold__"
+    flags.append(
+        f"EPS YoY: override q/e {q.isoformat()} is AHEAD of yfinance mostRecentQuarter "
+        f"{mrq.isoformat()} — check the date; ignored this run."
+    )
+    return False, None
+
 
 def _blank(v):
     return v is None or v == ""
 
 
-def apply_guards(info, fresh, existing):
+def apply_guards(info, fresh, existing, override=None):
     """Apply smart blank-handling guards to produce safe write set.
 
     Args:
         info: yfinance info dict (needs 'financialCurrency').
         fresh: compute_inputs output dict (input-key → value).
         existing: current Watchlist cell values (input-key → value or None/"" if blank).
+        override: this ticker's entry from eps-yoy-overrides.json, or None.
 
     Returns:
         (writes, flags): writes maps input-key → value for keys to write (absent = leave
@@ -151,6 +238,15 @@ def apply_guards(info, fresh, existing):
             continue
 
         if key == "eps_yoy":
+            # (0) rule-15 override file — a dated human ruling beats every guard
+            # below while its quarter matches; STALE withholds; AHEAD/undated
+            # fall through to (a)-(d) unchanged.
+            if override is not None:
+                handled, ov = _apply_eps_override(info, fresh, override, flags)
+                if handled:
+                    if ov != "__withhold__":
+                        writes[key] = ov
+                    continue
             # (a) existing blank → preserve, do not write
             if _blank(existing.get(key)):
                 flags.append(
@@ -351,7 +447,7 @@ def _layer_of(ws, row):
 
 
 def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
-            dma_fetcher=None, today=None):
+            dma_fetcher=None, today=None, overrides_path=None):
     """Orchestrate fetch → guards → (write|stage) for each target ticker.
 
     Args:
@@ -364,6 +460,8 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
                      pct_days_above_50dma. Injectable for tests.
         today: date object for Last Updated and staleness checks. Defaults
                to dt.date.today().
+        overrides_path: rule-15 EPS YoY override file (default
+               00-master/eps-yoy-overrides.json). Injectable for tests.
 
     Returns:
         dict with keys: mode_count, rows, flags, wrote.
@@ -373,6 +471,8 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
         from momentum_50dma import pct_days_above_50dma
         dma_fetcher = pct_days_above_50dma
     today = today or dt.date.today()
+    overrides = load_eps_overrides(
+        EPS_OVERRIDES_JSON if overrides_path is None else overrides_path)
 
     wb = load_workbook(scoring_path, data_only=False)
     ws = wb["Watchlist"]
@@ -405,7 +505,8 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
                 time.sleep(0.3)
             continue
         existing = read_existing(ws, row)
-        writes, flags = apply_guards(info, fresh, existing)
+        writes, flags = apply_guards(info, fresh, existing,
+                                     override=overrides.get(ticker))
 
         mwf = mw_staleness_flag(ticker, layer, today)
         if mwf:

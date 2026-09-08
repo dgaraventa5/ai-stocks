@@ -1,0 +1,72 @@
+{
+  "_meta": {
+    "definition": "Rule-15 rulings on the EPS YoY input (Watchlist col 18). value=null means a documented blank; a number means an ex-item YoY % (arithmetic stated in basis) that replaces the yfinance GAAP figure. A ruling applies only while quarter_end matches the name's most recent reported quarter (yfinance mostRecentQuarter); after the next print it is STALE and refresh_objective_inputs.py withholds the cell and re-raises it. Human-written; the script never edits this file.",
+    "refresh_rule": "Add/replace an entry in the same session that appends the Rating Audit row (audit_row points at it). Remove nothing: a superseded entry is replaced by the new quarter's ruling.",
+    "spec": "docs/superpowers/specs/2026-09-08-eps-yoy-override-design.md",
+    "updated": "2026-09-08"
+  },
+  "CRM": {
+    "quarter_end": "2026-07-31",
+    "value": null,
+    "basis": "GAAP net income $3,526M vs $1,887M (+86.9%) dominated by $2,613M gains on strategic investments (vs $6M); income from operations flat",
+    "source": "8-K Ex-99.1 filed 2026-08-26, Stmt of Ops + note 3 (https://www.sec.gov/Archives/edgar/data/1108524/000110852426000187/crm-q2fy27xexhibit991.htm)",
+    "ruled": "2026-09-07",
+    "audit_row": "Rating Audit 2026-09-07 EPS YoY (objective)"
+  },
+  "WDAY": {
+    "quarter_end": "2026-07-31",
+    "value": null,
+    "basis": "GAAP +177% dominated by a $374M deferred-tax benefit from an intra-entity IP transfer ($1.52/sh); pretax +7.6%",
+    "source": "8-K Ex-99.1 filed 2026-08-27, para 1 + income-tax-effects note (https://www.sec.gov/Archives/edgar/data/1327811/000132781126000042/wday-07312026x991.htm)",
+    "ruled": "2026-09-07",
+    "audit_row": "Rating Audit 2026-09-07 EPS YoY (objective)"
+  },
+  "INTU": {
+    "quarter_end": "2026-07-31",
+    "value": null,
+    "basis": "GAAP -4.7% while pretax +47%; sign flip driven by the tax swing ($177M provision vs $15M PY benefit), $293M restructuring secondary. Judgment call, flagged for Dom",
+    "source": "8-K Ex-99.1 filed 2026-08-25, Stmt of Ops + tax note (https://www.sec.gov/Archives/edgar/data/896878/000089687826000029/fy26q4earningspressrelease.htm)",
+    "ruled": "2026-09-07",
+    "audit_row": "Rating Audit 2026-09-07 EPS YoY (objective)"
+  },
+  "MDB": {
+    "quarter_end": "2026-07-31",
+    "value": null,
+    "basis": "Loss-to-profit ($40.9M vs $(47.0)M): ratio undefined; script had kept a stale 2.2",
+    "source": "8-K Ex-99.1 filed 2026-09-01, Stmt of Ops (https://www.sec.gov/Archives/edgar/data/1441816/000162828026059794/mdb-073126xex991xrelease.htm)",
+    "ruled": "2026-09-07",
+    "audit_row": "Rating Audit 2026-09-07 EPS YoY (objective)"
+  },
+  "PANW": {
+    "quarter_end": "2026-07-31",
+    "value": null,
+    "basis": "Profit-to-loss ($(282)M vs $254M, acquisition accounting): ratio undefined",
+    "source": "8-K Ex-99.1 filed 2026-09-01, Stmt of Ops (https://www.sec.gov/Archives/edgar/data/1327567/000132756726000019/ex991q426earningsrelease.htm)",
+    "ruled": "2026-09-07",
+    "audit_row": "Rating Audit 2026-09-07 EPS YoY (objective)"
+  },
+  "SNOW": {
+    "quarter_end": "2026-07-31",
+    "value": null,
+    "basis": "GAAP loss both periods ($(191.7)M vs $(298.0)M): ratio undefined",
+    "source": "8-K Ex-99.1 filed 2026-09-02, Stmt of Ops (https://www.sec.gov/Archives/edgar/data/1640147/000164014726000033/fy2027q2earnings.htm)",
+    "ruled": "2026-09-07",
+    "audit_row": "Rating Audit 2026-09-07 EPS YoY (objective)"
+  },
+  "CRWD": {
+    "quarter_end": "2026-07-31",
+    "value": null,
+    "basis": "Loss-to-profit ($5.3M vs $(70.1)M): ratio undefined",
+    "source": "8-K Ex-99.1 filed 2026-08-26, Stmt of Ops (https://www.sec.gov/Archives/edgar/data/1535527/000153552726000029/crwd-20260826xex991.htm)",
+    "ruled": "2026-09-07",
+    "audit_row": "Rating Audit 2026-09-07 EPS YoY (objective)"
+  },
+  "ZS": {
+    "quarter_end": "2026-07-31",
+    "value": null,
+    "basis": "GAAP loss both periods ($(3.4)M vs $(17.6)M): ratio undefined",
+    "source": "8-K Ex-99.1 filed 2026-09-03, Stmt of Ops (https://www.sec.gov/Archives/edgar/data/1713683/000171368326000156/zs-07312026_991.htm)",
+    "ruled": "2026-09-07",
+    "audit_row": "Rating Audit 2026-09-07 EPS YoY (objective)"
+  }
+}
