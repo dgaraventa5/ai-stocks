@@ -76,5 +76,13 @@
     "source": "Q2 2026 10-Q (filed 2026-08-04); Q2 2026 earnings release; context-2026-09-08.md",
     "ruled": "2026-09-08",
     "audit_row": "Rating Audit 2026-09-08 Full score gate"
+  },
+  "CIEN": {
+    "quarter_end": "2026-08-01",
+    "value": 429.6,
+    "basis": "OPERATING, not one-time — ruling CONFIRMS the GAAP figure rather than blanking it. GAAP net income $266.418M vs $50.308M (+429.6%); income from operations alone $301.179M vs $73.535M = +309.6% on revenue +37.0%, so the change is operating-leverage-dominated off a depressed PY base (rule 15: 'a big operational number off a small base stays'). Non-operating delta is recurring, not a gain: interest expense $5.803M vs $22.806M and interest income $22.388M vs $15.090M, both from the completed refinancing and larger cash balance. The only disclosed one-time item is a $7.143M loss on debt extinguishment, which REDUCES the current-period figure — so +429.6% is conservative, not inflated.",
+    "source": "8-K Item 2.02 Ex-99.1 filed 2026-09-03, Condensed Consolidated Statements of Operations, quarter ended 2026-08-01 (https://www.sec.gov/Archives/edgar/data/936395/000162828026060245/ex9912026q3earningspressre.htm)",
+    "ruled": "2026-09-08",
+    "audit_row": "Rating Audit 2026-09-08 EPS YoY (objective) — earnings sentinel"
   }
 }

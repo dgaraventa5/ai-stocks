@@ -758,6 +758,21 @@
           "EQT",
           "CIEN"
         ]
+      },
+      {
+        "date": "2026-09-08",
+        "roster": [
+          "AMZN",
+          "META",
+          "GOOGL",
+          "PLTR",
+          "TER",
+          "APH",
+          "ISRG",
+          "CGNX",
+          "EQT",
+          "KEYS"
+        ]
       }
     ],
     "BAND_TAIL": [
@@ -831,6 +846,26 @@
           "ARM",
           "ORCL",
           "APP",
+          "HSAI",
+          "ADSK",
+          "HTHIY",
+          "RMBS",
+          "DELL",
+          "GLW",
+          "POWL",
+          "CSCO"
+        ]
+      },
+      {
+        "date": "2026-09-08",
+        "roster": [
+          "CIEN",
+          "AR",
+          "FN",
+          "APP",
+          "WDC",
+          "ARM",
+          "ORCL",
           "HSAI",
           "ADSK",
           "HTHIY",
