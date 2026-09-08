@@ -13,7 +13,7 @@ import trade_ticket as tt
 # renormalization and delta-from-actuals from cash sizing. The buffer's own
 # behavior is covered against the real DEFAULTS in the cash-buffer tests below.
 CFG = {'MIN_ORDER_NOTIONAL': 25.0, 'LIMIT_TOL': 0.0075,
-       'MAX_WEIGHT': 0.12, 'TICKET_TTL_HOURS': 48, 'CASH_BUFFER_PCT': 0.0}
+       'MAX_WEIGHT': 0.12, 'TICKET_TTL_TRADING_DAYS': 2, 'CASH_BUFFER_PCT': 0.0}
 
 
 def orders_by_ticker(result):
@@ -150,7 +150,9 @@ def test_build_ticket_fields_and_expiry():
         created_at='2026-08-12T21:30:00Z', cfg=CFG,
         account_state_as_of='2026-08-12')
     assert tk['ticket_id'] == '2026-08-12-membership'
-    assert tk['expires_at'] == '2026-08-14T21:30:00Z'    # +48h
+    # Wed 21:30Z creation → close of the 2nd trading day after: Fri 16:00 ET
+    assert tk['expires_at'] == '2026-08-14T20:00:00Z'
+    assert tk['expires_basis'].startswith('close (16:00 ET) of trading day 2')
     assert tk['account_equity_at_gen'] == 500.0
     assert tk['account_state_as_of'] == '2026-08-12'
     assert tk['checksum'] == tt.ticket_checksum(tk['orders'])
@@ -188,3 +190,63 @@ def test_cash_buffer_is_configurable():
     res = tt.compute_orders(weights, {}, cash, prices, cfg)
     spend = sum(o['shares'] * o['limit_price'] for o in res['orders'])
     assert spend == pytest.approx(900.0, rel=0.01)
+
+
+# ---- trading-day-aware expiry (2026-09-08: the 2026-09-04 ticket lapsed) ----
+# The launchd executor only attempts execution at 06:35 PT on weekdays, so a
+# 48h wall-clock TTL spanning a weekend held zero attempts. Expiry is now the
+# close of the Nth trading day after the ET creation date; the executor's
+# expiry gate is untouched (it still compares `now` to `expires_at`).
+
+def _ticket(created_at, cfg=None):
+    res = tt.compute_orders(target_weights={'VRT': 0.1}, positions={},
+                            cash=500.0, prices={'VRT': 100.0}, cfg=CFG)
+    return tt.build_ticket(res, basis_event={'date': created_at[:10],
+                                             'kind': 'resize_monthly',
+                                             'reason': 'test'},
+                           created_at=created_at, cfg=cfg or CFG,
+                           account_state_as_of=created_at[:10])
+
+
+def test_friday_afternoon_ticket_survives_the_weekend():
+    # Fri 2026-08-14 22:11Z → Mon + Tue → expires Tue 2026-08-18 16:00 ET
+    tk = _ticket('2026-08-14T22:11:00Z')
+    assert tk['expires_at'] == '2026-08-18T20:00:00Z'
+    # the Monday 06:35 PT (13:35Z) and Tuesday 06:35 PT slots are both inside
+    for slot in ('2026-08-17T13:35:00Z', '2026-08-18T13:35:00Z'):
+        assert slot < tk['expires_at']
+
+
+def test_friday_ticket_across_labor_day_expires_wednesday():
+    # The real 2026-09-04-resize_monthly case: Fri 22:11Z, Mon = Labor Day.
+    # Old rule: expired Sun 2026-09-06 22:11Z, before Tue's first slot.
+    tk = _ticket('2026-09-04T22:11:00Z')
+    assert tk['expires_at'] == '2026-09-09T20:00:00Z'      # Wed close
+    assert '2026-09-07 (Labor Day)' in tk['expires_basis']
+    assert '2026-09-08T13:35:00Z' < tk['expires_at']       # Tue 06:35 PT slot
+
+
+def test_monday_morning_ticket_expires_wednesday_close():
+    # Mon 2026-08-10 13:40Z (06:40 PT, just after the open-mode run)
+    tk = _ticket('2026-08-10T13:40:00Z')
+    assert tk['expires_at'] == '2026-08-12T20:00:00Z'
+    assert 'skipped' not in tk['expires_basis']
+
+
+def test_ttl_is_configurable_in_trading_days():
+    tk = _ticket('2026-08-10T13:40:00Z',
+                 cfg=dict(CFG, TICKET_TTL_TRADING_DAYS=1))
+    assert tk['expires_at'] == '2026-08-11T20:00:00Z'
+
+
+def test_legacy_wall_clock_ttl_key_is_ignored():
+    # A stale TICKET_TTL_HOURS in executor-config.json must not resurrect the
+    # weekend-lapse behavior (generate_trade_ticket flags it separately).
+    tk = _ticket('2026-09-04T22:11:00Z', cfg=dict(CFG, TICKET_TTL_HOURS=48))
+    assert tk['expires_at'] == '2026-09-09T20:00:00Z'
+
+
+def test_winter_expiry_is_2100z():
+    # DST off: 16:00 ET = 21:00Z. Mon 2026-12-21 → Wed 2026-12-23 close.
+    tk = _ticket('2026-12-21T14:00:00Z')
+    assert tk['expires_at'] == '2026-12-23T21:00:00Z'

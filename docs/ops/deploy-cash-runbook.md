@@ -45,7 +45,8 @@ commands you type.
 
    A deposit on a near-target book produces a pure-buy ticket (every target
    notional rises with equity). Ticket lands in `tracking/live/tickets/`,
-   expires in 48h.
+   expires at the close of the 2nd trading day after generation (weekends and
+   NYSE holidays skipped — spec B3, changed 2026-09-08).
 
 4. **Dry-run the executor**, then confirm:
 
@@ -72,7 +73,8 @@ commands you type.
   flag, C3), then re-run. If you didn't mean to exceed it, withdraw.
 - **`notional > MAX_ORDER_NOTIONAL`** — a single order exceeds the per-order
   cap; same deliberate-edit rule if the new account size warrants it.
-- **`ticket expired`** — >48h since generation; regenerate (step 3), never
+- **`ticket expired`** — past the close of the 2nd trading day after
+  generation (see the ticket's `expires_basis`); regenerate (step 3), never
   hand-edit (checksum gate).
 - **`kill switch present`** — investigate `trading-halt.flag` first; clear
   it deliberately only once explained.

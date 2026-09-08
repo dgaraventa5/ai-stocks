@@ -581,7 +581,15 @@ updates). Ticket generation hooks every real `refresh_targets` model event and
 computes share deltas from the latest recon snapshot (actuals, never assumed
 holdings); no snapshot → loud refusal, no ticket. Anomaly recon auto-raises the
 halt flag (unknown-provenance position, negative cash, unexplained equity move)
-— the halt stops future executions, it never sells.
+— the halt stops future executions, it never sells. **Ticket TTL is counted in
+US trading days, not wall-clock hours (2026-09-08):** `expires_at` = the 16:00 ET
+close of the `TICKET_TTL_TRADING_DAYS`-th (default 2) trading day after the ET
+creation date, via `scripts/trading_calendar.py` (rule-computed NYSE holidays;
+ad-hoc closures go in `AD_HOC_CLOSURES`). The launchd executor only fires at
+06:35 PT on trading days, so the old 48h window could hold zero attempts — the
+2026-09-04 ticket expired Sunday, before the first post-Labor-Day slot. A stale
+`TICKET_TTL_HOURS` in `executor-config.json` is ignored and flagged. The C2.1
+expiry gate is unchanged: the fix moves the stamp, never the enforcement.
 
 ### 30. Tradability filter: foreign listings can't enter the portfolio (added 2026-08-11, approved by Dom)
 

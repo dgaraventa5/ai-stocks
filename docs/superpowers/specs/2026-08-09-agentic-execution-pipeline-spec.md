@@ -91,7 +91,21 @@ real run fires (`fire=True`, any `kind` except shadow-only updates), call
 ```
 
 - Tickets are **append-only artifacts**: a regenerated ticket is a new file; stale
-  ones expire via `expires_at` (48h default) and are refused by the executor.
+  ones expire via `expires_at` and are refused by the executor.
+- **`expires_at` is trading-day-aware (changed 2026-09-08):** the close (16:00 ET,
+  DST-correct) of the `TICKET_TTL_TRADING_DAYS`-th US trading day *strictly after*
+  the ET date of creation, default 2 — weekends and NYSE holidays
+  (`scripts/trading_calendar.py`, rule-computed, no data file) do not consume the
+  TTL. The example above: Wed 21:30Z → Fri 20:00Z. A Friday-evening ticket runs to
+  Tuesday's close; across a Monday holiday, Wednesday's. The ticket records the
+  reasoning in `expires_basis` (which closures were skipped). **Why:** the
+  scheduled executor (§C5) only attempts execution at 06:35 PT on trading days, so
+  the old 48 wall-clock hours (`TICKET_TTL_HOURS`, now ignored) could contain zero
+  attempts — `2026-09-04-resize_monthly` was generated Friday 22:11Z, expired
+  Sunday 22:11Z, and the first live slot after Labor Day was Tuesday. Two trading
+  days keeps the staleness protection at the same number of *sessions* as before
+  (Mon-evening → Wed-close is 46h); price staleness is separately caught by the
+  C2.5 live-quote gate regardless of calendar. The C2.1 gate itself is unchanged.
 - Foreign local-line names (rule 27: 6954.T, KGX.DE, …) are **not tradeable on
   Robinhood** — if one enters the roster, the ticket carries it in an
   `untradeable` section (flagged, excluded from orders, weights renormalized over

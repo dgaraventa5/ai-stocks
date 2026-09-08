@@ -88,6 +88,34 @@ def test_expired_ticket_refused(tmp_path, live_dir):
     assert_refused(run(p, live_dir, confirm=True), 'expired')
 
 
+def test_trading_day_expiry_still_refused_one_minute_past(tmp_path, live_dir):
+    """The 2026-09-08 TTL change moved WHERE expires_at lands (close of the
+    2nd trading day), not WHETHER it is enforced: a ticket built through
+    build_ticket is refused one minute past its own stamp."""
+    orders = [{'ticker': 'NVDA', 'side': 'buy', 'shares': 1.0,
+               'limit_price': 100.75, 'tif': 'day', 'notional_est': 100.0}]
+    res = {'orders': orders, 'untradeable': [], 'suppressed': [],
+           'skipped': [], 'equity': 500.0}
+    tk = tt.build_ticket(res, basis_event={'date': '2026-09-04',
+                                           'kind': 'resize_monthly',
+                                           'reason': 'test'},
+                         created_at='2026-09-04T22:11:00Z', cfg={},
+                         account_state_as_of='2026-09-04')
+    assert tk['expires_at'] == '2026-09-09T20:00:00Z'
+    p = tmp_path / 'ticket.json'
+    p.write_text(json.dumps(tk))
+    t = FakeTransport(quotes={'NVDA': 100.0})
+    # 09:35 ET Tue after Labor Day (the first live slot): inside the window
+    ok = ex.run(p, live_dir=live_dir, roster={'NVDA'}, transport=t,
+                now='2026-09-08T13:35:00Z', confirm=True)
+    assert ok['failures'] == [] and ok['sent'] is True
+    # one minute past expiry: refused, and the receipt from the run above is
+    # not what refuses it — check the expiry message explicitly
+    late = ex.run(p, live_dir=live_dir, roster={'NVDA'}, transport=t,
+                  now='2026-09-09T20:01:00Z', confirm=True)
+    assert_refused(late, 'expired')
+
+
 def test_already_executed_refused(tmp_path, live_dir):
     p = make_ticket(tmp_path)
     (live_dir / 'receipts' / 'receipt-2026-08-12-membership.json').write_text('{}')
