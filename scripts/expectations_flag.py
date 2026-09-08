@@ -36,6 +36,7 @@ import pandas as pd
 import yfinance as yf
 
 from common import cik_for, sec_get
+from xbrl_periods import quarterly_from_facts, quarters_are_consecutive
 
 REV_TAGS = ("RevenueFromContractWithCustomerExcludingAssessedTax", "Revenues",
             "RevenueFromContractWithCustomerIncludingAssessedTax",
@@ -46,8 +47,12 @@ def quarterly_revenue_sec(ticker: str) -> tuple[pd.Series | None, str | None]:
     """Quarterly revenue series from SEC companyfacts (10-Q/10-K, USD).
 
     yfinance only exposes ~5 quarters; companyfacts goes back years.
-    Annual (FY) frames are decomposed implicitly by keeping only ~3-month
-    periods (70-100 days), so the series is quarter-by-quarter.
+
+    Annual and year-to-date frames are decomposed into quarters by
+    ``xbrl_periods.quarterly_from_facts`` (Q4 = FY - 9M). Until 2026-09-07
+    this function instead kept only 70-100 day facts and *claimed* the
+    decomposition happened — it didn't, so fiscal Q4 was missing from every
+    name's series. See that module's docstring for the two bugs it caused.
     """
     cik = cik_for(ticker)
     if not cik:
@@ -65,13 +70,8 @@ def quarterly_revenue_sec(ticker: str) -> tuple[pd.Series | None, str | None]:
     for tag in REV_TAGS:
         if tag not in facts or "USD" not in facts[tag].get("units", {}):
             continue
-        rows = {}
-        for f in facts[tag]["units"]["USD"]:
-            if not f.get("start") or not f.get("end"):
-                continue
-            days = (pd.Timestamp(f["end"]) - pd.Timestamp(f["start"])).days
-            if 70 <= days <= 100:  # quarterly periods only
-                rows[pd.Timestamp(f["end"])] = float(f["val"])
+        rows = {pd.Timestamp(end): val for end, val
+                in quarterly_from_facts(facts[tag]["units"]["USD"]).items()}
         if rows:
             candidates.append(pd.Series(rows).sort_index())
     if not candidates:
@@ -85,9 +85,19 @@ def quarterly_revenue_sec(ticker: str) -> tuple[pd.Series | None, str | None]:
     # ffill would silently apply ancient revenue to today's price.
     if (pd.Timestamp.now() - merged.index.max()).days > 200:
         return None, f"latest XBRL quarter end {merged.index.max().date()} is >200 days stale"
+    if not _quarters_are_consecutive(merged.index):
+        return None, ("quarterly series has a gap — decomposition incomplete; "
+                      "YoY and TTM would be misaligned")
     if len(merged) < 8:
         return None, f"only {len(merged)} quarterly periods in companyfacts"
     return merged, None
+
+
+def _quarters_are_consecutive(index) -> bool:
+    """Gap check over the last 17 quarters — exactly the span
+    ``expectations_check`` consumes (3y TTM window + the growth median).
+    A gap earlier than that is irrelevant and must not cause a skip."""
+    return quarters_are_consecutive(index[-17:])
 
 
 def expectations_check(ticker: str) -> dict:
