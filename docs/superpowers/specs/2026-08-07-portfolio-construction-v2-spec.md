@@ -206,3 +206,20 @@ Integration: full pipeline on a frozen price fixture is byte-identical on repeat
 *Commit one-liner: the score chooses the names by rank, trailing volatility chooses the sizes,
 equal-weight rides shotgun as the permanent null, and three score-bands run ahead as scouts so
 the cutoff decision gets made by data in two quarters instead of by a backtest today.*
+
+---
+
+## Amendment 2026-09-08 — sizing flipped to equal weight (Dom-approved)
+
+Part A's inverse-vol sizing was retired on 2026-09-08 in favor of equal
+weight (`sizing.mode = "equal"`), on the prior rather than the data. The
+§A4 audit continues with roles reversed: `INVVOL_ROSTER` is the shadow (the
+model's rosters, sized by §A1 at every event and monthly pass; the §A2
+drift-band filter is not replayed), and the pre-registered tripwire mirrors
+§D-3 — INVVOL_ROSTER beating MODEL over two consecutive quarters from
+2026-09-08 is a "bring it to Dom" signal, not an auto-revert. §D-3's
+original two-quarter window was deliberately NOT shortened: neither one nor
+two quarters had the power to resolve a realistic sizing edge, and changing
+a stopping rule after observing an unfavorable interim reading is the
+optional-stopping trap. Full rationale and mechanics: CLAUDE.md rule 33.
+Part B (rank selection) and Part C (band shadows) are unchanged.

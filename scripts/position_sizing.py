@@ -42,6 +42,16 @@ def cap_floor_normalize(raw: dict[str, float], max_w: float, min_w: float,
     return w
 
 
+def equal_weights(roster: list[str]) -> dict[str, float]:
+    """1/n weights (sizing.mode='equal', live since the 2026-09-08 flip):
+    the score chooses the names and nothing chooses the sizes — the
+    literature's 1/N null, adopted on the prior that inverse-vol
+    systematically underweights the high-beta names this universe is
+    selected for. Inverse-vol keeps running as the INVVOL_ROSTER shadow."""
+    n = len(roster)
+    return {t: 1.0 / n for t in roster} if n else {}
+
+
 def inverse_vol_weights(prices, roster: list[str], cfg: dict,
                         layers: dict[str, str] | None = None) -> dict[str, float]:
     """Inverse-trailing-volatility weights for `roster` (spec A1).

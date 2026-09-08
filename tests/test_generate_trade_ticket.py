@@ -64,7 +64,11 @@ def test_regenerated_ticket_is_a_new_file(live_dir):
                      prices_fn=PRICES.get, now='2026-08-13T21:30:00Z')
     p2 = gt.generate({'NVDA': 0.6}, EVENT, live_dir=live_dir,
                      prices_fn=PRICES.get, now='2026-08-13T22:00:00Z')
-    assert p1 != p2 and p1.exists() and p2.exists()   # append-only (B3)
+    # append-only (B3): the first ticket is KEPT, but renamed out of the
+    # executor's glob — a regenerated ticket supersedes it (2026-09-08).
+    assert p1 != p2 and p2.exists()
+    assert not p1.exists()
+    assert p1.with_name(f'superseded-{p1.name}').exists()
 
 
 def test_default_price_path_is_price_source_batch(live_dir, monkeypatch):
@@ -124,3 +128,41 @@ def test_hook_failure_never_breaks_refresh(monkeypatch, tmp_path, capsys):
     assert rep['fire'] is True                     # refresh completed anyway
     # common.flag prints [FLAG] lines to stdout
     assert 'trade ticket not generated' in capsys.readouterr().out
+
+
+# ---- ticket supersession (2026-09-08): one actionable ticket at a time -----
+
+def _write_ticket(live_dir, ticket_id, expires):
+    tdir = live_dir / 'tickets'
+    tdir.mkdir(exist_ok=True)
+    p = tdir / f'ticket-{ticket_id}.json'
+    p.write_text(json.dumps({'ticket_id': ticket_id, 'expires_at': expires,
+                             'orders': []}))
+    return p
+
+
+def test_new_ticket_retires_older_actionable_tickets(live_dir):
+    """The scheduled executor runs the newest live ticket each morning and
+    then falls back to any older un-receipted, unexpired one the next day —
+    which would re-execute a stale share plan. A new ticket (computed from
+    actuals) subsumes every older actionable ticket, so those are renamed
+    out of the executor's glob; receipted and expired tickets are untouched."""
+    stale = _write_ticket(live_dir, '2026-08-12-membership',
+                          '2026-08-14T20:00:00Z')          # actionable
+    expired = _write_ticket(live_dir, '2026-08-10-tier',
+                            '2026-08-12T20:00:00Z')        # already lapsed
+    done = _write_ticket(live_dir, '2026-08-11-manual',
+                         '2026-08-14T20:00:00Z')           # receipted
+    (live_dir / 'receipts').mkdir()
+    (live_dir / 'receipts' / 'receipt-2026-08-11-manual.json').write_text('{}')
+
+    p = gt.generate({'NVDA': 0.5, 'TSM': 0.4}, EVENT, live_dir=live_dir,
+                    prices_fn=PRICES.get, now='2026-08-13T21:30:00Z')
+
+    assert p.exists()
+    assert not stale.exists()
+    assert (live_dir / 'tickets'
+            / 'superseded-ticket-2026-08-12-membership.json').exists()
+    assert expired.exists() and done.exists()
+    import executor_cron as ec
+    assert ec.pick_ticket(live_dir, now='2026-08-13T22:00:00Z') == p

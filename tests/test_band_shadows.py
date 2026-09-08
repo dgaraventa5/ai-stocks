@@ -88,3 +88,28 @@ def test_event_log_roundtrip(fake_prices, tmp_path, monkeypatch):
     # marked value the event re-allocated (5000+5900), no injected jump
     d = out1['dates'].index('2026-05-28')
     assert out1['model'][d] == pytest.approx(10900.0)
+
+
+# ---- weighted shadow events (INVVOL_ROSTER, 2026-09-08 flip) ---------------
+
+def test_chain_linked_growth_honors_event_weights(fake_prices):
+    """An event carrying `weights` is a weighted (not equal) basket. AAA
+    grows +10%/day, BBB is flat on day 1: 75/25 -> +7.5%, equal -> +5%."""
+    evs = [{'date': '2026-05-26', 'roster': ['AAA', 'BBB'],
+            'weights': {'AAA': 0.75, 'BBB': 0.25}}]
+    out = pm.chain_linked_growth(evs, '2026-05-26', DATES)
+    assert out.iloc[1] == pytest.approx(1.075, abs=1e-9)
+    ew = pm.chain_linked_growth([{'date': '2026-05-26',
+                                  'roster': ['AAA', 'BBB']}],
+                                '2026-05-26', DATES)
+    assert ew.iloc[1] == pytest.approx(1.05, abs=1e-9)
+
+
+def test_weighted_event_renormalizes_over_names_with_prices(fake_prices):
+    """A weighted name with no price data drops out and the survivors
+    re-share its weight — never silently carried as zero return."""
+    evs = [{'date': '2026-05-26', 'roster': ['AAA', 'BBB', 'ZZZ'],
+            'weights': {'AAA': 0.5, 'BBB': 0.1, 'ZZZ': 0.4}}]
+    out = pm.chain_linked_growth(evs, '2026-05-26', DATES)
+    # survivors re-share: AAA 5/6, BBB 1/6 -> 1 + 5/6 * 0.10 (equal -> 1.05)
+    assert out.iloc[1] == pytest.approx(1 + 5 / 6 * 0.10, abs=1e-9)

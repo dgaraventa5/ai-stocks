@@ -690,6 +690,54 @@ B's gate/cap constants are principled priors, not fit parameters — do not tune
 them against realized returns (rule 28); C damps only methodology-triggered
 exits — it must never be widened into a general reluctance to exit.
 
+### 33. Sizing flipped to equal weight; inverse-vol retired to a shadow (added 2026-09-08, approved by Dom)
+
+**Decision, and what it is NOT.** `sizing.mode = "equal"` in
+`tracking/portfolio-config.json` (1/n of the invested budget,
+`position_sizing.equal_weights`). This was a **prior-driven** call, not a data
+verdict: after the 2026-08-07 inverse-vol migration the model trailed its
+equal-weight twin by 0.4 pts over 20 bars (t ≈ −0.25 — noise; the visible
+pull-away on the site chart came in the Aug 1–7 week under the OLD tier
+sizing). The reasons were structural: inverse-vol underweights whatever moved
+most in the last 60 days, which in this universe is the high-beta names the
+thesis is selected for (SNDK/CRDO/ALAB/MU sat at the 3% floor while
+GMED/NTAP/MSFT/META sat near 9%), and the v2 spec's own confidence framing
+only ever rated "inverse-vol beats equal-weight" a lean (+1.6 pts inside
+noise). Neither one nor two quarters of the A4 tripwire could have resolved it
+(tracking error ~8%/yr → ±4 pts per quarter), so shortening the tripwire was
+rejected as changing a stopping rule after peeking. Event:
+`sizing_migration_equal` on 2026-09-07 (same-day-merged with the NTAP entry;
+the reason string records the absorbed event). Seam stamped (rule 32-C).
+
+**Mechanics.** Equal mode behaves like inverse-vol everywhere the score is
+not the sizer: tier crossings don't fire, the rule-18 monotonicity gate is
+scoped to tier mode, and the monthly ±25% drift-band re-size (spec A2) keeps
+running so the live book is not buy-and-hold. Selection (rank N=15/M=18),
+the sizing params (they still feed the shadow), and BAND_* are untouched.
+
+**Shadow swap (spec A4 roles reversed).** `INVVOL_ROSTER` in
+`shadow_events` — `{date, roster, weights}`; `chain_linked_growth` now honors
+per-event weights — records what inverse-vol WOULD size, re-targeted at every
+fired model event and every monthly pass (full re-target; the live drift-band
+filter is not replayed — a documented simplification). Seeded with the book's
+final inverse-vol allocations so it starts where the model left off.
+`EW_ROSTER` stays as the historic record and coincides with MODEL from the
+flip on. Site: "Same picks, volatility-sized", hidden by default.
+
+**Pre-registered mirror tripwire (do not shorten after peeking):** if
+INVVOL_ROSTER beats MODEL over two consecutive quarters from 2026-09-08,
+bring it to Dom with the data — revisit, never auto-revert. Do NOT tune caps,
+floor, drift band, or N/M against this window (rule 28).
+
+**Ticket supersession (latent bug fixed in the same change).** A new ticket
+now renames every older still-actionable ticket (un-receipted, unexpired) to
+`superseded-<name>` so it leaves the executor's `ticket-*.json` glob
+(`generate_trade_ticket.retire_superseded`). Before this, the scheduled
+executor ran the newest ticket one morning and fell back to the stale one the
+next — the unexecuted 2026-09-07 NTAP entry ticket would have re-executed the
+day after the equal-weight resize filled. Receipted and expired tickets are
+untouched; nothing is deleted (B3 append-only preserved).
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

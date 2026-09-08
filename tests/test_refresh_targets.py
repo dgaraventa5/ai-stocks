@@ -711,3 +711,136 @@ def test_seam_blocks_confirm_unit():
         '2026-06-30', '2026-07-05',
         {'date': '2026-07-02', 'reason': 'x'}) is False
     assert rt.seam_blocks_confirm('2026-07-02', '2026-07-05', None) is False
+
+
+# ---- equal-weight sizing mode + INVVOL_ROSTER shadow (2026-09-08 flip) -----
+
+def _equal_pcfg():
+    p = _invvol_pcfg()
+    p['sizing']['mode'] = 'equal'
+    return p
+
+
+def _equal_env(monkeypatch, tmp_path, cfg):
+    path, calls, saves = _invvol_env(monkeypatch, tmp_path, cfg)
+    monkeypatch.setattr(rt, 'load_pcfg', _equal_pcfg)
+    return path, calls, saves
+
+
+def test_equal_mode_weights_are_uniform_regardless_of_score(monkeypatch,
+                                                            tmp_path):
+    cfg = _seed_cfg()
+    path, calls, _saves = _equal_env(monkeypatch, tmp_path, cfg)
+
+    rt.refresh(portfolio=str(path), resize=True)
+
+    assert len(calls) == 1 and calls[0]['kind'] == 'manual_resize'
+    w = calls[0]['weights']
+    assert w['NVDA'] == pytest.approx(0.5) and w['TSM'] == pytest.approx(0.5)
+
+
+def test_equal_mode_tier_change_does_not_fire(monkeypatch, tmp_path):
+    """The score is not the sizer in equal mode (same as inverse-vol): a
+    tier crossing carries no weight information, so it is not an event."""
+    cfg = _seed_cfg()
+    cfg['events'][-1]['tiers'] = {'NVDA': '✓✓', 'TSM': '✓✓'}  # NVDA now ✓✓✓
+    cfg['sizing_state'] = {'last_resize_check': '2099-12'}   # no monthly pass
+    path, calls, _saves = _equal_env(monkeypatch, tmp_path, cfg)
+
+    rt.refresh(portfolio=str(path))
+
+    assert calls == []
+
+
+def test_equal_mode_monthly_resize_fires_outside_band(monkeypatch, tmp_path):
+    cfg = _seed_cfg()
+    path, calls, _saves = _equal_env(monkeypatch, tmp_path, cfg)
+    monkeypatch.setattr(rt, 'current_weights',
+                        lambda c: {'NVDA': 0.70, 'TSM': 0.30})  # ±40% vs 50/50
+
+    rt.refresh(portfolio=str(path))
+
+    assert len(calls) == 1 and calls[0]['kind'] == 'resize_monthly'
+    w = calls[0]['weights']
+    assert w['NVDA'] == pytest.approx(0.5) and w['TSM'] == pytest.approx(0.5)
+
+
+def test_equal_mode_appends_invvol_shadow_on_fire(monkeypatch, tmp_path):
+    """Inverse-vol is retired to a shadow: every fired real run in equal mode
+    records what inverse-vol WOULD have sized (NVDA 2x TSM's vol -> 1/3, 2/3)
+    so MODEL - INVVOL_ROSTER stays the standing sizing audit."""
+    import datetime as dt
+    cfg = _seed_cfg()
+    path, _calls, _saves = _equal_env(monkeypatch, tmp_path, cfg)
+
+    rt.refresh(portfolio=str(path), resize=True)
+
+    evs = cfg['shadow_events']['INVVOL_ROSTER']
+    assert evs[-1]['date'] == dt.date.today().isoformat()
+    assert evs[-1]['roster'] == ['NVDA', 'TSM']
+    assert evs[-1]['weights']['TSM'] == pytest.approx(
+        2 * evs[-1]['weights']['NVDA'], rel=1e-2)
+    assert sum(evs[-1]['weights'].values()) == pytest.approx(1.0, abs=1e-9)
+
+
+def test_equal_mode_refreshes_invvol_shadow_on_monthly_check(monkeypatch,
+                                                             tmp_path):
+    """The monthly pass re-targets the shadow even when the book itself is
+    inside the drift band (frozen run) — and persists it."""
+    cfg = _seed_cfg()
+    path, calls, saves = _equal_env(monkeypatch, tmp_path, cfg)
+    monkeypatch.setattr(rt, 'current_weights',
+                        lambda c: {'NVDA': 0.5, 'TSM': 0.5})   # inside band
+
+    rt.refresh(portfolio=str(path))
+
+    assert calls == []
+    assert cfg['shadow_events']['INVVOL_ROSTER'][-1]['roster'] == ['NVDA', 'TSM']
+    assert saves                                     # frozen-run persistence
+
+
+def test_inverse_vol_mode_never_writes_invvol_shadow(monkeypatch, tmp_path):
+    """While inverse-vol is LIVE the model itself is the record."""
+    cfg = _seed_cfg()
+    path, _calls, _saves = _invvol_env(monkeypatch, tmp_path, cfg)
+
+    rt.refresh(portfolio=str(path), resize=True)
+
+    assert 'INVVOL_ROSTER' not in cfg.get('shadow_events', {})
+
+
+def test_equal_mode_dry_run_is_networkless(monkeypatch, tmp_path):
+    cfg = _seed_cfg()
+    path, calls, saves = _equal_env(monkeypatch, tmp_path, cfg)
+
+    def boom(tickers, lb):
+        raise AssertionError('dry run fetched prices')
+
+    monkeypatch.setattr(rt, '_price_frame', boom)
+    assert rt.pending_rebalance(portfolio=str(path)) is False
+    assert 'INVVOL_ROSTER' not in cfg.get('shadow_events', {})
+    assert calls == [] and saves == []
+
+
+def test_migration_kind_equal_absorbs_same_day_event(monkeypatch, tmp_path):
+    import datetime as dt
+    cfg = _seed_cfg()
+    cfg['events'][-1]['date'] = dt.date.today().isoformat()
+    cfg['events'][-1]['reason'] = 'membership: +TSM'
+    path, calls, _saves = _equal_env(monkeypatch, tmp_path, cfg)
+
+    rt.refresh(portfolio=str(path), resize=True,
+               migration='sizing_migration_equal')
+
+    assert calls[0]['kind'] == 'sizing_migration_equal'
+    assert calls[0]['reason'].startswith('sizing_migration_equal:')
+    assert 'absorbs same-day event: membership: +TSM' in calls[0]['reason']
+
+
+def test_migration_true_still_means_invvol(monkeypatch, tmp_path):
+    cfg = _seed_cfg()
+    path, calls, _saves = _invvol_env(monkeypatch, tmp_path, cfg)
+
+    rt.refresh(portfolio=str(path), resize=True, migration=True)
+
+    assert calls[0]['kind'] == 'sizing_migration_invvol'

@@ -89,7 +89,39 @@ def generate(target_weights: dict[str, float], event: dict, *,
     print(f'ticket written: {path} ({len(ticket["orders"])} orders, '
           f'{len(ticket["suppressed"])} dust-suppressed, '
           f'{len(ticket["untradeable"])} untradeable)')
+    retire_superseded(tdir, live_dir / 'receipts', keep=path, now=now)
     return path
+
+
+def retire_superseded(tdir: Path, rdir: Path, *, keep: Path, now: str) -> list:
+    """Rename every OTHER still-actionable ticket (un-receipted, unexpired)
+    to superseded-<name> so it leaves the executor's ticket-*.json glob.
+
+    A new ticket is computed from actual holdings and the current targets,
+    so it subsumes any older unexecuted plan; leaving both live lets the
+    scheduled executor run the newest today and the stale one tomorrow
+    (added 2026-09-08 — the NTAP entry ticket would have re-executed the
+    morning after the equal-weight migration filled). Receipted and expired
+    tickets are untouched: their history is closed either way."""
+    now_dt = dt.datetime.fromisoformat(now.replace('Z', '+00:00'))
+    retired = []
+    for p in sorted(Path(tdir).glob('ticket-*.json')):
+        if p == keep:
+            continue
+        try:
+            tk = json.loads(p.read_text())
+        except ValueError:
+            continue
+        if (Path(rdir) / f"receipt-{tk.get('ticket_id')}.json").exists():
+            continue
+        exp = tk.get('expires_at')
+        if exp and dt.datetime.fromisoformat(exp.replace('Z', '+00:00')) < now_dt:
+            continue
+        target = p.with_name(f'superseded-{p.name}')
+        p.rename(target)
+        retired.append(target)
+        _flag(f'{p.name} superseded by {keep.name} — renamed to {target.name}')
+    return retired
 
 
 def on_model_event(event: dict, weights: dict[str, float]) -> Path | None:
