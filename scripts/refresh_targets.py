@@ -456,7 +456,20 @@ def refresh(dry_run: bool = False, resize: bool = False,
             include.append(t)   # still held while pending
             new_pending[t] = exit_pending.get(t, today)   # start/keep the clock
             statuses[t] = f'EXIT PENDING ({below(t)}, since {new_pending[t]})'
-            flag(f'{t}: {below(t)} — EXIT PENDING, confirms next refresh')
+            # Say what will ACTUALLY happen. A clock starting inside an open
+            # seam window will be damped on the next run, not confirmed, and
+            # printing "confirms next refresh" there reads as a scheduled exit
+            # that is not going to happen (observed 2026-09-08 on NTAP during
+            # the rule-34 ROIC deploy).
+            if seam_blocks_confirm(new_pending[t], today,
+                                   cfg.get('methodology_seam')):
+                _seam = cfg['methodology_seam']
+                _end = (dt.date.fromisoformat(_seam['date'])
+                        + dt.timedelta(days=SEAM_DAYS)).isoformat()
+                flag(f'{t}: {below(t)} — EXIT PENDING, confirm seam-damped '
+                     f'until {_end} ({_seam.get("reason", "methodology change")})')
+            else:
+                flag(f'{t}: {below(t)} — EXIT PENDING, confirms next refresh')
     for t in order:
         if t in include or t in statuses or t in dead or t in untradable:
             continue

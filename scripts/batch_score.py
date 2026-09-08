@@ -158,6 +158,9 @@ def _is_layer9_capacity(layer: str | None) -> bool:
     return "bitcoin" in l or "neocloud" in l
 
 
+ROIC_SKIP_FOREIGN = True   # rule 34; see compute_inputs
+
+
 def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
                    layer: str | None = None) -> tuple[dict, list[str]]:
     """Return the 11 objective inputs + a list of gap messages for the log."""
@@ -167,6 +170,21 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
         "roic": None, "gross_mgn": None, "fcf_mgn": None, "nd_ebitda": None,
         "rev_3y_cagr": None, "rev_yoy": None, "eps_yoy": None,
     }
+
+    # ----- Quality: ROIC (rule 34, 2026-09-08) -----
+    # Was a hand-curated cell that never refreshed: 39% blank and stale where it
+    # mattered. Now computed TTM from the statements. Foreign LOCAL listings are
+    # excluded by convention (Dom, 2026-09-08) — note that ROIC is currency-
+    # neutral (numerator and denominator share the reporting currency), so this
+    # is a scope choice, NOT a rule-19 FX limitation; flip ROIC_SKIP_FOREIGN to
+    # cover them.
+    if ROIC_SKIP_FOREIGN and "." in ticker:
+        gaps.append("roic: foreign local listing — excluded by convention "
+                    "(currency-neutral metric; scope choice, not an FX limit)")
+    else:
+        from roic import statement_roic
+        inp["roic"], _rflags = statement_roic(t)
+        gaps.extend(f"roic: {f}" for f in _rflags)
 
     # ----- Value -----
     inp["fwd_pe"]    = info.get("forwardPE")

@@ -632,9 +632,55 @@
         "ALAB": "\u2713\u2713"
       },
       "cash": -0.02
+    },
+    {
+      "date": "2026-09-08",
+      "reason": "membership: +AMZN",
+      "kind": "membership",
+      "allocations": {
+        "CRDO": 593.32,
+        "NVDA": 593.32,
+        "ANET": 593.32,
+        "GMED": 593.32,
+        "ALAB": 593.32,
+        "TSM": 593.32,
+        "NTAP": 593.32,
+        "EME": 593.32,
+        "RDDT": 593.32,
+        "VRT": 593.32,
+        "FIX": 593.32,
+        "META": 593.32,
+        "SNDK": 593.32,
+        "AVGO": 593.32,
+        "MSFT": 593.32,
+        "MU": 593.32,
+        "AMZN": 593.32
+      },
+      "tiers": {
+        "CRDO": "\u2713\u2713",
+        "NVDA": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "GMED": "\u2713\u2713",
+        "ALAB": "\u2713\u2713",
+        "TSM": "\u2713\u2713",
+        "NTAP": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "RDDT": "\u2713\u2713",
+        "VRT": "\u2713\u2713",
+        "FIX": "\u2713\u2713",
+        "META": "\u2713\u2713",
+        "SNDK": "\u2713\u2713",
+        "AVGO": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "MU": "\u2713\u2713",
+        "AMZN": "\u2713\u2713"
+      },
+      "cash": -0.06
     }
   ],
-  "exit_pending": {},
+  "exit_pending": {
+    "NTAP": "2026-09-08"
+  },
   "shadow_events": {
     "BAND_TOP": [
       {
@@ -695,6 +741,26 @@
           "VRT",
           "RDDT",
           "NTAP"
+        ]
+      },
+      {
+        "date": "2026-09-08",
+        "roster": [
+          "NVDA",
+          "FIX",
+          "TSM",
+          "CRDO",
+          "AVGO",
+          "ANET",
+          "SNDK",
+          "MSFT",
+          "MU",
+          "GMED",
+          "ALAB",
+          "EME",
+          "VRT",
+          "META",
+          "AMZN"
         ]
       }
     ],
@@ -762,16 +828,16 @@
       {
         "date": "2026-09-08",
         "roster": [
-          "AMZN",
-          "META",
+          "RDDT",
+          "TER",
           "GOOGL",
           "PLTR",
-          "TER",
+          "NTAP",
           "APH",
           "ISRG",
-          "CGNX",
           "EQT",
-          "KEYS"
+          "CGNX",
+          "APP"
         ]
       }
     ],
@@ -859,21 +925,21 @@
       {
         "date": "2026-09-08",
         "roster": [
-          "CIEN",
-          "AR",
-          "FN",
-          "APP",
-          "WDC",
-          "ARM",
           "ORCL",
-          "HSAI",
-          "ADSK",
+          "CIEN",
+          "KEYS",
+          "AR",
+          "BE",
+          "FN",
           "HTHIY",
-          "RMBS",
-          "DELL",
-          "GLW",
+          "STX",
+          "WDC",
+          "ADSK",
+          "AMD",
+          "MOD",
           "POWL",
-          "CSCO"
+          "ARM",
+          "HSAI"
         ]
       }
     ],
@@ -916,6 +982,47 @@
           "TSM": 0.078909,
           "VRT": 0.048258
         }
+      },
+      {
+        "date": "2026-09-08",
+        "roster": [
+          "ALAB",
+          "AMZN",
+          "ANET",
+          "AVGO",
+          "CRDO",
+          "EME",
+          "FIX",
+          "GMED",
+          "META",
+          "MSFT",
+          "MU",
+          "NTAP",
+          "NVDA",
+          "RDDT",
+          "SNDK",
+          "TSM",
+          "VRT"
+        ],
+        "weights": {
+          "ALAB": 0.031353,
+          "AMZN": 0.074412,
+          "ANET": 0.057985,
+          "AVGO": 0.07607,
+          "CRDO": 0.030843,
+          "EME": 0.06029,
+          "FIX": 0.053796,
+          "GMED": 0.082657,
+          "META": 0.071974,
+          "MSFT": 0.075284,
+          "MU": 0.034674,
+          "NTAP": 0.08411,
+          "NVDA": 0.081113,
+          "RDDT": 0.037711,
+          "SNDK": 0.03,
+          "TSM": 0.072952,
+          "VRT": 0.044776
+        }
       }
     ]
   },
@@ -923,7 +1030,7 @@
     "last_resize_check": "2026-09"
   },
   "methodology_seam": {
-    "date": "2026-09-07",
-    "reason": "sizing flip: inverse-vol -> equal weight (rule 33, prior-driven; inverse-vol retired to INVVOL_ROSTER shadow)"
+    "date": "2026-09-08",
+    "reason": "rule 34: ROIC switched to computed TTM NOPAT / capital employed (was a stale hand-curated cell, 39% blank)"
   }
 }
