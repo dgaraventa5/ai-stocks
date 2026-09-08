@@ -210,7 +210,11 @@ def chain_linked_growth(events, inception: str, idx):
         if not mask.any():
             continue
         seg_idx = idx[mask]
-        parts = []
+        # Optional per-name `weights` (INVVOL_ROSTER shadow, 2026-09-08):
+        # a weighted basket instead of equal; names without prices drop
+        # out and the survivors re-share their weight pro-rata.
+        wts = ev.get('weights') or {}
+        parts, ws = [], []
         for t in ev['roster']:
             g = gfull(t)
             if g is None:
@@ -219,9 +223,11 @@ def chain_linked_growth(events, inception: str, idx):
             if base != base or base == 0:          # NaN (pre-listing) / zero
                 continue
             parts.append(g.reindex(seg_idx) / base)
-        if not parts:
+            ws.append(float(wts.get(t, 1.0)) if wts else 1.0)
+        if not parts or sum(ws) <= 0:
             continue
-        seg = level * pd.concat(parts, axis=1).mean(axis=1)
+        basket = pd.concat(parts, axis=1)
+        seg = level * basket.mul(ws, axis=1).sum(axis=1) / sum(ws)
         out[seg_idx] = seg
         level = float(seg.iloc[-1])
         anchor = seg_idx[-1]

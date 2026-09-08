@@ -100,3 +100,17 @@ def test_drift_band():
     assert traded == ['B', 'C']
     assert w['B'] / w['C'] == pytest.approx(1.0)             # both back to target ratio
     assert sum(w.values()) == pytest.approx(sum(target.values()), abs=1e-9)
+
+
+# ---- equal-weight sizing mode (2026-09-08 flip) ----------------------------
+
+def test_equal_weights_are_uniform_and_sum_to_one():
+    from position_sizing import equal_weights
+    w = equal_weights(['A', 'B', 'C', 'D'])
+    assert w == {'A': 0.25, 'B': 0.25, 'C': 0.25, 'D': 0.25}
+    assert sum(w.values()) == pytest.approx(1.0, abs=1e-12)
+
+
+def test_equal_weights_empty_roster():
+    from position_sizing import equal_weights
+    assert equal_weights([]) == {}

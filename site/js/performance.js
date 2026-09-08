@@ -9,7 +9,7 @@ renderNav('performance.html');
     // before their deploy date). Filter tolerates data files exported before v2.
     const series = [
       ['Model', perf.model, CHART_COLORS.model, true, true,
-        'The live portfolio — the top 15 names by score, with steadier stocks given bigger weights (volatility-based sizing).'],
+        'The live portfolio — the top 15 names by score, every position equally sized (since 2026-09-08; volatility-based sizing before that).'],
       ['SMH', perf.bench.SMH, CHART_COLORS.SMH, false, true,
         'Semiconductor ETF — the closest off-the-shelf benchmark for AI hardware.'],
       ['QQQ', perf.bench.QQQ, CHART_COLORS.QQQ, false, true,
@@ -17,7 +17,9 @@ renderNav('performance.html');
       ['S&P 500', perf.bench.SPY, CHART_COLORS.SPY, false, true,
         'The broad US market.'],
       ['Same picks, equal weight', perf.bench.EW_ROSTER, CHART_COLORS.EW_ROSTER, false, false,
-        'The model’s exact stocks and trades, but every position equally sized — the gap vs Model shows what volatility-based sizing adds (or costs).'],
+        'The model’s exact stocks and trades, every position equally sized — the gap vs Model up to 2026-09-08 shows what volatility-based sizing added (or cost); after that the two lines coincide.'],
+      ['Same picks, volatility-sized', perf.bench.INVVOL_ROSTER, CHART_COLORS.INVVOL_ROSTER, false, false,
+        'The model’s exact stocks, sized the old way (steadier stocks bigger) from 2026-09-08 on — the standing check on whether dropping volatility-based sizing was right.'],
       ['Band 1–15', perf.bench.BAND_TOP, CHART_COLORS.BAND_TOP, false, false,
         'The score’s top 15 names, equal weight, rebalanced mechanically — the raw picks with no sizing or trading rules.'],
       ['Band 16–25', perf.bench.BAND_NEXT, CHART_COLORS.BAND_NEXT, false, false,

@@ -49,7 +49,8 @@ from portfolio_model import (current_weights, load_cfg, load_pcfg,
 from portfolio_sizing import (build_reason, is_tradable, rank_by_score,
                               tier_changes, topn_membership,
                               weights_score_monotonic)
-from position_sizing import drift_band_filter, inverse_vol_weights
+from position_sizing import (drift_band_filter, equal_weights,
+                             inverse_vol_weights)
 from recalc_watchlist import recalc
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -225,6 +226,26 @@ def _price_frame(tickers: list[str], lookback: int):
     return pd.DataFrame(cols)
 
 
+def _update_invvol_shadow(cfg: dict, roster: list[str], siz: dict,
+                          layers: dict[str, str], today: str) -> bool:
+    """Append today's inverse-vol weights for `roster` to the INVVOL_ROSTER
+    shadow (same-day re-runs replace; prior days are never rewritten).
+    Re-targets fully at each call — the live A2 drift-band filter is NOT
+    replayed (documented simplification, CLAUDE.md rule 33)."""
+    prices = _price_frame(roster, int(siz['lookback']))
+    inv = inverse_vol_weights(prices, roster, siz,
+                              layers={t: layers.get(t, '') for t in roster})
+    ev = {'date': today, 'roster': sorted(roster),
+          'weights': {t: round(w, 6) for t, w in sorted(inv.items())}}
+    evs = cfg.setdefault('shadow_events', {}).setdefault('INVVOL_ROSTER', [])
+    if evs and evs[-1]['date'] == today:
+        evs[-1] = ev
+    else:
+        evs.append(ev)
+    flag(f'shadow INVVOL_ROSTER: re-targeted ({len(roster)} names)')
+    return True
+
+
 def _update_band_shadows(cfg: dict, live: list, pcfg: dict, today: str) -> bool:
     """Refresh BAND_TOP/NEXT/TAIL rosters from today's ranks (v2 spec C1).
     Pure-score ranking (no incumbency tie-break): the bands are unsized
@@ -257,8 +278,12 @@ def _update_band_shadows(cfg: dict, live: list, pcfg: dict, today: str) -> bool:
 
 def refresh(dry_run: bool = False, resize: bool = False,
             portfolio: str | None = None, check_freshness: bool = True,
-            migration: bool = False) -> None:
+            migration: bool | str = False) -> None:
     today = dt.date.today().isoformat()
+    # migration: False | True (legacy: the 2026-08-07 inverse-vol switch) |
+    # an explicit event kind such as 'sizing_migration_equal' (2026-09-08).
+    mig_kind = (('sizing_migration_invvol' if migration is True else
+                 str(migration)) if migration else None)
     path = portfolio or PORTFOLIO
     wb = load_workbook(path, data_only=False)
     sizing, targets = wb['Sizing Rules'], wb['Targets']
@@ -452,9 +477,15 @@ def refresh(dry_run: bool = False, resize: bool = False,
                 flag(f'{t}: qualifies ({why(t)}) but max positions '
                      f'({max_positions}) full')
 
-    # ---- sizing (v2 spec A1): tier bands or inverse trailing volatility ----
+    # ---- sizing (v2 spec A1): tier bands, inverse trailing volatility, or
+    # equal weight (live since 2026-09-08; inverse-vol retired to a shadow).
+    # Only tier mode uses the score as the sizer (spec A0).
     siz = pcfg['sizing']
-    if siz['mode'] == 'inverse_vol':
+    score_sizes = siz['mode'] == 'tier'
+    if siz['mode'] == 'equal':
+        weights = {t: w * (1.0 - cash)
+                   for t, w in equal_weights(include).items()}
+    elif siz['mode'] == 'inverse_vol':
         if dry_run and not check_freshness:
             # Offline probe (pending_rebalance / rule-25 gate): the gate reads
             # only membership + tier state, never weights — keep it networkless
@@ -484,11 +515,11 @@ def refresh(dry_run: bool = False, resize: bool = False,
     prior_model = set(last_ev['allocations'])
     last_tiers = last_ev.get('tiers', {})
     tier_chg = tier_changes(include, info, last_tiers)
-    tier_fire = bool(tier_chg) and siz['mode'] != 'inverse_vol'
+    tier_fire = bool(tier_chg) and score_sizes
     entered = sorted(set(include) - prior_model)
     exited = sorted(prior_model - set(include))
     fire = bool(entered or exited) or tier_fire or resize
-    kind = ('sizing_migration_invvol' if migration else
+    kind = (mig_kind if mig_kind else
             'membership' if (entered or exited) else
             'tier' if tier_fire else 'manual_resize')
 
@@ -499,8 +530,7 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # never trades intra-month.
     monthly_traded: list[str] = []
     state_changed = False
-    if (siz['mode'] == 'inverse_vol' and not fire and not dry_run
-            and check_freshness):
+    if (not score_sizes and not fire and not dry_run and check_freshness):
         state = cfg.setdefault('sizing_state', {})
         if today[:7] > state.get('last_resize_check', ''):
             cur = current_weights(cfg)
@@ -538,7 +568,7 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # ---- sanity: tier-sized weights must be monotonic in score (rule 18).
     # Scoped to tier mode: inverse-vol weights are deliberately NOT
     # score-ordered (v2 spec A0) — the EW_ROSTER shadow audits sizing there.
-    if siz['mode'] != 'inverse_vol':
+    if score_sizes:
         viol = weights_score_monotonic([(info[t]['TOTAL'], weights.get(t, 0))
                                         for t in include])
         if viol:
@@ -548,6 +578,14 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # not — the scouts track today's ranks regardless of the book.
     shadows_changed = False if dry_run else _update_band_shadows(
         cfg, sel_live, pcfg, today)
+    # INVVOL_ROSTER (2026-09-08): with equal-weight live, record what
+    # inverse-vol WOULD size at every event and monthly pass — MODEL minus
+    # this shadow is the standing sizing audit (spec A4, roles swapped).
+    # Never on dry runs (networkless gate); never while inverse-vol is live
+    # (the model itself is the record).
+    if siz['mode'] == 'equal' and not dry_run and (fire or state_changed):
+        shadows_changed = _update_invvol_shadow(
+            cfg, include, siz, layers, today) or shadows_changed
 
     if dry_run:
         print(f'\n{"Tkr":<7}{"Rank":>5}{"Score":>7}{"Status":<34}{"Wt %":>6}')
@@ -660,10 +698,17 @@ def refresh(dry_run: bool = False, resize: bool = False,
     elif kind == 'sizing_migration_invvol':
         reason = ('sizing_migration_invvol: one-time switch to inverse-vol '
                   'sizing + rank selection (v2 spec A3)')
+    elif kind == 'sizing_migration_equal':
+        reason = ('sizing_migration_equal: one-time switch to equal-weight '
+                  'sizing; inverse-vol retired to the INVVOL_ROSTER shadow '
+                  '(prior-driven flip, 2026-09-08)')
     else:
         reason = build_reason(entered, exited, tier_chg, resize)
+    if mig_kind and last_ev.get('date') == today:
+        # log_rebalance same-day-REPLACES the prior event: keep its story.
+        reason += f' (absorbs same-day event: {last_ev.get("reason", "")})'
     tiers_now = {t: info[t]['Tier'] for t in include}
-    if siz['mode'] == 'inverse_vol':
+    if not score_sizes:
         # Any fired full re-size IS that month's scheduled re-size (spec A2).
         cfg.setdefault('sizing_state', {})['last_resize_check'] = today[:7]
     ev = log_rebalance(cfg, weights, reason, tiers_now, kind=kind)
