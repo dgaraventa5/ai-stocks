@@ -18,9 +18,15 @@ DEFAULTS = {
     'MIN_ORDER_NOTIONAL': 25.0,   # dust guard (spec B2)
     'LIMIT_TOL': 0.0075,          # marketable-limit tolerance
     'MAX_WEIGHT': 0.12,           # renormalization cap (mirrors sizing cap)
-    'TICKET_TTL_HOURS': 48,
+    'TICKET_TTL_TRADING_DAYS': 2, # expire at the close of the Nth trading day
     'CASH_BUFFER_PCT': 0.02,      # undeployed slack for slippage (see below)
 }
+
+# Retired 2026-09-08: the wall-clock TTL lapsed over weekends/holidays with
+# zero execution attempts inside it (see trading_calendar.py). The key is
+# ignored if it survives in an executor-config.json; generate_trade_ticket
+# flags it so the stale setting is noticed rather than silently dropped.
+LEGACY_TTL_KEY = 'TICKET_TTL_HOURS'
 
 
 def is_tradeable(ticker: str) -> bool:
@@ -140,13 +146,24 @@ def ticket_checksum(orders: list[dict]) -> str:
 
 def build_ticket(result: dict, basis_event: dict, created_at: str,
                  cfg: dict, account_state_as_of: str) -> dict:
-    ttl = int(cfg.get('TICKET_TTL_HOURS', DEFAULTS['TICKET_TTL_HOURS']))
+    """Assemble the ticket. `expires_at` is the close (16:00 ET) of the
+    TICKET_TTL_TRADING_DAYS-th US trading day strictly after the ET date of
+    creation — weekends and NYSE holidays don't consume the TTL, so a ticket
+    always carries that many scheduled-executor opportunities (06:35 PT on
+    trading days). Wall-clock hours never enter it: the 2026-09-04 ticket
+    (Friday 22:11Z + 48h = Sunday) expired before Tuesday's first slot after
+    Labor Day. The executor's expiry gate (C2.1) is unchanged; only the
+    stamped instant moved."""
+    import trading_calendar as tc
+    ttl = int(cfg.get('TICKET_TTL_TRADING_DAYS',
+                      DEFAULTS['TICKET_TTL_TRADING_DAYS']))
     created = dt.datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-    expires = created + dt.timedelta(hours=ttl)
+    expires, basis = tc.expiry_after_trading_days(created, ttl)
     return {
         'ticket_id': f"{basis_event['date']}-{basis_event['kind']}",
         'created_at': created_at,
         'expires_at': expires.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'expires_basis': basis,
         'basis_event': basis_event,
         'account_equity_at_gen': result['equity'],
         'account_state_as_of': account_state_as_of,

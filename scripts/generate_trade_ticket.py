@@ -50,6 +50,11 @@ def generate(target_weights: dict[str, float], event: dict, *,
     cfg_path = live_dir / 'executor-config.json'
     if cfg_path.exists():
         cfg.update(json.loads(cfg_path.read_text()))
+    if tt.LEGACY_TTL_KEY in cfg:
+        _flag(f'{tt.LEGACY_TTL_KEY} in executor-config.json is IGNORED — '
+              f'ticket TTL is TICKET_TTL_TRADING_DAYS '
+              f'({cfg["TICKET_TTL_TRADING_DAYS"]}) since 2026-09-08; remove '
+              f'the stale key (deliberate edit, C3)')
 
     tickers = sorted(set(target_weights) | set(snap['positions']))
     if prices_fn is None:

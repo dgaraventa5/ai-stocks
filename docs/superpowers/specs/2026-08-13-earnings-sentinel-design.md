@@ -154,8 +154,8 @@ pattern as `executor_cron.macos_notify`).
 | After close (≈⅔) | Tue 16:30 | Tue 18:30 | Wed 18:30 | Thu 09:35 ET | ~41h |
 
 Versus up to ~6 days on the weekly cycle. Tickets are generated ~15h before
-the executor window — comfortably inside the 48h default TTL
-(`trade_ticket.py DEFAULTS`).
+the executor window — comfortably inside the ticket TTL (2 US trading days
+since 2026-09-08, previously 48 wall-clock hours; `trade_ticket.py DEFAULTS`).
 
 ## 7. Execution seam (no new execution code)
 
