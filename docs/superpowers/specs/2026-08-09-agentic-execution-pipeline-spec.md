@@ -260,3 +260,16 @@ spirit — dated, reasoned, reversible.
 - **O4:** does Robinhood's Agentic account support fractional shares on all
   listed names? Verify in Phase 1 dry-run; fall back to whole-share rounding
   with cash remainder if not.
+
+
+---
+
+## Amendment 2026-09-08 — sell proceeds fund buys; regenerate on quote drift (Dom-approved)
+
+C2.3's cash gate credits same-ticket sell proceeds at a 2% haircut, and the
+executor waits (≤90s, polling account cash) for those proceeds before sending
+buys; unfunded buys are receipted `not_sent` and reported as failures. §C5's
+auto-halt is preceded by ONE regeneration when a refusal consists solely of
+C2.5 stale-quote failures. Motivation and mechanics: CLAUDE.md rule 29
+amendment. The executed-once guard, checksum, expiry, roster, caps, turnover
+and kill switch are unchanged.

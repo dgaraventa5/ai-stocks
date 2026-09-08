@@ -57,18 +57,52 @@ def macos_notify(msg: str) -> None:
         pass   # notification is best-effort; the log line above always lands
 
 
-def cron_run(live_dir: Path, runner, notifier, now: str) -> int:
-    """One scheduled pass. runner(ticket_path) -> execute_ticket.run result."""
+def _is_stale_quote(failure: str) -> bool:
+    from execute_ticket import STALE_QUOTE_MARK   # lazy (minimal-CI convention)
+    return STALE_QUOTE_MARK in failure
+
+
+def cron_run(live_dir: Path, runner, notifier, now: str, regen=None) -> int:
+    """One scheduled pass. runner(ticket_path) -> execute_ticket.run result.
+    regen() -> fresh ticket path (or None) for the quote-drift retry."""
     live_dir = Path(live_dir)
     ticket = pick_ticket(live_dir, now)
     if ticket is None:
         return 0                                  # quiet no-op (normal case)
-    try:
-        res = runner(ticket)
-    except (SystemExit, Exception) as e:          # token/network — nothing sent
-        notifier(f'executor cron: transport error, nothing sent — {e} '
-                 f'(check token: ROBINHOOD_MCP_TOKEN / Claude Code OAuth)')
+
+    def attempt(path):
+        try:
+            return runner(path)
+        except (SystemExit, Exception) as e:      # token/network — nothing sent
+            notifier(f'executor cron: transport error, nothing sent — {e} '
+                     f'(check token: ROBINHOOD_MCP_TOKEN / Claude Code OAuth)')
+            return None
+
+    res = attempt(ticket)
+    if res is None:
         return 1
+    # 2026-09-08 (Dom-approved): a refusal on quote drift ALONE means the
+    # evening ticket's reference prices went stale overnight, not that
+    # anything is wrong with the account. Regenerate once with live quotes
+    # (fresh limits, same actual holdings) and try that ticket; any other
+    # failure, or a still-stale regeneration, halts as before.
+    if (res['failures'] and regen is not None
+            and all(_is_stale_quote(f) for f in res['failures'])):
+        notifier(f'executor cron: ticket {ticket.name} refused on quote '
+                 f'drift only — regenerating with live quotes')
+        try:
+            fresh = regen()
+        except Exception as e:
+            fresh = None
+            notifier(f'executor cron: regeneration failed — {e}')
+        if fresh is None:
+            res = {**res, 'failures': res['failures']
+                   + ['regeneration unavailable — see log']}
+        else:
+            ticket = Path(fresh)
+            res = attempt(ticket)
+            if res is None:
+                return 1
     if res['failures']:
         # C5: any validation failure under scheduling raises the kill switch.
         halt = live_dir / 'trading-halt.flag'
@@ -286,21 +320,29 @@ def main(mode: str = 'auto') -> int:
         mode = 'open' if dt.datetime.now().hour < 12 else 'close'
     transport = RobinhoodTransport()
 
+    def last_event():
+        from portfolio_model import load_cfg
+        last_ev = load_cfg()['events'][-1]
+        return {'date': last_ev['date'],
+                'kind': last_ev.get('kind', 'membership'),
+                'reason': last_ev.get('reason', '')}
+
+    def regenerate():
+        from generate_trade_ticket import generate, _targets_weights
+        return generate(_targets_weights()[0], last_event())
+
     def execute_step():
         def runner(ticket_path):
             return exec_run(ticket_path, live_dir=LIVE_DIR,
                             roster=_load_roster(), transport=transport,
                             confirm=True, now=now)
-        if cron_run(LIVE_DIR, runner, macos_notify, now) != 0:
+        if cron_run(LIVE_DIR, runner, macos_notify, now,
+                    regen=regenerate) != 0:
             raise RuntimeError('execution refused or transport error (see log)')
 
     def ticket_step():
         from generate_trade_ticket import generate, _targets_weights
-        from portfolio_model import load_cfg
-        last_ev = load_cfg()['events'][-1]
-        event = {'date': last_ev['date'],
-                 'kind': last_ev.get('kind', 'membership'),
-                 'reason': last_ev.get('reason', '')}
+        event = last_event()
         if ticket_gen_if_stale(
                 LIVE_DIR, event,
                 gen=lambda ev: generate(_targets_weights()[0], ev)):

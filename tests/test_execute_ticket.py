@@ -487,3 +487,74 @@ def test_partial_failure_does_not_weaken_the_executed_once_guard(
     res2 = run(p2, live_dir, transport=FakeTransport(
         quotes={'NVDA': 100.0, 'TSM': 250.0}), confirm=True)
     assert_refused(res2, 'already executed')
+
+
+# ---- 2026-09-08: sell proceeds fund buys (Dom-approved gate change) --------
+
+def _resize_orders(sell_notional=150.0, buy_notional=100.0):
+    return [{'ticker': 'TSM', 'side': 'sell', 'shares': sell_notional / 250.0,
+             'limit_price': 250.0, 'tif': 'day', 'notional_est': sell_notional},
+            {'ticker': 'NVDA', 'side': 'buy', 'shares': buy_notional / 100.0,
+             'limit_price': 100.0, 'tif': 'day', 'notional_est': buy_notional}]
+
+
+def test_buys_funded_by_same_ticket_sells_pass_cash_gate(tmp_path, live_dir):
+    """A resize in a fully invested account: idle cash 0, sells 150, buys
+    100 — the sells fund the buys. Before 2026-09-08 this was refused."""
+    p = make_ticket(tmp_path, _resize_orders())
+    tr = FakeTransport(cash=0.0, quotes={'NVDA': 100.0, 'TSM': 250.0})
+    res = run(p, live_dir, transport=tr)
+    assert res['failures'] == []
+
+
+def test_sell_proceeds_are_haircut_before_funding_buys(tmp_path, live_dir):
+    """Sells are credited at (1 - SELL_PROCEEDS_HAIRCUT), never at par."""
+    p = make_ticket(tmp_path, _resize_orders(sell_notional=100.0,
+                                             buy_notional=100.0))
+    tr = FakeTransport(cash=0.0, quotes={'NVDA': 100.0, 'TSM': 250.0})
+    res = run(p, live_dir, transport=tr)
+    assert_refused(res, 'sell proceeds')
+
+
+class FundingTransport(FakeTransport):
+    """Cash appears only after a sell has been placed (broker settles the
+    market sell before buying power updates)."""
+
+    def __init__(self, cash_after_sell, **kw):
+        super().__init__(**kw)
+        self._after = cash_after_sell
+        self.polls = 0
+
+    def portfolio(self):
+        self.polls += 1
+        sold = any(o['side'] == 'sell' for o in self.placed)
+        return {'cash': self._after if sold else self._cash,
+                'equity': self._equity}
+
+
+def test_buys_wait_for_sell_proceeds_before_sending(tmp_path, live_dir):
+    p = make_ticket(tmp_path, _resize_orders())
+    tr = FundingTransport(cash_after_sell=150.0, cash=0.0,
+                          quotes={'NVDA': 100.0, 'TSM': 250.0})
+    slept = []
+    res = run(p, live_dir, transport=tr, confirm=True, sleeper=slept.append)
+    assert [o['side'] for o in tr.placed] == ['sell', 'buy']
+    assert res['failures'] == [] and res['sent'] is True
+
+
+def test_buys_not_sent_when_funding_never_arrives(tmp_path, live_dir):
+    """Sell proceeds never show up: sells stay sent (and receipted), buys are
+    recorded as not_sent and reported as failures — never fired blind into a
+    broker rejection ('You can only purchase 0 shares', VRT 2026-08-17)."""
+    p = make_ticket(tmp_path, _resize_orders())
+    tr = FundingTransport(cash_after_sell=0.0, cash=0.0,
+                          quotes={'NVDA': 100.0, 'TSM': 250.0})
+    slept = []
+    res = run(p, live_dir, transport=tr, confirm=True, sleeper=slept.append)
+    assert [o['side'] for o in tr.placed] == ['sell']
+    assert slept                                   # it actually waited
+    assert res['sent'] is True
+    assert any('funding' in f for f in res['failures'])
+    rec = json.loads(res['receipt'].read_text())
+    states = {o['ticker']: o['state'] for o in rec['orders']}
+    assert states['NVDA'] == 'not_sent' and states['TSM'] == 'queued'
