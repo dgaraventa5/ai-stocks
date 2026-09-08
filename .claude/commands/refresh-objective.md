@@ -19,7 +19,12 @@ half of rule 9 (earnings-triggered objective refresh).
    `python3 scripts/refresh_objective_inputs.py <target> --dry-run`
 2. Resolve the JUDGMENT FLAGS with Dom — these are the only cells needing
    judgment:
-   - **EPS YoY withheld/preserved** (rule 15): confirm blank vs write per filing evidence.
+   - **EPS YoY withheld/preserved/STALE** (rule 15): confirm blank vs write per
+     filing evidence, then record the ruling in `00-master/eps-yoy-overrides.json`
+     (ticker → `quarter_end`, `value` null|ex-item %, `basis`, `source`, `ruled`,
+     `audit_row`) as well as the Rating Audit. The script applies a ruling on every
+     refresh while yfinance's most-recent quarter matches and flags it STALE after
+     the next print — a STALE flag means "re-rule this quarter", never "keep".
    - **MW stale/missing** (rule 13): refresh `capacity-mw.json` if a filing supports it.
 3. On approval, run live:
    `python3 scripts/refresh_objective_inputs.py <target>`

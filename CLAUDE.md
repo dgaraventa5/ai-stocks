@@ -234,6 +234,21 @@ The rubric has no "what's priced in" input — Value bands are absolute and Mome
 
 GAAP EPS YoY scores garbage when the change is dominated by disclosed non-operating items (divestiture gains, fair-value swings, large tax one-offs) — GEV's +1,768% from the ~$4.5B Prolec gain would have scored 100 on a divestiture. **Rule:** blank the EPS YoY input when a briefing/filing documents that the YoY change is non-operating-dominated; Growth then averages the revenue metrics. Applied on documented per-name evidence (cite the item in the Rating Audit), NOT mechanically on magnitude — a big operational number off a small base (e.g., SEI +303%) stays. Same garbage-input principle as the negative-EBITDA blanking convention and rules 10/13.
 
+**Rulings persist and expire (added 2026-09-08, approved by Dom):** every rule-15
+ruling — a blank OR an ex-item value substituted for the GAAP figure — is
+recorded in `00-master/eps-yoy-overrides.json` (ticker → `quarter_end`,
+`value` null|number, `basis`, `source`, `ruled`, `audit_row`) in the same
+session that writes the Rating Audit row. `refresh_objective_inputs.py`
+applies the ruling on every refresh while yfinance's most-recent quarter
+matches `quarter_end`, and once the next print lands it withholds the cell and
+flags the entry STALE for a fresh ruling. This closes the three failures seen
+2026-06-17 → 2026-09-08: rulings silently overwritten by the mechanical
+refresh (WDAY/ADSK), blanks that never expired (PANW/SNOW/CRWD/ZS), and a
+sub-300% garbage value written without a ruling (CRM +86.9% on a $2.6B
+investment gain). A STALE flag means "re-rule", never "keep". The 300%
+withhold stays as the safety net for names with no entry. PEG follows the
+cell automatically. Spec: `docs/superpowers/specs/2026-09-08-eps-yoy-override-design.md`.
+
 ### 16. Risk: R5 Disruption Risk dimension (added 2026-06-17, approved by Dom)
 
 **Context:** R1–R4 (customer concentration, geography, balance sheet, regulatory) measure whether earnings are *safe now*, not whether the *revenue model survives*. This let beaten-down application-SaaS names (down 40–67% on genuine agentic-AI disruption fears) still score ✓✓ — Value rises as price falls (20% weight) while the disruption thesis had nowhere to land (moat is only 1 of 5 AI-Thesis dims → ≤1.6pt swing). Surfaced in the 2026-06-17 QQQ-coverage batch (WDAY): a value-quality screen rewards a falling quality name *because* it is falling. R5 gives terminal-value/business-model durability a home.
