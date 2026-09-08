@@ -164,8 +164,8 @@ def test_ticket_gen_skips_when_ticket_already_covers_event(live_dir):
     gen_calls = []
     ec.ticket_gen_if_stale(
         live_dir, last_event={'date': '2026-08-12', 'kind': 'membership'},
-        gen=lambda ev: gen_calls.append(ev))
-    assert gen_calls == []
+        gen=lambda ev: gen_calls.append(ev), now=NOW)
+    assert gen_calls == []      # unexpired + unexecuted → still actionable
 
 
 def test_full_turnover_ticket_never_auto_executed(live_dir):
@@ -282,3 +282,61 @@ def test_series_unchanged_commits_nothing():
     git = FakeGit(branch='main')
     git.__call__ = lambda argv, **kw: subprocess.CompletedProcess(argv, 0, 'main\n', '')
     ec._series_step(run=git.__call__, notifier=lambda m: None)
+
+
+# ---- 3c (2026-09-08): an expired, unexecuted ticket does not cover ----------
+# ticket_gen_if_stale treated an event as covered if ANY ticket file existed
+# for it — executed or not, expired or not. The 2026-09-04 VRT top-up was
+# generated Friday, never had an execution slot before its TTL, and lapsed;
+# the mere existence of that file then meant the event stayed "covered" and
+# nothing regenerated. The VRT underweight survived a month on that alone.
+
+def _covering_ticket(live_dir, ticket_id, date, expires):
+    (live_dir / 'tickets' / f'ticket-{ticket_id}.json').write_text(json.dumps(
+        {'ticket_id': ticket_id, 'expires_at': expires,
+         'basis_event': {'date': date, 'kind': 'resize_monthly'},
+         'orders': []}))
+
+
+def test_expired_unexecuted_ticket_does_not_cover_event(live_dir):
+    _covering_ticket(live_dir, '2026-08-12-resize_monthly', '2026-08-12',
+                     '2026-08-12T20:00:00Z')          # already lapsed at NOW
+    gen_calls = []
+    ec.ticket_gen_if_stale(
+        live_dir, last_event={'date': '2026-08-12', 'kind': 'resize_monthly'},
+        gen=lambda ev: gen_calls.append(ev), now=NOW)
+    assert gen_calls, 'a lapsed, never-executed ticket must be regenerated'
+
+
+def test_expired_but_executed_ticket_still_covers_event(live_dir):
+    """A receipt means it WAS actioned — expiry afterwards is irrelevant."""
+    _covering_ticket(live_dir, '2026-08-12-resize_monthly', '2026-08-12',
+                     '2026-08-12T20:00:00Z')
+    (live_dir / 'receipts' / 'receipt-2026-08-12-resize_monthly.json').write_text(
+        json.dumps({'ticket_id': '2026-08-12-resize_monthly',
+                    'orders': [{'ticker': 'VRT', 'state': 'queued'}]}))
+    gen_calls = []
+    ec.ticket_gen_if_stale(
+        live_dir, last_event={'date': '2026-08-12', 'kind': 'resize_monthly'},
+        gen=lambda ev: gen_calls.append(ev), now=NOW)
+    assert gen_calls == []
+
+
+def test_regeneration_is_self_limiting(live_dir):
+    """Regenerating must not spam a ticket per run: the fresh ticket is
+    unexpired, so it covers until IT lapses (one per TTL window at most)."""
+    _covering_ticket(live_dir, '2026-08-12-resize_monthly', '2026-08-12',
+                     '2026-08-12T20:00:00Z')
+    calls = []
+
+    def gen(ev):
+        calls.append(ev)
+        _covering_ticket(live_dir, '2026-08-12-resize_monthly-2', ev['date'],
+                         '2026-08-15T20:00:00Z')      # fresh TTL, unexpired
+
+    for _ in range(3):
+        ec.ticket_gen_if_stale(
+            live_dir,
+            last_event={'date': '2026-08-12', 'kind': 'resize_monthly'},
+            gen=gen, now=NOW)
+    assert len(calls) == 1
