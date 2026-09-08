@@ -126,6 +126,18 @@ documented DarkWake network issue.
 underweight *added* +0.15pt. That is luck. Had VRT rallied 20% the same defect
 would have cost roughly −0.75pt with no additional warning.
 
+### Status
+
+**3a and 3b are IMPLEMENTED** (2026-09-08, branch
+`fix/partial-leg-failure-reporting`). 3c and §4 remain open.
+
+One correction to §3b as originally written: it said "Anomalies are the
+existing loud channel", which is wrong — in this codebase *every* entry in
+`detect_anomalies` raises the kill switch, so routing an unrepaired leg there
+would have contradicted the same paragraph's rejection of auto-halting. It is
+implemented instead as a distinct non-halting channel (`unrepaired_legs`),
+which is what the paragraph's intent required.
+
 ### Proposed changes
 
 **3a — A partial failure must not report success.**

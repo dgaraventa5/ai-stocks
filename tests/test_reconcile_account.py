@@ -360,3 +360,73 @@ def test_cap_flag_reaches_committed_status_without_dollars(live_dir, tmp_path):
     assert json.loads(text)['cap_exceeded'] is True
     for planted in (str(EQUITY), str(EQUITY - 100), str(CASH)):
         assert planted not in text
+
+
+# ---- 3b (2026-09-08): a transmit_error leg still out of band ----------------
+# The 2026-08-17 VRT leg was rejected at transmit while 14 legs went through.
+# The receipt recorded it, drift flagged it every run for three weeks, and
+# nothing ever connected the two — so the underweight read as ordinary price
+# drift rather than as a trade that never happened. This channel is loud but
+# deliberately NON-HALTING: raising the kill switch would block unrelated
+# correct trades to fix a position that is merely the wrong size.
+
+def _receipt(live_dir, ticker, state, ticket_id='2026-08-17-manual_resize'):
+    (live_dir / 'receipts' / f'receipt-{ticket_id}.json').write_text(json.dumps({
+        'ticket_id': ticket_id, 'sent_at': '2026-08-17T13:40:00Z',
+        'checksum': 'x',
+        'orders': [{'ticker': 'NVDA', 'side': 'buy', 'shares': 1.0,
+                    'order_id': 'rh-1', 'state': 'queued'},
+                   {'ticker': ticker, 'side': 'buy', 'shares': 1.0,
+                    'order_id': None, 'state': state,
+                    **({'error': 'You can only purchase 0 shares'}
+                       if state == 'transmit_error' else {})}]}))
+
+
+def test_transmit_error_leg_still_out_of_band_is_surfaced(live_dir, tmp_path):
+    _receipt(live_dir, 'VRT', 'transmit_error')
+    state = {**STATE, 'positions': {**STATE['positions'],
+                                    'VRT': {'shares': 0.1, 'price': 10.0}}}
+    res = run(state, live_dir, tmp_path, targets={'NVDA': 0.70, 'VRT': 0.25})
+    assert 'VRT' in res['unrepaired_legs']
+
+
+def test_unrepaired_leg_does_not_halt(live_dir, tmp_path):
+    """Loud, never blocking — the halt flag stops unrelated correct trades."""
+    _receipt(live_dir, 'VRT', 'transmit_error')
+    state = {**STATE, 'positions': {**STATE['positions'],
+                                    'VRT': {'shares': 0.1, 'price': 10.0}}}
+    res = run(state, live_dir, tmp_path, targets={'NVDA': 0.70, 'VRT': 0.25})
+    assert res['halted'] is False
+    assert not (live_dir / 'trading-halt.flag').exists()
+
+
+def test_transmit_error_leg_back_in_band_is_not_surfaced(live_dir, tmp_path):
+    """Repaired by a later ticket → the receipt is history, not a live gap."""
+    _receipt(live_dir, 'VRT', 'transmit_error')
+    # VRT now sits essentially on its target weight
+    state = {**STATE, 'positions': {**STATE['positions'],
+                                    'VRT': {'shares': 6.8, 'price': 10.0}}}
+    res = run(state, live_dir, tmp_path, targets={'NVDA': 0.70, 'VRT': 0.1327})
+    assert res['unrepaired_legs'] == []
+
+
+def test_successful_leg_out_of_band_is_only_drift(live_dir, tmp_path):
+    """Ordinary price drift on a leg that DID transmit must not be escalated."""
+    _receipt(live_dir, 'VRT', 'queued')
+    state = {**STATE, 'positions': {**STATE['positions'],
+                                    'VRT': {'shares': 0.1, 'price': 10.0}}}
+    res = run(state, live_dir, tmp_path, targets={'NVDA': 0.70, 'VRT': 0.25})
+    assert res['unrepaired_legs'] == []
+    assert any(d['ticker'] == 'VRT' for d in res['drift'])
+
+
+def test_unrepaired_legs_are_sanitized_into_committed_status(live_dir, tmp_path):
+    _receipt(live_dir, 'VRT', 'transmit_error')
+    state = {**STATE, 'positions': {**STATE['positions'],
+                                    'VRT': {'shares': 0.1, 'price': 10.0}}}
+    run(state, live_dir, tmp_path, targets={'NVDA': 0.70, 'VRT': 0.25})
+    status = json.loads((tmp_path / 'live-status.json').read_text())
+    assert status['unrepaired_legs'] == ['VRT']          # tickers only
+    blob = json.dumps(status)
+    for planted in (str(CASH), str(EQUITY), str(NVDA_PX), str(NVDA_SH)):
+        assert planted not in blob
