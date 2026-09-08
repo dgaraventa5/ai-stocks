@@ -204,7 +204,27 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
             f'{receipt_path.stem}.superseded-{stamp}.json'))
     receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
     print(f'receipt written: {receipt_path}')
-    return {'failures': [], 'sent': True, 'receipt': receipt_path}
+
+    # A leg that died at transmit never reached the broker, so this run did NOT
+    # do what the ticket asked — report it as a failure even though other legs
+    # went through. Until 2026-09-08 this returned failures=[] and the run
+    # exited 0: on 2026-08-17 VRT's leg was rejected ("You can only purchase 0
+    # shares") while 14 legs transmitted, the run reported success, and the
+    # position sat 67% underweight for three weeks. The receipt recorded it
+    # correctly the whole time; only the report to the caller was wrong.
+    #
+    # `sent` stays True and the receipt is unchanged BY DESIGN. Orders did
+    # reach the broker, and the executed-once guard must keep refusing a re-run
+    # of this ticket — double-execution is far worse than an underweight. This
+    # changes what is REPORTED, never what is RE-SENT; remediation is a NEW
+    # ticket from the next drift pass (spec §3c).
+    failures = [f"transmit failed {o['ticker']}: {o.get('error', 'unknown')}"
+                for o in results if o.get('state') == 'transmit_error']
+    if failures:
+        print(f'{len(failures)} of {len(results)} orders FAILED to transmit '
+              f'(the rest were sent); this run is a failure — regenerate a '
+              f'ticket for the missing legs, do NOT re-run this one')
+    return {'failures': failures, 'sent': True, 'receipt': receipt_path}
 
 
 def extract_order_ack(payload) -> dict:

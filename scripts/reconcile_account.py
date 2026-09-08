@@ -49,7 +49,7 @@ DEAD_STATES = ('cancelled', 'expired', 'rejected', 'failed', 'voided')
 _STATUS_SCHEMA = {'as_of': str, 'halted': bool, 'positions': int,
                   'open_orders': int, 'drift_flags': list,
                   'regen_needed': list, 'anomaly_count': int,
-                  'cap_exceeded': bool}
+                  'cap_exceeded': bool, 'unrepaired_legs': list}
 _LVM_ENTRY_SCHEMA = {'date': str, 'live_pct': (float, int, type(None)),
                      'model_pct': (float, int, type(None)),
                      'shortfall_pct': (float, int, type(None))}
@@ -64,7 +64,8 @@ def assert_sanitized_status(status: dict) -> None:
             raise ValueError(f'live-status field {key!r} has type '
                              f'{type(val).__name__}, expected '
                              f'{_STATUS_SCHEMA[key]}')
-    for lst in (status.get('drift_flags', []), status.get('regen_needed', [])):
+    for lst in (status.get('drift_flags', []), status.get('regen_needed', []),
+                status.get('unrepaired_legs', [])):
         for item in lst:
             if not isinstance(item, str):
                 raise ValueError(f'{item!r}: ticker lists may contain only '
@@ -213,6 +214,34 @@ def drift_check(state: dict, target_weights: dict[str, float],
     return out
 
 
+def unrepaired_legs(receipts: list[dict], drift: list[dict]) -> list[str]:
+    """Tickers whose most recent order never reached the broker AND which are
+    still outside their drift band — a trade that did not happen, not price
+    drift (added 2026-09-08, spec §3b).
+
+    Why this exists: on 2026-08-17 VRT's leg was rejected at transmit ("You
+    can only purchase 0 shares") while the other 14 legs went through. The
+    receipt recorded it and drift flagged it on every run for three weeks, but
+    nothing joined the two facts, so a trade that never happened was
+    indistinguishable from ordinary price drift. This is the join.
+
+    Deliberately NOT an anomaly: every entry in detect_anomalies raises the
+    kill switch, and halting would block unrelated correct trades to fix a
+    position that is merely the wrong size. Loud, never blocking.
+
+    The LAST receipt mentioning a ticker wins — a later successful ticket
+    repairs an earlier failure, and this must go quiet when it does.
+    """
+    latest: dict[str, str] = {}
+    for r in receipts:                     # _receipts() returns sorted order
+        for o in r.get('orders', []):
+            if o.get('ticker'):
+                latest[o['ticker']] = o.get('state', 'unknown')
+    drifting = {d['ticker'] for d in drift}
+    return sorted(t for t, st in latest.items()
+                  if st == 'transmit_error' and t in drifting)
+
+
 def _prior_snapshot(live_dir: Path, as_of: str) -> dict | None:
     snaps = sorted((live_dir / 'recon').glob('snapshot-*.json'))
     prior = [p for p in snaps if p.stem.split('snapshot-')[1] < as_of]
@@ -335,6 +364,7 @@ def run(state: dict, *, live_dir: Path, target_weights: dict[str, float],
 
     fills, regen = verify_fills(receipts, state.get('orders', []))
     drift = drift_check(state, target_weights)
+    unrepaired = unrepaired_legs(receipts, drift)
     anomalies = detect_anomalies(state, target_weights, receipts, prior,
                                  declared_flow=declared)
 
@@ -368,6 +398,7 @@ def run(state: dict, *, live_dir: Path, target_weights: dict[str, float],
         'regen_needed': regen,
         'anomaly_count': len(anomalies),
         'cap_exceeded': over_cap,
+        'unrepaired_legs': unrepaired,
     }
     assert_sanitized_status(status)              # §E gate before committed write
     Path(status_path).write_text(json.dumps(status, indent=2) + '\n')
@@ -378,6 +409,11 @@ def run(state: dict, *, live_dir: Path, target_weights: dict[str, float],
     for t in regen:
         print(f'unfilled order dead: {t} — regenerate on next model event '
               f'or --regen-unfilled')
+    for t in unrepaired:
+        print(f'UNREPAIRED LEG: {t} never reached the broker on its last '
+              f'ticket and is still outside its drift band — this is a trade '
+              f'that did not happen, not price drift. Regenerate a ticket for '
+              f'it; do NOT re-run the original (spec §3b).')
     if over_cap:
         print('[FLAG] account equity exceeds ACCOUNT_CAP — execute_ticket will '
               'REFUSE every ticket until the cap is raised in '
@@ -386,6 +422,7 @@ def run(state: dict, *, live_dir: Path, target_weights: dict[str, float],
           f'{open_orders} open orders, halted={halted}')
     return {'halted': halted, 'drift': drift, 'fills': fills,
             'regen_needed': regen, 'anomalies': anomalies,
+            'unrepaired_legs': unrepaired,
             'cap_exceeded': over_cap, 'snapshot': snap_path}
 
 

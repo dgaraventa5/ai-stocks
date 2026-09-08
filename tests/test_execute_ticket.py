@@ -406,3 +406,84 @@ def test_receipt_preserves_raw_response_when_ack_missing(tmp_path, live_dir):
         (live_dir / 'receipts' / 'receipt-2026-08-12-membership.json').read_text())
     assert receipt['orders'][0]['raw_response'] == {
         'data': {'message': 'accepted'}}
+
+
+# ---- 3a (2026-09-08): a partial transmit failure must not report success ----
+# VRT's buy leg was rejected on 2026-08-17 ("You can only purchase 0 shares")
+# while the other 14 legs went through. run() returned failures=[] and the run
+# reported SUCCESS, so nothing escalated and the position sat 67% underweight
+# for three weeks. The receipt recorded it correctly the whole time — the
+# defect was purely in what run() reported to its caller.
+
+def _partial_run(tmp_path, live_dir):
+    orders = [
+        {'ticker': 'NVDA', 'side': 'buy', 'shares': 1.0, 'limit_price': 100.75,
+         'tif': 'day', 'notional_est': 100.0},
+        {'ticker': 'TSM', 'side': 'buy', 'shares': 0.4, 'limit_price': 251.88,
+         'tif': 'day', 'notional_est': 100.0},
+    ]
+    p = make_ticket(tmp_path, orders=orders)
+    t = FakeTransport(quotes={'NVDA': 100.0, 'TSM': 250.0}, fail_on={'TSM'})
+    return run(p, live_dir, transport=t, confirm=True), t
+
+
+def test_partial_transmit_failure_is_reported_as_a_failure(tmp_path, live_dir):
+    res, _ = _partial_run(tmp_path, live_dir)
+    assert res['failures'], 'a leg that never reached the broker must surface'
+    assert any('TSM' in f for f in res['failures']), res['failures']
+
+
+def test_partial_transmit_failure_keeps_sent_true(tmp_path, live_dir):
+    """`sent` must stay True — 1 of 2 orders DID reach the broker, and
+    misreporting that would invite a double-execution on re-run."""
+    res, _ = _partial_run(tmp_path, live_dir)
+    assert res['sent'] is True
+    assert res['receipt'] is not None and res['receipt'].exists()
+
+
+def test_partial_transmit_failure_exits_nonzero(tmp_path, live_dir):
+    """main() is `sys.exit(0 if not res['failures'] else 1)`, so a non-empty
+    failures list is exactly what makes the scheduled run visibly fail."""
+    res, _ = _partial_run(tmp_path, live_dir)
+    assert bool(res['failures']) is True
+
+
+def test_partial_failure_names_every_failed_leg(tmp_path, live_dir):
+    orders = [
+        {'ticker': 'NVDA', 'side': 'buy', 'shares': 1.0, 'limit_price': 100.75,
+         'tif': 'day', 'notional_est': 100.0},
+        {'ticker': 'TSM', 'side': 'buy', 'shares': 0.4, 'limit_price': 251.88,
+         'tif': 'day', 'notional_est': 100.0},
+    ]
+    p = make_ticket(tmp_path, orders=orders)
+    t = FakeTransport(quotes={'NVDA': 100.0, 'TSM': 250.0},
+                      fail_on={'NVDA', 'TSM'})
+    res = run(p, live_dir, transport=t, confirm=True)
+    assert len(res['failures']) == 2
+    assert {'NVDA', 'TSM'} == {f.split(':')[0].split()[-1]
+                               for f in res['failures']}
+
+
+def test_clean_run_still_reports_no_failures(tmp_path, live_dir):
+    """Regression: an all-success transmit must stay a clean exit."""
+    p = make_ticket(tmp_path)
+    res = run(p, live_dir, transport=FakeTransport(quotes={'NVDA': 100.0}),
+              confirm=True)
+    assert res['failures'] == [] and res['sent'] is True
+
+
+def test_partial_failure_does_not_weaken_the_executed_once_guard(
+        tmp_path, live_dir):
+    """3a changes what is REPORTED, never what is RE-SENT. After a partial,
+    the same ticket must still be refused — 1 order exists broker-side."""
+    _partial_run(tmp_path, live_dir)
+    orders = [
+        {'ticker': 'NVDA', 'side': 'buy', 'shares': 1.0, 'limit_price': 100.75,
+         'tif': 'day', 'notional_est': 100.0},
+        {'ticker': 'TSM', 'side': 'buy', 'shares': 0.4, 'limit_price': 251.88,
+         'tif': 'day', 'notional_est': 100.0},
+    ]
+    p2 = make_ticket(tmp_path, orders=orders)
+    res2 = run(p2, live_dir, transport=FakeTransport(
+        quotes={'NVDA': 100.0, 'TSM': 250.0}), confirm=True)
+    assert_refused(res2, 'already executed')
