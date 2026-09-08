@@ -27,6 +27,16 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 LIVE_DIR = _REPO_ROOT / 'tracking' / 'live'
 MCP_URL = 'https://agent.robinhood.com/mcp/trading'
 QUOTE_TOL = 0.03          # C2.5: refuse limits >3% from the live quote
+STALE_QUOTE_MARK = 'stale ticket in a moving market'   # C2.5 failure tag
+# C2.3 (amended 2026-09-08, Dom-approved): same-ticket sell proceeds fund buys,
+# credited at (1 - haircut) — a resize in a fully invested account has ~no idle
+# cash, and until this every ticket that ever filled was buys-from-cash. The
+# execution loop places sells first and WAITS for the proceeds to show up as
+# cash before sending buys (broker rejects buys placed ahead of settlement:
+# VRT 2026-08-17 "You can only purchase 0 shares").
+SELL_PROCEEDS_HAIRCUT = 0.02
+FUNDING_WAIT_S = 90       # max wait for sell proceeds before buys are skipped
+FUNDING_POLL_S = 5
 REQUIRED_CAPS = ('ACCOUNT_CAP', 'MAX_ORDER_NOTIONAL', 'MAX_TURNOVER_PCT')
 
 
@@ -118,8 +128,13 @@ def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
             fails.append(f"{o['ticker']}: notional {o['notional_est']:.2f} > "
                          f'MAX_ORDER_NOTIONAL {max_order:.2f}')
     buys = sum(o['notional_est'] for o in orders if o['side'] == 'buy')
-    if buys > cash + 1e-6:
-        fails.append(f'total buy notional {buys:.2f} > available cash {cash:.2f}')
+    sells = sum(o['notional_est'] for o in orders if o['side'] == 'sell')
+    proceeds = sells * (1 - SELL_PROCEEDS_HAIRCUT)
+    if buys > cash + proceeds + 1e-6:
+        fails.append(f'total buy notional {buys:.2f} > available cash '
+                     f'{cash:.2f} + sell proceeds {proceeds:.2f} '
+                     f'(sells {sells:.2f} less {SELL_PROCEEDS_HAIRCUT:.0%} '
+                     f'haircut)')
     if buys > 0 and equity > float(cfg['ACCOUNT_CAP']) + 1e-6:
         fails.append(f'account equity {equity:.2f} > ACCOUNT_CAP '
                      f"{float(cfg['ACCOUNT_CAP']):.2f} — refusing buys "
@@ -139,7 +154,7 @@ def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
         elif abs(o['limit_price'] - q) / q > QUOTE_TOL:
             fails.append(f"{o['ticker']}: limit {o['limit_price']} is "
                          f'{abs(o["limit_price"] - q) / q:.1%} from live quote '
-                         f'{q} — stale ticket in a moving market, regenerate')
+                         f'{q} — {STALE_QUOTE_MARK}, regenerate')
     return fails
 
 
@@ -147,7 +162,9 @@ def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
 
 def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
         confirm: bool = False, allow_full_turnover: bool = False,
-        now: str | None = None) -> dict:
+        now: str | None = None, sleeper=None) -> dict:
+    import time
+    sleeper = sleeper or time.sleep
     live_dir = Path(live_dir)
     ticket = json.loads(Path(ticket_path).read_text())
     now = now or dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -183,7 +200,8 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
         return {'failures': [], 'sent': False, 'receipt': None}
 
     results = []
-    for o in ticket['orders']:
+
+    def place(o):
         o = {**o, 'ref_id': order_ref_id(ticket['ticket_id'], o)}
         try:
             r = transport.place_equity_order(o)
@@ -195,6 +213,26 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
             results.append({**o, 'order_id': None, 'state': 'transmit_error',
                             'error': str(e)})
             print(f"  TRANSMIT ERROR {o['ticker']}: {e}")
+
+    sells = [o for o in ticket['orders'] if o['side'] == 'sell']
+    buys = [o for o in ticket['orders'] if o['side'] != 'sell']
+    for o in sells:
+        place(o)
+    if buys:
+        needed = sum(o['notional_est'] for o in buys)
+        funded = _wait_for_funding(transport, needed, sleeper)
+        if funded:
+            for o in buys:
+                place(o)
+        else:
+            msg = (f'funding: sell proceeds did not reach cash within '
+                   f'{FUNDING_WAIT_S}s (need {needed:.2f}) — buys NOT sent; '
+                   f'regenerate a ticket for them')
+            print(f'  {msg}')
+            for o in buys:
+                results.append({**o, 'ref_id': order_ref_id(ticket['ticket_id'], o),
+                                'order_id': None, 'state': 'not_sent',
+                                'error': msg})
     receipt = {'ticket_id': ticket['ticket_id'], 'sent_at': now,
                'checksum': ticket['checksum'], 'orders': results}
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -220,11 +258,30 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
     # ticket from the next drift pass (spec §3c).
     failures = [f"transmit failed {o['ticker']}: {o.get('error', 'unknown')}"
                 for o in results if o.get('state') == 'transmit_error']
+    failures += [f"{o['ticker']}: {o.get('error', 'not sent')}"
+                 for o in results if o.get('state') == 'not_sent']
     if failures:
         print(f'{len(failures)} of {len(results)} orders FAILED to transmit '
               f'(the rest were sent); this run is a failure — regenerate a '
               f'ticket for the missing legs, do NOT re-run this one')
     return {'failures': failures, 'sent': True, 'receipt': receipt_path}
+
+
+def _wait_for_funding(transport, needed: float, sleeper) -> bool:
+    """Poll the account's cash until it covers `needed` (sell proceeds
+    landing), up to FUNDING_WAIT_S. Checks before the first sleep, so a
+    buys-only ticket against idle cash never waits."""
+    waited = 0.0
+    while True:
+        cash = float(transport.portfolio().get('cash') or 0.0)
+        if cash + 1e-6 >= needed:
+            return True
+        if waited >= FUNDING_WAIT_S:
+            return False
+        print(f'  waiting for sell proceeds: cash {cash:.2f} < {needed:.2f} '
+              f'({waited:.0f}s)')
+        sleeper(FUNDING_POLL_S)
+        waited += FUNDING_POLL_S
 
 
 def extract_order_ack(payload) -> dict:

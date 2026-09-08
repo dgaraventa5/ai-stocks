@@ -340,3 +340,79 @@ def test_regeneration_is_self_limiting(live_dir):
             last_event={'date': '2026-08-12', 'kind': 'resize_monthly'},
             gen=gen, now=NOW)
     assert len(calls) == 1
+
+
+# ---- 2026-09-08: regenerate on quote drift instead of halting -------------
+
+STALE = ('TSM: limit 425.43 is 3.2% from live quote 439.57 — stale ticket in '
+         'a moving market, regenerate')
+
+
+def _drift_then_ok(live_dir, second_failures=None):
+    """runner refuses the ORIGINAL ticket on quote drift; the regenerated
+    ticket gets `second_failures` (default: clean execution)."""
+    old = write_ticket(live_dir / 'tickets', '2026-08-12-membership',
+                       '2026-08-14T20:00:00Z')
+    new = live_dir / 'tickets' / 'ticket-2026-08-12-membership-2.json'
+    seen = []
+
+    def runner(p):
+        seen.append(p)
+        if p == old:
+            return {'failures': [STALE], 'sent': False, 'receipt': None}
+        return {'failures': second_failures or [], 'sent': not second_failures,
+                'receipt': 'r' if not second_failures else None}
+
+    def regen():
+        new.write_text(old.read_text())
+        return new
+    return old, new, seen, runner, regen
+
+
+def test_quote_drift_refusal_regenerates_and_executes_fresh_ticket(live_dir):
+    old, new, seen, runner, regen = _drift_then_ok(live_dir)
+    notes = []
+    rc = ec.cron_run(live_dir, runner=runner, notifier=notes.append, now=NOW,
+                     regen=regen)
+    assert rc == 0
+    assert seen == [old, new]
+    assert not (live_dir / 'trading-halt.flag').exists()
+    assert any('regenerat' in n for n in notes)
+    assert any('executed' in n for n in notes)
+
+
+def test_regenerated_ticket_still_stale_halts(live_dir):
+    old, new, seen, runner, regen = _drift_then_ok(live_dir,
+                                                   second_failures=[STALE])
+    notes = []
+    rc = ec.cron_run(live_dir, runner=runner, notifier=notes.append, now=NOW,
+                     regen=regen)
+    assert rc == 1 and seen == [old, new]          # exactly one retry
+    halt = (live_dir / 'trading-halt.flag').read_text()
+    assert new.name in halt and 'stale' in halt
+
+
+def test_non_drift_failure_halts_without_regen(live_dir):
+    write_ticket(live_dir / 'tickets', '2026-08-12-membership',
+                 '2026-08-14T20:00:00Z')
+    regen_calls = []
+    rc = ec.cron_run(
+        live_dir,
+        runner=lambda p: {'failures': [STALE, 'NVDA: not in roster'],
+                          'sent': False, 'receipt': None},
+        notifier=lambda m: None, now=NOW,
+        regen=lambda: regen_calls.append(1))
+    assert rc == 1 and regen_calls == []
+    assert (live_dir / 'trading-halt.flag').exists()
+
+
+def test_regen_unavailable_halts(live_dir):
+    """No recon snapshot -> generate() returns None -> halt, not a loop."""
+    write_ticket(live_dir / 'tickets', '2026-08-12-membership',
+                 '2026-08-14T20:00:00Z')
+    notes = []
+    rc = ec.cron_run(live_dir,
+                     runner=lambda p: {'failures': [STALE], 'sent': False,
+                                       'receipt': None},
+                     notifier=notes.append, now=NOW, regen=lambda: None)
+    assert rc == 1 and (live_dir / 'trading-halt.flag').exists()

@@ -606,6 +606,23 @@ ad-hoc closures go in `AD_HOC_CLOSURES`). The launchd executor only fires at
 `TICKET_TTL_HOURS` in `executor-config.json` is ignored and flagged. The C2.1
 expiry gate is unchanged: the fix moves the stamp, never the enforcement.
 
+**Amendment 2026-09-08 (Dom-approved, surfaced by the rule-33 flip):** two
+C2 gate-set changes in `execute_ticket.py` / `executor_cron.py`. (1) **Sell
+proceeds fund buys:** C2.3 now checks `buys ≤ cash + sells × (1 −
+SELL_PROCEEDS_HAIRCUT 2%)` instead of idle cash alone — a resize or
+membership swap in a fully invested account has ~no idle cash, and every
+ticket that had ever filled was buys-from-cash. The run loop places sells
+first and **waits for the proceeds to appear as cash** (poll ≤90s) before
+sending buys; if funding never lands the buys are receipted `not_sent` and
+reported as failures (remediation = a new ticket, never a re-run). (2)
+**Regenerate on quote drift:** a scheduled refusal whose failures are ALL
+C2.5 stale-quote failures regenerates the ticket once with live quotes and
+the same actual holdings, then executes that; any other failure, or a
+still-stale regeneration, halts as before. Evening-generated tickets
+tripped the 3% drift gate at the open on 2026-09-08 (TSM/ALAB/VRT) and the
+covering-ticket check blocked the refresh. Both changes are gate changes,
+hence logged here; the halt flag remains Dom's alone to clear.
+
 ### 30. Tradability filter: foreign listings can't enter the portfolio (added 2026-08-11, approved by Dom)
 
 **Context:** 6861.T (Keyence) entered the model at rank 12 / 8.61% — a weight the
