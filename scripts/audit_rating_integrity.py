@@ -106,7 +106,7 @@ def audit(layer_filter=None, stale_days=90):
         has_thesis = thesis_populated(tkr, baseline)
         brief_age = newest_briefing_age(tkr, today)
         last = audits.get(tkr)
-        audit_age = (today - dt.date.fromisoformat(last)).days if last else None
+        audit_age = (today - dt.date.fromisoformat(last[:10])).days if last else None
         # Backed = a durable thesis OR any per-name research briefing exists.
         backed = has_thesis or (brief_age is not None)
         # Review age = freshest evidence of an actual review pass.
