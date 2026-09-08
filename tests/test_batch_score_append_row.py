@@ -11,9 +11,15 @@ references Momentum) unless the mandatory rebuild_watchlist_formulas.py follow-u
 ran and papered over it.
 
 Post-fix contract (option a, single source of truth):
-  * append_row uniquely owns PEG(9); it writes NO category/TOTAL/Tier formula.
-  * rebuild_watchlist_formulas.py owns the other eight computed columns
-    {10,15,19,25,30,35,36,37}.
+  * append_row INITIALISES PEG(9) for a new row; it writes NO category/TOTAL/Tier
+    formula.
+  * rebuild_watchlist_formulas.py owns {9,10,15,19,25,30,35,36,37} — it REPAIRS
+    PEG as well as the eight category/TOTAL/Tier columns. PEG joined that set on
+    2026-09-08: nothing had repaired it after a structural row change, so row
+    deletions drifted it by +1 on 110 rows (see tests/test_rebuild_peg_drift.py).
+    append_row still seeds PEG by copying row 2 and retargeting, and because
+    rebuild rewrites row 2 from its own template that copy INHERITS the template
+    rather than duplicating it — the property this file's partition protects.
   * The documented two-step workflow (append_row -> rebuild) yields a complete row.
 
 batch_score imports yfinance at module load, so this module is skipped in the
@@ -35,12 +41,22 @@ import rebuild_watchlist_formulas as rebuild  # noqa: E402
 PEG_COL = 9
 MOMENTUM_COL, RISK_COL, TOTAL_COL, TIER_COL = 30, 35, 36, 37
 
-# The columns rebuild_watchlist_formulas.py owns. append_row must NOT write these
-# (writing them is the duplicated knowledge that let the two lists drift apart).
+# The columns rebuild_watchlist_formulas.py owns/repairs.
 REBUILD_OWNED = set(rebuild.COLS)
 # Layout guard: fail loudly here if the Watchlist columns ever shift again, so the
 # rest of this file can't silently test the wrong columns.
-assert REBUILD_OWNED == {10, 15, 19, 25, 30, 35, 36, 37}, REBUILD_OWNED
+assert REBUILD_OWNED == {9, 10, 15, 19, 25, 30, 35, 36, 37}, REBUILD_OWNED
+
+# PEG(9) joined rebuild's set on 2026-09-08. Before that nothing repaired PEG after
+# a structural row change: append_row wrote it once at append time and rebuild did
+# not own it, so openpyxl row deletions drifted it by +1 on 110 rows while
+# check_drift (col 10 only) reported clean. rebuild now REPAIRS PEG; append_row
+# still INITIALISES it for a new row by copying row 2 and retargeting — and since
+# rebuild rewrites row 2 from its own template, that copy inherits the template
+# rather than duplicating it, which is what the partition below protects.
+# So the "append_row must not write" set is the category/TOTAL/Tier columns only.
+REBUILD_ONLY = REBUILD_OWNED - {PEG_COL}
+assert REBUILD_ONLY == {10, 15, 19, 25, 30, 35, 36, 37}, REBUILD_ONLY
 
 # The 11 objective inputs append_row expects (values are arbitrary — we assert on
 # which cells become formulas, not on their numbers).
@@ -110,7 +126,7 @@ def test_append_row_owns_only_peg_and_delegates_the_rest():
 
     # Everything rebuild owns must be untouched by append_row. Before the fix,
     # append_row copied Growth(19)/AI(25)/Risk(35)/TOTAL(36) here — the duplication.
-    wrote = sorted(c for c in REBUILD_OWNED if _is_formula(ws.cell(row=r, column=c)))
+    wrote = sorted(c for c in REBUILD_ONLY if _is_formula(ws.cell(row=r, column=c)))
     assert wrote == [], (
         f"append_row wrote formulas into rebuild-owned columns {wrote}; those belong "
         "to rebuild_watchlist_formulas.py (run it after batch_score)."
