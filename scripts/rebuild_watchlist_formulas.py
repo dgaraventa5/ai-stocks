@@ -119,20 +119,36 @@ TOTAL = ('=IFERROR(J{r}*Weights!$B$4 + O{r}*Weights!$B$5 + S{r}*Weights!$B$6 + '
 TIER = ('=IF(AJ{r}="","",IF(AJ{r}>=85,"✓✓✓",IF(AJ{r}>=70,"✓✓",'
         'IF(AJ{r}>=55,"✓",IF(AJ{r}>=40,"?","✗")))))')
 
-COLS = {10: VALUE, 15: QUALITY, 19: GROWTH, 25: AI, 30: MOMENTUM,
+# PEG (col I=9, rule: Value sub-metric added 2026-05-25) = Fwd P/E / EPS-growth.
+# It is a per-row formula like the score columns, so it must be rebuilt with them:
+# it was omitted until 2026-09-08 and openpyxl row deletions had drifted it by +1
+# on 110 rows while check_drift (which only read col 10) reported clean.
+PEG = '=IF(OR(E{r}="",R{r}="",R{r}<=0,E{r}<0),"",E{r}/R{r})'
+
+COLS = {9: PEG, 10: VALUE, 15: QUALITY, 19: GROWTH, 25: AI, 30: MOMENTUM,
         35: RISK, 36: TOTAL, 37: TIER}
 
 
 def check_drift(ws) -> list[tuple[int, str, int]]:
+    """Rows whose managed formulas reference a row other than their own.
+
+    Scans every column in COLS (not just col 10): the PEG column drifted for
+    110 rows while a col-10-only check reported clean. Weights!/Methodology!
+    sheet refs are excluded -- only same-sheet A1 refs are row-checked.
+    """
     drifted = []
     for r in range(2, ws.max_row + 1):
         if not ws.cell(row=r, column=1).value:
             continue
-        f = ws.cell(row=r, column=10).value
-        if isinstance(f, str) and f.startswith('='):
-            m = re.search(r'E(\d+)', f)
-            if m and int(m.group(1)) != r:
-                drifted.append((r, ws.cell(row=r, column=1).value, int(m.group(1))))
+        for col in sorted(COLS):
+            f = ws.cell(row=r, column=col).value
+            if not (isinstance(f, str) and f.startswith('=')):
+                continue
+            body = re.sub(r"\w+!\$?[A-Z]{1,2}\$?\d+", "", f)
+            off = {int(m) for m in re.findall(r"(?<![A-Z0-9!$])[A-Z]{1,2}(\d+)", body)} - {r}
+            if off:
+                drifted.append((r, ws.cell(row=r, column=1).value, sorted(off)[0]))
+                break
     return drifted
 
 
