@@ -464,3 +464,50 @@ Rule 6: news-log line appended. Rule 29: read-only (EDGAR + yfinance only; no Ro
 ### Ticket `2026-09-04-resize_monthly` — left in place (judgement call, Dom asked)
 
 Left for the executor. Reasoning: it is the model's designed output under rule 28 (monthly ±25% drift-band pass), the trigger is data (CRDO's −20% week), not a methodology deploy (and rule 32-C damps only exits anyway), the recon snapshot is fresh (2026-09-03), and the executor's own C2 gates (checksum, expiry 2026-09-06 22:11Z, caps, live-quote sanity, halt flag) still stand between the ticket and an order. Deleting it would be a discretionary trade decision by Claude — exactly what rules 5/29 exclude. Executor state checked: last recon 2026-09-03 clean, `halted=False`, 0 open orders; no halt flag present. Dom retains the veto until the next executor run.
+
+---
+
+## 2026-09-08 — CIEN (fiscal Q3 2026, reported 2026-09-03 BMO)
+
+**Scope:** 25 names (holdings ∪ top-25 tradable ranks). One event: **CIEN**, both phases due in the same run.
+Unmerged-branch guard: clean (no prior `earnings/*` branches unmerged). Branch `earnings/2026-09-08` cut from `origin/main` @ 79c0faf.
+
+### Briefing phase
+**⚠️ RULE-9 IMMEDIATE — CIEN.** Adjusted EPS **$2.11 vs $1.72 consensus = +22.7% surprise** (>15% trigger). Revenue $1,671.1M (+37.0% YoY) vs $1.63B consensus = +2.5%; sequential GAAP gross margin 44.0% → 45.4% (+140bps, below the 500bps trigger). The EPS surprise alone qualifies.
+
+Written: `per-stock/CIEN/context-2026-09-08.md` (headline vs consensus, guidance, DIFF vs the 2026-06-22 mental model, ratings implications). News-log line appended (rule 6). **No ratings changed** (rule 12).
+
+Highlights carried into the briefing: FY26 guide raised to $6.42B ±$50M (+35%); FY27 *early view* (call, not filed) $8.3–8.4B at 25–27% adj. op margin; backlog $8.5B → >$10B by FY26-end with supply/demand imbalance seen persisting **until 2028**; hyperscalers now ~half of revenue, direct cloud +80% YoY. Stock **−9.5%** on the print (Q4 GM guided down to ~45% from a 46.4% that included ~70bps of one-time tariff refund; valuation reset).
+
+**Ratings tension surfaced, not acted on:** the same hyperscaler demand pushing D1/D5 up pushed **R1 customer concentration from 34.0% → 41.7%** (two 10%+ customers) in one quarter. Also flagged: FCF conversion ~77% (9M FCF $488.7M vs 9M net income $634.9M) as capex more than doubled YoY, and ~$10M/qtr named Canada tariff exposure.
+
+### Re-score phase
+Chain run once: `refresh_objective_inputs CIEN` (dry-run reviewed first) → `momentum_50dma` → `refresh_reverse_dcf` → `recalc_watchlist --sync`.
+
+| | Before | After |
+|---|---|---|
+| TOTAL | 70.31 | **69.53** |
+| Tier | ✓✓ | **✓** |
+| Tradable rank | 25 | **26** |
+| Value | 52.36 | 48.47 |
+
+**Model event: NO.** `--sync` → "membership & tiers unchanged since last rebalance — snapshot frozen, nothing written." CIEN is not a holding, so its tier crossing does not fire an event. **No ticket generated.** (Monthly resize already stamped `2026-09` earlier in the month.)
+
+**Read the tier drop correctly:** it is *not* the earnings print. Every operating line improved. The Value score fell because CIEN **rallied +8.7% today** ($321.00 on 9/4 → $348.98 on 9/8, +9.9% off the 9/3 print-day close), lifting P/S 7.56 → 8.22 and fwd P/E 27.7 → 30.1. The name got better and more expensive in the same week; the rubric priced the second.
+
+**Cohort side-effect (rule 20/24, expected):** COHR 62.68 → 63.09 from the Layer-07 percentile shift. No other name moved >0.05.
+
+**Rule-15 ruling — CIEN EPS YoY: CONFIRM, do not blank.** Fresh +429.6% tripped the 300% withhold. Primary filing shows the change is operating-dominated — income from operations $301.179M vs $73.535M (**+309.6%**) on revenue +37.0%, off a depressed PY base; the non-operating delta is *recurring* (interest expense $5.803M vs $22.806M, interest income $22.388M vs $15.090M, both post-refinancing), and the only disclosed one-time item is a $7.143M debt-extinguishment **loss** that reduces the current period. Rule 15: "a big operational number off a small base stays." Entry added to `00-master/eps-yoy-overrides.json` (quarter_end 2026-08-01, value 429.6) + Rating Audit row 3014, same session. Expires automatically at the next print.
+
+### Flags (not fixed)
+- **⚠️ ROIC is stale and almost certainly too low.** `refresh_objective_inputs` correctly left the curated ROIC at **11** (yfinance does not expose it). CIEN's GAAP operating margin went **6.1% → 18.0%** YoY this quarter — an ROIC of 11 cannot survive that. **Not hand-computed on purpose:** ROIC has no documented NOPAT/invested-capital convention anywhere in the repo, and rule 20 percentile-ranks ROIC *within the Layer-07 cohort*, so a one-off value computed on a different basis would corrupt every peer's Quality percentile too. Needs a human refresh with the convention stated. Direction of the error: CIEN's Quality score is biased **down**.
+- **⚠️ Pre-existing Watchlist formula drift (rule 10), 110 rows.** Column I (PEG) formulas reference **row+1** — e.g. CIEN at row 86 carries `=IF(OR(E87="",R87="",...),"",E87/R87)`. This is the openpyxl `delete_rows` signature the rule-10 note warns about. **Confirmed pre-existing on `origin/main` (110 rows there too) — not introduced by this run.** **Live scores are unaffected:** `recalc_watchlist` recomputes PEG in Python from each row's own E/R (`scripts/recalc_watchlist.py:201`) and never reads column I, so TOTAL/Tier/Targets/site are all clean. The corruption is display-only in the .xlsx itself. **Remedy is `python3 scripts/rebuild_watchlist_formulas.py` followed by `recalc_watchlist.py --sync` (rule 20)** — deliberately NOT run here: a full formula rebuild rewrites the whole sheet, and another session has uncommitted work in this shared tree tonight (`scripts/audit_rating_integrity.py`, `per-stock/ADBE/`, several `filings/` dirs). Left for an attended run.
+- **TTM-vs-MRQ (rule 9):** no >10pt divergence to report. yfinance has already picked up the Q3 statements (TTM revenue $6,020.9M reconciles exactly to 9M FY26 $4,668.9M + derived Q4 FY25 $1,352M), so the margin/growth inputs are current, not a quarter behind.
+- **Layer-9 EV/MW (rule 13):** N/A — no Layer-9 name in this event.
+- **Rule 27 market-cap check: clean.** $49.49B = 141.81M shares × $348.98; `currency` == `financialCurrency` == USD, so no rule-19 FX branch.
+- **Rule 14 expectations flag: clean** (P/S 8.22 = 81.4th pctile of own 3y range, below the 90th trigger; rev YoY 37.0% vs 3y median 18.3% — accelerating). **Rule 32-A capitulation flag: clean** (same inputs; P/S near the top of its range, not the bottom).
+- **Score panel:** `tracking/score-history.csv` already carries 2026-09-08 rows from an earlier session today. It is date-deduped and append-only, so CIEN's new 69.53 does not overwrite today's row and enters with the next date's rows — by design, not rewritten.
+- **Live pipeline (rule 29, read-only):** `tracking/live/trading-halt.flag` is **present** and `live-status.json` shows `halted: true` (as of 2026-09-08, from the earlier ticket refusal) with an unrepaired **VRT** leg. Untouched — clearing the halt is Dom's alone. No Robinhood order/write tool was called; no MCP calls at all this pass (SEC EDGAR + yfinance + web only).
+- **Prompt drift:** none. The scheduled-task text matches `docs/ops/earnings-sentinel-task.md`.
+
+**Test gate:** `python3 -m pytest tests/ -q` → **491 passed** (0 failures). PR opened.
