@@ -176,15 +176,47 @@ def stale_jobs(live_dir: Path, jobs: list[str], today: str | None = None,
 
 # ------------------------------------------------------------- daily runner
 
-def ticket_gen_if_stale(live_dir: Path, last_event: dict, gen) -> bool:
+def ticket_covers_event(ticket: dict, live_dir: Path, now: str) -> bool:
+    """Does this ticket still stand as the answer to its model event?
+
+    Only if it is still ACTIONABLE: either it was executed (a receipt exists,
+    whatever the outcome of the individual legs) or it has not yet expired.
+
+    Added 2026-09-08 (spec §3c). Before this, the mere existence of a ticket
+    file counted as coverage forever. The 2026-09-04 VRT top-up was generated
+    on a Friday, never had an execution slot before its TTL (the launchd
+    executor only executes at 06:35 PT on weekdays, and Monday was Labor Day),
+    and lapsed unexecuted — after which that dead file was still treated as
+    the event's answer and nothing regenerated. PR #57 fixed the TTL that
+    caused that particular lapse; this fixes what happens when one lapses
+    anyway.
+    """
+    receipt = (Path(live_dir) / 'receipts'
+               / f"receipt-{ticket.get('ticket_id')}.json")
+    if receipt.exists():
+        return True                       # actioned; expiry after that is moot
+    return ticket.get('expires_at', '') > now
+
+
+def ticket_gen_if_stale(live_dir: Path, last_event: dict, gen,
+                        now: str | None = None) -> bool:
     """Generate a ticket when the newest model event isn't covered by any
-    existing ticket (closes the cloud-fired-event gap: cloud sessions log
-    events but can't see tracking/live/, so ticket generation happens here,
-    on the machine that has the snapshots)."""
+    still-actionable ticket (closes the cloud-fired-event gap: cloud sessions
+    log events but can't see tracking/live/, so ticket generation happens
+    here, on the machine that has the snapshots).
+
+    Self-limiting: a regenerated ticket is unexpired and therefore covers the
+    event until IT lapses, so this produces at most one ticket per TTL window
+    rather than one per run.
+    """
     live_dir = Path(live_dir)
+    now = now or dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     newest = ''
     for p in (live_dir / 'tickets').glob('ticket-*.json'):
-        basis = json.loads(p.read_text()).get('basis_event', {})
+        ticket = json.loads(p.read_text())
+        if not ticket_covers_event(ticket, live_dir, now):
+            continue                      # lapsed + never executed → not an answer
+        basis = ticket.get('basis_event', {})
         newest = max(newest, basis.get('date', ''))
     if last_event.get('date', '') > newest:
         gen(last_event)

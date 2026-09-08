@@ -50,9 +50,17 @@ _STATUS_SCHEMA = {'as_of': str, 'halted': bool, 'positions': int,
                   'open_orders': int, 'drift_flags': list,
                   'regen_needed': list, 'anomaly_count': int,
                   'cap_exceeded': bool, 'unrepaired_legs': list}
-_LVM_ENTRY_SCHEMA = {'date': str, 'live_pct': (float, int, type(None)),
-                     'model_pct': (float, int, type(None)),
-                     'shortfall_pct': (float, int, type(None))}
+_NUM = (float, int, type(None))
+_LVM_ENTRY_SCHEMA = {'date': str, 'live_pct': _NUM, 'model_pct': _NUM,
+                     'shortfall_pct': _NUM,
+                     # second line, anchored at first full deployment (§4)
+                     'live_since_deploy_pct': _NUM,
+                     'model_since_deploy_pct': _NUM,
+                     'shortfall_since_deploy_pct': _NUM}
+
+# A snapshot counts as "fully deployed" at/above this invested fraction. The
+# anchor is the FIRST snapshot to reach it, and is then frozen forever.
+DEPLOYED_MIN = 0.95
 
 
 def assert_sanitized_status(status: dict) -> None:
@@ -73,9 +81,12 @@ def assert_sanitized_status(status: dict) -> None:
 
 
 def assert_sanitized_lvm(doc: dict) -> None:
-    if set(doc) != {'baseline_date', 'series'}:
-        raise ValueError(f'live-vs-model keys {sorted(doc)} != '
-                         f"['baseline_date', 'series'] (§E)")
+    allowed = {'baseline_date', 'series', 'deployment_date'}
+    if not {'baseline_date', 'series'} <= set(doc) or not set(doc) <= allowed:
+        raise ValueError(f'live-vs-model keys {sorted(doc)} outside '
+                         f'{sorted(allowed)} (§E)')
+    if not isinstance(doc.get('deployment_date', ''), str):
+        raise ValueError('deployment_date must be a date string (§E)')
     for entry in doc['series']:
         for key, val in entry.items():
             if key not in _LVM_ENTRY_SCHEMA:
@@ -285,6 +296,46 @@ def detect_anomalies(state: dict, target_weights: dict, receipts: list[dict],
     return anomalies
 
 
+def _invested_frac(snap: dict) -> float:
+    eq = snap.get('equity') or 0.0
+    if not eq:
+        return 0.0
+    return sum(p['shares'] * p['price']
+               for p in snap.get('positions', {}).values()) / eq
+
+
+def deployment_baseline(live_dir: Path, state: dict) -> dict | None:
+    """The second anchor (§4): the FIRST snapshot at/above DEPLOYED_MIN
+    invested. Written once and never revised.
+
+    Why a second anchor at all: the since-inception line was struck on
+    2026-08-09 with the account 100% cash while the model was already fully
+    invested, and a deposit on 08-14 left it 27% invested for three days. That
+    cost -3.69pts of a -4.53pt shortfall — real, one-time, and permanent in a
+    cumulative metric, which made the ongoing tracking signal unreadable. The
+    inception line is NEVER restated (that would discard experienced cost);
+    this line runs beside it, and the gap between the two IS the deployment
+    cost, stated rather than hidden.
+
+    Immutable on purpose, for the reason rule 17 freezes created_date: an
+    adjustable anchor can be nudged until the tracking looks good.
+    """
+    path = Path(live_dir) / 'recon' / 'deployment-baseline.json'
+    if path.exists():
+        return json.loads(path.read_text())
+    snaps = sorted((Path(live_dir) / 'recon').glob('snapshot-*.json'))
+    candidates = [json.loads(p.read_text()) for p in snaps]
+    if _invested_frac(state) >= DEPLOYED_MIN:
+        candidates.append(state)
+    for snap in sorted(candidates, key=lambda s: s.get('as_of', '')):
+        if _invested_frac(snap) >= DEPLOYED_MIN:
+            base = {'date': snap['as_of'], 'equity': snap['equity'],
+                    'applied_flows': []}
+            path.write_text(json.dumps(base) + '\n')
+            return base
+    return None
+
+
 def live_vs_model(state: dict, live_dir: Path, model_series_path: Path,
                   lvm_path: Path) -> None:
     """Implementation-shortfall line (D5): cumulative live vs model return
@@ -337,10 +388,43 @@ def live_vs_model(state: dict, live_dir: Path, model_series_path: Path,
              'model_pct': model_pct,
              'shortfall_pct': (round(live_pct - model_pct, 2)
                                if model_pct is not None else None)}
+
+    # Second line, anchored at first full deployment (§4). Additive: the
+    # inception fields above are computed and written exactly as before.
+    deploy = deployment_baseline(live_dir, state)
+    if deploy and state['as_of'] >= deploy['date']:
+        d_pending = [f for f in flows if f['date'] > deploy['date']
+                     and f not in deploy['applied_flows']]
+        if d_pending:
+            total = sum(f['amount'] for f in d_pending)
+            if state['equity'] - total > 0:
+                deploy['equity'] = round(
+                    deploy['equity'] * state['equity']
+                    / (state['equity'] - total), 4)
+                deploy['applied_flows'].extend(d_pending)
+                (Path(live_dir) / 'recon' / 'deployment-baseline.json'
+                 ).write_text(json.dumps(deploy) + '\n')
+            else:
+                print('FLAG: declared flow >= equity — deployment baseline '
+                      'NOT adjusted (rule 3: flagged, not guessed)')
+        d_live = round((state['equity'] / deploy['equity'] - 1) * 100, 2)
+        d_model = None
+        if model_pct is not None:
+            m_d = at_or_before(deploy['date'])
+            if m_d and m1:
+                d_model = round((m1 / m_d - 1) * 100, 2)
+        entry.update({
+            'live_since_deploy_pct': d_live,
+            'model_since_deploy_pct': d_model,
+            'shortfall_since_deploy_pct': (round(d_live - d_model, 2)
+                                           if d_model is not None else None)})
+
     try:
         doc = json.loads(Path(lvm_path).read_text())
     except (OSError, ValueError):
         doc = {'baseline_date': base['date'], 'series': []}
+    if deploy:
+        doc['deployment_date'] = deploy['date']
     doc['series'] = [e for e in doc['series'] if e['date'] != entry['date']]
     doc['series'].append(entry)
     doc['series'].sort(key=lambda e: e['date'])

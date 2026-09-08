@@ -128,8 +128,9 @@ would have cost roughly −0.75pt with no additional warning.
 
 ### Status
 
-**3a and 3b are IMPLEMENTED** (2026-09-08, branch
-`fix/partial-leg-failure-reporting`). 3c and §4 remain open.
+**3a and 3b are IMPLEMENTED** (2026-09-08, PR #58). **3c and §4 are
+IMPLEMENTED** (2026-09-08, `fix/lapsed-tickets-and-baseline`). Nothing in this
+spec remains open.
 
 One correction to §3b as originally written: it said "Anomalies are the
 existing loud channel", which is wrong — in this codebase *every* entry in
@@ -205,6 +206,28 @@ into the framing:
   the documented deployment cost. Cost: two numbers to explain, and a second
   anchor date that must be defined precisely (first snapshot at ≥95% invested,
   recorded once and then immutable).
+
+**CHOSEN AND IMPLEMENTED: (c).** The anchor resolves to **2026-08-17** (96.21%
+invested), frozen in `tracking/live/recon/deployment-baseline.json`. Measured
+on the real history at 2026-09-07:
+
+| Line | live | model | shortfall |
+|---|---|---|---|
+| since inception (2026-08-09) | −5.34% | −0.81% | **−4.53%** |
+| since deployment (2026-08-17) | −4.94% | −4.68% | **−0.26%** |
+
+The gap between the lines — **−4.27pts** — is the deployment cost, now stated
+rather than buried. Ongoing tracking is −0.26% over three weeks, i.e. live is
+tracking the model almost exactly.
+
+**This corrects a figure given earlier in this investigation.** §1 reports the
+post-deployment residual as −0.84pts, obtained by subtracting cumulative
+shortfalls at two dates (−4.53 − −3.69). That subtraction is wrong: both legs
+compound multiplicatively and the inception baseline carries a flow-divisor
+adjustment, so cumulative percentages are not additive across dates. −0.26% is
+the correct figure, computed from its own anchor. The §1 decomposition is
+directionally right — the deployment window dominates — but the residual is
+about a third of what was quoted.
 
 **(c) is consistent with how this repo has handled every prior seam** —
 `sizing_migration_invvol` (rule 28) added an event and restated nothing;

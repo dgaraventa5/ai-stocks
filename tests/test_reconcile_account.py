@@ -430,3 +430,94 @@ def test_unrepaired_legs_are_sanitized_into_committed_status(live_dir, tmp_path)
     blob = json.dumps(status)
     for planted in (str(CASH), str(EQUITY), str(NVDA_PX), str(NVDA_SH)):
         assert planted not in blob
+
+
+# ---- §4 (2026-09-08): report BOTH lines, discard nothing --------------------
+# The since-inception shortfall carried two meanings at once: a permanent
+# one-time deployment lag (-3.69pts of the -4.53 accrued 2026-08-09..08-17,
+# when the baseline was struck at 100% cash and a deposit left the account 27%
+# invested for three days while the model was fully invested) and ongoing
+# implementation shortfall. Summed, neither is readable. The inception series
+# is NEVER restated; a second anchor is added at first-full-deployment and
+# reported alongside it. Forward-only — existing entries are not backfilled.
+
+def _snap(live_dir, date, cash, positions, equity):
+    (live_dir / 'recon' / f'snapshot-{date}.json').write_text(json.dumps(
+        {'as_of': date, 'cash': cash, 'equity': equity,
+         'positions': positions, 'orders': [], 'fills': [], 'anomalies': []}))
+
+
+def test_deployment_anchor_is_first_fully_deployed_snapshot(live_dir, tmp_path):
+    _snap(live_dir, '2026-08-14', 73.0, {'NVDA': {'shares': 1.0, 'price': 27.0}},
+          100.0)                                        # 27% invested
+    _snap(live_dir, '2026-08-17', 4.0, {'NVDA': {'shares': 1.0, 'price': 96.0}},
+          100.0)                                        # 96% invested
+    state = {'as_of': '2026-08-18', 'cash': 4.0, 'equity': 100.0,
+             'positions': {'NVDA': {'shares': 1.0, 'price': 96.0}}, 'orders': []}
+    run(state, live_dir, tmp_path, targets={'NVDA': 0.96})
+    doc = json.loads((tmp_path / 'live-vs-model.json').read_text())
+    assert doc['deployment_date'] == '2026-08-17'
+
+
+def test_deployment_anchor_is_immutable_once_written(live_dir, tmp_path):
+    """An adjustable anchor could be tuned until tracking looks good — the
+    same reason rule 17 freezes created_date."""
+    _snap(live_dir, '2026-08-17', 4.0, {'NVDA': {'shares': 1.0, 'price': 96.0}},
+          100.0)
+    state = {'as_of': '2026-08-18', 'cash': 4.0, 'equity': 100.0,
+             'positions': {'NVDA': {'shares': 1.0, 'price': 96.0}}, 'orders': []}
+    run(state, live_dir, tmp_path, targets={'NVDA': 0.96})
+    first = json.loads((tmp_path / 'live-vs-model.json').read_text())['deployment_date']
+    _snap(live_dir, '2026-08-19', 1.0, {'NVDA': {'shares': 1.0, 'price': 99.0}},
+          100.0)                                        # even more invested
+    state2 = {**state, 'as_of': '2026-08-20'}
+    run(state2, live_dir, tmp_path, targets={'NVDA': 0.96})
+    doc = json.loads((tmp_path / 'live-vs-model.json').read_text())
+    assert doc['deployment_date'] == first == '2026-08-17'
+
+
+def test_no_anchor_while_never_fully_deployed(live_dir, tmp_path):
+    _snap(live_dir, '2026-08-14', 73.0, {'NVDA': {'shares': 1.0, 'price': 27.0}},
+          100.0)
+    state = {'as_of': '2026-08-15', 'cash': 73.0, 'equity': 100.0,
+             'positions': {'NVDA': {'shares': 1.0, 'price': 27.0}}, 'orders': []}
+    run(state, live_dir, tmp_path, targets={'NVDA': 0.27})
+    doc = json.loads((tmp_path / 'live-vs-model.json').read_text())
+    assert doc.get('deployment_date') is None
+    assert doc['series'][-1].get('shortfall_since_deploy_pct') is None
+
+
+def test_inception_line_is_never_restated(live_dir, tmp_path):
+    """The whole point of (c): nothing is discarded."""
+    _snap(live_dir, '2026-08-17', 4.0, {'NVDA': {'shares': 1.0, 'price': 96.0}},
+          100.0)
+    state = {'as_of': '2026-08-18', 'cash': 4.0, 'equity': 100.0,
+             'positions': {'NVDA': {'shares': 1.0, 'price': 96.0}}, 'orders': []}
+    run(state, live_dir, tmp_path, targets={'NVDA': 0.96})
+    doc = json.loads((tmp_path / 'live-vs-model.json').read_text())
+    e = doc['series'][-1]
+    assert e['live_pct'] is not None and 'shortfall_pct' in e
+    assert doc['baseline_date'] == '2026-08-18'   # inception anchor untouched
+
+
+def test_since_deploy_entries_are_forward_only(live_dir, tmp_path):
+    """Pre-existing entries keep exactly the fields they were written with."""
+    lvm = tmp_path / 'live-vs-model.json'
+    lvm.write_text(json.dumps({'baseline_date': '2026-08-09', 'series': [
+        {'date': '2026-08-13', 'live_pct': 0.05, 'model_pct': 1.97,
+         'shortfall_pct': -1.92}]}))
+    _snap(live_dir, '2026-08-17', 4.0, {'NVDA': {'shares': 1.0, 'price': 96.0}},
+          100.0)
+    state = {'as_of': '2026-08-18', 'cash': 4.0, 'equity': 100.0,
+             'positions': {'NVDA': {'shares': 1.0, 'price': 96.0}}, 'orders': []}
+    run(state, live_dir, tmp_path, targets={'NVDA': 0.96})
+    doc = json.loads(lvm.read_text())
+    old = [e for e in doc['series'] if e['date'] == '2026-08-13'][0]
+    assert set(old) == {'date', 'live_pct', 'model_pct', 'shortfall_pct'}
+    assert old['shortfall_pct'] == -1.92          # not recomputed
+
+
+def test_lvm_sanitizer_still_rejects_an_unknown_field(live_dir, tmp_path):
+    with pytest.raises(ValueError):
+        ra.assert_sanitized_lvm({'baseline_date': '2026-08-09', 'series': [
+            {'date': '2026-08-13', 'equity_usd': 13800.0}]})
