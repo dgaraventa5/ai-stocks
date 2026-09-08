@@ -1,13 +1,29 @@
 {
-  "as_of": "2026-09-07",
-  "halted": false,
+  "as_of": "2026-09-08",
+  "halted": true,
   "positions": 15,
   "open_orders": 0,
   "drift_flags": [
+    "ALAB",
+    "ANET",
+    "AVGO",
     "CRDO",
+    "EME",
+    "GMED",
+    "META",
+    "MSFT",
+    "MU",
+    "NTAP",
+    "NVDA",
+    "RDDT",
+    "SNDK",
+    "TSM",
     "VRT"
   ],
   "regen_needed": [],
   "anomaly_count": 0,
-  "cap_exceeded": false
+  "cap_exceeded": false,
+  "unrepaired_legs": [
+    "VRT"
+  ]
 }
