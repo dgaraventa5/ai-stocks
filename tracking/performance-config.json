@@ -593,45 +593,45 @@
     },
     {
       "date": "2026-09-07",
-      "reason": "membership: +NTAP",
-      "kind": "membership",
+      "reason": "sizing_migration_equal: one-time switch to equal-weight sizing; inverse-vol retired to the INVVOL_ROSTER shadow (prior-driven flip, 2026-09-08) (absorbs same-day event: membership: +NTAP)",
+      "kind": "sizing_migration_equal",
       "allocations": {
-        "SNDK": 302.59,
-        "MU": 369.51,
-        "EME": 654.73,
-        "ANET": 632.99,
-        "META": 789.26,
-        "ALAB": 338.92,
-        "FIX": 574.85,
-        "AVGO": 830.1,
-        "TSM": 795.91,
-        "RDDT": 414.62,
-        "CRDO": 329.87,
-        "MSFT": 823.36,
-        "VRT": 486.75,
-        "GMED": 927.01,
-        "NVDA": 890.57,
-        "NTAP": 925.33
+        "TSM": 630.4,
+        "RDDT": 630.4,
+        "CRDO": 630.4,
+        "SNDK": 630.4,
+        "MU": 630.4,
+        "GMED": 630.4,
+        "FIX": 630.4,
+        "NTAP": 630.4,
+        "ANET": 630.4,
+        "AVGO": 630.4,
+        "NVDA": 630.4,
+        "MSFT": 630.4,
+        "EME": 630.4,
+        "META": 630.4,
+        "VRT": 630.4,
+        "ALAB": 630.4
       },
       "tiers": {
-        "SNDK": "\u2713\u2713",
-        "MU": "\u2713\u2713",
-        "EME": "\u2713\u2713",
-        "ANET": "\u2713\u2713",
-        "META": "\u2713\u2713",
-        "ALAB": "\u2713\u2713",
-        "FIX": "\u2713\u2713",
-        "AVGO": "\u2713\u2713",
         "TSM": "\u2713\u2713",
         "RDDT": "\u2713\u2713",
         "CRDO": "\u2713\u2713",
-        "MSFT": "\u2713\u2713",
-        "VRT": "\u2713\u2713",
+        "SNDK": "\u2713\u2713",
+        "MU": "\u2713\u2713",
         "GMED": "\u2713\u2713",
+        "FIX": "\u2713\u2713",
+        "NTAP": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "AVGO": "\u2713\u2713",
         "NVDA": "\u2713\u2713",
-        "NTAP": "\u2713\u2713"
+        "MSFT": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "META": "\u2713\u2713",
+        "VRT": "\u2713\u2713",
+        "ALAB": "\u2713\u2713"
       },
-      "cash": 0.01
+      "cash": -0.02
     }
   ],
   "exit_pending": {},
@@ -841,13 +841,54 @@
           "CSCO"
         ]
       }
+    ],
+    "INVVOL_ROSTER": [
+      {
+        "date": "2026-09-07",
+        "roster": [
+          "ALAB",
+          "ANET",
+          "AVGO",
+          "CRDO",
+          "EME",
+          "FIX",
+          "GMED",
+          "META",
+          "MSFT",
+          "MU",
+          "NTAP",
+          "NVDA",
+          "RDDT",
+          "SNDK",
+          "TSM",
+          "VRT"
+        ],
+        "weights": {
+          "ALAB": 0.033602,
+          "ANET": 0.062757,
+          "AVGO": 0.0823,
+          "CRDO": 0.032705,
+          "EME": 0.064912,
+          "FIX": 0.056993,
+          "GMED": 0.091907,
+          "META": 0.07825,
+          "MSFT": 0.08163,
+          "MU": 0.036634,
+          "NTAP": 0.091741,
+          "NVDA": 0.088295,
+          "RDDT": 0.041107,
+          "SNDK": 0.03,
+          "TSM": 0.078909,
+          "VRT": 0.048258
+        }
+      }
     ]
   },
   "sizing_state": {
     "last_resize_check": "2026-09"
   },
   "methodology_seam": {
-    "date": "2026-08-31",
-    "reason": "rule 32-B deploy: acceleration-aware P2 grounded growth"
+    "date": "2026-09-07",
+    "reason": "sizing flip: inverse-vol -> equal weight (rule 33, prior-driven; inverse-vol retired to INVVOL_ROSTER shadow)"
   }
 }
