@@ -68,5 +68,13 @@
     "source": "8-K Ex-99.1 filed 2026-09-03, Stmt of Ops (https://www.sec.gov/Archives/edgar/data/1713683/000171368326000156/zs-07312026_991.htm)",
     "ruled": "2026-09-07",
     "audit_row": "Rating Audit 2026-09-07 EPS YoY (objective)"
+  },
+  "SPCX": {
+    "quarter_end": "2026-06-30",
+    "value": null,
+    "basis": "Net losses throughout FY2025 and H1 2026 (GAAP); xAI common-control consolidation recast distorts any YoY comparison to pre-recast periods; Cursor acquisition dilution (389M shares) adds additional non-operational noise. No operable GAAP EPS growth figure.",
+    "source": "Q2 2026 10-Q (filed 2026-08-04); Q2 2026 earnings release; context-2026-09-08.md",
+    "ruled": "2026-09-08",
+    "audit_row": "Rating Audit 2026-09-08 Full score gate"
   }
 }
