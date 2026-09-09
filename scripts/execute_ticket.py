@@ -31,10 +31,11 @@ STALE_QUOTE_MARK = 'stale ticket in a moving market'   # C2.5 failure tag
 # C2.3 (amended 2026-09-08, Dom-approved): same-ticket sell proceeds fund buys,
 # credited at (1 - haircut) — a resize in a fully invested account has ~no idle
 # cash, and until this every ticket that ever filled was buys-from-cash. The
+# haircut constant is OWNED by trade_ticket.DEFAULTS (cfg-overridable) so the
+# builder's self-funding scale and this gate can never disagree. The
 # execution loop places sells first and WAITS for the proceeds to show up as
 # cash before sending buys (broker rejects buys placed ahead of settlement:
 # VRT 2026-08-17 "You can only purchase 0 shares").
-SELL_PROCEEDS_HAIRCUT = 0.02
 FUNDING_WAIT_S = 90       # max wait for sell proceeds before buys are skipped
 FUNDING_POLL_S = 5
 REQUIRED_CAPS = ('ACCOUNT_CAP', 'MAX_ORDER_NOTIONAL', 'MAX_TURNOVER_PCT')
@@ -129,12 +130,13 @@ def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
                          f'MAX_ORDER_NOTIONAL {max_order:.2f}')
     buys = sum(o['notional_est'] for o in orders if o['side'] == 'buy')
     sells = sum(o['notional_est'] for o in orders if o['side'] == 'sell')
-    proceeds = sells * (1 - SELL_PROCEEDS_HAIRCUT)
+    haircut = float(cfg.get('SELL_PROCEEDS_HAIRCUT',
+                            tt.DEFAULTS['SELL_PROCEEDS_HAIRCUT']))
+    proceeds = sells * (1 - haircut)
     if buys > cash + proceeds + 1e-6:
         fails.append(f'total buy notional {buys:.2f} > available cash '
                      f'{cash:.2f} + sell proceeds {proceeds:.2f} '
-                     f'(sells {sells:.2f} less {SELL_PROCEEDS_HAIRCUT:.0%} '
-                     f'haircut)')
+                     f'(sells {sells:.2f} less {haircut:.0%} haircut)')
     if buys > 0 and equity > float(cfg['ACCOUNT_CAP']) + 1e-6:
         fails.append(f'account equity {equity:.2f} > ACCOUNT_CAP '
                      f"{float(cfg['ACCOUNT_CAP']):.2f} — refusing buys "

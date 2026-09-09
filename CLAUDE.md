@@ -623,6 +623,22 @@ tripped the 3% drift gate at the open on 2026-09-08 (TSM/ALAB/VRT) and the
 covering-ticket check blocked the refresh. Both changes are gate changes,
 hence logged here; the halt flag remains Dom's alone to clear.
 
+**Amendment 2026-09-09 (Dom-approved): tickets are self-funding, and
+exit-clock names are never bought.** (1) `trade_ticket.compute_orders`
+scales buys pro-rata so their total never exceeds idle cash + same-ticket
+sell proceeds at the haircut (`DEFAULTS['SELL_PROCEEDS_HAIRCUT']`, the ONE
+constant the executor's C2.3 gate also reads — a scaled ticket passes that
+gate by construction); buy shares round DOWN at 4dp; dust is re-applied after
+scaling; the `funding` block on the ticket records cash / proceeds / scale;
+the residual underweight is picked up by the next drift pass. Why: dust
+suppression is asymmetric — five suppressed sell-side overweights starved the
+buy side and the 2026-09-08 ticket failed the cash gate by 8% even with
+proceeds credited. (2) Names in `exit_pending` (a running rule-26 clock) are
+excluded from the buy side (`generate_trade_ticket._exit_pending` →
+`no_buy`); their sell legs are unaffected. Why: NTAP was to be bought at full
+weight on 2026-09-09 with its exit clock already running — buy-then-sell
+within a week is churn, not a signal (Dom).
+
 ### 30. Tradability filter: foreign listings can't enter the portfolio (added 2026-08-11, approved by Dom)
 
 **Context:** 6861.T (Keyence) entered the model at rank 12 / 8.61% — a weight the
