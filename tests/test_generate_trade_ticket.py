@@ -166,3 +166,23 @@ def test_new_ticket_retires_older_actionable_tickets(live_dir):
     assert expired.exists() and done.exists()
     import executor_cron as ec
     assert ec.pick_ticket(live_dir, now='2026-08-13T22:00:00Z') == p
+
+
+# ---- 2026-09-09: exit-clock names are excluded from the buy side ----------
+
+def test_generate_excludes_exit_pending_names_from_buys(live_dir, monkeypatch):
+    monkeypatch.setattr(gt, '_exit_pending', lambda: {'TSM'})
+    p = gt.generate({'NVDA': 0.5, 'TSM': 0.4}, EVENT, live_dir=live_dir,
+                    prices_fn=PRICES.get, now='2026-08-13T21:30:00Z')
+    tk = json.loads(p.read_text())
+    assert [o['ticker'] for o in tk['orders'] if o['side'] == 'buy'] == []
+    assert any(s['ticker'] == 'TSM' for s in tk['skipped'])
+
+
+def test_explicit_no_buy_overrides_config(live_dir, monkeypatch):
+    monkeypatch.setattr(gt, '_exit_pending',
+                        lambda: (_ for _ in ()).throw(AssertionError('read')))
+    p = gt.generate({'NVDA': 0.5, 'TSM': 0.4}, EVENT, live_dir=live_dir,
+                    prices_fn=PRICES.get, now='2026-08-13T21:30:00Z',
+                    no_buy=set())
+    assert any(o['ticker'] == 'TSM' for o in json.loads(p.read_text())['orders'])

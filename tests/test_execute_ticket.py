@@ -558,3 +558,20 @@ def test_buys_not_sent_when_funding_never_arrives(tmp_path, live_dir):
     rec = json.loads(res['receipt'].read_text())
     states = {o['ticker']: o['state'] for o in rec['orders']}
     assert states['NVDA'] == 'not_sent' and states['TSM'] == 'queued'
+
+
+def test_self_funding_ticket_passes_the_cash_gate_by_construction(tmp_path,
+                                                                  live_dir):
+    """Builder and executor share one haircut: a ticket the builder scaled
+    to cash + haircut sell proceeds must never be refused by C2.3."""
+    res = tt.compute_orders(
+        target_weights={'NVDA': 0.3, 'TSM': 0.7},
+        positions={'NVDA': {'shares': 2.0}, 'TSM': {'shares': 0.56}},
+        cash=0.0, prices={'NVDA': 180.0, 'TSM': 250.0},
+        cfg={**CFG, 'MIN_ORDER_NOTIONAL': 25.0, 'CASH_BUFFER_PCT': 0.0,
+             'LIMIT_TOL': 0.0075, 'MAX_WEIGHT': 0.12,
+             'TICKET_TTL_TRADING_DAYS': 2})
+    p = make_ticket(tmp_path, res['orders'])
+    tr = FakeTransport(cash=0.0, quotes={'NVDA': 180.0, 'TSM': 250.0})
+    out = run(p, live_dir, transport=tr)
+    assert not any('cash' in f for f in out['failures']), out['failures']

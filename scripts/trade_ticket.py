@@ -20,6 +20,11 @@ DEFAULTS = {
     'MAX_WEIGHT': 0.12,           # renormalization cap (mirrors sizing cap)
     'TICKET_TTL_TRADING_DAYS': 2, # expire at the close of the Nth trading day
     'CASH_BUFFER_PCT': 0.02,      # undeployed slack for slippage (see below)
+    # Same-ticket sell proceeds are credited to buys at (1 - haircut) — ONE
+    # constant shared with the executor's C2.3 gate (execute_ticket reads it
+    # from here), so a ticket the builder scaled to funding passes that gate
+    # by construction (2026-09-09).
+    'SELL_PROCEEDS_HAIRCUT': 0.02,
 }
 
 # Retired 2026-09-08: the wall-clock TTL lapsed over weekends/holidays with
@@ -65,15 +70,26 @@ def compute_orders(target_weights: dict[str, float],
                    positions: dict[str, dict],
                    cash: float,
                    prices: dict[str, float],
-                   cfg: dict) -> dict:
+                   cfg: dict, no_buy: set[str] | None = None) -> dict:
     """Share deltas from actual account state.
 
     positions: {ticker: {'shares': float}} — actual holdings.
     prices: reference prices (last close) for every target + held name.
-    Returns {'orders', 'untradeable', 'suppressed', 'skipped', 'equity'}.
+    no_buy: names whose exit clock is running (performance-config
+      `exit_pending`) — never ADDED to (Dom, 2026-09-09: don't buy a stock
+      the model is about to sell); their sell legs are unaffected.
+    Returns {'orders', 'untradeable', 'suppressed', 'skipped', 'equity',
+    'funding'}. Self-funding (2026-09-09): buys are scaled pro-rata so their
+    total never exceeds idle cash + haircut same-ticket sell proceeds (dust
+    re-applied after scaling); the residual underweight is picked up by the
+    next drift pass. Before this, five dust-suppressed sells starved the buy
+    side and the 2026-09-08 ticket failed the executor's cash gate by 8%.
     """
+    no_buy = set(no_buy or ())
     min_notional = float(cfg.get('MIN_ORDER_NOTIONAL',
                                  DEFAULTS['MIN_ORDER_NOTIONAL']))
+    haircut = float(cfg.get('SELL_PROCEEDS_HAIRCUT',
+                            DEFAULTS['SELL_PROCEEDS_HAIRCUT']))
     tol = float(cfg.get('LIMIT_TOL', DEFAULTS['LIMIT_TOL']))
     cap = float(cfg.get('MAX_WEIGHT', DEFAULTS['MAX_WEIGHT']))
 
@@ -123,7 +139,16 @@ def compute_orders(target_weights: dict[str, float],
                                              f'MIN_ORDER_NOTIONAL {min_notional}'})
             continue
         side = 'buy' if delta > 0 else 'sell'
-        shares = round(abs(delta) / ref, 4)
+        if side == 'buy' and t in no_buy:
+            skipped.append({'ticker': t, 'notional_est': round(delta, 2),
+                            'reason': 'exit clock running (exit_pending) — '
+                                      'not adding to a name the model is '
+                                      'about to sell'})
+            continue
+        # Buys round DOWN at 4dp so a ticket can never exceed its funding
+        # by rounding (2026-09-09); sells keep nearest-rounding.
+        shares = (int(abs(delta) / ref * 1e4) / 1e4 if side == 'buy'
+                  else round(abs(delta) / ref, 4))
         if side == 'sell' and t in positions:
             shares = min(shares, positions[t]['shares'])   # never short
         limit = round(ref * (1 + tol), 2) if side == 'buy' \
@@ -131,10 +156,40 @@ def compute_orders(target_weights: dict[str, float],
         orders.append({'ticker': t, 'side': side, 'shares': shares,
                        'limit_price': limit, 'tif': 'day',
                        'notional_est': round(shares * ref, 2)})
+    # ---- self-funding: scale buys to cash + haircut sell proceeds ----
+    sell_total = sum(o['notional_est'] for o in orders if o['side'] == 'sell')
+    buys_requested = sum(o['notional_est'] for o in orders if o['side'] == 'buy')
+    available = cash + sell_total * (1 - haircut)
+    scale = 1.0
+    if buys_requested > available + 1e-9:
+        scale = max(available, 0.0) / buys_requested
+        kept = []
+        for o in orders:
+            if o['side'] != 'buy':
+                kept.append(o)
+                continue
+            # round DOWN so rounding can never push the total over funding
+            shares = int(o['shares'] * scale * 1e4) / 1e4
+            notional = round(shares * float(prices[o['ticker']]), 2)
+            if notional < min_notional:
+                suppressed.append({'ticker': o['ticker'],
+                                   'notional_est': notional,
+                                   'reason': f'dust after funding scale: '
+                                             f'{notional:.2f} < '
+                                             f'MIN_ORDER_NOTIONAL {min_notional}'})
+                continue
+            kept.append({**o, 'shares': shares, 'notional_est': notional})
+        orders = kept
     orders.sort(key=lambda o: (o['side'] != 'sell', o['ticker']))
+    funding = {'cash': round(cash, 2), 'sell_proceeds': round(sell_total, 2),
+               'haircut': haircut, 'available': round(available, 2),
+               'buys_requested': round(buys_requested, 2),
+               'buys_sent': round(sum(o['notional_est'] for o in orders
+                                      if o['side'] == 'buy'), 2),
+               'scale': round(scale, 6)}
     return {'orders': orders, 'untradeable': untradeable,
             'suppressed': suppressed, 'skipped': skipped,
-            'equity': round(equity, 2)}
+            'equity': round(equity, 2), 'funding': funding}
 
 
 def ticket_checksum(orders: list[dict]) -> str:
@@ -171,5 +226,6 @@ def build_ticket(result: dict, basis_event: dict, created_at: str,
         'untradeable': result['untradeable'],
         'suppressed': result['suppressed'],
         'skipped': result['skipped'],
+        'funding': result.get('funding'),
         'checksum': ticket_checksum(result['orders']),
     }

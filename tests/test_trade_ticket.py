@@ -31,7 +31,8 @@ def test_fresh_deployment_buys_at_marketable_limit():
     assert res['equity'] == 500.0
     nvda = o['NVDA']
     assert nvda['side'] == 'buy'
-    assert nvda['shares'] == 1.6667          # 300 / 180, 4dp fractional
+    assert nvda['shares'] == 1.6666          # 300 / 180, 4dp, rounded DOWN
+    # (2026-09-09: buys floor at 4dp so a ticket never overshoots funding)
     assert nvda['limit_price'] == 181.35     # 180 * 1.0075
     assert nvda['tif'] == 'day'
     assert abs(nvda['notional_est'] - 300.0) < 0.05
@@ -250,3 +251,79 @@ def test_winter_expiry_is_2100z():
     # DST off: 16:00 ET = 21:00Z. Mon 2026-12-21 → Wed 2026-12-23 close.
     tk = _ticket('2026-12-21T14:00:00Z')
     assert tk['expires_at'] == '2026-12-23T21:00:00Z'
+
+
+# ---- 2026-09-09: self-funding tickets + no buys on an exit clock -----------
+
+def _resize_case(cash=0.0):
+    """Fully invested: 2 sh NVDA @180 (360) + 0.56 sh TSM @250 (140) = 500.
+    Target flips to 30/70 -> sell NVDA 210, buy TSM 210 (+ new name AMD 0)."""
+    return dict(target_weights={'NVDA': 0.3, 'TSM': 0.7},
+                positions={'NVDA': {'shares': 2.0}, 'TSM': {'shares': 0.56}},
+                cash=cash, prices={'NVDA': 180.0, 'TSM': 250.0}, cfg=CFG)
+
+
+def test_buys_scaled_to_cash_plus_haircut_sell_proceeds():
+    """Idle cash 0, sells 210 -> funding 210 * 0.98 = 205.8; the 210 buy is
+    scaled down to fit. The executor's C2.3 gate then passes by construction."""
+    res = tt.compute_orders(**_resize_case())
+    o = orders_by_ticker(res)
+    assert o['NVDA']['side'] == 'sell'
+    assert o['TSM']['side'] == 'buy'
+    assert o['TSM']['notional_est'] <= 205.8 + 1e-6
+    assert o['TSM']['notional_est'] > 205.0          # scaled, not dust-dropped
+    f = res['funding']
+    assert f['buys_requested'] == pytest.approx(210.0, abs=0.5)
+    assert f['scale'] == pytest.approx(205.8 / 210.0, rel=1e-3)
+
+
+def test_fully_funded_buys_are_not_scaled():
+    """With the real-life cash buffer (targets sized against 95% of equity)
+    the sells more than cover the buys: no scaling, scale reported as 1."""
+    case = _resize_case()
+    case['cfg'] = {**CFG, 'CASH_BUFFER_PCT': 0.05}
+    res = tt.compute_orders(**case)
+    # equity 500, deployable 475: NVDA 142.5 (sell 217.5), TSM 332.5 (buy 192.5)
+    assert orders_by_ticker(res)['TSM']['notional_est'] == pytest.approx(
+        192.5, abs=0.5)
+    assert res['funding']['scale'] == 1.0
+
+
+def test_buy_that_falls_under_dust_after_scaling_is_suppressed():
+    """Sell 270 funds 264.6; buys TSM 216 + AMD 54 scale by 0.98 -> AMD 52.9,
+    which is under a 54 dust floor: suppressed AFTER scaling, logged as dust."""
+    res = tt.compute_orders(
+        target_weights={'NVDA': 0.5, 'TSM': 0.4, 'AMD': 0.1},
+        positions={'NVDA': {'shares': 3.0}},           # 540 mv, all NVDA
+        cash=0.0, prices={'NVDA': 180.0, 'TSM': 250.0, 'AMD': 100.0},
+        cfg={**CFG, 'MIN_ORDER_NOTIONAL': 54.0})
+    o = orders_by_ticker(res)
+    assert o['NVDA']['side'] == 'sell' and 'AMD' not in o
+    assert any(x['ticker'] == 'AMD' and 'dust' in x['reason']
+               for x in res['suppressed'])
+    buys = sum(x['notional_est'] for x in res['orders'] if x['side'] == 'buy')
+    assert buys <= 270 * 0.98 + 1e-6
+    assert res['funding']['scale'] < 1.0
+
+
+def test_exit_clock_name_is_not_bought_but_may_still_be_sold():
+    res = tt.compute_orders(
+        target_weights={'NVDA': 0.5, 'TSM': 0.5},
+        positions={'NVDA': {'shares': 2.0}}, cash=140.0,
+        prices={'NVDA': 180.0, 'TSM': 250.0}, cfg=CFG,
+        no_buy={'TSM', 'NVDA'})
+    o = orders_by_ticker(res)
+    assert 'TSM' not in o                              # buy skipped
+    assert o['NVDA']['side'] == 'sell'                 # sell still fires
+    assert any(s['ticker'] == 'TSM' and 'exit clock' in s['reason']
+               for s in res['skipped'])
+
+
+def test_build_ticket_carries_funding_block():
+    res = tt.compute_orders(**_resize_case())
+    tk = tt.build_ticket(res, basis_event={'date': '2026-09-09',
+                                           'kind': 'membership', 'reason': 'x'},
+                         created_at='2026-09-09T21:30:00Z', cfg=CFG,
+                         account_state_as_of='2026-09-09')
+    assert tk['funding']['scale'] < 1.0
+    assert tk['checksum'] == tt.ticket_checksum(tk['orders'])

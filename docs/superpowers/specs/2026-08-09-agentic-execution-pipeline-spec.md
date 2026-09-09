@@ -273,3 +273,12 @@ auto-halt is preceded by ONE regeneration when a refusal consists solely of
 C2.5 stale-quote failures. Motivation and mechanics: CLAUDE.md rule 29
 amendment. The executed-once guard, checksum, expiry, roster, caps, turnover
 and kill switch are unchanged.
+
+## Amendment 2026-09-09 — self-funding tickets; no buys on an exit clock (Dom-approved)
+
+`compute_orders` scales buys pro-rata to idle cash + haircut sell proceeds
+(one shared haircut constant with the executor's C2.3 gate), rounds buy
+shares down, re-applies dust after scaling, and records a `funding` block on
+the ticket. Names with a running `exit_pending` clock are excluded from the
+buy side (sells unaffected). Mechanics and motivation: CLAUDE.md rule 29
+amendment 2026-09-09.

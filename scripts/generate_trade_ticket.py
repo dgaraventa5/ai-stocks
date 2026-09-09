@@ -32,9 +32,20 @@ def _latest_snapshot(live_dir: Path) -> dict | None:
     return json.loads(snaps[-1].read_text()) if snaps else None
 
 
+def _exit_pending() -> set[str]:
+    """Names with a running rule-26 exit clock (performance-config
+    `exit_pending`). Lazy import: portfolio_model pulls yfinance."""
+    try:
+        from portfolio_model import load_cfg
+        return set((load_cfg().get('exit_pending') or {}).keys())
+    except Exception as e:                       # flagged, never fatal
+        _flag(f'exit_pending unavailable ({e}) — no buy exclusions applied')
+        return set()
+
+
 def generate(target_weights: dict[str, float], event: dict, *,
              live_dir: Path = LIVE_DIR, prices_fn=None,
-             now: str | None = None) -> Path | None:
+             now: str | None = None, no_buy=None) -> Path | None:
     """Build + write the ticket. Returns the path, or None (flagged) when no
     reconciliation snapshot exists — deltas from assumed holdings are exactly
     the compounding error B2 forbids, so we refuse rather than guess."""
@@ -67,8 +78,10 @@ def generate(target_weights: dict[str, float], event: dict, *,
             px = prices_fn(t)
             if px:
                 prices[t] = px
+    # Dom 2026-09-09: never ADD to a name whose exit clock is running.
+    no_buy = _exit_pending() if no_buy is None else set(no_buy)
     result = tt.compute_orders(target_weights, snap['positions'],
-                               snap['cash'], prices, cfg)
+                               snap['cash'], prices, cfg, no_buy=no_buy)
     for u in result['untradeable']:
         _flag(f"{u['ticker']}: {u['reason']}")
     for s in result['skipped']:
@@ -86,9 +99,12 @@ def generate(target_weights: dict[str, float], event: dict, *,
         n += 1
         path = tdir / f"ticket-{ticket['ticket_id']}-{n}.json"
     path.write_text(json.dumps(ticket, indent=2) + '\n')
+    f = ticket.get('funding') or {}
     print(f'ticket written: {path} ({len(ticket["orders"])} orders, '
           f'{len(ticket["suppressed"])} dust-suppressed, '
-          f'{len(ticket["untradeable"])} untradeable)')
+          f'{len(ticket["untradeable"])} untradeable, '
+          f'{len(ticket["skipped"])} skipped; funding scale '
+          f'{f.get("scale", 1.0):.3f})')
     retire_superseded(tdir, live_dir / 'receipts', keep=path, now=now)
     return path
 
