@@ -41,22 +41,26 @@ TRACKED_FUNDS = {
     "Berkshire Hathaway": "0001067983",
     "Baillie Gifford":    "0001088875",  # corrected 2026-09-11: 0001048268 resolved to IES
                                           # Holdings, Inc. (an unrelated electrical contractor),
-                                          # not Baillie Gifford & Co. New CIK identified via
-                                          # WebSearch of EDGAR-indexed filing titles (session's
-                                          # direct EDGAR access was blocked) — same
-                                          # secondary-evidence standard as the Whale Rock fix
-                                          # below. Re-verify against primary EDGAR once access
-                                          # is restored.
+                                          # not Baillie Gifford & Co. New CIK re-confirmed
+                                          # 2026-09-11 via WebSearch surfacing EDGAR-indexed 13F
+                                          # filing titles literally reading "BAILLIE GIFFORD &
+                                          # CO", address Calton Square/Edinburgh — as close to
+                                          # primary confirmation as WebSearch (not a direct
+                                          # sec.gov fetch, still blocked this session) allows.
     "Tiger Global":       "0001167483",
     "Coatue Management":  "0001135730",  # corrected 2026-09-11: 0001336528 resolved to
                                           # Pershing Square Capital Management, L.P. (Bill
-                                          # Ackman's fund), not Coatue Management LLC. Same
-                                          # secondary-evidence caveat as above.
+                                          # Ackman's fund), not Coatue Management LLC. New CIK
+                                          # re-confirmed 2026-09-11 via WebSearch surfacing
+                                          # EDGAR-indexed 13F titles reading "COATUE MANAGEMENT
+                                          # LLC", signed by Philippe Laffont (Coatue's actual
+                                          # founder) — same standard as above.
     "Whale Rock Capital": "0001387322",  # corrected 2026-09-04: 0001485922 didn't match Whale
-                                          # Rock Capital Management LLC in any source; new CIK
-                                          # cross-confirmed via whalewisdom/13f.info/opengovus
-                                          # (secondary aggregators, not primary EDGAR — session's
-                                          # EDGAR access was blocked). Re-verify against primary
+                                          # Rock Capital Management LLC in any source; re-
+                                          # confirmed 2026-09-11 via WebSearch surfacing
+                                          # EDGAR-indexed 13F titles reading "Whale Rock Capital
+                                          # Management LLC", signed by Alex Sacerdote (Whale
+                                          # Rock's actual founder). Re-verify against primary
                                           # EDGAR once access is restored.
     "Lone Pine Capital":  "0001061165",
 }

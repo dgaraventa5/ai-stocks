@@ -2,6 +2,65 @@
 
 **Scope:** 214 watchlist tickers. Scan window: **2026-09-04 – 2026-09-11**.
 
+## Same-day follow-up (post-scan action items worked, still 2026-09-11)
+
+Dom asked for all of the scan's action items to be worked same-day. Results:
+
+- **AVGO R3 (partially resolved):** The Q3 FY26 10-Q (`avgo-20260802.htm`) has been filed and
+  does contain formal contingent-liability language on the AI XPV platform's residual value
+  guarantees ("contingent liabilities [Broadcom] believe[s] would have a low probability of
+  occurring...") — the accounting-treatment question from thesis-killer #2 is answered: yes,
+  it's now a filed disclosure, not only a verbal characterization. On size: asked about
+  incremental exposure on the 9/2 call, management said there's "nothing new to add" beyond
+  the existing ~$29B max on the initial $35B tranche — no escalation. The separate $60-100B
+  second financing package remains unsigned. Written up in `per-stock/AVGO/thesis.md` §9 and
+  `news-log.md`; **R3 rating itself left to Dom/the collaborative process (rule 2/8), not
+  changed here.**
+- **VRT UtilityInnovation deal — now primary-confirmed:** WebSearch surfaced the actual
+  SEC-indexed 8-K content (accession 000119312526379306, signed by CFO Craig Chamberlin,
+  merger agreement dated 9/1) — terms as previously reported ($1.45B cash + up to $1.15B
+  earnout in two EBITDA-gated tranches, ~13x 2027E EBITDA, Q4 2026 close, JPM/Morgan Stanley
+  advising). Upgraded from "secondary-sourced" to "primary-confirmed" in
+  `per-stock/VRT/news-log.md`.
+- **CRM NRR — settled as a finding, not a gap:** a fourth consecutive search (FY26 10-K, Q1/Q2
+  FY27 releases, revenue-recognition disclosure aggregators) found no NRR percentage anywhere
+  in Salesforce's disclosures. This now reads as a genuine disclosure-practice shift toward
+  RPO/cRPO rather than a search-coverage problem. Logged in `per-stock/CRM/news-log.md` with a
+  decision flagged for Dom: adopt cRPO growth as the go-forward proxy, keep flagging the
+  absence, or treat it as settled.
+- **13F CIK fixes — re-confirmed at a higher confidence level:** WebSearch surfacing
+  EDGAR-indexed filing titles now directly names all three corrected/re-verified funds
+  ("BAILLIE GIFFORD & CO", "COATUE MANAGEMENT LLC" signed by Philippe Laffont, "Whale Rock
+  Capital Management LLC" signed by Alex Sacerdote) with matching addresses — about as strong
+  as evidence gets without a direct sec.gov fetch (still blocked this session). Code comments
+  in `scripts/weekly_scan_runner.py` updated accordingly.
+- **AMZN `/refresh-context` run:** AMZN had no populated `thesis.md` and no prior context
+  briefing despite being a live holding — first briefing written
+  (`per-stock/AMZN/context-2026-09-11.md`). Headline findings: the Amazon-Anthropic
+  relationship is a $100B/decade committed-spend contract (4/20/2026) with $13B cumulative
+  equity investment and up to 5GW of dedicated Trainium capacity; AWS's AI and Chips
+  businesses each independently crossed a $25B annualized run-rate in Q2 2026; Trainium
+  external sales remain talks-only; and **the original 2023 FTC monopoly antitrust case
+  (distinct from the 8/31 ad-surcharge suit) has a trial date of 2026-10-13** — a much sharper
+  near-term catalyst than "an ongoing suit." Quantitative red-flag scripts (2b-2e) were all
+  network-blocked; rating implications flagged, not decided.
+- **ORCL `/refresh-objective --dry-run`:** ran clean but made zero changes — Yahoo Finance
+  fetch failed with the same `403`/`ConnectionError` pattern as every other network call this
+  session (`Cookie/crumb fetch failed`, `curl: (7) CONNECT tunnel failed, response 403`). The
+  script's own guarantee ("a failed fetch never clobbers an existing value") held — ORCL's row
+  is untouched, not silently corrupted. **Genuinely blocked, not attempted by hand** — ORCL's
+  objective inputs need a network-enabled session.
+- **NTAP capitulation check:** still genuinely blocked. `capitulation_flag.py` requires a live
+  SEC XBRL quarterly-revenue pull plus 3 years of yfinance daily price history to compute a
+  P/S percentile — this cannot be responsibly hand-approximated from WebSearch snippets
+  without breaking the rule-17 calibration loop's precision guarantees. Confirmed via a direct
+  test: `ProxyError... Tunnel connection failed: 403 Forbidden` on
+  `www.sec.gov/files/company_tickers.json`. Recommend running
+  `python3 scripts/capitulation_flag.py NTAP --log-forecast` from a network-enabled session
+  before the exit confirms (no earlier than 2026-09-15).
+- **MU Taiwan situation:** no action item beyond monitoring — next mediation session is
+  9/21, outside this window; nothing to do until then.
+
 ## Execution note (network constraints — unchanged since 2026-06-12)
 
 SEC EDGAR (`data.sec.gov`, `www.sec.gov`, `efts.sec.gov`) and Yahoo Finance
