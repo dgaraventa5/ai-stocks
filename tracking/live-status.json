@@ -1,10 +1,11 @@
 {
-  "as_of": "2026-09-08",
+  "as_of": "2026-09-10",
   "halted": false,
   "positions": 15,
   "open_orders": 0,
   "drift_flags": [
     "ALAB",
+    "AMZN",
     "ANET",
     "AVGO",
     "CRDO",
