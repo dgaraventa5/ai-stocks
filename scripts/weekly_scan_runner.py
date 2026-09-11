@@ -39,9 +39,19 @@ SCAN_TO   = date(2026, 6, 19)
 # Tracked 13F funds and their CIKs
 TRACKED_FUNDS = {
     "Berkshire Hathaway": "0001067983",
-    "Baillie Gifford":    "0001048268",
+    "Baillie Gifford":    "0001088875",  # corrected 2026-09-11: 0001048268 resolved to IES
+                                          # Holdings, Inc. (an unrelated electrical contractor),
+                                          # not Baillie Gifford & Co. New CIK identified via
+                                          # WebSearch of EDGAR-indexed filing titles (session's
+                                          # direct EDGAR access was blocked) — same
+                                          # secondary-evidence standard as the Whale Rock fix
+                                          # below. Re-verify against primary EDGAR once access
+                                          # is restored.
     "Tiger Global":       "0001167483",
-    "Coatue Management":  "0001336528",
+    "Coatue Management":  "0001135730",  # corrected 2026-09-11: 0001336528 resolved to
+                                          # Pershing Square Capital Management, L.P. (Bill
+                                          # Ackman's fund), not Coatue Management LLC. Same
+                                          # secondary-evidence caveat as above.
     "Whale Rock Capital": "0001387322",  # corrected 2026-09-04: 0001485922 didn't match Whale
                                           # Rock Capital Management LLC in any source; new CIK
                                           # cross-confirmed via whalewisdom/13f.info/opengovus
