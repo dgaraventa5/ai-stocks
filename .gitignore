@@ -52,3 +52,6 @@ tracking/*.png
 # Related: the privacy test reads all ~1,100 tracked files, and on an
 # iCloud-synced Desktop that took 1350s cold vs 6.15s warm (2026-08-27/28).
 .metadata_never_index
+
+# Claude Code desktop-app dev-server launch config (machine-local tooling).
+.claude/launch.json
