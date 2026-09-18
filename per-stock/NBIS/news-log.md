@@ -10,3 +10,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-06-11 | Tech Times | Added to Nasdaq-100 (announced 6/11); stock ~+21% since, near $300. |
 | 2026-06-16 | SEC 6-K | Closed acquisition of MagicByte, Inc. (d/b/a Eigen AI Labs). |
 | 2026-07-03 | weekly scan (Yahoo Finance/CNBC 7/1) | Meta reportedly building "Meta Compute," a business to sell excess AI compute — direct competitive threat given Meta's up-to-$27B Nebius deal. NBIS fell ~17% 7/1, continued weakness into 7/2 (low $207.30). |
+
+- **2026-09-18** (weekly scan, SEC EDGAR): 6-K 2026-09-08: named Palantir's preferred sovereign AI infrastructure partner; Nebius compute to sit inside the Palantir enterprise perimeter (no $/MW disclosed).

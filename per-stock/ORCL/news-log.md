@@ -15,3 +15,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 
 - **2026-07-14** (weekly scan, 8-K/A) — Amended prior disclosure to set/update compensation terms for co-CEOs Clayton Magouyrk and Michael Sicilia and new CFO Douglas Kehring — administrative follow-up to the already-known leadership transition, not a new change.
 - **2026-07-30** ⚠️ (weekly scan (Bloomberg / PRNewswire)) — Expanded Google Cloud/Gemini AI partnership (stock +8%); $7B DoW enterprise software deal (10-yr) plus up to $6.99B Navy IDIQ; separately, Wisconsin regulators upheld credit rules that may force Oracle to post $7B+ collateral for an AI data center (adds $100M+/yr financing cost).
+
+- **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-10 (Item 2.02): Q1 FY27 rev $19.35B +30%, cloud infrastructure +121%, RPO $664B, capex $28.5B in the quarter, FCF ≈ −$5B, $20B ATM equity sale completed; FY27 guide ≥$90B rev / $8.10 non-GAAP EPS. 8-K 9/14: Ellison cancelled 10b5-1 sale plan. Objective refresh 2026-09-18: 69.09 → 71.17, ✓ → ✓✓.

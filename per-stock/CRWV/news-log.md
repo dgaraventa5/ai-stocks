@@ -11,3 +11,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): Call position cut -83% (10.81M→1.81M sh underlying); equity ADDED +18% to 7.18M sh ($556M) — de-levered the expression, kept the exposure.
 
 - **2026-07-03** (weekly scan, CNBC/Bloomberg 7/1) — Meta reportedly building "Meta Compute," a business to sell excess AI compute — a direct competitive threat given Meta's $21B CoreWeave deal through 2032. CRWV fell ~13.9% same day.
+
+- **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-17: launched $3.0B convertible senior notes due 2033 (+$500M greenshoe) and a new ATM for up to 35M Class A shares; deck: total debt $35.6B, backlog $104.2B excluding >$25B of commitments added early Q3.

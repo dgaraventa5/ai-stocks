@@ -5,3 +5,5 @@
 - 2026-06-11 | ground.news / Adobe | CEO succession announced: Anil Chakravarthy to become CEO effective 2026-12-01; Shantanu Narayen to become Executive Chair after 18 yrs as CEO.
 - 2026-07-14 | 8-K filed 2026-07-17 (Item 5.02) | Executive Compensation Committee approved retention letters for named officers (leadership-transition retention plumbing).
 - 2026-08-31 | Morningstar/BusinessWire | Adobe to report Q3 FY2026 after close on 2026-09-10; guidance Q3 rev $6.67–6.72B / non-GAAP EPS $6.05–6.10.
+
+- **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-08 (Item 5.02): Anil Chakravarthy to become President & CEO 12/1/2026, Narayen → Executive Chair; David Wadhwani (head of Creativity & Productivity) steps down 9/27. 8-K 2026-09-10 (2.02): Q3 FY26 rev $6.76B +13%, non-GAAP EPS $6.13, ARR $27.5B, AI-first ARR +150% YoY, FY26 guide raised. Objective inputs refreshed 2026-09-18.
