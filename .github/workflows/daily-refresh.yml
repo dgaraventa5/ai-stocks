@@ -2,89 +2,168 @@ name: Daily site refresh
 
 on:
   schedule:
-    # Primary targets ~5pm ET, right after the 4pm ET close (yfinance adjusted
-    # closes have settled by then). NOTE: GitHub's `schedule` trigger is
-    # BEST-EFFORT — runs land 60-90 min late and are sometimes dropped entirely
-    # under load (Monday 2026-06-15 was dropped, leaving the site a trading day
-    # stale), so actual execution is ~6-6:30pm ET, not 5pm sharp; nominal-5pm is
-    # as early as a free GitHub cron can target. Mitigation: fire three times on
-    # spread-out, non-round minutes (round :00/:30 are GitHub's most-contended,
-    # most-dropped slots) so a dropped/delayed primary is caught by a backstop.
-    # The "commit series if changed" guard makes redundant fires idempotent —
-    # only the run that finds new closes commits and deploys; the rest rebuild,
-    # see no diff, and exit in ~1 min. Holidays self-skip the same way (series is
-    # byte-identical when markets are shut). UTC is fixed, so clock times drift
-    # 1h between EDT and EST — all three stay safely after the 4pm ET close in
-    # both seasons.
-    - cron: '5 21 * * 1-5'    # primary — ~5:05pm EDT / 4:05pm EST, post-close
-    - cron: '35 22 * * 1-5'   # backstop 1 — ~90 min later, same UTC day
-    - cron: '35 0 * * 2-6'    # backstop 2 — late catch-up (next UTC day)
+    # Three post-close attempts because GitHub schedule delivery is best-effort.
+    # The stable automation branch + PR deduplication makes backstops idempotent.
+    - cron: '5 21 * * 1-5'
+    - cron: '35 22 * * 1-5'
+    - cron: '35 0 * * 2-6'
   workflow_dispatch:
 
+# The repository token is deliberately read-only. A dedicated, repository-only
+# fine-grained token creates the generated-data PR so its events trigger PR CI.
 permissions:
-  contents: write
+  contents: read
 
-# One refresh at a time: if a delayed primary and a backstop ever overlap, the
-# later one queues rather than racing on the commit/push.
 concurrency:
   group: daily-refresh
   cancel-in-progress: false
+
+env:
+  AUTOMATION_BRANCH: automation/performance-series
+  GENERATED_PATH: tracking/performance-series.json
+  GH_TOKEN: ${{ secrets.AI_STOCKS_AUTOMATION_TOKEN }}
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      - name: Require scoped automation token
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::AI_STOCKS_AUTOMATION_TOKEN is required; main is protected"
+            exit 1
+          fi
+
+      - name: Verify branch protection prerequisites
+        run: |
+          if ! gh api "repos/$GITHUB_REPOSITORY" --jq '.allow_auto_merge' \
+              | grep -Fx 'true'; then
+            echo "::error::repository auto-merge must be enabled"
+            exit 1
+          fi
+          if ! gh api \
+              "repos/$GITHUB_REPOSITORY/branches/main/protection/required_status_checks" \
+              --jq '.contexts[]' | grep -Fx 'test'; then
+            echo "::error::main must require the test status check"
+            exit 1
+          fi
+
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.AI_STOCKS_AUTOMATION_TOKEN }}
+
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - run: pip install yfinance pandas openpyxl pytest
 
-      - name: Rebuild performance series (3 attempts — Yahoo throttles CI IPs)
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest
+
+      - name: Rebuild performance series
         run: |
           for i in 1 2 3; do
             python scripts/track_performance.py --series-only && exit 0
             echo "attempt $i failed; retrying in 60s"
             sleep 60
           done
-          echo "::error::yfinance failed after 3 attempts — site keeps yesterday's data"
+          echo "::error::yfinance failed after 3 attempts; published data is unchanged"
           exit 1
 
-      # Validate the generated series and every repository invariant before any
-      # commit can reach main. A failed gate leaves the previous data published.
       - name: Validate generated data
         run: python -m pytest tests -q
 
-      - name: Commit series if changed
-        id: commit
+      - name: Detect generated change
+        id: changed
         run: |
-          if git diff --quiet tracking/performance-series.json; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "series unchanged (holiday / no new data) — skipping deploy"
+          if git diff --quiet -- "$GENERATED_PATH"; then
+            echo "value=false" >> "$GITHUB_OUTPUT"
+            echo "series unchanged; no PR update needed"
           else
-            git config user.name 'github-actions[bot]'
-            git config user.email 'github-actions[bot]@users.noreply.github.com'
-            git add tracking/performance-series.json
-            # Stamp the message with the series' actual as_of (the latest bar),
-            # NOT the wall-clock run date — they diverge when the latest close
-            # hasn't settled yet, which made git history misleading (a Jun-25
-            # series was committed as "2026-06-27"). The high-water-mark guard
-            # in build_daily_series means a committed change never regresses.
-            asof=$(python -c "import json; print(json.load(open('tracking/performance-series.json'))['as_of'])")
-            git commit -m "chore(data): daily performance series $asof"
-            git pull --rebase origin main
-            git push
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "value=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Inline deploy: a GITHUB_TOKEN push cannot trigger deploy-site.yml.
-      - run: python scripts/export_site_data.py
-        if: steps.commit.outputs.changed == 'true'
-      - run: python scripts/check_site.py
-        if: steps.commit.outputs.changed == 'true'
-      - uses: cloudflare/wrangler-action@v4
-        if: steps.commit.outputs.changed == 'true'
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=ai-supply-chain
+      - name: Plan generated-data PR
+        if: steps.changed.outputs.value == 'true'
+        id: plan
+        run: |
+          branch_exists=false
+          remote_commit=""
+          branch_sha=""
+          if git fetch origin "$AUTOMATION_BRANCH"; then
+            branch_exists=true
+            remote_commit=$(git rev-parse "origin/$AUTOMATION_BRANCH")
+            branch_sha=$(git show "origin/$AUTOMATION_BRANCH:$GENERATED_PATH" \
+              | shasum -a 256 | cut -d ' ' -f 1)
+          fi
+
+          desired_sha=$(shasum -a 256 "$GENERATED_PATH" | cut -d ' ' -f 1)
+          listed=$(gh pr list --state open --head "$AUTOMATION_BRANCH" \
+            --json number,headRefName,baseRefName,mergeStateStatus,statusCheckRollup)
+          count=$(jq 'length' <<<"$listed")
+          prs="$listed"
+          if [ "$count" -eq 1 ]; then
+            number=$(jq -r '.[0].number' <<<"$listed")
+            detail=$(gh pr view "$number" \
+              --json number,headRefName,baseRefName,mergeStateStatus,statusCheckRollup,files)
+            prs=$(jq -n --argjson pr "$detail" '[$pr]')
+          fi
+
+          jq -n \
+            --argjson prs "$prs" \
+            --argjson branch_exists "$branch_exists" \
+            --arg desired_sha "$desired_sha" \
+            --arg branch_sha "$branch_sha" \
+            '{prs: $prs, branch_exists: $branch_exists,
+              desired_sha: $desired_sha,
+              branch_sha: (if $branch_sha == "" then null else $branch_sha end)}' \
+            > /tmp/generated-pr-input.json
+
+          python scripts/generated_data_pr.py \
+            --input /tmp/generated-pr-input.json \
+            --github-output "$GITHUB_OUTPUT"
+          echo "remote_commit=$remote_commit" >> "$GITHUB_OUTPUT"
+          asof=$(python -c \
+            "import json; print(json.load(open('$GENERATED_PATH'))['as_of'])")
+          echo "asof=$asof" >> "$GITHUB_OUTPUT"
+
+      - name: Commit series if changed
+        if: >-
+          steps.changed.outputs.value == 'true' &&
+          (steps.plan.outputs.action == 'create' || steps.plan.outputs.action == 'update')
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -- "$GENERATED_PATH"
+          git commit -m "chore(data): daily performance series ${{ steps.plan.outputs.asof }}"
+
+          if [ "${{ steps.plan.outputs.action }}" = "update" ]; then
+            git push \
+              --force-with-lease="refs/heads/$AUTOMATION_BRANCH:${{ steps.plan.outputs.remote_commit }}" \
+              origin "HEAD:refs/heads/$AUTOMATION_BRANCH"
+          else
+            git push origin "HEAD:refs/heads/$AUTOMATION_BRANCH"
+          fi
+
+      - name: Create or refresh generated-data PR
+        if: >-
+          steps.changed.outputs.value == 'true' &&
+          (steps.plan.outputs.action == 'create' || steps.plan.outputs.action == 'update')
+        run: |
+          if [ "${{ steps.plan.outputs.action }}" = "create" ]; then
+            gh pr create \
+              --base main \
+              --head "$AUTOMATION_BRANCH" \
+              --title "chore(data): daily performance series" \
+              --body "Automated single-file update for \`$GENERATED_PATH\`. Full tests passed before push. Auto-merge waits for required PR checks."
+          fi
+          number=$(gh pr list --state open --head "$AUTOMATION_BRANCH" \
+            --json number --jq '.[0].number')
+          gh pr merge --auto --squash "$number"
+          echo "generated-data PR #$number is waiting for required checks"
+
+      - name: Report existing PR wait
+        if: >-
+          steps.changed.outputs.value == 'true' &&
+          steps.plan.outputs.action == 'wait'
+        run: echo "${{ steps.plan.outputs.reason }}"

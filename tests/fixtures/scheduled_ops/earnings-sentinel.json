@@ -1,0 +1,12 @@
+{
+  "scope_size": 25,
+  "briefing_due": [
+    {"ticker": "AAA", "report_date": "2026-09-21", "session": "BMO"},
+    {"ticker": "BBB", "report_date": "2026-09-21", "session": "AMC"}
+  ],
+  "rescore_due": [
+    {"ticker": "AAA", "report_date": "2026-09-21", "session": "BMO"},
+    {"ticker": "CCC", "report_date": "2026-09-20", "session": "AMC"}
+  ],
+  "flagged": {"DDD": "earnings-date lookup failed"}
+}

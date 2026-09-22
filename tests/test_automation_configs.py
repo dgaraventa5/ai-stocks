@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import plistlib
 
@@ -57,3 +58,43 @@ def test_hermes_context_is_bounded_and_carries_safety_rules():
         "CLAUDE.md",
     ):
         assert required in context
+
+
+def test_daily_refresh_uses_a_scoped_automation_pr_instead_of_main_push():
+    workflow = (ROOT / ".github/workflows/daily-refresh.yml").read_text()
+
+    assert "AI_STOCKS_AUTOMATION_TOKEN" in workflow
+    assert "automation/performance-series" in workflow
+    assert "scripts/generated_data_pr.py" in workflow
+    assert "gh pr create" in workflow
+    assert "gh pr merge --auto --squash" in workflow
+    assert "git push origin main" not in workflow
+    assert "pages deploy" not in workflow
+    assert "permissions:\n  contents: read" in workflow
+
+
+def test_hermes_cron_proposals_are_paused_script_only_and_order_safe():
+    definition_path = ROOT / "automation/hermes/cron-definitions.json"
+    definitions = json.loads(definition_path.read_text())
+
+    assert {job["name"] for job in definitions["jobs"]} == {
+        "ai-stocks-weekly-rating-report",
+        "ai-stocks-earnings-sentinel-report",
+        "ai-stocks-ops-health",
+    }
+    for job in definitions["jobs"]:
+        assert job["paused"] is True
+        assert job["no_agent"] is True
+        assert job["deliver"] == "telegram"
+        assert job["workdir"] == "/Users/dom/Hermes/projects/ai-stocks"
+        wrapper = (ROOT / "automation/hermes" / job["source_script"]).read_text()
+        for forbidden in ("execute_ticket", "--confirm", "git push", "gh pr"):
+            assert forbidden not in wrapper
+
+
+def test_daily_refresh_fails_closed_until_required_check_and_auto_merge_exist():
+    workflow = (ROOT / ".github/workflows/daily-refresh.yml").read_text()
+
+    assert "/branches/main/protection/required_status_checks" in workflow
+    assert "allow_auto_merge" in workflow
+    assert "grep -Fx 'test'" in workflow

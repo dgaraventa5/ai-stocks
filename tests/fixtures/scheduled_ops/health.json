@@ -1,0 +1,18 @@
+{
+  "state": {
+    "schema_version": 1,
+    "jobs": {
+      "weekly-rating": {"last_success_at": "2026-09-01T10:00:00Z"},
+      "earnings-sentinel": {"last_success_at": "2026-09-21T22:30:00Z"}
+    }
+  },
+  "prs": [
+    {
+      "number": 80,
+      "headRefName": "automation/performance-series",
+      "mergeStateStatus": "DIRTY",
+      "updatedAt": "2026-09-21T00:00:00Z",
+      "statusCheckRollup": [{"name": "test", "conclusion": "FAILURE"}]
+    }
+  ]
+}
