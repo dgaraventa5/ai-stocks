@@ -511,3 +511,5 @@ Chain run once: `refresh_objective_inputs CIEN` (dry-run reviewed first) → `mo
 - **Prompt drift:** none. The scheduled-task text matches `docs/ops/earnings-sentinel-task.md`.
 
 **Test gate:** `python3 -m pytest tests/ -q` → **491 passed** (0 failures). PR opened.
+
+2026-09-21: quiet (scope 25, flagged: ALAB earnings-date lookup failed — transient; a direct yfinance probe in the same session returned ALAB's calendar cleanly (last report 2026-08-04, next 2026-11-03), so the failure was throttling during the 25-name sweep, not missing data. No event either way: the 2026-08-04 print is >5 days old, so per spec it belongs to the weekly scan — where it already sits as the known rule-9 backlog item from the 2026-09-18 scan.) No briefings, no re-scores, no model event, no ticket. Steps 2-7 not run. Prompt drift: none.
