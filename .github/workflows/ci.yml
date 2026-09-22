@@ -2,6 +2,11 @@ name: Pull request CI
 
 on:
   pull_request:
+    paths-ignore:
+      - tracking/performance-series.json
+  # GITHUB_TOKEN-authored PR events require approval. The daily writer uses
+  # this documented recursion exception so `test` attaches to the PR head SHA.
+  workflow_dispatch:
 
 permissions:
   contents: read

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "jobs": [
+    {
+      "name": "ai-stocks-weekly-rating-report",
+      "schedule": "0 10 * * 1",
+      "paused": true,
+      "paused_reason": "Awaiting post-merge activation approval",
+      "prompt": "Version 1 report-only weekly rating-integrity output; script output is authoritative.",
+      "source_script": "weekly_rating_report.py",
+      "installed_script": "ai-stocks-weekly-rating-report.py",
+      "no_agent": true,
+      "deliver": "telegram",
+      "failure_deliver": "telegram",
+      "workdir": "/Users/dom/Hermes/projects/ai-stocks",
+      "max_expected_seconds": 60,
+      "token_cost": 0
+    },
+    {
+      "name": "ai-stocks-earnings-sentinel-report",
+      "schedule": "30 18 * * 1-5",
+      "paused": true,
+      "paused_reason": "Awaiting post-merge activation approval",
+      "prompt": "Version 1 report-only earnings detection output; script output is authoritative.",
+      "source_script": "earnings_sentinel_report.py",
+      "installed_script": "ai-stocks-earnings-sentinel-report.py",
+      "no_agent": true,
+      "deliver": "telegram",
+      "failure_deliver": "telegram",
+      "workdir": "/Users/dom/Hermes/projects/ai-stocks",
+      "max_expected_seconds": 150,
+      "token_cost": 0
+    },
+    {
+      "name": "ai-stocks-ops-health",
+      "schedule": "0 8 * * *",
+      "paused": true,
+      "paused_reason": "Awaiting post-merge activation approval",
+      "prompt": "Version 1 stale-run, failed-check, and blocked-PR watchdog; script output is authoritative.",
+      "source_script": "ops_health_report.py",
+      "installed_script": "ai-stocks-ops-health.py",
+      "no_agent": true,
+      "deliver": "telegram",
+      "failure_deliver": "telegram",
+      "workdir": "/Users/dom/Hermes/projects/ai-stocks",
+      "max_expected_seconds": 60,
+      "token_cost": 0
+    }
+  ]
+}

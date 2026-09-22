@@ -273,44 +273,16 @@ def daily_run(live_dir: Path, steps: list[tuple], notifier,
     return rc
 
 
-SERIES_FILE = 'tracking/performance-series.json'
-
-
 def _series_step(run=None, notifier=None) -> None:
-    """Manual close-mode fallback for rebuilding and pushing the series.
+    """Retired local writer retained as an explicit fail-closed compatibility hook.
 
-    GitHub Actions is the sole scheduled series writer; launchd schedules only
-    the 06:35 open-mode executor. This fallback remains available for attended
-    recovery and commits ONLY on main. It acts on the currently checked-out
-    branch: on 2026-08-17 it committed the series
-    onto an in-flight feature branch (bare `git push` pushes the current
-    branch), which then conflicted with main's copy of the same day and
-    carried different values, because the series is recomputed from the
-    model's current composition. Off main, rebuild and flag — the next run on
-    main, or the GH backstop, publishes it.
+    GitHub Actions owns the deterministic performance-series artifact. Keeping
+    this named step as a no-op prevents old attended close-mode invocations
+    from becoming a second writer.
     """
-    run = run or subprocess.run
+    del run
     notifier = notifier or print
-    run([sys.executable, 'scripts/track_performance.py', '--series-only'],
-        cwd=_REPO_ROOT, check=True, timeout=600)
-    if run(['git', 'diff', '--quiet', '--', SERIES_FILE],
-           cwd=_REPO_ROOT).returncode == 0:
-        return                               # unchanged (holiday/weekend)
-    branch = (run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], cwd=_REPO_ROOT,
-                  capture_output=True, text=True).stdout or '').strip()
-    if branch != 'main':
-        notifier(f'series rebuilt but NOT committed: on branch {branch!r}, '
-                 f'not main — commit it from main (or let the GH backstop)')
-        return
-    run(['git', 'add', SERIES_FILE], cwd=_REPO_ROOT, check=True)
-    # `--` scopes the commit to this path: a bare `git commit` would also
-    # sweep in whatever else happened to be staged in the working tree.
-    run(['git', 'commit', '-m',
-         f'chore(data): daily performance series '
-         f'{dt.date.today().isoformat()} (local pipeline runner)',
-         '--', SERIES_FILE], cwd=_REPO_ROOT, check=True)
-    run(['git', 'push', 'origin', 'main'], cwd=_REPO_ROOT, check=True,
-        timeout=120)
+    notifier('performance series skipped: GitHub Daily site refresh is the sole owner')
 
 
 def main(mode: str = 'auto') -> int:

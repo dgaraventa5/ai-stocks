@@ -1,0 +1,7 @@
+{
+  "rows": [
+    {"tkr": "AAA", "layer": "01", "gate": true, "stale": false, "age": null, "backing": "NONE"},
+    {"tkr": "BBB", "layer": "02", "gate": false, "stale": true, "age": 120, "backing": "brief 120d"},
+    {"tkr": "CCC", "layer": "03", "gate": false, "stale": true, "age": 95, "backing": "brief 95d"}
+  ]
+}
