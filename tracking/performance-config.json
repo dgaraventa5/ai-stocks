@@ -914,6 +914,21 @@
           "ORCL",
           "HTHIY"
         ]
+      },
+      {
+        "date": "2026-09-22",
+        "roster": [
+          "SBGSY",
+          "META",
+          "PLTR",
+          "TER",
+          "GOOGL",
+          "ORCL",
+          "NTAP",
+          "APH",
+          "ISRG",
+          "HTHIY"
+        ]
       }
     ],
     "BAND_TAIL": [
@@ -1035,6 +1050,26 @@
           "ADSK",
           "ARM",
           "SBGSY"
+        ]
+      },
+      {
+        "date": "2026-09-22",
+        "roster": [
+          "EQT",
+          "CGNX",
+          "APP",
+          "CIEN",
+          "AR",
+          "PWR",
+          "BE",
+          "FN",
+          "KEYS",
+          "WDC",
+          "AMD",
+          "HSAI",
+          "STX",
+          "EXE",
+          "ADSK"
         ]
       }
     ],
