@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from openpyxl import load_workbook
 
-XLSX = '/Users/dom/Desktop/ai-stocks/00-master/ai_supply_chain_scoring.xlsx'
+XLSX = '/Users/dom/Hermes/projects/ai-stocks/00-master/ai_supply_chain_scoring.xlsx'
 
 
 def main() -> None:

@@ -11,7 +11,7 @@ metrics: ev_ebitda=pct(32)  fcf_yield=pct(33)  ps=pct(31)  roic=pct(33)  gm=pct(
 members: AEP, AR, BE, BW, BWXT, CCJ, CEG, CMI, D, DUK, EQT, ETR, EXE, GNRC, LEU, NEE, NNE, NRG, NXT, OKLO, PLUG, PPL, PSIX, PUMP, RRC, SEI, SMR, SO, TE, TLN, UEC, VST, XEL
 
 ## Layer 02 — 11 names
-metrics: ev_ebitda=pct(10)  fcf_yield=pct(11)  ps=pct(11)  roic=pct(11)  gm=pct(11)  fcf_mgn=pct(11)
+metrics: ev_ebitda=pct(10)  fcf_yield=pct(10)  ps=pct(11)  roic=pct(11)  gm=pct(11)  fcf_mgn=pct(11)
 members: ABBNY, ATKR, ETN, GEV, HTHIY, HUBB, MTZ, NVT, POWL, PWR, SBGSY
 
 ## Layer 03 — 11 names

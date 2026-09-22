@@ -50,6 +50,11 @@ jobs:
           echo "::error::yfinance failed after 3 attempts — site keeps yesterday's data"
           exit 1
 
+      # Validate the generated series and every repository invariant before any
+      # commit can reach main. A failed gate leaves the previous data published.
+      - name: Validate generated data
+        run: python -m pytest tests -q
+
       - name: Commit series if changed
         id: commit
         run: |
@@ -73,8 +78,6 @@ jobs:
           fi
 
       # Inline deploy: a GITHUB_TOKEN push cannot trigger deploy-site.yml.
-      - run: python -m pytest tests -q
-        if: steps.commit.outputs.changed == 'true'
       - run: python scripts/export_site_data.py
         if: steps.commit.outputs.changed == 'true'
       - run: python scripts/check_site.py

@@ -277,12 +277,12 @@ SERIES_FILE = 'tracking/performance-series.json'
 
 
 def _series_step(run=None, notifier=None) -> None:
-    """Rebuild the performance series and push it if it changed — from this
-    machine (residential IP, real git creds), replacing dependence on the
-    flaky GH cron (which stays as an idempotent backstop).
+    """Manual close-mode fallback for rebuilding and pushing the series.
 
-    Commits ONLY on main. This runs on a schedule, so it lands on whatever
-    branch happens to be checked out: on 2026-08-17 it committed the series
+    GitHub Actions is the sole scheduled series writer; launchd schedules only
+    the 06:35 open-mode executor. This fallback remains available for attended
+    recovery and commits ONLY on main. It acts on the currently checked-out
+    branch: on 2026-08-17 it committed the series
     onto an in-flight feature branch (bare `git push` pushes the current
     branch), which then conflicted with main's copy of the same day and
     carried different values, because the series is recomputed from the
@@ -316,7 +316,7 @@ def _series_step(run=None, notifier=None) -> None:
 def main(mode: str = 'auto') -> int:
     from execute_ticket import RobinhoodTransport, _load_roster, run as exec_run
     now = dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-    if mode == 'auto':   # launchd fires 06:35 PT (open) and 13:35 PT (close)
+    if mode == 'auto':   # launchd schedules 06:35 open; time split supports manual runs
         mode = 'open' if dt.datetime.now().hour < 12 else 'close'
     transport = RobinhoodTransport()
 
