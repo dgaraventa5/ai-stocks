@@ -6,10 +6,10 @@
     "band_anchor": "AI DC replacement cost ~$9-10M per gross MW (~$11-12M per IT MW), facility+power excl. IT gear"
   },
   "CRWV": {
-    "secured_gross_mw": 3500,
-    "basis": "company 'contracted power', IT-vs-gross unspecified (treated gross, flagged) | Sweep through 2026-07-16: no newer contracted-power total (Galaxy Helios Phase I 2026-07-06 is delivery of pre-existing lease; Conapto 2026-06-24 re-cites Q1 figures). Next trigger: Q2 earnings 2026-08-18. Note: Helios discloses IT-vs-gross ratio ~1.52 (526 IT / 800 gross), evidence the x1.25 convention may understate gross for IT-quoted leases.",
-    "asof": "2026-03-31",
-    "source": "Q1 2026 results, investors.coreweave.com, May 2026",
+    "secured_gross_mw": 4200,
+    "basis": "company 'contracted power', IT-vs-gross unspecified (treated gross, flagged) | Q2 2026 refresh (rule 12 weekly, 2026-09-22): contracted power 3.7 GW at 2026-06-30 (10-Q) rising to 4.2 GW disclosed 2026-08-11 (Q2 call / Aug update); active >1.5 GW, EOY26 active target raised to >1.85 GW. Prior 3,500 MW was the 2026-03-31 Q1 figure. Helios still discloses IT-vs-gross ratio ~1.52 (526 IT / 800 gross), evidence the x1.25 convention may understate gross for IT-quoted leases.",
+    "asof": "2026-08-11",
+    "source": "Q2 2026 results / Aug 2026 update, investors.coreweave.com; per-stock/CRWV/context-2026-09-21.md",
     "confidence": "Medium"
   },
   "NBIS": {

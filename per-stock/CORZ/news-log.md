@@ -10,3 +10,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): Trimmed -10% to 26.01M sh ($389M).
 - **2026-06-22** — /refresh-context research pass; briefing at per-stock/CORZ/context-2026-06-22.md. Acquisition-termination confirmed as dominant thesis change; capacity-mw.json (1,900 MW) confirmed current vs 10-Q.
 - **2026-07-27/28** ⚠️ (weekly scan (BusinessWire / TipRanks)) — Signed a 15-year AMD colocation lease (~530MW, up to $14B potential revenue) — a major capacity/customer win; Q2 results also reported 7/28.
+
+- **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-10 (Item 7.01): ERCOT large-load status — Denton 297+74 MW, Pecos 300 MW base + 300 MW studied, Hunt 431 MW, all conditionally approved.

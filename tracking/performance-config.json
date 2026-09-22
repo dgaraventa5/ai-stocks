@@ -676,11 +676,51 @@
         "AMZN": "\u2713\u2713"
       },
       "cash": -0.06
+    },
+    {
+      "date": "2026-09-18",
+      "reason": "membership: -NTAP",
+      "kind": "membership",
+      "allocations": {
+        "CRDO": 632.67,
+        "EME": 632.67,
+        "META": 632.67,
+        "FIX": 632.67,
+        "ANET": 632.67,
+        "SNDK": 632.67,
+        "RDDT": 632.67,
+        "AVGO": 632.67,
+        "NVDA": 632.67,
+        "ALAB": 632.67,
+        "VRT": 632.67,
+        "MSFT": 632.67,
+        "MU": 632.67,
+        "GMED": 632.67,
+        "AMZN": 632.67,
+        "TSM": 632.67
+      },
+      "tiers": {
+        "CRDO": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "META": "\u2713\u2713",
+        "FIX": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "SNDK": "\u2713\u2713",
+        "RDDT": "\u2713\u2713",
+        "AVGO": "\u2713\u2713",
+        "NVDA": "\u2713\u2713",
+        "ALAB": "\u2713\u2713",
+        "VRT": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "MU": "\u2713\u2713",
+        "GMED": "\u2713\u2713",
+        "AMZN": "\u2713\u2713",
+        "TSM": "\u2713\u2713"
+      },
+      "cash": -0.08
     }
   ],
-  "exit_pending": {
-    "NTAP": "2026-09-08"
-  },
+  "exit_pending": {},
   "shadow_events": {
     "BAND_TOP": [
       {
@@ -762,6 +802,26 @@
           "META",
           "AMZN"
         ]
+      },
+      {
+        "date": "2026-09-18",
+        "roster": [
+          "NVDA",
+          "FIX",
+          "TSM",
+          "CRDO",
+          "AVGO",
+          "MSFT",
+          "ANET",
+          "SNDK",
+          "MU",
+          "GMED",
+          "RDDT",
+          "ALAB",
+          "EME",
+          "VRT",
+          "AMZN"
+        ]
       }
     ],
     "BAND_NEXT": [
@@ -838,6 +898,36 @@
           "EQT",
           "CGNX",
           "APP"
+        ]
+      },
+      {
+        "date": "2026-09-18",
+        "roster": [
+          "META",
+          "PLTR",
+          "TER",
+          "GOOGL",
+          "NTAP",
+          "APH",
+          "ISRG",
+          "EQT",
+          "ORCL",
+          "HTHIY"
+        ]
+      },
+      {
+        "date": "2026-09-22",
+        "roster": [
+          "SBGSY",
+          "META",
+          "PLTR",
+          "TER",
+          "GOOGL",
+          "ORCL",
+          "NTAP",
+          "APH",
+          "ISRG",
+          "HTHIY"
         ]
       }
     ],
@@ -941,6 +1031,46 @@
           "ARM",
           "HSAI"
         ]
+      },
+      {
+        "date": "2026-09-18",
+        "roster": [
+          "CGNX",
+          "APP",
+          "CIEN",
+          "AR",
+          "BE",
+          "FN",
+          "KEYS",
+          "WDC",
+          "AMD",
+          "HSAI",
+          "STX",
+          "EXE",
+          "ADSK",
+          "ARM",
+          "SBGSY"
+        ]
+      },
+      {
+        "date": "2026-09-22",
+        "roster": [
+          "EQT",
+          "CGNX",
+          "APP",
+          "CIEN",
+          "AR",
+          "PWR",
+          "BE",
+          "FN",
+          "KEYS",
+          "WDC",
+          "AMD",
+          "HSAI",
+          "STX",
+          "EXE",
+          "ADSK"
+        ]
       }
     ],
     "INVVOL_ROSTER": [
@@ -1022,6 +1152,45 @@
           "SNDK": 0.03,
           "TSM": 0.072952,
           "VRT": 0.044776
+        }
+      },
+      {
+        "date": "2026-09-18",
+        "roster": [
+          "ALAB",
+          "AMZN",
+          "ANET",
+          "AVGO",
+          "CRDO",
+          "EME",
+          "FIX",
+          "GMED",
+          "META",
+          "MSFT",
+          "MU",
+          "NVDA",
+          "RDDT",
+          "SNDK",
+          "TSM",
+          "VRT"
+        ],
+        "weights": {
+          "ALAB": 0.033111,
+          "AMZN": 0.081413,
+          "ANET": 0.061584,
+          "AVGO": 0.085822,
+          "CRDO": 0.034027,
+          "EME": 0.062692,
+          "FIX": 0.056763,
+          "GMED": 0.09245,
+          "META": 0.07616,
+          "MSFT": 0.082318,
+          "MU": 0.039869,
+          "NVDA": 0.087634,
+          "RDDT": 0.042254,
+          "SNDK": 0.03,
+          "TSM": 0.085722,
+          "VRT": 0.04818
         }
       }
     ]

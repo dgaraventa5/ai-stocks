@@ -10,3 +10,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-03-25 | Investor Day (via Barchart/TIKR) | DC backlog $400M (YE25) → $700M; path to ~$1B DC revenue by 2028; segment reorg. Stock -11% on NO hyperscaler LTA announced. (Backfilled 2026-06-10.) |
 | 2026-04-29 | 8-K Ex-99.1 + Q1 call | Q1 2026: sales $1.06B +12%; C&I +28% to $510M (DC-led); adj EBITDA $193M (18.3%). DC backlog >$700M EXCLUDING ~$600M non-binding NTP for 2027 deliveries with a hyperscale customer. Guide raised; large-MW capacity to >$1B by Q4 2026. Enercon (switchgear/enclosures) closed 4/1. (Backfilled 2026-06-10.) |
 | 2026-06-02 | PR Newswire 302787906 / biztimes | Generac SIGNED global supply agreement with unnamed "leading hyperscale data center operator" for backup power gensets after multi-factory qualification audits. No $ disclosed. Stock +~8%. |
+
+- **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-16 (Items 1.01/3.02): long-term Amazon data-center backup-generator supply agreement, initial deliveries $2.4B over 2027–28; warrant to Amazon for up to 1.69M shares @ $200.93 vesting against up to $8B of payments.

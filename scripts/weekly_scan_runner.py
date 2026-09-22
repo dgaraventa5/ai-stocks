@@ -1,6 +1,7 @@
-"""Weekly scan runner for 2026-06-19.
+"""Weekly scan runner for 2026-09-18.
 
-Covers filings from 2026-06-12 through 2026-06-19.
+Covers filings from 2026-09-05 through 2026-09-18 (gap week: no 2026-09-11
+scan was run, so this window spans two weeks to avoid missing anything).
 Steps:
   1. Read watchlist tickers + tiers
   2. Query EDGAR for 8-Ks (and 6-Ks for foreign filers)
@@ -33,21 +34,20 @@ SEC_HEADERS_WWW = {
     "Host": "www.sec.gov",
 }
 
-SCAN_FROM = date(2026, 6, 12)
-SCAN_TO   = date(2026, 6, 19)
+SCAN_FROM = date(2026, 9, 5)
+SCAN_TO   = date(2026, 9, 18)
 
 # Tracked 13F funds and their CIKs
 TRACKED_FUNDS = {
     "Berkshire Hathaway": "0001067983",
-    "Baillie Gifford":    "0001048268",
+    "Baillie Gifford":    "0001088875",  # corrected 2026-09-18: 0001048268 is IES Holdings (itself
+                                          # a 13F filer, so the wrong CIK returned plausible data);
+                                          # verified on primary EDGAR submissions JSON
     "Tiger Global":       "0001167483",
-    "Coatue Management":  "0001336528",
-    "Whale Rock Capital": "0001387322",  # corrected 2026-09-04: 0001485922 didn't match Whale
-                                          # Rock Capital Management LLC in any source; new CIK
-                                          # cross-confirmed via whalewisdom/13f.info/opengovus
-                                          # (secondary aggregators, not primary EDGAR — session's
-                                          # EDGAR access was blocked). Re-verify against primary
-                                          # EDGAR once access is restored.
+    "Coatue Management":  "0001135730",  # corrected 2026-09-18: 0001336528 is Pershing Square;
+                                          # verified on primary EDGAR submissions JSON
+    "Whale Rock Capital": "0001387322",  # confirmed on primary EDGAR 2026-09-18 ("Whale Rock
+                                          # Capital Management LLC"); 0001485922 was wrong
     "Lone Pine Capital":  "0001061165",
 }
 

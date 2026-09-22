@@ -8,3 +8,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-05-05 | Earnings call | New disclosures: NVLink Fusion custom switch (NVIDIA + hyperscaler, rev 2027), UALink switches for Amazon/AMD (2027), optical fiber-attach qualification at major AI platform, KV cache Leo CXL design win (2027). |
 | 2026-05-05 | 10-Q | Customer A (likely Amazon) surged to 29% of revenue from 12% YoY. Two new customers entered top-5 at 12% each. Top-5 = ~90% of revenue. |
 | 2026-05-20 | Yahoo Finance / RBC | Stock +17% after RBC raised PT to $250 citing Scorpio X switch ramp into Amazon Trainium3 racks in Q3 (tied to Amazon-Anthropic $100B infra commitment). Revenue expected to triple from $130M to $390M in 2026. |
+
+- **2026-09-18** (weekly scan, SEC EDGAR): Rule-9 backlog cleared 2026-09-18: objective inputs refreshed for the 8/4 Q2 print (first refresh since 7/16); score 75.28 → 75.26, ✓✓ unchanged. FCF margin 34.2% → 23.0% flagged for the next context pass.
