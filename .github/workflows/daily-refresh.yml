@@ -9,10 +9,13 @@ on:
     - cron: '35 0 * * 2-6'
   workflow_dispatch:
 
-# The repository token is deliberately read-only. A dedicated, repository-only
-# fine-grained token creates the generated-data PR so its events trigger PR CI.
+# Same-repository GITHUB_TOKEN only. Each write scope is required by one step:
+# branch/merge (contents), PR creation (pull-requests), explicit CI/deploy
+# workflow_dispatch recursion exceptions (actions).
 permissions:
-  contents: read
+  actions: write
+  contents: write
+  pull-requests: write
 
 concurrency:
   group: daily-refresh
@@ -21,37 +24,24 @@ concurrency:
 env:
   AUTOMATION_BRANCH: automation/performance-series
   GENERATED_PATH: tracking/performance-series.json
-  GH_TOKEN: ${{ secrets.AI_STOCKS_AUTOMATION_TOKEN }}
+  GH_TOKEN: ${{ github.token }}
+  AUTOMATION_CUTOVER_ENABLED: ${{ vars.AUTOMATION_CUTOVER_ENABLED }}
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: Require scoped automation token
+      - name: Require approved cutover gate
         run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "::error::AI_STOCKS_AUTOMATION_TOKEN is required; main is protected"
-            exit 1
-          fi
-
-      - name: Verify branch protection prerequisites
-        run: |
-          if ! gh api "repos/$GITHUB_REPOSITORY" --jq '.allow_auto_merge' \
-              | grep -Fx 'true'; then
-            echo "::error::repository auto-merge must be enabled"
-            exit 1
-          fi
-          if ! gh api \
-              "repos/$GITHUB_REPOSITORY/branches/main/protection/required_status_checks" \
-              --jq '.contexts[]' | grep -Fx 'test'; then
-            echo "::error::main must require the test status check"
+          if [ "$AUTOMATION_CUTOVER_ENABLED" != "true" ]; then
+            echo "::error::AUTOMATION_CUTOVER_ENABLED is not true"
             exit 1
           fi
 
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          token: ${{ secrets.AI_STOCKS_AUTOMATION_TOKEN }}
 
       - uses: actions/setup-python@v6
         with:
@@ -145,25 +135,137 @@ jobs:
             git push origin "HEAD:refs/heads/$AUTOMATION_BRANCH"
           fi
 
-      - name: Create or refresh generated-data PR
-        if: >-
-          steps.changed.outputs.value == 'true' &&
-          (steps.plan.outputs.action == 'create' || steps.plan.outputs.action == 'update')
+      - name: Create or locate generated-data PR
+        if: steps.changed.outputs.value == 'true'
+        id: generated_pr
         run: |
           if [ "${{ steps.plan.outputs.action }}" = "create" ]; then
             gh pr create \
               --base main \
               --head "$AUTOMATION_BRANCH" \
               --title "chore(data): daily performance series" \
-              --body "Automated single-file update for \`$GENERATED_PATH\`. Full tests passed before push. Auto-merge waits for required PR checks."
+              --body "Automated single-file update for \`$GENERATED_PATH\`. Full tests passed before push. Explicit workflow dispatch attaches the required \`test\` check to this head SHA."
           fi
-          number=$(gh pr list --state open --head "$AUTOMATION_BRANCH" \
-            --json number --jq '.[0].number')
-          gh pr merge --auto --squash "$number"
-          echo "generated-data PR #$number is waiting for required checks"
 
-      - name: Report existing PR wait
-        if: >-
-          steps.changed.outputs.value == 'true' &&
-          steps.plan.outputs.action == 'wait'
-        run: echo "${{ steps.plan.outputs.reason }}"
+          number=$(gh pr list --state open --head "$AUTOMATION_BRANCH" \
+            --json number --jq 'if length == 1 then .[0].number else error("expected one automation PR") end')
+          head_sha=$(gh pr view "$number" --json headRefOid --jq '.headRefOid')
+
+          if [ "${{ steps.plan.outputs.action }}" = "create" ] || \
+             [ "${{ steps.plan.outputs.action }}" = "update" ]; then
+            expected_sha=$(git rev-parse HEAD)
+          else
+            expected_sha="${{ steps.plan.outputs.remote_commit }}"
+          fi
+          if [ "$head_sha" != "$expected_sha" ]; then
+            echo "::error::PR head $head_sha does not match planned head $expected_sha"
+            exit 1
+          fi
+
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch required test on exact PR head
+        if: steps.changed.outputs.value == 'true'
+        id: dispatched_test
+        env:
+          PR_NUMBER: ${{ steps.generated_pr.outputs.number }}
+          PR_HEAD_SHA: ${{ steps.generated_pr.outputs.head_sha }}
+        run: |
+          response=$(gh api --method POST \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/dispatches" \
+            -f ref="$AUTOMATION_BRANCH")
+          test_run_id=$(jq -er '.workflow_run_id | select(type == "number")' \
+            <<<"$response")
+
+          for attempt in {1..10}; do
+            if run=$(gh run view "$test_run_id" \
+                --json event,headSha,status,conclusion,workflowName 2>/dev/null); then
+              break
+            fi
+            sleep 2
+          done
+          if [ -z "${run:-}" ]; then
+            echo "::error::dispatched test run $test_run_id was not readable"
+            exit 1
+          fi
+          if ! jq -e --arg sha "$PR_HEAD_SHA" \
+              '.event == "workflow_dispatch" and .headSha == $sha and
+               .workflowName == "Pull request CI"' <<<"$run" >/dev/null; then
+            echo "::error::dispatched test did not attach to PR head $PR_HEAD_SHA"
+            exit 1
+          fi
+
+          gh run watch "$test_run_id" --exit-status
+          completed=$(gh run view "$test_run_id" \
+            --json event,headSha,status,conclusion,workflowName,jobs)
+          if ! jq -e --arg sha "$PR_HEAD_SHA" \
+              '.event == "workflow_dispatch" and .headSha == $sha and
+               .status == "completed" and .conclusion == "success" and
+               any(.jobs[]; .name == "test" and .conclusion == "success")' \
+              <<<"$completed" >/dev/null; then
+            echo "::error::required test did not succeed on PR head $PR_HEAD_SHA"
+            exit 1
+          fi
+          current_head=$(gh pr view "$PR_NUMBER" --json headRefOid --jq '.headRefOid')
+          if [ "$current_head" != "$PR_HEAD_SHA" ]; then
+            echo "::error::PR head changed while test was running"
+            exit 1
+          fi
+          echo "run_id=$test_run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Auto-merge tested PR and dispatch deployment
+        if: steps.changed.outputs.value == 'true'
+        env:
+          PR_NUMBER: ${{ steps.generated_pr.outputs.number }}
+          PR_HEAD_SHA: ${{ steps.generated_pr.outputs.head_sha }}
+        run: |
+          gh pr merge --auto --squash "$PR_NUMBER"
+
+          merged=false
+          for attempt in {1..60}; do
+            state=$(gh pr view "$PR_NUMBER" --json state --jq '.state')
+            if [ "$state" = "MERGED" ]; then
+              merged=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$merged" != true ]; then
+            echo "::error::automation PR did not merge after required test passed"
+            exit 1
+          fi
+
+          merge_sha=$(gh pr view "$PR_NUMBER" --json mergeCommit --jq '.mergeCommit.oid')
+          main_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq '.sha')
+          if [ "$merge_sha" != "$main_sha" ]; then
+            echo "::error::main moved after automation merge; refusing ambiguous deploy"
+            exit 1
+          fi
+
+          response=$(gh api --method POST \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/deploy-site.yml/dispatches" \
+            -f ref=main)
+          deploy_run_id=$(jq -er '.workflow_run_id | select(type == "number")' \
+            <<<"$response")
+          for attempt in {1..10}; do
+            if deploy=$(gh run view "$deploy_run_id" \
+                --json event,headSha,workflowName 2>/dev/null); then
+              break
+            fi
+            sleep 2
+          done
+          if [ -z "${deploy:-}" ]; then
+            echo "::error::dispatched deploy run $deploy_run_id was not readable"
+            exit 1
+          fi
+          if ! jq -e --arg sha "$merge_sha" \
+              '.event == "workflow_dispatch" and .headSha == $sha and
+               .workflowName == "Deploy portfolio site"' \
+              <<<"$deploy" >/dev/null; then
+            echo "::error::deployment did not attach to merged main SHA"
+            exit 1
+          fi
+          gh run watch "$deploy_run_id" --exit-status

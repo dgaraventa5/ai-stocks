@@ -35,39 +35,90 @@ Planner behavior:
 - orphan branch, multiple PRs, wrong base/head, unexpected files, `DIRTY`/`BLOCKED` merge state, or failed required check: stop loudly;
 - a successful update enables squash auto-merge, which waits for branch protection's required `test` check.
 
-The workflow no longer pushes `main` or deploys Pages inline. The PAT-authored merge to `main` triggers the existing `Deploy portfolio site` push workflow.
+The workflow never pushes `main`. It uses only the job-scoped, same-repository `GITHUB_TOKEN`; no personal OAuth token, PAT, GitHub App secret, or external repository is involved.
 
-### Why a dedicated token is required
+### Built-in token recursion design
 
-Events produced by the default `GITHUB_TOKEN` normally do not recursively trigger other workflows. A PR created or updated only by that token can therefore remain without the required `test` run. Use a repository-only fine-grained PAT so the generated PR triggers ordinary `pull_request` CI. Never grant brokerage, organization, or unrelated repository access.
+GitHub normally suppresses workflow recursion for events created by `GITHUB_TOKEN`, and a token-authored pull request's ordinary `pull_request` run requires manual approval. GitHub documents two exceptions that always create runs: `workflow_dispatch` and `repository_dispatch`. V1 uses `workflow_dispatch` because it accepts an exact branch ref and GitHub defines its `GITHUB_SHA` as the last commit on that ref.
 
-Proposed secret:
+After creating or updating the PR, the daily workflow:
 
-- name: `AI_STOCKS_AUTOMATION_TOKEN`
-- resource owner: Dom's GitHub account
-- repository access: only `dgaraventa5/ai-stocks`
-- repository permissions: Metadata read, Administration read, Contents read/write, Pull requests read/write
-- expiration: 90 days or the shortest operationally acceptable interval
+1. reads the PR's exact `headRefOid`;
+2. dispatches `ci.yml` on `automation/performance-series` through the REST API;
+3. verifies the returned run is `workflow_dispatch`, has that exact head SHA, and contains a successful job named `test`;
+4. re-verifies the PR head did not move;
+5. enables squash auto-merge;
+6. verifies the merge commit is current `main`;
+7. explicitly dispatches and waits for `deploy-site.yml` on that merge SHA, because a `GITHUB_TOKEN` merge does not recursively trigger the normal `push` deployment.
 
-The workflow's own `GITHUB_TOKEN` remains `contents: read`.
+`ci.yml` ignores the sole generated path for ordinary `pull_request` triggering, avoiding an approval-required duplicate run, but retains normal PR CI for every other change. The explicit dispatch supplies the same required `test` context from the GitHub Actions app on the PR head commit.
+
+Official behavior:
+
+- https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs
+- https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch
+- https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event
+
+Workflow permissions are explicit and job-scoped: `actions: write` for the two dispatches, `contents: write` for the automation branch and merge, and `pull-requests: write` for PR creation/auto-merge. Repository defaults stay read-only. The complete refresh is capped at 30 minutes.
 
 ## Exact proposed GitHub settings
 
-Apply only after separate approval and before merging/activating this workflow:
+Apply only after separate approval, in one cutover window:
 
-1. Repository setting `allow_auto_merge=true`.
-2. Repository setting `delete_branch_on_merge=true`.
-3. Add secret `AI_STOCKS_AUTOMATION_TOKEN` with the scope above.
-4. Protect `main` with:
+1. Keep default workflow permissions read-only and allow GitHub Actions to create pull requests. GitHub's combined setting also says “approve,” but this workflow never calls review approval and branch protection grants no bypass.
+2. Set `allow_auto_merge=true` and `delete_branch_on_merge=true`.
+3. Protect `main` with:
    - require pull requests before merging;
    - required status check context: `test`;
-   - require branches to be up to date before merging (`strict=true`);
-   - no required human approval for the generated-data bot path;
+   - require branches to be up to date (`strict=true`);
+   - zero required human approvals for this deterministic path;
    - enforce protections for administrators;
-   - disallow force pushes;
-   - disallow deletions;
-   - do not grant bypass to the token owner or GitHub Actions.
-5. Keep default workflow permissions read-only. Do not enable GitHub Actions approval of PRs; this design does not depend on bot approval.
+   - disallow force pushes and deletions;
+   - do not grant any bypass actor.
+4. Arm the workflow only after verifying those settings by setting the non-secret repository variable `AUTOMATION_CUTOVER_ENABLED=true`. The job-scoped `GITHUB_TOKEN` cannot request Administration permission to introspect repository settings, so this explicit gate prevents pre-cutover runs; PR creation, dispatch SHA checks, auto-merge, and deployment checks then fail closed at runtime.
+
+Exact setting commands (do not run before approval):
+
+    gh api --method PUT \
+      repos/dgaraventa5/ai-stocks/actions/permissions/workflow \
+      -f default_workflow_permissions=read \
+      -F can_approve_pull_request_reviews=true
+
+    gh api --method PATCH repos/dgaraventa5/ai-stocks \
+      -F allow_auto_merge=true \
+      -F delete_branch_on_merge=true
+
+    gh api --method PUT \
+      repos/dgaraventa5/ai-stocks/branches/main/protection \
+      --input - <<'JSON'
+    {
+      "required_status_checks": {"strict": true, "contexts": ["test"]},
+      "enforce_admins": true,
+      "required_pull_request_reviews": {
+        "dismiss_stale_reviews": false,
+        "require_code_owner_reviews": false,
+        "required_approving_review_count": 0,
+        "require_last_push_approval": false
+      },
+      "restrictions": null,
+      "required_linear_history": true,
+      "allow_force_pushes": false,
+      "allow_deletions": false,
+      "block_creations": false,
+      "required_conversation_resolution": false,
+      "lock_branch": false,
+      "allow_fork_syncing": false
+    }
+    JSON
+
+    gh api repos/dgaraventa5/ai-stocks/actions/permissions/workflow
+    gh api repos/dgaraventa5/ai-stocks \
+      --jq '{allow_auto_merge,delete_branch_on_merge}'
+    gh api repos/dgaraventa5/ai-stocks/branches/main/protection \
+      --jq '{required_status_checks,enforce_admins,required_pull_request_reviews,allow_force_pushes,allow_deletions}'
+
+    gh variable set AUTOMATION_CUTOVER_ENABLED \
+      --repo dgaraventa5/ai-stocks --body true
 
 If policy later requires a human approval, remove automatic merge from the daily workflow and accept that daily publication waits for attended approval.
 
@@ -127,11 +178,25 @@ Fixtures: `tests/fixtures/scheduled_ops/`.
 
 ## Activation checklist
 
-1. Review and merge the implementation PR.
-2. Obtain separate approval for GitHub settings and cron activation.
-3. Create the scoped PAT and repository secret; verify its expiration reminder.
-4. Apply the exact branch protection and auto-merge settings above.
-5. Manually dispatch `Daily site refresh` once. Verify one scoped PR, `test` success, auto-merge, and subsequent `Deploy portfolio site` success.
+1. Obtain separate approval for the GitHub settings and cron activation.
+2. Merge the implementation PR. The new daily workflow fails closed until all settings below are applied.
+3. In the same cutover window, apply the exact Actions, auto-merge, branch deletion, and branch-protection commands above. No secret is created.
+4. Manually dispatch `Daily site refresh` once:
+
+       gh workflow run daily-refresh.yml --ref main
+       run_id=$(gh run list --workflow daily-refresh.yml --event workflow_dispatch \
+         --limit 1 --json databaseId --jq '.[0].databaseId')
+       gh run watch "$run_id" --exit-status
+
+5. Verify the workflow-created PR head received a successful `test` check from the explicit dispatch, auto-merged, and explicitly dispatched a successful deployment:
+
+       gh pr list --state all --head automation/performance-series \
+         --limit 1 --json number,state,headRefOid,mergeCommit,url
+       gh run list --workflow ci.yml --event workflow_dispatch --limit 5 \
+         --json databaseId,headSha,status,conclusion,url
+       gh run list --workflow deploy-site.yml --event workflow_dispatch --limit 5 \
+         --json databaseId,headSha,status,conclusion,url
+
 6. Copy wrappers into the active profile's `$HERMES_HOME/scripts/`.
 7. Register all three Hermes jobs paused from `cron-definitions.json`.
 8. Run each paused job once with fixture inputs or an equivalent copied dry-run wrapper; inspect delivery and heartbeat state.
@@ -141,7 +206,7 @@ Fixtures: `tests/fixtures/scheduled_ops/`.
 ## Rollback
 
 1. Pause all three Hermes jobs; do not enable Claude automatically.
-2. Disable the `Daily site refresh` schedule or remove `AI_STOCKS_AUTOMATION_TOKEN` to fail closed.
+2. Set `AUTOMATION_CUTOVER_ENABLED=false`, then disable `Daily site refresh`; there is no personal credential or secret to revoke.
 3. Close (do not merge) any open `automation/performance-series` PR after preserving its URL and diff.
 4. Revert the implementation PR on a new branch and run the full suite.
 5. Remove branch-protection/settings changes only with separate approval; never bypass the `test` gate to restore direct pushes.
