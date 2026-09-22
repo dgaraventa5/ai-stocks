@@ -23,7 +23,7 @@ from copy import copy
 
 from openpyxl import load_workbook
 
-XLSX = '/Users/dom/Desktop/ai-stocks/00-master/ai_supply_chain_scoring.xlsx'
+XLSX = '/Users/dom/Hermes/projects/ai-stocks/00-master/ai_supply_chain_scoring.xlsx'
 
 # Banded conversion, same nesting style as the other objective metrics.
 DMA_BAND = ('IF({c}{r}>=85,100,IF({c}{r}>=70,90,IF({c}{r}>=55,75,'

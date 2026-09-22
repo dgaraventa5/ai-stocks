@@ -8,7 +8,7 @@ if it changes, re-register the task.
 
 You are running the earnings sentinel for the AI Supply Chain research
 project (spec docs/superpowers/specs/2026-08-13-earnings-sentinel-design.md).
-Working directory: /Users/dom/Desktop/ai-stocks. Use the REAL current date
+Working directory: /Users/dom/Hermes/projects/ai-stocks. Use the REAL current date
 (`date +%F`); never hardcode dates. Read CLAUDE.md rules 9, 12, 25, 29, 31
 before starting.
 

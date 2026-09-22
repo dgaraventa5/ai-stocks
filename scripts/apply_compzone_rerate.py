@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from openpyxl import load_workbook
 
-XLSX = '/Users/dom/Desktop/ai-stocks/00-master/ai_supply_chain_scoring.xlsx'
+XLSX = '/Users/dom/Hermes/projects/ai-stocks/00-master/ai_supply_chain_scoring.xlsx'
 DATE = '2026-06-10'
 COL = {'D1': 20, 'D2': 21, 'D5': 24}
 
