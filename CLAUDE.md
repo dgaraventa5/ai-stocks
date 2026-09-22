@@ -858,16 +858,15 @@ deployed by `.github/workflows/deploy-site.yml` on push to `main`.
   base; real capital, share counts, and cost basis are excluded by design.
   `tests/test_export_site_data.py::test_privacy_no_real_dollars_anywhere` is
   the regression gate — never weaken it.
-- **Performance series:** `tracking/performance-series.json` is written by
-  `track_performance.py`. `deploy-site.yml` needs no network/yfinance;
-  `daily-refresh.yml` (weekday crons 21:05 + 22:35 + 00:35 UTC, targeting ~5pm
-  ET right after the 4pm ET close) rebuilds it
-  with `--series-only`, commits if changed (holidays self-skip), and redeploys
-  inline — dashboard/performance pages stay daily-fresh. Three crons because
-  GitHub's `schedule` trigger is best-effort and drops runs (it dropped
-  2026-06-15 entirely); the commit-if-changed guard makes the backstops
-  idempotent. The weekly Cowork routine still owns the narrative
-  `performance-log.md`.
+- **Performance series:** `daily-refresh.yml` is the sole scheduled writer of
+  `tracking/performance-series.json`. It rebuilds with `track_performance.py
+  --series-only`, validates the full suite, and creates or updates the scoped
+  `automation/performance-series` PR instead of pushing `main`. It explicitly
+  dispatches CI on the exact PR head; the required `test` check must pass before
+  auto-merge. Because a `GITHUB_TOKEN` merge does not trigger another workflow,
+  it then explicitly dispatches `deploy-site.yml` on the verified merge SHA.
+  The three weekday backstops remain idempotent, and `performance-log.md`
+  remains attended. See `docs/ops/scheduled-automation-v1.md`.
 - **Scan links:** `tracking/notion-scan-links.json` maps scan dates to Notion
   URLs; the Cowork weekly routine appends to it.
 - The spec lives at `docs/superpowers/specs/2026-06-10-portfolio-site-design.md`.
