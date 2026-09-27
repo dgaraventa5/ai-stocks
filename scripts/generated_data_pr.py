@@ -7,13 +7,13 @@ from pathlib import Path
 import sys
 
 
-AUTOMATION_BRANCH = "automation/performance-series"
 BASE_BRANCH = "main"
 ALLOWED_PATH = "tracking/performance-series.json"
 
 
 def plan_update(prs: list[dict], branch_exists: bool,
-                desired_sha: str, branch_sha: str | None) -> dict:
+                desired_sha: str, branch_sha: str | None,
+                automation_branch: str) -> dict:
     """Return a deterministic action without mutating Git or GitHub."""
     if not prs and not branch_exists:
         return {"action": "create", "reason": "no existing automation PR"}
@@ -23,7 +23,8 @@ def plan_update(prs: list[dict], branch_exists: bool,
         return {"action": "blocked", "reason": "multiple automation PRs exist"}
 
     pr = prs[0]
-    if pr.get("headRefName") != AUTOMATION_BRANCH or pr.get("baseRefName") != BASE_BRANCH:
+    if (pr.get("headRefName") != automation_branch or
+            pr.get("baseRefName") != BASE_BRANCH):
         return {"action": "blocked", "reason": "automation PR ownership mismatch"}
     paths = sorted(file["path"] for file in pr.get("files", []))
     if paths != [ALLOWED_PATH]:
@@ -49,13 +50,15 @@ def plan_update(prs: list[dict], branch_exists: bool,
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument("--automation-branch", required=True)
     parser.add_argument("--github-output", type=Path)
     args = parser.parse_args(argv)
     data = json.loads(args.input.read_text())
     plan = plan_update(
         data.get("prs", []), bool(data.get("branch_exists")),
         str(data["desired_sha"]),
-        str(data["branch_sha"]) if data.get("branch_sha") is not None else None)
+        str(data["branch_sha"]) if data.get("branch_sha") is not None else None,
+        args.automation_branch)
     print(json.dumps(plan, sort_keys=True))
     if args.github_output:
         lines = [f"action={plan['action']}", f"reason={plan['reason']}"]

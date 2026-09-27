@@ -9,22 +9,18 @@ on:
     - cron: '35 0 * * 2-6'
   workflow_dispatch:
 
-# Same-repository GITHUB_TOKEN only. Each write scope is required by one step:
-# branch/merge (contents), PR creation (pull-requests), explicit CI/deploy
-# workflow_dispatch recursion exceptions (actions).
+# The built-in token only reads the repository. Mutations use a dedicated
+# GitHub App installation token scoped to this repository.
 permissions:
-  actions: write
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: daily-refresh
   cancel-in-progress: false
 
 env:
-  AUTOMATION_BRANCH: automation/performance-series
+  AUTOMATION_BRANCH: automation/performance-series-v2
   GENERATED_PATH: tracking/performance-series.json
-  GH_TOKEN: ${{ github.token }}
   AUTOMATION_CUTOVER_ENABLED: ${{ vars.AUTOMATION_CUTOVER_ENABLED }}
 
 jobs:
@@ -39,9 +35,19 @@ jobs:
             exit 1
           fi
 
+      - name: Create repository-scoped automation token
+        id: app_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.AI_STOCKS_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AI_STOCKS_AUTOMATION_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          token: ${{ steps.app_token.outputs.token }}
 
       - uses: actions/setup-python@v6
         with:
@@ -76,6 +82,8 @@ jobs:
       - name: Plan generated-data PR
         if: steps.changed.outputs.value == 'true'
         id: plan
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
         run: |
           branch_exists=false
           remote_commit=""
@@ -111,6 +119,7 @@ jobs:
 
           python scripts/generated_data_pr.py \
             --input /tmp/generated-pr-input.json \
+            --automation-branch "$AUTOMATION_BRANCH" \
             --github-output "$GITHUB_OUTPUT"
           echo "remote_commit=$remote_commit" >> "$GITHUB_OUTPUT"
           asof=$(python -c \
@@ -122,8 +131,8 @@ jobs:
           steps.changed.outputs.value == 'true' &&
           (steps.plan.outputs.action == 'create' || steps.plan.outputs.action == 'update')
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name 'ai-stocks-automation[bot]'
+          git config user.email 'ai-stocks-automation[bot]@users.noreply.github.com'
           git add -- "$GENERATED_PATH"
           git commit -m "chore(data): daily performance series ${{ steps.plan.outputs.asof }}"
 
@@ -138,13 +147,15 @@ jobs:
       - name: Create or locate generated-data PR
         if: steps.changed.outputs.value == 'true'
         id: generated_pr
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
         run: |
           if [ "${{ steps.plan.outputs.action }}" = "create" ]; then
             gh pr create \
               --base main \
               --head "$AUTOMATION_BRANCH" \
               --title "chore(data): daily performance series" \
-              --body "Automated single-file update for \`$GENERATED_PATH\`. Full tests passed before push. Explicit workflow dispatch attaches the required \`test\` check to this head SHA."
+              --body "Automated single-file update for \`$GENERATED_PATH\`. Full tests must pass in the PR-associated \`pull_request\` run before auto-merge."
           fi
 
           number=$(gh pr list --state open --head "$AUTOMATION_BRANCH" \
@@ -165,63 +176,58 @@ jobs:
           echo "number=$number" >> "$GITHUB_OUTPUT"
           echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
 
-      - name: Dispatch required test on exact PR head
+      - name: Require PR-associated test and auto-merge
         if: steps.changed.outputs.value == 'true'
-        id: dispatched_test
         env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
           PR_NUMBER: ${{ steps.generated_pr.outputs.number }}
           PR_HEAD_SHA: ${{ steps.generated_pr.outputs.head_sha }}
         run: |
-          response=$(gh api --method POST \
-            -H 'X-GitHub-Api-Version: 2026-03-10' \
-            "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/dispatches" \
-            -f ref="$AUTOMATION_BRANCH")
-          test_run_id=$(jq -er '.workflow_run_id | select(type == "number")' \
-            <<<"$response")
-
-          for attempt in {1..10}; do
-            if run=$(gh run view "$test_run_id" \
-                --json event,headSha,status,conclusion,workflowName 2>/dev/null); then
+          found=false
+          for attempt in {1..30}; do
+            checks=$(gh pr checks "$PR_NUMBER" --required \
+              --json name,state,bucket,event,workflow 2>/dev/null || true)
+            if jq -e 'any(.[]; .name == "test" and .event == "pull_request")' \
+                <<<"$checks" >/dev/null; then
+              found=true
               break
             fi
             sleep 2
           done
-          if [ -z "${run:-}" ]; then
-            echo "::error::dispatched test run $test_run_id was not readable"
-            exit 1
-          fi
-          if ! jq -e --arg sha "$PR_HEAD_SHA" \
-              '.event == "workflow_dispatch" and .headSha == $sha and
-               .workflowName == "Pull request CI"' <<<"$run" >/dev/null; then
-            echo "::error::dispatched test did not attach to PR head $PR_HEAD_SHA"
+          if [ "$found" != true ]; then
+            echo "::error::PR-associated required test did not appear"
             exit 1
           fi
 
-          gh run watch "$test_run_id" --exit-status
-          completed=$(gh run view "$test_run_id" \
-            --json event,headSha,status,conclusion,workflowName,jobs)
-          if ! jq -e --arg sha "$PR_HEAD_SHA" \
-              '.event == "workflow_dispatch" and .headSha == $sha and
-               .status == "completed" and .conclusion == "success" and
-               any(.jobs[]; .name == "test" and .conclusion == "success")' \
-              <<<"$completed" >/dev/null; then
-            echo "::error::required test did not succeed on PR head $PR_HEAD_SHA"
+          gh pr checks "$PR_NUMBER" --required --watch --fail-fast --interval 5
+          checks=$(gh pr checks "$PR_NUMBER" --required \
+            --json name,state,bucket,event,workflow)
+          if ! jq -e \
+              'any(.[]; .name == "test" and .event == "pull_request" and
+                         .bucket == "pass")' <<<"$checks" >/dev/null; then
+            echo "::error::required test did not pass in pull_request context"
             exit 1
           fi
+
+          check_runs=$(gh api \
+            "repos/$GITHUB_REPOSITORY/commits/$PR_HEAD_SHA/check-runs?filter=latest")
+          if ! jq -e --argjson pr "$PR_NUMBER" \
+              'any(.check_runs[]; .name == "test" and .app.id == 15368 and
+                                   .conclusion == "success" and
+                                   any(.pull_requests[]; .number == $pr))' \
+              <<<"$check_runs" >/dev/null; then
+            echo "::error::required test was not reported by GitHub Actions app 15368"
+            exit 1
+          fi
+
           current_head=$(gh pr view "$PR_NUMBER" --json headRefOid --jq '.headRefOid')
           if [ "$current_head" != "$PR_HEAD_SHA" ]; then
-            echo "::error::PR head changed while test was running"
+            echo "::error::PR head changed while tests were running"
             exit 1
           fi
-          echo "run_id=$test_run_id" >> "$GITHUB_OUTPUT"
 
-      - name: Auto-merge tested PR and dispatch deployment
-        if: steps.changed.outputs.value == 'true'
-        env:
-          PR_NUMBER: ${{ steps.generated_pr.outputs.number }}
-          PR_HEAD_SHA: ${{ steps.generated_pr.outputs.head_sha }}
-        run: |
-          gh pr merge --auto --squash "$PR_NUMBER"
+          gh pr merge --auto --squash "$PR_NUMBER" \
+            --match-head-commit "$PR_HEAD_SHA"
 
           merged=false
           for attempt in {1..60}; do
@@ -240,32 +246,22 @@ jobs:
           merge_sha=$(gh pr view "$PR_NUMBER" --json mergeCommit --jq '.mergeCommit.oid')
           main_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq '.sha')
           if [ "$merge_sha" != "$main_sha" ]; then
-            echo "::error::main moved after automation merge; refusing ambiguous deploy"
+            echo "::error::main moved after automation merge; refusing ambiguous deploy verification"
             exit 1
           fi
 
-          response=$(gh api --method POST \
-            -H 'X-GitHub-Api-Version: 2026-03-10' \
-            "repos/$GITHUB_REPOSITORY/actions/workflows/deploy-site.yml/dispatches" \
-            -f ref=main)
-          deploy_run_id=$(jq -er '.workflow_run_id | select(type == "number")' \
-            <<<"$response")
-          for attempt in {1..10}; do
-            if deploy=$(gh run view "$deploy_run_id" \
-                --json event,headSha,workflowName 2>/dev/null); then
+          deploy_run_id=""
+          for attempt in {1..30}; do
+            deploy_run_id=$(gh run list --workflow deploy-site.yml \
+              --commit "$merge_sha" --event push --limit 1 \
+              --json databaseId --jq '.[0].databaseId // empty')
+            if [ -n "$deploy_run_id" ]; then
               break
             fi
             sleep 2
           done
-          if [ -z "${deploy:-}" ]; then
-            echo "::error::dispatched deploy run $deploy_run_id was not readable"
-            exit 1
-          fi
-          if ! jq -e --arg sha "$merge_sha" \
-              '.event == "workflow_dispatch" and .headSha == $sha and
-               .workflowName == "Deploy portfolio site"' \
-              <<<"$deploy" >/dev/null; then
-            echo "::error::deployment did not attach to merged main SHA"
+          if [ -z "$deploy_run_id" ]; then
+            echo "::error::merge push did not trigger deployment"
             exit 1
           fi
           gh run watch "$deploy_run_id" --exit-status

@@ -17,13 +17,14 @@ def test_daily_refresh_validates_before_commit_and_push():
     assert workflow.index(test_step) < workflow.index(commit_step)
 
 
-def test_pull_request_ci_is_least_privilege_and_dispatchable():
+def test_pull_request_ci_is_least_privilege_and_pr_associated():
     workflow_path = ROOT / ".github/workflows/ci.yml"
 
     assert workflow_path.exists()
     workflow = workflow_path.read_text()
     assert "pull_request:" in workflow
-    assert "workflow_dispatch:" in workflow
+    assert "paths-ignore:" not in workflow
+    assert "workflow_dispatch:" not in workflow
     assert "permissions:\n  contents: read" in workflow
     assert "concurrency:" in workflow
     assert "cancel-in-progress: true" in workflow
@@ -61,22 +62,24 @@ def test_hermes_context_is_bounded_and_carries_safety_rules():
         assert required in context
 
 
-def test_daily_refresh_uses_builtin_token_and_explicit_dispatches():
+def test_daily_refresh_uses_repo_scoped_app_and_pr_associated_check():
     workflow = (ROOT / ".github/workflows/daily-refresh.yml").read_text()
 
-    assert "AI_STOCKS_AUTOMATION_TOKEN" not in workflow
-    assert "GH_TOKEN: ${{ github.token }}" in workflow
-    assert "automation/performance-series" in workflow
+    assert "actions/create-github-app-token@v2" in workflow
+    assert "AI_STOCKS_AUTOMATION_APP_ID" in workflow
+    assert "AI_STOCKS_AUTOMATION_PRIVATE_KEY" in workflow
+    assert "automation/performance-series-v2" in workflow
     assert "scripts/generated_data_pr.py" in workflow
+    assert '--automation-branch "$AUTOMATION_BRANCH"' in workflow
     assert "gh pr create" in workflow
+    assert "gh pr checks \"$PR_NUMBER\" --required --watch --fail-fast" in workflow
+    assert 'any(.check_runs[]; .name == "test" and .app.id == 15368' in workflow
     assert "gh pr merge --auto --squash" in workflow
+    assert "--match-head-commit \"$PR_HEAD_SHA\"" in workflow
     assert "git push origin main" not in workflow
-    assert "permissions:\n  actions: write\n  contents: write\n  pull-requests: write" in workflow
-    assert "/actions/workflows/ci.yml/dispatches" in workflow
-    assert "/actions/workflows/deploy-site.yml/dispatches" in workflow
-    assert "gh run watch \"$test_run_id\" --exit-status" in workflow
-    assert "headSha" in workflow
-    assert "workflow_dispatch" in workflow
+    assert "permissions:\n  contents: read" in workflow
+    assert "/actions/workflows/ci.yml/dispatches" not in workflow
+    assert "/actions/workflows/deploy-site.yml/dispatches" not in workflow
     assert "timeout-minutes: 30" in workflow
 
 
@@ -110,9 +113,17 @@ def test_daily_refresh_fails_closed_without_admin_read_permission():
     assert "/actions/permissions/workflow" not in workflow
 
 
-def test_docs_require_no_personal_credential_secret():
+def test_docs_record_dispatch_failure_and_repo_scoped_app_recovery():
     design = (ROOT / "docs/ops/scheduled-automation-v1.md").read_text()
 
     assert "AI_STOCKS_AUTOMATION_TOKEN" not in design
     assert "fine-grained PAT" not in design
-    assert "GITHUB_TOKEN" in design
+    assert "workflow_dispatch" in design
+    assert "does not satisfy" in design
+    assert "GitHub App" in design
+    assert "Actions: read" in design
+    assert "Checks: read" in design
+    assert "Contents: read/write" in design
+    assert "Pull requests: read/write" in design
+    assert "PR 74" in design
+    assert "automation/performance-series-v2" in design
