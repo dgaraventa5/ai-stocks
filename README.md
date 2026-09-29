@@ -114,6 +114,23 @@ See [`scripts/README.md`](scripts/README.md) for the full script catalog and com
 
 ---
 
+## Portfolio construction
+
+The live model selects tradable names by canonical Watchlist score: enter at
+rank 15 or better, exit below rank 18 after the confirmation clock, and retain
+incumbents in the 16–18 hysteresis band. Current holdings are sized equally
+across the invested budget (`tracking/portfolio-config.json` has
+`sizing.mode = "equal"`); conviction tiers do not set position size.
+
+`00-master/portfolio.xlsx` `Targets` remains the source of truth for roster
+membership and target weights. The canonical current score and tier come from
+`scripts/recalc_watchlist.py`, not the snapshot columns on `Targets`. Monthly
+drift-band checks keep the live book near equal weight. The retired inverse-vol
+sizer remains an `INVVOL_ROSTER` shadow for the pre-registered comparison; it
+does not size live positions.
+
+---
+
 ## Portfolio site
 
 A password-gated static site for close friends lives in [`site/`](site) and deploys to Cloudflare Pages via [`.github/workflows/deploy-site.yml`](.github/workflows/deploy-site.yml) on every push to `main`.

@@ -1,5 +1,5 @@
 {
-  "_comment": "Portfolio-construction v2 switches + params (spec 2026-08-07). Modes stay tier/score until Dom approves the migration (scripts/migrate_portfolio_v2.py --apply). Selection N/M live on the Sizing Rules sheet (rule 26); this file owns sizing params and the mode switches. Do NOT tune params against the 10-week history (spec Non-goals).",
+  "_comment": "Live portfolio construction: rank selection plus equal-weight sizing (Dom-approved 2026-09-08; see CLAUDE.md rule 33). Selection N/M live on the Sizing Rules sheet. drift_band governs the live monthly equal-weight check; lookback/sigma_floor/max_weight/min_weight remain for the INVVOL_ROSTER shadow only. Do NOT tune params against the short history.",
   "sizing": {
     "mode": "equal",
     "lookback": 60,

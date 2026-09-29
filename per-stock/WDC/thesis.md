@@ -2,8 +2,8 @@
 
 **Layer:** 08 — Servers, Systems & Storage infrastructure / nearline mass-capacity HDD
 **Last reviewed:** 2026-06-17
-**Current conviction:** ✓✓ (Total 78.0)
-**Current position size:** ~6.6% of portfolio (76-bar model)
+**Current conviction:** ✓ (canonical Watchlist recalc 68.2)
+**Current target allocation:** 0% — not a current Targets holding
 **Thesis-break trigger:** A major cloud customer cancels/declines to renew an LTA, OR NAND/SSD reaches $/TB parity with nearline HDD at data-center scale — either would break the "sold-out, structural-pricing-power" core of the thesis and de-rate the ~21x-sales multiple hard.
 
 ---

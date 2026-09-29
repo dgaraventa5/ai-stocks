@@ -2,8 +2,8 @@
 
 **Layer:** 06 Silicon — Memory
 **Last reviewed:** 2026-06-26
-**Current conviction:** ✓✓✓ (86.4 total score, up from 79.35 pre-Q3)
-**Current position size:** ~7% of model portfolio (HOLD)
+**Current conviction:** ✓✓ (canonical Watchlist recalc 78.4)
+**Current target allocation:** 6.25% of portfolio (per Targets sheet, equal-weight mode)
 **Thesis-break trigger:** HBM4 fails Vera Rubin qualification at NVIDIA, OR hyperscaler capex drops >30% materially before SCA terms expire
 
 ---

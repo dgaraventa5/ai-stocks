@@ -2,8 +2,8 @@
 
 **Layer:** 11 Robotics & Physical AI / Machine vision & perception
 **Last reviewed:** 2026-08-04
-**Current conviction:** ✓✓ (74.6, 2026-08-02 batch)
-**Current position size:** model holding (entered 2026-08-04 — cleared the reverted 74.5 entry threshold in the merge reconciliation; had not cleared the prior 76.0)
+**Current conviction:** ✓✓ (canonical Watchlist recalc 74.6)
+**Current target allocation:** 0% — not a current Targets holding (foreign local listing; rule-30 tradability filter)
 **Thesis-break trigger:** operating margin breaking decisively below ~50% (the business-model moat IS the margin), or Asia semi/electronics demand — the named growth engine — rolling over for 2+ quarters
 
 ---

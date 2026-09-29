@@ -5,6 +5,23 @@ import pytest
 import export_site_data as ex
 
 
+@pytest.fixture(autouse=True)
+def canonical_position_scores(monkeypatch):
+    """Targets owns membership/weights; Watchlist recalc owns score/tier."""
+    blank_categories = {
+        'Value': None, 'Quality': None, 'Growth': None,
+        'AI': None, 'Momentum': None, 'Risk': None,
+    }
+    results = [
+        {'ticker': 'NVDA', 'layer': '06', 'TOTAL': 91.2, 'Tier': '✓✓✓',
+         **blank_categories},
+        {'ticker': 'TSM', 'layer': '05', 'TOTAL': 72.4, 'Tier': '✓✓',
+         **blank_categories},
+
+    ]
+    monkeypatch.setattr(ex.recalc_watchlist, 'recalc', lambda xlsx: results)
+
+
 def test_positions_only_included_rows(repo):
     pos = ex.export_positions(repo)
     assert [p['ticker'] for p in pos] == ['NVDA', 'TSM']   # ARM excluded
@@ -17,9 +34,36 @@ def test_positions_fields_and_scaling(repo):
         'ticker': 'NVDA', 'company': 'NVIDIA Corp',
         'layer_num': '06', 'layer': 'Silicon',
         'weight': 60.0, 'notional': 6000,
-        'score': 83.3, 'tier': '✓✓',
+        'score': 91.2, 'tier': '✓✓✓',
     }
     assert sum(p['notional'] for p in pos) == 10000
+
+
+def test_positions_ignore_stale_targets_score_and_tier(repo):
+    pos = {row['ticker']: row for row in ex.export_positions(repo)}
+    assert pos['NVDA']['score'] == 91.2
+    assert pos['NVDA']['tier'] == '✓✓✓'
+
+
+def test_positions_fail_closed_when_included_ticker_missing_from_watchlist_recalc(
+        repo, monkeypatch, capsys):
+    monkeypatch.setattr(ex.recalc_watchlist, 'recalc', lambda xlsx: [
+        {'ticker': 'NVDA', 'TOTAL': 91.2, 'Tier': '✓✓✓'},
+    ])
+    with pytest.raises(SystemExit):
+        ex.export_positions(repo)
+    assert 'TSM' in capsys.readouterr().err
+
+
+def test_positions_fail_closed_when_included_ticker_is_unscored(
+        repo, monkeypatch, capsys):
+    monkeypatch.setattr(ex.recalc_watchlist, 'recalc', lambda xlsx: [
+        {'ticker': 'NVDA', 'TOTAL': 91.2, 'Tier': '✓✓✓'},
+        {'ticker': 'TSM', 'TOTAL': None, 'Tier': None},
+    ])
+    with pytest.raises(SystemExit):
+        ex.export_positions(repo)
+    assert 'TSM' in capsys.readouterr().err
 
 
 def test_positions_schema_surprise_fails_loudly(repo):
@@ -151,12 +195,12 @@ def test_watchlist_fields_and_held_flags(repo):
     assert nvda['layer'] == 'Silicon'
     assert nvda['held'] is True
     assert by['TSM']['held'] is False
-    # The miniature Watchlist has no scoring inputs, so every score is blank;
-    # blank-scored rows still export (with score/tier None), sorted last.
+    # Category inputs remain blank in the miniature Watchlist, while the
+    # canonical recalc fixture supplies current TOTAL/Tier values.
     assert all(k in nvda for k in
                ('value', 'quality', 'growth', 'ai', 'momentum', 'risk',
                 'score', 'tier'))
-    assert nvda['score'] is None and nvda['tier'] is None
+    assert nvda['score'] == 91.2 and nvda['tier'] == '✓✓✓'
 
 
 def test_methodology_weights_live_from_sheet(repo):
@@ -184,7 +228,7 @@ def test_main_writes_all_files(repo):
     assert meta['as_of'] == '2026-05-28'
     assert meta['last_rebalance'] == '2026-06-10'
     assert meta['holdings'] == 2
-    assert meta['scored'] == 0   # miniature Watchlist has no scoring inputs
+    assert meta['scored'] == 2   # canonical recalc fixture scores both names
 
 
 def test_privacy_no_real_dollars_anywhere(repo):

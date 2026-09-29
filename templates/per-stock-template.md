@@ -2,8 +2,8 @@
 
 **Layer:** {e.g., Power Generation / IPPs}
 **Last reviewed:** {YYYY-MM-DD}
-**Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
-**Current position size:** {0% / X% of portfolio}
+**Current conviction:** {current Tier from the canonical Watchlist recalc: ✗ / ? / ✓ / ✓✓ / ✓✓✓}
+**Current target allocation:** {0% if absent from Targets; otherwise current Target % — live equal-weight sizing is independent of conviction}
 **Thesis-break trigger:** {what single development would force exit}
 
 ---

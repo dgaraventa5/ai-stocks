@@ -1,8 +1,13 @@
-# Spec: Portfolio construction v2 — inverse-vol sizing, top-N selection, band shadows
+# Spec: Portfolio construction v2 — rank selection, equal-weight live sizing, band shadows
 
 **Date:** 2026-08-07
-**Status:** Proposal — the live portfolio is NOT to be changed until Dom approves the migration table in §A3
+**Status:** Implemented; Part A's original inverse-vol design is historical and was superseded by the Dom-approved 2026-09-08 amendment below
 **Supersedes:** the standalone inverse-vol sizing spec (folded in here as Part A)
+
+**Current state:** rank selection (N=15/M=18) is live. Live holdings are
+equal-weighted (`sizing.mode = "equal"`); inverse-vol is retained only as the
+`INVVOL_ROSTER` shadow. The original Part-A values and migration record below
+are preserved as dated design history, not current operating instructions.
 
 This is one change-set with three parts, in build order:
 - **Part A — Sizing:** replace tier-proportional position sizes with inverse-volatility sizes. (Evidence-driven; approved direction.)
