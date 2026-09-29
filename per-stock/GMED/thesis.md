@@ -2,8 +2,8 @@
 
 **Layer:** 11 Robotics & Physical AI / Surgical & medical robotics
 **Last reviewed:** 2026-08-04
-**Current conviction:** ✓✓ (76.6, 2026-08-02 batch — top of the Layer-11 cohort)
-**Current position size:** model holding (entered 2026-08-02 via rule-25 auto-reweight, confirmed at 74.5 entry in the 2026-08-04 merge reconciliation)
+**Current conviction:** ✓✓ (canonical Watchlist recalc 76.6)
+**Current target allocation:** 6.25% of portfolio (per Targets sheet, equal-weight mode)
 **Thesis-break trigger:** organic growth converging to spine-market rate while disclosed Enabling Technologies share stalls at ~3.5% — that would make this a value stock mislabeled as a robotics play
 
 ---

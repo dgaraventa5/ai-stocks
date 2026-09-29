@@ -2,8 +2,8 @@
 
 **Layer:** 10 Models, Software & Applications / AI advertising (Layer-11 AI Adopter, Bucket 3)
 **Last reviewed:** 2026-06-26
-**Current conviction:** ✓✓ (79.4 total score; above 76 portfolio bar, potential ENTER on WDC exit)
-**Current position size:** 0% (not yet in portfolio)
+**Current conviction:** ✓✓ (canonical Watchlist recalc 75.2)
+**Current target allocation:** 6.25% of portfolio (per Targets sheet, equal-weight mode)
 **Thesis-break trigger:** U.S. DAUq growth turns negative two consecutive quarters, OR Google data-licensing agreement is not renewed, OR ad revenue growth falls below 30% YoY with no acceleration path
 
 ---

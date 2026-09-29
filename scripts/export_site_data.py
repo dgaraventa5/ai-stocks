@@ -16,8 +16,11 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import NoReturn
 
 import openpyxl
+
+import recalc_watchlist
 
 NOTIONAL = 10_000.0
 
@@ -32,7 +35,7 @@ TARGETS_HEADERS = ['Ticker', 'Layer', 'TOTAL', 'Tier', 'Rank', 'Status',
                    'Include?', 'Override', 'Target %', 'Notes']
 
 
-def fail(msg: str) -> None:
+def fail(msg: str) -> NoReturn:
     print(f'EXPORT ERROR: {msg}', file=sys.stderr)
     raise SystemExit(1)
 
@@ -57,6 +60,11 @@ def export_positions(root: Path) -> list[dict]:
     if headers != TARGETS_HEADERS:
         fail(f'Targets headers changed: {headers}')
     names = _company_names(root)
+    current_scores = {
+        row['ticker']: row
+        for row in recalc_watchlist.recalc(
+            str(root / '00-master' / 'ai_supply_chain_scoring.xlsx'))
+    }
     out = []
     for row in ws.iter_rows(min_row=3, values_only=True):
         include = str(row[6]).strip().upper() if row[6] is not None else ''
@@ -67,6 +75,11 @@ def export_positions(root: Path) -> list[dict]:
             warn(f'{row[0]}: unrecognized layer {row[1]!r}')
         if row[8] is None:
             fail(f'{row[0]}: included row has no Target %')
+        current = current_scores.get(row[0])
+        if (current is None or current.get('TOTAL') is None
+                or current.get('Tier') is None):
+            fail(f'{row[0]}: included row is missing or unscored in canonical '
+                 'Watchlist recalc')
         out.append({
             'ticker': row[0],
             'company': names.get(row[0], row[0]),
@@ -74,8 +87,8 @@ def export_positions(root: Path) -> list[dict]:
             'layer': LAYERS.get(layer_num, str(row[1])),
             'weight': round(float(row[8]), 2),
             'notional': round(float(row[8]) / 100 * NOTIONAL),
-            'score': round(float(row[2]), 1),
-            'tier': row[3],
+            'score': round(float(current['TOTAL']), 1),
+            'tier': current['Tier'],
         })
     if not out:
         fail('no included positions found in Targets')

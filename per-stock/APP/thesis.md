@@ -2,8 +2,8 @@
 
 **Layer:** 10 — Models, Software & Applications / AI advertising
 **Last reviewed:** 2026-06-17
-**Current conviction:** ✓✓ (Total 78.9)
-**Current position size:** ~7.0% of portfolio (76-bar model)
+**Current conviction:** ✓ (canonical Watchlist recalc 69.5)
+**Current target allocation:** 0% — not a current Targets holding
 **Thesis-break trigger:** The SEC/short-seller overhang resolves into a documented finding that AXON's ad-performance metrics were materially misstated, OR the e-commerce expansion stalls (self-serve GA slips / ROAS disappoints) — either breaks the "durable AI flywheel with a 5–10x adjacent TAM" core.
 
 ---
