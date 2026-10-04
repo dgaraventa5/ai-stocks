@@ -639,6 +639,14 @@ excluded from the buy side (`generate_trade_ticket._exit_pending` →
 weight on 2026-09-09 with its exit clock already running — buy-then-sell
 within a week is churn, not a signal (Dom).
 
+**Amendment 2026-10-04 (Dom-approved): dust guard lowered from $25 to $5.**
+`MIN_ORDER_NOTIONAL` (`trade_ticket.DEFAULTS`, mirrored in the gitignored
+executor config) suppresses orders below it. The original $25 was an
+unreasoned first-build default; at the live account's size it hid nearly every
+drift correction — on 2026-10-02 twelve of sixteen names were more than 5% off
+target and only one gap cleared the guard. A floor stays because the broker
+rejects fractional orders under $1.
+
 ### 30. Tradability filter: foreign listings can't enter the portfolio (added 2026-08-11, approved by Dom)
 
 **Context:** 6861.T (Keyence) entered the model at rank 12 / 8.61% — a weight the

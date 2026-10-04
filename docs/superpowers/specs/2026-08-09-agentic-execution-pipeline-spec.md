@@ -65,7 +65,7 @@ real run fires (`fire=True`, any `kind` except shadow-only updates), call
 - Account equity: live from MCP read tools at generation time (cash + positions).
 - Delta per name: `target_weight × equity − current_market_value`, converted to
   fractional shares at the reference price. Orders below `MIN_ORDER_NOTIONAL`
-  ($25 default) are suppressed (dust guard) and logged.
+  ($5 default; lowered from $25 on 2026-10-04, Dom) are suppressed (dust guard) and logged.
 - Reference price: last close from the existing price path; order type is a
   **marketable limit** — buy at ref × (1 + `LIMIT_TOL`), sell at ref × (1 −
   `LIMIT_TOL`), `LIMIT_TOL = 0.75%` default, time-in-force DAY. Never market
