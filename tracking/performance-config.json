@@ -822,6 +822,26 @@
           "VRT",
           "AMZN"
         ]
+      },
+      {
+        "date": "2026-09-28",
+        "roster": [
+          "NVDA",
+          "FIX",
+          "TSM",
+          "CRDO",
+          "MSFT",
+          "AVGO",
+          "ANET",
+          "SNDK",
+          "MU",
+          "GMED",
+          "RDDT",
+          "EME",
+          "ALAB",
+          "VRT",
+          "META"
+        ]
       }
     ],
     "BAND_NEXT": [
@@ -920,6 +940,21 @@
         "roster": [
           "SBGSY",
           "META",
+          "PLTR",
+          "TER",
+          "GOOGL",
+          "ORCL",
+          "NTAP",
+          "APH",
+          "ISRG",
+          "HTHIY"
+        ]
+      },
+      {
+        "date": "2026-09-28",
+        "roster": [
+          "AMZN",
+          "SBGSY",
           "PLTR",
           "TER",
           "GOOGL",
