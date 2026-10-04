@@ -15,7 +15,7 @@ import hashlib
 import json
 
 DEFAULTS = {
-    'MIN_ORDER_NOTIONAL': 25.0,   # dust guard (spec B2)
+    'MIN_ORDER_NOTIONAL': 5.0,    # dust guard (spec B2; $25 -> $5 2026-10-04)
     'LIMIT_TOL': 0.0075,          # marketable-limit tolerance
     'MAX_WEIGHT': 0.12,           # renormalization cap (mirrors sizing cap)
     'TICKET_TTL_TRADING_DAYS': 2, # expire at the close of the Nth trading day
