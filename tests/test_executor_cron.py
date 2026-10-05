@@ -376,3 +376,86 @@ def test_regen_unavailable_halts(live_dir):
                                        'receipt': None},
                      notifier=notes.append, now=NOW, regen=lambda: None)
     assert rc == 1 and (live_dir / 'trading-halt.flag').exists()
+
+
+# ---- monthly rebalance + login preflight (2026-10-05) ----
+
+def _stamp(live_dir, **jobs):
+    (live_dir / 'heartbeat.json').write_text(json.dumps(jobs))
+
+
+def test_monthly_rebalance_due_on_first_trading_run_of_month(live_dir):
+    _stamp(live_dir, rebalance_monthly='2026-09-01')
+    assert ec.monthly_rebalance_due(live_dir, '2026-10-01')      # Thursday
+    assert not ec.monthly_rebalance_due(live_dir, '2026-09-30')  # same month
+
+
+def test_monthly_rebalance_never_due_on_a_closed_day(live_dir):
+    assert not ec.monthly_rebalance_due(live_dir, '2026-10-03')  # Saturday
+    assert not ec.monthly_rebalance_due(live_dir, '2026-12-25')  # Christmas
+
+
+def test_monthly_rebalance_catches_up_after_a_missed_first_day(live_dir):
+    _stamp(live_dir, rebalance_monthly='2026-09-01')
+    assert ec.monthly_rebalance_due(live_dir, '2026-10-06')
+
+
+def test_monthly_rebalance_generates_once_and_stamps(live_dir):
+    (live_dir / 'recon').mkdir()
+    events, notes = [], []
+
+    def recon():
+        (live_dir / 'recon' / 'snapshot-2026-10-01.json').write_text('{}')
+
+    def gen(ev):
+        events.append(ev)
+        return live_dir / 'tickets' / 'ticket-2026-10-01-rebalance_monthly.json'
+
+    assert ec.monthly_rebalance(live_dir, recon, gen, notes.append, '2026-10-01')
+    assert events[0]['kind'] == 'rebalance_monthly'
+    assert not ec.monthly_rebalance(live_dir, recon, gen, notes.append, '2026-10-02')
+    assert len(events) == 1
+
+
+def test_monthly_rebalance_without_fresh_snapshot_makes_no_ticket(live_dir):
+    (live_dir / 'recon').mkdir()
+    events, notes = [], []
+    done = ec.monthly_rebalance(live_dir, lambda: None, events.append,
+                                notes.append, '2026-10-01')
+    assert not done and not events
+    assert 'SKIPPED' in notes[0]
+    assert ec.monthly_rebalance_due(live_dir, '2026-10-02')      # retries
+
+
+class _T:
+    def __init__(self, err=None):
+        self.err = err
+
+    def portfolio(self):
+        if self.err:
+            raise self.err
+        return {'cash': 1.0, 'equity': 2.0}
+
+
+def test_preflight_login_returns_transport_when_read_works():
+    notes = []
+    t = _T()
+    assert ec.preflight_login(lambda: t, notes.append) is t
+    assert not notes
+
+
+def test_preflight_login_tells_dom_to_log_in_on_401():
+    notes = []
+    t = _T(RuntimeError('HTTP Error 401: Unauthorized'))
+    assert ec.preflight_login(lambda: t, notes.append) is None
+    assert '/mcp' in notes[0]
+
+
+def test_preflight_login_handles_missing_token():
+    notes = []
+
+    def make():
+        raise SystemExit('No Robinhood MCP token found.')
+
+    assert ec.preflight_login(make, notes.append) is None
+    assert '/mcp' in notes[0]

@@ -258,6 +258,77 @@ def ticket_gen_if_stale(live_dir: Path, last_event: dict, gen,
     return False
 
 
+# ------------------------------------------------- monthly rebalance (2026-10-05)
+
+REBALANCE_JOB = 'rebalance_monthly'
+
+
+def monthly_rebalance_due(live_dir: Path, today: str) -> bool:
+    """True on the first TRADING-day run of a calendar month that has not yet
+    produced a rebalance ticket. The heartbeat's `rebalance_monthly` date is
+    the memory: a Mac that was off on the 1st catches up on its next trading
+    day, and a month is never rebalanced twice."""
+    import trading_calendar as tc
+    if not tc.is_trading_day(dt.date.fromisoformat(today)):
+        return False
+    try:
+        hb = json.loads((Path(live_dir) / 'heartbeat.json').read_text())
+    except (OSError, ValueError):
+        hb = {}
+    return hb.get(REBALANCE_JOB, '')[:7] < today[:7]
+
+
+def monthly_rebalance(live_dir: Path, recon, gen, notifier,
+                      today: str) -> bool:
+    """Monthly full rebalance to the model's target weights (Dom 2026-10-05).
+
+    recon() must write today's snapshot from LIVE account reads; gen(event)
+    builds the ticket from that snapshot. No fresh snapshot → no ticket and
+    no stamp (rule 29: share deltas come from actuals, never assumed), so the
+    next trading day retries. The ticket then goes through the ordinary
+    execute step and every C2 gate; nothing here sends an order."""
+    live_dir = Path(live_dir)
+    if not monthly_rebalance_due(live_dir, today):
+        return False
+    recon()
+    if not (live_dir / 'recon' / f'snapshot-{today}.json').exists():
+        notifier('monthly rebalance SKIPPED: no fresh account snapshot '
+                 '(login expired or network down) — will retry next trading '
+                 'day')
+        return False
+    path = gen({'date': today, 'kind': REBALANCE_JOB,
+                'reason': 'scheduled monthly rebalance to target weights'})
+    if path is None:
+        notifier('monthly rebalance: ticket generation refused — see log')
+        return False
+    heartbeat_stamp(live_dir, REBALANCE_JOB, today=today)
+    notifier(f'monthly rebalance: generated {Path(path).name}')
+    return True
+
+
+LOGIN_HELP = ('Robinhood login expired or missing. Open Claude Code in this '
+              'project, run /mcp, re-authenticate "robinhood"; the next '
+              'scheduled run picks it up.')
+
+
+def preflight_login(make_transport, notifier):
+    """Build the transport and prove the login works with one READ call
+    before any step runs. Returns the transport, or None after a loud,
+    specific notification — 2026-09-15..22 every run died on a 401 buried
+    in the log while nothing told Dom to log in again."""
+    try:
+        transport = make_transport()
+        transport.portfolio()
+        return transport
+    except (SystemExit, Exception) as e:
+        msg = str(e)
+        if '401' in msg or 'Unauthorized' in msg or 'No Robinhood MCP token' in msg:
+            notifier(f'pipeline: {LOGIN_HELP}')
+        else:
+            notifier(f'pipeline: cannot reach Robinhood ({msg}) — nothing run')
+        return None
+
+
 def daily_run(live_dir: Path, steps: list[tuple], notifier,
               today: str | None = None) -> int:
     """Run named steps in order; a failure notifies and moves on (isolated),
@@ -290,7 +361,13 @@ def main(mode: str = 'auto') -> int:
     now = dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     if mode == 'auto':   # launchd schedules 06:35 open; time split supports manual runs
         mode = 'open' if dt.datetime.now().hour < 12 else 'close'
-    transport = RobinhoodTransport()
+    if not wait_for_network():
+        macos_notify('pipeline: network unavailable — nothing run')
+        return 1
+    transport = preflight_login(RobinhoodTransport, macos_notify)
+    if transport is None:
+        return 1
+    today = dt.date.today().isoformat()
 
     def last_event():
         from portfolio_model import load_cfg
@@ -324,9 +401,16 @@ def main(mode: str = 'auto') -> int:
     def recon_step():
         _reconcile_via_transport(transport, macos_notify)
 
+    def rebalance_step():
+        from generate_trade_ticket import generate, _targets_weights
+        monthly_rebalance(
+            LIVE_DIR, recon=recon_step,
+            gen=lambda ev: generate(_targets_weights()[0], ev),
+            notifier=macos_notify, today=today)
+
     if mode == 'open':
-        steps = [('ticket_gen', ticket_step), ('execute', execute_step),
-                 ('recon', recon_step)]
+        steps = [('rebalance', rebalance_step), ('ticket_gen', ticket_step),
+                 ('execute', execute_step), ('recon', recon_step)]
     else:
         steps = [('series', _series_step), ('recon', recon_step)]
     return daily_run(LIVE_DIR, steps, macos_notify)

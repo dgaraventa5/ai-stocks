@@ -647,6 +647,24 @@ drift correction — on 2026-10-02 twelve of sixteen names were more than 5% off
 target and only one gap cleared the guard. A floor stays because the broker
 rejects fractional orders under $1.
 
+**Amendment 2026-10-05 (Dom-approved): scheduled monthly rebalance + login
+preflight.** The launchd executor (`executor_cron.py`, open mode) now (1)
+proves the Robinhood login with one READ call before any step and, on a 401
+or missing token, notifies "re-authenticate via /mcp" and runs nothing — the
+2026-09-15..22 runs all died on a 401 buried in the log; and (2) on the first
+trading-day run of each calendar month reconciles from live reads and
+generates one full two-way ticket to the Targets weights (`kind:
+rebalance_monthly`), which then passes through the ordinary execute step and
+every C2 gate. Memory is `heartbeat.json` `rebalance_monthly`; no fresh
+snapshot → no ticket, no stamp, retry next trading day. Why: nothing
+scheduled ever generated a ticket for drift alone (tickets followed model
+events only), so under-filled positions sat for a month — RDDT was 35% under
+target on 2026-10-02. Dom chose full rebalancing over a buys-first design
+(tax deferral was not worth a drifted book). This is the LIVE-account
+rebalance; the model's own monthly drift-band pass (rule 28 A2) is separate
+and unchanged. Still Dom's alone: loading the launchd job, `--confirm` runs,
+and clearing the halt flag.
+
 ### 30. Tradability filter: foreign listings can't enter the portfolio (added 2026-08-11, approved by Dom)
 
 **Context:** 6861.T (Keyence) entered the model at rank 12 / 8.61% — a weight the
