@@ -2,8 +2,8 @@
 
 **Layer:** 09 Cloud — Hyperscaler
 **Last reviewed:** 2026-10-05
-**Current conviction:** ✓✓ (canonical Watchlist recalc 73.9)
-**Current target allocation:** 6.25% of portfolio (per Targets sheet, equal-weight mode)
+**Current conviction:** ✓✓ (canonical Watchlist recalc 73.6, rescored 2026-10-05)
+**Current target allocation:** 5.88% of portfolio (per Targets sheet, equal-weight mode, 17 holdings)
 **Thesis-break trigger:** AWS growth decelerates for two consecutive quarters while capex guidance keeps rising (spend without return), OR AWS operating margin compresses materially on depreciation
 
 ---
@@ -137,3 +137,4 @@
 | Date | Action | Reason |
 |---|---|---|
 | 2026-10-05 | Thesis first written (sections 1, 2, 9), then refreshed same day against the Q2 10-Q | One-liner now filing-verified; added OpenAI stake, backlog concentration, negative FCF and debt. Sections 3–8 and 10 still to do |
+| 2026-10-05 | Rescored: R3 4→3, M2 4→3 (Dom-approved); objective inputs refreshed | Score 73.9 → 73.6, tradable rank 15 → 16 (hold band). Rating Audit rows 3032–3034 |

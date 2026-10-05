@@ -3,7 +3,7 @@
 **Layer:** 06 — AI Compute Silicon / Custom silicon (ASIC/XPU designers) + AI networking
 **Last reviewed:** 2026-09-02 *(§3/§6/§9 updated from the post-Q3-FY26 briefing `context-2026-09-02.md` and the 2026-08-21 refresh; §4/§5/§7 still carry Q2-FY26 data and are owed a refresh. Objective inputs on the Watchlist are stale at 2026-07-16 — the mechanical rescore runs 2026-09-03.)*
 **Current conviction:** ✓✓ (canonical Watchlist recalc 79.2)
-**Current target allocation:** 6.25% of portfolio (per Targets sheet, equal-weight mode)
+**Current target allocation:** 5.88% of portfolio (per Targets sheet, equal-weight mode, 17 holdings)
 **Thesis-break trigger:** Loss or in-housing of a core XPU customer (Google or Meta), OR clear evidence the third-party-financed (Apollo/Blackstone) compute platform is propping up demand that end-customer cash flows cannot sustain.
 
 ---
