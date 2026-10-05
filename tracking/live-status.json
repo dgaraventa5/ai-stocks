@@ -4,19 +4,8 @@
   "positions": 16,
   "open_orders": 0,
   "drift_flags": [
-    "ALAB",
-    "AMZN",
-    "ANET",
-    "AVGO",
-    "CRDO",
-    "EME",
-    "GMED",
-    "MSFT",
     "MU",
-    "NVDA",
-    "RDDT",
-    "SNDK",
-    "VRT"
+    "NVDA"
   ],
   "regen_needed": [],
   "anomaly_count": 0,
