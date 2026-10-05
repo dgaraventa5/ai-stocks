@@ -323,7 +323,7 @@ def _drift_then_ok(live_dir, second_failures=None):
         return {'failures': second_failures or [], 'sent': not second_failures,
                 'receipt': 'r' if not second_failures else None}
 
-    def regen():
+    def regen(basis=None):
         new.write_text(old.read_text())
         return new
     return old, new, seen, runner, regen
@@ -361,7 +361,7 @@ def test_non_drift_failure_halts_without_regen(live_dir):
         runner=lambda p: {'failures': [STALE, 'NVDA: not in roster'],
                           'sent': False, 'receipt': None},
         notifier=lambda m: None, now=NOW,
-        regen=lambda: regen_calls.append(1))
+        regen=lambda basis=None: regen_calls.append(1))
     assert rc == 1 and regen_calls == []
     assert (live_dir / 'trading-halt.flag').exists()
 
@@ -374,7 +374,7 @@ def test_regen_unavailable_halts(live_dir):
     rc = ec.cron_run(live_dir,
                      runner=lambda p: {'failures': [STALE], 'sent': False,
                                        'receipt': None},
-                     notifier=notes.append, now=NOW, regen=lambda: None)
+                     notifier=notes.append, now=NOW, regen=lambda basis=None: None)
     assert rc == 1 and (live_dir / 'trading-halt.flag').exists()
 
 
@@ -406,6 +406,7 @@ def test_monthly_rebalance_generates_once_and_stamps(live_dir):
 
     def recon():
         (live_dir / 'recon' / 'snapshot-2026-10-01.json').write_text('{}')
+        return True
 
     def gen(ev):
         events.append(ev)
@@ -420,7 +421,7 @@ def test_monthly_rebalance_generates_once_and_stamps(live_dir):
 def test_monthly_rebalance_without_fresh_snapshot_makes_no_ticket(live_dir):
     (live_dir / 'recon').mkdir()
     events, notes = [], []
-    done = ec.monthly_rebalance(live_dir, lambda: None, events.append,
+    done = ec.monthly_rebalance(live_dir, lambda: False, events.append,
                                 notes.append, '2026-10-01')
     assert not done and not events
     assert 'SKIPPED' in notes[0]
@@ -459,3 +460,34 @@ def test_preflight_login_handles_missing_token():
 
     assert ec.preflight_login(make, notes.append) is None
     assert '/mcp' in notes[0]
+
+
+def test_monthly_rebalance_ignores_a_stale_same_day_snapshot(live_dir):
+    # An earlier same-day snapshot exists, but THIS run's live reads failed.
+    (live_dir / 'recon').mkdir()
+    (live_dir / 'recon' / 'snapshot-2026-10-01.json').write_text('{}')
+    events, notes = [], []
+    done = ec.monthly_rebalance(live_dir, lambda: False, events.append,
+                                notes.append, '2026-10-01')
+    assert not done and not events
+    assert ec.monthly_rebalance_due(live_dir, '2026-10-02')
+
+
+def test_quote_drift_retry_keeps_the_refused_tickets_identity(live_dir):
+    old = write_ticket(live_dir / 'tickets', '2026-10-01-rebalance_monthly',
+                       '2026-10-05T20:00:00Z')
+    tk = json.loads(old.read_text())
+    tk['basis_event'] = {'date': '2026-10-01', 'kind': 'rebalance_monthly'}
+    old.write_text(json.dumps(tk))
+    got = []
+
+    def runner(path):
+        return {'failures': [STALE], 'sent': False, 'receipt': None}
+
+    def regen(basis=None):
+        got.append(basis)
+        return None
+
+    ec.cron_run(live_dir, runner, lambda m: None, '2026-10-01T14:00:00Z',
+                regen=regen)
+    assert got == [{'date': '2026-10-01', 'kind': 'rebalance_monthly'}]

@@ -64,7 +64,8 @@ def _is_stale_quote(failure: str) -> bool:
 
 def cron_run(live_dir: Path, runner, notifier, now: str, regen=None) -> int:
     """One scheduled pass. runner(ticket_path) -> execute_ticket.run result.
-    regen() -> fresh ticket path (or None) for the quote-drift retry."""
+    regen(basis_event) -> fresh ticket path (or None) for the quote-drift
+    retry; basis_event is the refused ticket's own event (None if absent)."""
     live_dir = Path(live_dir)
     ticket = pick_ticket(live_dir, now)
     if ticket is None:
@@ -91,7 +92,12 @@ def cron_run(live_dir: Path, runner, notifier, now: str, regen=None) -> int:
         notifier(f'executor cron: ticket {ticket.name} refused on quote '
                  f'drift only — regenerating with live quotes')
         try:
-            fresh = regen()
+            # Regenerate under the REFUSED ticket's own basis event, so the
+            # retry keeps its identity (a monthly rebalance must not come
+            # back labelled as the last model event, whose ticket id may
+            # already carry a receipt).
+            basis = json.loads(ticket.read_text()).get('basis_event')
+            fresh = regen(basis)
         except Exception as e:
             fresh = None
             notifier(f'executor cron: regeneration failed — {e}')
@@ -146,14 +152,15 @@ def wait_for_network(host: str = 'agent.robinhood.com', attempts: int = 5,
     return False
 
 
-def _reconcile_via_transport(transport, notifier) -> None:
-    """Post-execution recon using READ methods only (D). Failure here is
-    flagged, never fatal — the orders are already safely receipted."""
+def _reconcile_via_transport(transport, notifier) -> bool:
+    """Recon using READ methods only (D). Failure here is flagged, never
+    fatal — any orders are already safely receipted. Returns True only when
+    a snapshot was written from live reads in THIS call."""
     if not wait_for_network():
         notifier('recon skipped: network unavailable (likely a DarkWake '
                  'maintenance wake on battery — see plist caffeinate note) — '
                  'run reconcile_account.py in an attended session')
-        return
+        return False
     try:
         import reconcile_account as ra
         positions = transport.positions()
@@ -171,9 +178,11 @@ def _reconcile_via_transport(transport, notifier) -> None:
         if res['halted'] or res['anomalies']:
             notifier(f'recon after execution: HALTED — '
                      f'{"; ".join(res["anomalies"]) or "pre-existing halt"}')
+        return True
     except Exception as e:
         notifier(f'recon after execution FAILED ({e}) — run '
                  f'reconcile_account.py in an attended session')
+        return False
 
 
 # ---------------------------------------------------------------- heartbeat
@@ -282,16 +291,20 @@ def monthly_rebalance(live_dir: Path, recon, gen, notifier,
                       today: str) -> bool:
     """Monthly full rebalance to the model's target weights (Dom 2026-10-05).
 
-    recon() must write today's snapshot from LIVE account reads; gen(event)
-    builds the ticket from that snapshot. No fresh snapshot → no ticket and
-    no stamp (rule 29: share deltas come from actuals, never assumed), so the
-    next trading day retries. The ticket then goes through the ordinary
+    recon() must write today's snapshot from LIVE account reads and return
+    True; gen(event) builds the ticket from that snapshot. Anything else →
+    no ticket and no stamp (rule 29: share deltas come from actuals, never
+    assumed), so the next trading day retries. The file merely EXISTING is
+    not enough: an earlier same-day snapshot (an attended recon, a prior
+    run) would otherwise size orders from stale holdings when this run's
+    reads failed. The ticket then goes through the ordinary
     execute step and every C2 gate; nothing here sends an order."""
     live_dir = Path(live_dir)
     if not monthly_rebalance_due(live_dir, today):
         return False
-    recon()
-    if not (live_dir / 'recon' / f'snapshot-{today}.json').exists():
+    fresh = recon() is True
+    if not (fresh and (live_dir / 'recon'
+                       / f'snapshot-{today}.json').exists()):
         notifier('monthly rebalance SKIPPED: no fresh account snapshot '
                  '(login expired or network down) — will retry next trading '
                  'day')
@@ -376,9 +389,9 @@ def main(mode: str = 'auto') -> int:
                 'kind': last_ev.get('kind', 'membership'),
                 'reason': last_ev.get('reason', '')}
 
-    def regenerate():
+    def regenerate(basis=None):
         from generate_trade_ticket import generate, _targets_weights
-        return generate(_targets_weights()[0], last_event())
+        return generate(_targets_weights()[0], basis or last_event())
 
     def execute_step():
         def runner(ticket_path):
@@ -404,7 +417,8 @@ def main(mode: str = 'auto') -> int:
     def rebalance_step():
         from generate_trade_ticket import generate, _targets_weights
         monthly_rebalance(
-            LIVE_DIR, recon=recon_step,
+            LIVE_DIR,
+            recon=lambda: _reconcile_via_transport(transport, macos_notify),
             gen=lambda ev: generate(_targets_weights()[0], ev),
             notifier=macos_notify, today=today)
 
