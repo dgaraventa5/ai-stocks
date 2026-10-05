@@ -32,7 +32,8 @@
   <string>/Users/dom/Hermes/projects/ai-stocks</string>
   <key>StartCalendarInterval</key>
   <array>
-    <!-- open-mode 06:35 PT: ticket-gen → execute → recon -->
+    <!-- open-mode 06:35 PT: login check → monthly rebalance (first trading
+         day of the month) → ticket-gen → execute → recon -->
     <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
     <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>
     <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>6</integer><key>Minute</key><integer>35</integer></dict>

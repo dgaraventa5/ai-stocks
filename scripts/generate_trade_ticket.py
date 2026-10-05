@@ -134,6 +134,11 @@ def retire_superseded(tdir: Path, rdir: Path, *, keep: Path, now: str) -> list:
         if exp and dt.datetime.fromisoformat(exp.replace('Z', '+00:00')) < now_dt:
             continue
         target = p.with_name(f'superseded-{p.name}')
+        n = 2
+        while target.exists():      # never overwrite an earlier superseded
+            target = p.with_name(   # ticket (B3 append-only; hit 2026-10-05)
+                f'superseded-{p.stem}.{n}{p.suffix}')
+            n += 1
         p.rename(target)
         retired.append(target)
         _flag(f'{p.name} superseded by {keep.name} — renamed to {target.name}')

@@ -186,3 +186,16 @@ def test_explicit_no_buy_overrides_config(live_dir, monkeypatch):
                     prices_fn=PRICES.get, now='2026-08-13T21:30:00Z',
                     no_buy=set())
     assert any(o['ticker'] == 'TSM' for o in json.loads(p.read_text())['orders'])
+
+
+def test_superseding_twice_never_overwrites_an_earlier_superseded_file(tmp_path):
+    tdir, rdir = tmp_path / 'tickets', tmp_path / 'receipts'
+    tdir.mkdir(); rdir.mkdir()
+    (tdir / 'superseded-ticket-a.json').write_text('{"first": true}')
+    (tdir / 'ticket-a.json').write_text(json.dumps(
+        {'ticket_id': 'a', 'expires_at': '2099-01-01T00:00:00Z'}))
+    keep = tdir / 'ticket-b.json'
+    keep.write_text('{}')
+    gt.retire_superseded(tdir, rdir, keep=keep, now='2026-10-05T00:00:00Z')
+    assert json.loads((tdir / 'superseded-ticket-a.json').read_text()) == {'first': True}
+    assert (tdir / 'superseded-ticket-a.2.json').exists()
