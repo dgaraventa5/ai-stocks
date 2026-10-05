@@ -138,12 +138,12 @@
     },
     {
       "date": "2026-10-05",
-      "live_pct": 0.56,
+      "live_pct": 0.6,
       "model_pct": 3.7,
-      "shortfall_pct": -3.14,
-      "live_since_deploy_pct": 0.99,
+      "shortfall_pct": -3.1,
+      "live_since_deploy_pct": 1.03,
       "model_since_deploy_pct": -0.34,
-      "shortfall_since_deploy_pct": 1.33
+      "shortfall_since_deploy_pct": 1.37
     }
   ],
   "deployment_date": "2026-08-17"
