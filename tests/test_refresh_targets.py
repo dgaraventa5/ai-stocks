@@ -844,3 +844,68 @@ def test_migration_true_still_means_invvol(monkeypatch, tmp_path):
     rt.refresh(portfolio=str(path), resize=True, migration=True)
 
     assert calls[0]['kind'] == 'sizing_migration_invvol'
+
+
+# ---- entry gate (rule 35, 2026-10-06) ---------------------------------------
+
+def _gate_pcfg():
+    p = _rank_pcfg()
+    p['selection']['entry_gate'] = True
+    return p
+
+
+def _gate_live():
+    return [{'ticker': f'T{i:02d}', 'layer': '06 Silicon', 'TOTAL': 90.0 - i,
+             'Tier': '✓✓'} for i in range(1, 18)]
+
+
+def test_entry_gate_defers_blocked_entry_and_leaves_holders_alone(monkeypatch, tmp_path):
+    """T15 ranks inside the entry band but is gated: it is not entered, no
+    model event fires, and held names are never asked."""
+    path = tmp_path / 'portfolio.xlsx'
+    prior = [f'T{i:02d}' for i in range(1, 15)]
+    _build_portfolio(path, [(t, '06 Silicon', 90.0, '✓✓') for t in prior])
+    calls, _saves = _mock_env(monkeypatch, _gate_live(), _rank_cfg(prior))
+    monkeypatch.setattr(rt, 'load_pcfg', _gate_pcfg)
+    asked = []
+
+    def block(ticker, today, root, max_age=30):
+        asked.append(ticker)
+        return 'entry hold until 2026-11-15: county action'
+
+    monkeypatch.setattr(rt, 'entry_block', block)
+
+    rep = rt.refresh(portfolio=str(path))
+
+    assert rep['entered'] == [] and calls == []
+    assert asked == ['T15']                       # holders never gated
+    assert rt.pending_rebalance(portfolio=str(path)) is False
+
+
+def test_entry_gate_allows_cleared_entry(monkeypatch, tmp_path):
+    path = tmp_path / 'portfolio.xlsx'
+    prior = [f'T{i:02d}' for i in range(1, 15)]
+    _build_portfolio(path, [(t, '06 Silicon', 90.0, '✓✓') for t in prior])
+    calls, _saves = _mock_env(monkeypatch, _gate_live(), _rank_cfg(prior))
+    monkeypatch.setattr(rt, 'load_pcfg', _gate_pcfg)
+    monkeypatch.setattr(rt, 'entry_block', lambda *a, **k: None)
+
+    rep = rt.refresh(portfolio=str(path))
+
+    assert 'T15' in rep['entered'] and len(calls) == 1
+
+
+def test_entry_gate_off_never_consults_the_gate(monkeypatch, tmp_path):
+    """Flag absent (default): pre-rule-35 behavior, byte for byte."""
+    path = tmp_path / 'portfolio.xlsx'
+    prior = [f'T{i:02d}' for i in range(1, 15)]
+    _build_portfolio(path, [(t, '06 Silicon', 90.0, '✓✓') for t in prior])
+    _calls, _saves = _mock_env(monkeypatch, _gate_live(), _rank_cfg(prior))
+    monkeypatch.setattr(rt, 'load_pcfg', _rank_pcfg)
+
+    def boom(*a, **k):
+        raise AssertionError('gate consulted while disabled')
+
+    monkeypatch.setattr(rt, 'entry_block', boom)
+
+    assert 'T15' in rt.refresh(portfolio=str(path))['entered']

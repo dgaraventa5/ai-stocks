@@ -10,7 +10,9 @@
   },
   "selection": {
     "mode": "rank",
-    "tradable_only": true
+    "tradable_only": true,
+    "entry_gate": true,
+    "entry_gate_days": 30
   },
   "shadows": {
     "top": 15,

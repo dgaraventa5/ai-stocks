@@ -46,6 +46,7 @@ from openpyxl.styles import Font, PatternFill
 from common import flag
 from portfolio_model import (current_weights, load_cfg, load_pcfg,
                              log_rebalance, save_cfg)
+from entry_gate import entry_block
 from portfolio_sizing import (build_reason, is_tradable, rank_by_score,
                               tier_changes, topn_membership,
                               weights_score_monotonic)
@@ -364,6 +365,8 @@ def refresh(dry_run: bool = False, resize: bool = False,
                 if tradable_only else live)
     untradable = ({t for t in info if not is_tradable(t)}
                   if tradable_only else set())
+    gate_on = bool(pcfg['selection'].get('entry_gate'))
+    gate_days = int(pcfg['selection'].get('entry_gate_days', 30))
     for _t, _v in overrides.items():
         if _v == 'INCLUDE' and _t in untradable:
             flag(f'{_t}: Override=INCLUDE but untradable — filter wins, stays out')
@@ -480,6 +483,15 @@ def refresh(dry_run: bool = False, resize: bool = False,
             continue
         forced = overrides.get(t) == 'INCLUDE'
         if enters(t) or forced:
+            # Rule 35 entry gate: research-before-entry. Deferred, not
+            # cancelled; a manual INCLUDE is Dom's explicit call and bypasses.
+            blocked = (entry_block(t, today, _REPO_ROOT, gate_days)
+                       if gate_on and not forced else None)
+            if blocked:
+                statuses[t] = f'ENTRY DEFERRED ({why(t)}; {blocked})'
+                flag(f'{t}: would enter ({why(t)}) but ENTRY DEFERRED — '
+                     f'{blocked}')
+                continue
             if len(include) < max_positions:
                 include.append(t)
                 statuses[t] = ('ENTER (forced)' if forced
