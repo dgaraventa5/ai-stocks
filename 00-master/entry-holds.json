@@ -1,0 +1,15 @@
+{
+ "_meta": {
+  "definition": "Rule-35 entry holds. A ticker listed here may not ENTER the portfolio while its hold is live (expires is inclusive; a missing or unreadable expiry fails closed). Holds never affect scores, ranks, or names already held. Human-written in the session that writes the briefing recording the event; the scripts never edit this file.",
+  "when_to_add": "The context briefing records an unresolved event the score cannot see: a new government enforcement action, a securities case filed in the last 90 days, a guidance cut, or a transformative transaction announced since the last reported quarter.",
+  "expiry": "A set date, normally just after the next earnings report or other resolving event. An expired hold is simply inactive; replace or remove the entry when re-ruling.",
+  "updated": "2026-10-06"
+ },
+ "APP": {
+  "reason": "San Diego County enforcement action filed 2026-10-05 (People v. AppLovin, seeks an injunction on data collection) and securities class action Talbot v. AppLovin, 3:26-cv-10584 (N.D. Cal., filed 2026-09-16); growth decelerating with Q3 uplift untested",
+  "source": "per-stock/APP/context-2026-10-06.md",
+  "set": "2026-10-06",
+  "expires": "2026-11-15",
+  "review_event": "Q3 2026 results (expected ~2026-11-11, date unconfirmed)"
+ }
+}

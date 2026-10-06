@@ -887,6 +887,46 @@ values run systematically lower than the old column (NVDA 103 → 60, MSFT 29 �
 stamped (rule 32-C); NTAP fell to rank 20 and its exit clock is seam-damped to
 2026-09-15. Impact method: rule-24 style before/after against a temp workbook.
 
+### 35. Entry gate: research before entry (added 2026-10-06, approved by Dom)
+
+**Context:** A score built from quarterly filings and 1–5 ratings cannot react
+to an event that landed yesterday. Twice in two days the model would have
+bought a name the day after one: SBGSY (a $22.6B acquisition announced the day
+it entered) and APP (a county enforcement action filed the day before, with
+its regulatory rating already at the floor of 1, so there was nowhere lower for
+the score to go). Options weighed and declined: doubling the weight of R4
+(re-ranks every name with a legal overhang) and a new "event risk" rating
+(another subjective input that goes stale).
+
+**Rule:** with `selection.entry_gate: true` in `tracking/portfolio-config.json`,
+a name that qualifies to ENTER is **deferred, not cancelled**, when either:
+- its newest `per-stock/{T}/context-YYYY-MM-DD.md` is older than
+  `entry_gate_days` (30) or missing — research first, then buy; or
+- it has a live hold in `00-master/entry-holds.json` (ticker → `reason`,
+  `source`, `set`, `expires`, `review_event`).
+
+**Holds are human-written**, in the session that writes the briefing, when the
+briefing records an unresolved event the score cannot see: a new government
+enforcement action, a securities case filed in the last 90 days, a guidance
+cut, or a transformative transaction since the last reported quarter. Give
+every hold an expiry — normally just after the next earnings report. A missing
+or unreadable expiry fails closed.
+
+**Boundary (do not widen):** the gate touches entries only. It never changes a
+score, a rank, a rating, or a name already held; exits still run on the
+rule-26 clock; a manual `Override=INCLUDE` bypasses it. A deferred name keeps
+its rank and does not pull the next name up. Flag off reproduces prior
+behavior exactly.
+
+**Expected side effect:** when a hold expires, or a fresh briefing lands, a
+still-qualifying name becomes enterable and `pending_rebalance()` turns True —
+the rule-25 gate goes red until `refresh_targets.py` runs. Same design as the
+rule-26 clock: red means "act", not "bug".
+
+Code: `scripts/entry_gate.py` (pure, offline); wired in `refresh_targets.py`
+at the entry branch. Tests: `tests/test_entry_gate.py` and the entry-gate
+block in `tests/test_refresh_targets.py`.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

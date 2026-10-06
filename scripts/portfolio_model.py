@@ -58,7 +58,8 @@ DEFAULT_PCFG = {
     # the 10-week history that motivated the change (spec Non-goals).
     'sizing': {'mode': 'tier', 'lookback': 60, 'sigma_floor': 0.005,
                'max_weight': 0.12, 'min_weight': 0.03, 'drift_band': 0.25},
-    'selection': {'mode': 'score', 'tradable_only': False},
+    'selection': {'mode': 'score', 'tradable_only': False,
+                  'entry_gate': False, 'entry_gate_days': 30},
     'shadows': {'top': 15, 'next': 25, 'tail': 40},
 }
 
