@@ -15,3 +15,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-07-31 (still unconfirmed)** (weekly scan) — The Reuters-sourced Meta NAND supply-deal report remains unconfirmed by either company for a 3rd consecutive scan cycle; earnings (8/5) and Investor Day (8/13) both fall outside this window.
 
 - **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-11: revolver refinanced into $1.5B facility due 2031 (SOFR+1.375%). 8-K 9/16: executive pay adjustments (routine).
+- **2026-09-05 (on/after)** ⚠️ (weekly scan (FX Leaders)) — Raised prices ~10% across channel partners and consumer products, effective on new orders — a direct pricing action confirming the NAND-shortage thesis flagged as a watch item last scan. — [FX Leaders](https://www.fxleaders.com/news/2026/09/04/sndk-stock-breaks-resistance-as-nand-demand-strengthens-sandisk-but-memory-risks-remain/)
