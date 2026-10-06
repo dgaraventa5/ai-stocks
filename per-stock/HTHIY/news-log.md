@@ -10,3 +10,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-07 | Hitachi Energy PR | Won order to supply 110kV grid connection for Kauri CAB Digital Infrastructure's Frankfurt data center — contracted AI-DC grid tie. |
 | 2026-09-17 | pv magazine USA; Interesting Engineering | New $528M Mississippi large-power-transformer plant (largest-ever US, doubles output); part of $4.5B global capacity program (alongside $457M Virginia broke ground Jun 29, $150M LatAm Mar 2026, $300M Chongqing China Aug 2026). |
 | 2025-10-21 | Hitachi Global; DCD | (Surfaced this pass, predates prior briefing) Hitachi–OpenAI strategic partnership (MoU 2025-10-02): Hitachi to supply power T&D equipment to OpenAI's data centers. |
+| 2026-08-17 | Hitachi press release | $300M investment in Hefei, China to expand transformer/component manufacturing capacity (part of global $4.5B grid build-out). |

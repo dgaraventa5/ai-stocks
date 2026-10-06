@@ -15,3 +15,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-07-29** (rule-12 refresh, Q2 earnings call/Yahoo): **Backlog re-accelerated to ~$15B at Q2-end (roughly doubled YoY); organic orders +152% YoY** on AI-datacenter demand; liquid cooling now in the majority of AI engagements. Resolves the Q1 backlog-decline yellow flag ($15.0B→$12.45B) positively. Book-to-bill not disclosed (secondary "2.9x" unverified). Source: finance.yahoo.com order-surge article + call coverage.
 
 - **2026-09-02** (rule-12 refresh, 8-K acc. 0001628280-26-059961): declared quarterly dividend $0.0625/sh, record 2026-09-14, payable 2026-09-24 (routine).
+- **2026-09-01** (weekly scan) — Legal thread still pre-litigation: two more firms (Grabar Law Office, Robbins LLP) posted "investigating claims" solicitation notices alongside the four already tracked (Bronstein Gewirtz, Schall/SBS, Pomerantz, Hagens Berman) — no filed complaint or SEC action confirmed.
