@@ -169,3 +169,13 @@ def test_env_token_still_wins(monkeypatch):
     monkeypatch.setenv('ROBINHOOD_MCP_TOKEN', 'from-env')
     monkeypatch.setattr(ra, 'access_token', lambda: pytest.fail('not reached'))
     assert ex.RobinhoodTransport._find_token() == 'from-env'
+
+
+def test_force_renews_a_token_that_is_still_valid():
+    store = FakeStore(blob(expires_at=900_000))     # days of life left
+    http = lambda url, form=None, body=None: {
+        'access_token': 'access-2', 'refresh_token': 'refresh-2',
+        'expires_in': 3600}
+    assert ra.access_token(store, http=http, now=lambda: 1_000,
+                           force=True) == 'access-2'
+    assert store.blob['refresh_token'] == 'refresh-2' and store.saves == 1

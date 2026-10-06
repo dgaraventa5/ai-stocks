@@ -19,6 +19,7 @@ login first and falls back to the Claude Code session if it is unavailable.
 Use:
   python3 scripts/robinhood_auth.py login    # Dom, once: browser approval
   python3 scripts/robinhood_auth.py status   # expiry only — never the token
+  python3 scripts/robinhood_auth.py renew    # force a renewal now (a test)
   python3 scripts/robinhood_auth.py logout   # delete the stored login
 
 Stdlib only. Endpoints are discovered from the server's published OAuth
@@ -147,15 +148,17 @@ def _stamp(tok: dict, now: float) -> dict:
 
 
 def access_token(store: Keychain | None = None, http=_http_json,
-                 now=time.time) -> str:
-    """A currently valid bearer token, renewing it when close to expiry.
+                 now=time.time, force: bool = False) -> str:
+    """A currently valid bearer token, renewing it when close to expiry
+    (or immediately with force=True — the `renew` command, to prove renewal
+    works without waiting for the token to age).
     Raises LoginRequired when there is nothing stored or renewal is refused;
     raises OSError when the network is down (the stored login is kept)."""
     store = store or Keychain()
     blob = store.load()
     if not blob or not blob.get('access_token'):
         raise LoginRequired(f'no executor login stored — {LOGIN_HINT}')
-    if blob.get('expires_at', 0) - now() > REFRESH_MARGIN_S:
+    if not force and blob.get('expires_at', 0) - now() > REFRESH_MARGIN_S:
         return blob['access_token']
     if not blob.get('refresh_token') or not blob.get('client_id'):
         raise LoginRequired(f'executor login expired and cannot renew — '
@@ -284,6 +287,12 @@ if __name__ == '__main__':
         login()
     elif cmd == 'status':
         print(status())
+    elif cmd == 'renew':
+        try:
+            access_token(force=True)
+        except LoginRequired as e:
+            sys.exit(str(e))
+        print('renewed without a browser — ' + status())
     elif cmd == 'logout':
         Keychain().delete()
         print('executor login deleted')
