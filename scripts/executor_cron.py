@@ -319,9 +319,9 @@ def monthly_rebalance(live_dir: Path, recon, gen, notifier,
     return True
 
 
-LOGIN_HELP = ('Robinhood login expired or missing. Open Claude Code in this '
-              'project, run /mcp, re-authenticate "robinhood"; the next '
-              'scheduled run picks it up.')
+LOGIN_HELP = ('Robinhood login expired or missing. In a terminal in this '
+              'project run `python3 scripts/robinhood_auth.py login` and '
+              'approve in the browser; the next scheduled run picks it up.')
 
 
 def preflight_login(make_transport, notifier):

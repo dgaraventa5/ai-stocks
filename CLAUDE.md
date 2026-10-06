@@ -665,6 +665,18 @@ rebalance; the model's own monthly drift-band pass (rule 28 A2) is separate
 and unchanged. Still Dom's alone: loading the launchd job, `--confirm` runs,
 and clearing the halt flag.
 
+**Amendment 2026-10-05 (Dom-approved): the executor has its own
+self-renewing login.** `scripts/robinhood_auth.py` holds a separate OAuth
+login for the executor in its own Keychain item and renews it before expiry;
+`execute_ticket.py` tries it first and falls back to the Claude Code session
+if it is unavailable. Why: the borrowed Claude Code token is renewed only
+when a Claude session touches the connector, which is what expired under the
+2026-09-15..22 runs. `robinhood_auth.py login` is Dom's action (browser
+approval), never a Claude session's; the module names no order tool and the
+one-order-writer invariant is unchanged. The preflight's fix-it message now
+points at that command instead of /mcp. First renewal was still unproven on
+the day of the change (token issued 2026-10-05, ~10-day life).
+
 ### 30. Tradability filter: foreign listings can't enter the portfolio (added 2026-08-11, approved by Dom)
 
 **Context:** 6861.T (Keyence) entered the model at rank 12 / 8.61% — a weight the
