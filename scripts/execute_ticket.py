@@ -368,6 +368,12 @@ class RobinhoodTransport:
         tok = os.environ.get('ROBINHOOD_MCP_TOKEN')
         if tok:
             return tok
+        try:   # the executor's own self-renewing login (robinhood_auth.py)
+            import robinhood_auth
+            return robinhood_auth.access_token()
+        except Exception as e:   # not set up / refused / offline: fall back
+            print(f'executor login unavailable ({e}); trying the Claude Code '
+                  f'session', file=sys.stderr)
         try:   # Claude Code stores MCP OAuth tokens in the macOS Keychain
             out = subprocess.run(
                 ['security', 'find-generic-password', '-s',
@@ -381,7 +387,8 @@ class RobinhoodTransport:
         except Exception:
             pass
         raise SystemExit(
-            'No Robinhood MCP token found. Set ROBINHOOD_MCP_TOKEN or ensure '
+            'No Robinhood MCP token found. Run `python3 scripts/'
+            'robinhood_auth.py login`, set ROBINHOOD_MCP_TOKEN, or ensure '
             'the Claude Code OAuth session exists (claude mcp list). '
             'Refusing to proceed without credentials.')
 

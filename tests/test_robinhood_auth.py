@@ -137,3 +137,35 @@ def test_pkce_challenge_is_s256_of_the_verifier():
     want = base64.urlsafe_b64encode(
         hashlib.sha256(verifier.encode()).digest()).rstrip(b'=').decode()
     assert challenge == want and len(verifier) >= 43
+
+
+# ------------------------------------------- wiring into the order writer
+
+def test_executor_prefers_its_own_login(monkeypatch):
+    import execute_ticket as ex
+    monkeypatch.delenv('ROBINHOOD_MCP_TOKEN', raising=False)
+    monkeypatch.setattr(ra, 'access_token', lambda: 'own-login-token')
+    monkeypatch.setattr(ex.subprocess, 'run', lambda *a, **k: pytest.fail(
+        'must not read the Claude Code session when its own login works'))
+    assert ex.RobinhoodTransport._find_token() == 'own-login-token'
+
+
+def test_executor_falls_back_to_claude_code_session(monkeypatch):
+    import execute_ticket as ex
+    import json, types
+
+    def refuse():
+        raise ra.LoginRequired('no executor login stored')
+    monkeypatch.delenv('ROBINHOOD_MCP_TOKEN', raising=False)
+    monkeypatch.setattr(ra, 'access_token', refuse)
+    blob = json.dumps({'mcpOAuth': {'robinhood|x': {'accessToken': 'borrowed'}}})
+    monkeypatch.setattr(ex.subprocess, 'run', lambda *a, **k:
+                        types.SimpleNamespace(returncode=0, stdout=blob))
+    assert ex.RobinhoodTransport._find_token() == 'borrowed'
+
+
+def test_env_token_still_wins(monkeypatch):
+    import execute_ticket as ex
+    monkeypatch.setenv('ROBINHOOD_MCP_TOKEN', 'from-env')
+    monkeypatch.setattr(ra, 'access_token', lambda: pytest.fail('not reached'))
+    assert ex.RobinhoodTransport._find_token() == 'from-env'

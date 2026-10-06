@@ -449,7 +449,7 @@ def test_preflight_login_tells_dom_to_log_in_on_401():
     notes = []
     t = _T(RuntimeError('HTTP Error 401: Unauthorized'))
     assert ec.preflight_login(lambda: t, notes.append) is None
-    assert '/mcp' in notes[0]
+    assert 'robinhood_auth.py login' in notes[0]
 
 
 def test_preflight_login_handles_missing_token():
@@ -459,7 +459,7 @@ def test_preflight_login_handles_missing_token():
         raise SystemExit('No Robinhood MCP token found.')
 
     assert ec.preflight_login(make, notes.append) is None
-    assert '/mcp' in notes[0]
+    assert 'robinhood_auth.py login' in notes[0]
 
 
 def test_monthly_rebalance_ignores_a_stale_same_day_snapshot(live_dir):

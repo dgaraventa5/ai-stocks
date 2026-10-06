@@ -13,6 +13,9 @@ What it is NOT. It places no orders and names no order tool (rule 29: one
 order writer, scripts/execute_ticket.py). It only obtains and renews the
 bearer token that file's transport sends.
 
+Wired in 2026-10-05: execute_ticket.RobinhoodTransport._find_token tries this
+login first and falls back to the Claude Code session if it is unavailable.
+
 Use:
   python3 scripts/robinhood_auth.py login    # Dom, once: browser approval
   python3 scripts/robinhood_auth.py status   # expiry only — never the token
