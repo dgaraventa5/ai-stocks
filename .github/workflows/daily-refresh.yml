@@ -160,14 +160,23 @@ jobs:
 
           number=$(gh pr list --state open --head "$AUTOMATION_BRANCH" \
             --json number --jq 'if length == 1 then .[0].number else error("expected one automation PR") end')
-          head_sha=$(gh pr view "$number" --json headRefOid --jq '.headRefOid')
-
           if [ "${{ steps.plan.outputs.action }}" = "create" ] || \
              [ "${{ steps.plan.outputs.action }}" = "update" ]; then
             expected_sha=$(git rev-parse HEAD)
           else
             expected_sha="${{ steps.plan.outputs.remote_commit }}"
           fi
+
+          # The PR API can lag a just-pushed branch by a few seconds; wait
+          # for it to report the pushed head before judging a mismatch.
+          head_sha=""
+          for attempt in {1..30}; do
+            head_sha=$(gh pr view "$number" --json headRefOid --jq '.headRefOid')
+            if [ "$head_sha" = "$expected_sha" ]; then
+              break
+            fi
+            sleep 2
+          done
           if [ "$head_sha" != "$expected_sha" ]; then
             echo "::error::PR head $head_sha does not match planned head $expected_sha"
             exit 1
