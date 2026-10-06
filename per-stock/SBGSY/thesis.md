@@ -1,9 +1,9 @@
 # SBGSY — Schneider Electric SE (US ADR)
 
 **Layer:** 02 — Grid & Power Equipment
-**Last reviewed:** 2026-09-22
-**Current conviction:** Strong (✓✓-range) — precise tier pending the 2026-09-22 recalc
-**Current position size:** 0% (not held; US ADR, thinly traded vs. the Paris line SU.PA)
+**Last reviewed:** 2026-10-05
+**Current conviction:** ✓✓ (canonical Watchlist recalc 73.8, rescored 2026-10-05)
+**Current target allocation:** 5.88% of portfolio (per Targets sheet, equal-weight mode, 17 holdings) — entered the model 2026-10-05; US line is an OTC ADR
 **Thesis-break trigger:** Data Center & Networks growth decelerating to single digits for two consecutive halves *while* the group EBITA margin rolls over — i.e., the AI-power demand pull proving cyclical rather than structural.
 
 ---
@@ -118,6 +118,7 @@
 - 2026-09-09 — Compass Datacenters white-space collaboration (prefab EcoStruxure Pod) — Facilities Dive
 - 2026 — Data Center & Networks triple-digit growth — Utility Dive
 - 2026-09-21 — Rule-12 context briefing — per-stock/SBGSY/context-2026-09-21.md
+- 2026-10-05 — PTC acquisition ($22.6B cash; €16–17B debt + €5–6B equity) — Euronews; InsideArbitrage; per-stock/SBGSY/context-2026-10-05.md
 
 ---
 
@@ -126,3 +127,4 @@
 | Date | Action | Conviction | Rationale | Position size after |
 |---|---|---|---|---|
 | 2026-09-22 | Thesis populated (rule-12 gate; was template) | Strong (✓✓-range) | H1 record + guidance upgrade + triple-digit DC growth; M1 3→4 this cycle | 0% (not held) |
+| 2026-10-05 | Entered the model at rank 15; rescored same day after the PTC announcement (R3 4→3, M2 3→4; objective refresh) | ✓✓ (73.8) | Score 73.65 → 73.76; leverage rises to ≈3x pro forma (estimate) but the lower price and sector-relative strength offset it. Data-center thesis unchanged; capital-allocation risk added | 5.88% target |
