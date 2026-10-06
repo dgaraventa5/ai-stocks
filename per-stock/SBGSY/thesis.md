@@ -3,7 +3,7 @@
 **Layer:** 02 — Grid & Power Equipment
 **Last reviewed:** 2026-10-05
 **Current conviction:** ✓✓ (canonical Watchlist recalc 73.8, rescored 2026-10-05)
-**Current target allocation:** 5.88% of portfolio (per Targets sheet, equal-weight mode, 17 holdings) — entered the model 2026-10-05; US line is an OTC ADR
+**Current target allocation:** 0% — not buyable: the execution broker does not list this OTC ADR (verified 2026-10-05; rule 30 `BROKER_UNTRADABLE`). Still scored on the Watchlist
 **Thesis-break trigger:** Data Center & Networks growth decelerating to single digits for two consecutive halves *while* the group EBITA margin rolls over — i.e., the AI-power demand pull proving cyclical rather than structural.
 
 ---
@@ -128,3 +128,4 @@
 |---|---|---|---|---|
 | 2026-09-22 | Thesis populated (rule-12 gate; was template) | Strong (✓✓-range) | H1 record + guidance upgrade + triple-digit DC growth; M1 3→4 this cycle | 0% (not held) |
 | 2026-10-05 | Entered the model at rank 15; rescored same day after the PTC announcement (R3 4→3, M2 3→4; objective refresh) | ✓✓ (73.8) | Score 73.65 → 73.76; leverage rises to ≈3x pro forma (estimate) but the lower price and sector-relative strength offset it. Data-center thesis unchanged; capital-allocation risk added | 5.88% target |
+| 2026-10-05 | Removed from the model the same day it entered | ✓✓ (73.8) | Broker does not list SBGSY; added to `BROKER_UNTRADABLE` (rule 30 amendment). A constraint, not a signal — score and ratings unchanged | 0% (not buyable) |
