@@ -1,9 +1,9 @@
 # SBGSY — Schneider Electric SE (US ADR)
 
 **Layer:** 02 — Grid & Power Equipment
-**Last reviewed:** 2026-09-22
-**Current conviction:** Strong (✓✓-range) — precise tier pending the 2026-09-22 recalc
-**Current position size:** 0% (not held; US ADR, thinly traded vs. the Paris line SU.PA)
+**Last reviewed:** 2026-10-05
+**Current conviction:** ✓✓ (canonical Watchlist recalc 73.8, rescored 2026-10-05)
+**Current target allocation:** 0% — not buyable: the execution broker does not list this OTC ADR (verified 2026-10-05; rule 30 `BROKER_UNTRADABLE`). Still scored on the Watchlist
 **Thesis-break trigger:** Data Center & Networks growth decelerating to single digits for two consecutive halves *while* the group EBITA margin rolls over — i.e., the AI-power demand pull proving cyclical rather than structural.
 
 ---
@@ -118,6 +118,7 @@
 - 2026-09-09 — Compass Datacenters white-space collaboration (prefab EcoStruxure Pod) — Facilities Dive
 - 2026 — Data Center & Networks triple-digit growth — Utility Dive
 - 2026-09-21 — Rule-12 context briefing — per-stock/SBGSY/context-2026-09-21.md
+- 2026-10-05 — PTC acquisition ($22.6B cash; €16–17B debt + €5–6B equity) — Euronews; InsideArbitrage; per-stock/SBGSY/context-2026-10-05.md
 
 ---
 
@@ -126,3 +127,5 @@
 | Date | Action | Conviction | Rationale | Position size after |
 |---|---|---|---|---|
 | 2026-09-22 | Thesis populated (rule-12 gate; was template) | Strong (✓✓-range) | H1 record + guidance upgrade + triple-digit DC growth; M1 3→4 this cycle | 0% (not held) |
+| 2026-10-05 | Entered the model at rank 15; rescored same day after the PTC announcement (R3 4→3, M2 3→4; objective refresh) | ✓✓ (73.8) | Score 73.65 → 73.76; leverage rises to ≈3x pro forma (estimate) but the lower price and sector-relative strength offset it. Data-center thesis unchanged; capital-allocation risk added | 5.88% target |
+| 2026-10-05 | Removed from the model the same day it entered | ✓✓ (73.8) | Broker does not list SBGSY; added to `BROKER_UNTRADABLE` (rule 30 amendment). A constraint, not a signal — score and ratings unchanged | 0% (not buyable) |

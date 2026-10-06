@@ -27,6 +27,16 @@ def test_positions_only_included_rows(repo):
     assert [p['ticker'] for p in pos] == ['NVDA', 'TSM']   # ARM excluded
 
 
+def test_positions_sorted_by_score_desc(repo, monkeypatch):
+    """Equal-weight sizing ties every weight, so score is the display order."""
+    monkeypatch.setattr(ex.recalc_watchlist, 'recalc', lambda xlsx: [
+        {'ticker': 'NVDA', 'TOTAL': 70.0, 'Tier': '✓✓'},
+        {'ticker': 'TSM', 'TOTAL': 80.0, 'Tier': '✓✓'},
+    ])
+    pos = ex.export_positions(repo)
+    assert [p['ticker'] for p in pos] == ['TSM', 'NVDA']
+
+
 def test_positions_fields_and_scaling(repo):
     pos = ex.export_positions(repo)
     nvda = pos[0]
