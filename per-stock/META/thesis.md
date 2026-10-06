@@ -3,7 +3,7 @@
 **Layer:** 09 Compute-as-a-Service / Hyperscalers (public-cloud AI revenue)
 **Last reviewed:** 2026-09-28
 **Current conviction:** ✓✓ (canonical Watchlist recalc 74.4)
-**Current target allocation:** 5.88% of portfolio (per Targets sheet, equal-weight mode, 17 holdings)
+**Current target allocation:** 6.25% of portfolio (per Targets sheet, equal-weight mode)
 **Thesis-break trigger:** Capex ramp stalls AND ad-revenue growth decelerates below 15% YoY simultaneously — the thesis requires both the AI-infrastructure investment to be productive (ad side) and the buildout to be real (capex side).
 
 ---

@@ -684,6 +684,21 @@ Watchlist; that would shift the survivors' percentile scores), the full-universe
 pre-2026-08-11 behavior exactly. Spec:
 `docs/superpowers/specs/2026-08-11-tradability-filter-design.md`.
 
+**Amendment 2026-10-05 (Dom-approved): explicit broker list for OTC ADRs.**
+The suffix-dot test cannot see over-the-counter ADRs, which carry plain
+US-style tickers. SBGSY entered the model at rank 15 on 2026-10-05 and the
+broker's tradability lookup returned "not found". `is_tradable` now also
+rejects any ticker in `portfolio_sizing.BROKER_UNTRADABLE` — names the broker
+does not list (SBGSY, ABBNY, TOELY, HHUSF) and names it takes whole-share
+orders only for (HTHIY, BESIY; the pipeline sizes in fractional shares). This
+replaces the original "no per-name list" design choice for this one case.
+**When adding any OTC or five-letter foreign ticker to the Watchlist, check it
+against the broker's tradability lookup (a READ tool, rule 29) and add it to
+the list in the same change.** Everything else in rule 30 is unchanged:
+Watchlist membership, scoring, cohorts and the score panel still include
+these names. No seam was stamped: a tradability constraint cannot start an
+exit clock, and a seam would have damped unrelated data-driven clocks.
+
 ### 31. Earnings sentinel: event-driven refresh for portfolio-relevant names (added 2026-08-13, approved by Dom)
 
 Spec: `docs/superpowers/specs/2026-08-13-earnings-sentinel-design.md`. A

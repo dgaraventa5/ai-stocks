@@ -79,8 +79,25 @@ def weights_score_monotonic(rows, tol=1e-4):
     return viol
 
 
+# OTC ADRs carry plain US-style tickers, so the suffix-dot test passes them, but
+# the execution broker either does not list them or takes whole-share orders
+# only (the pipeline sizes in fractional shares). Verified against the broker's
+# tradability lookup on the date shown; re-verify before removing an entry and
+# add any new OTC name here when it joins the Watchlist (rule 30 amendment
+# 2026-10-05, after SBGSY entered the model at rank 15 and could not be bought).
+BROKER_UNTRADABLE = {
+    'SBGSY': 'not listed (2026-10-05)',
+    'ABBNY': 'not listed (2026-10-05)',
+    'TOELY': 'not listed (2026-10-05)',
+    'HHUSF': 'not listed (2026-10-05)',
+    'HTHIY': 'whole-share only, no fractional (2026-10-05)',
+    'BESIY': 'whole-share only, no fractional (2026-10-05)',
+}
+
+
 def is_tradable(ticker: str) -> bool:
     """US-brokerage tradability (spec 2026-08-11): foreign local lines carry
     an exchange-suffix dot (6861.T, KGX.DE, 0981.HK); US listings never do.
-    Deterministic and offline by design — no per-name list, no API."""
-    return '.' not in ticker
+    Deterministic and offline — no API. BROKER_UNTRADABLE is the one per-name
+    exception list, for OTC ADRs the suffix test cannot see."""
+    return '.' not in ticker and ticker not in BROKER_UNTRADABLE

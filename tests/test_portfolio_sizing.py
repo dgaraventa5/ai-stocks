@@ -82,6 +82,17 @@ def test_is_tradable_rejects_exchange_suffixes():
     assert not any(is_tradable(t) for t in foreign)
 
 
+def test_is_tradable_rejects_broker_unlisted_otc_adrs():
+    """OTC ADRs carry plain US-style tickers but the broker does not list
+    them (or lists them whole-share only) — verified 2026-10-05."""
+    from portfolio_sizing import is_tradable, BROKER_UNTRADABLE
+    for t in ('SBGSY', 'ABBNY', 'TOELY', 'HHUSF', 'HTHIY', 'BESIY'):
+        assert t in BROKER_UNTRADABLE
+        assert not is_tradable(t)
+    # exchange-listed ADRs stay tradable
+    assert is_tradable('TSM') and is_tradable('HSAI')
+
+
 def test_pcfg_defaults_tradable_only_false(monkeypatch, tmp_path):
     import portfolio_model as pm
     monkeypatch.setattr(pm, 'PCONFIG', tmp_path / 'missing.json')

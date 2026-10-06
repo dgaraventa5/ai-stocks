@@ -3,7 +3,7 @@
 **Layer:** 03 Data Centers — power & thermal infrastructure
 **Last reviewed:** 2026-10-05
 **Current conviction:** ✓✓ (canonical Watchlist recalc 74.4)
-**Current target allocation:** 5.88% of portfolio (per Targets sheet, equal-weight mode, 17 holdings)
+**Current target allocation:** 6.25% of portfolio (per Targets sheet, equal-weight mode)
 **Thesis-break trigger:** Backlog declines for two consecutive quarters with book-to-bill below 1, OR a full-year guidance cut tied to hyperscaler order cancellations/push-outs
 
 ---
