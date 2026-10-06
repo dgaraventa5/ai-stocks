@@ -92,6 +92,9 @@ def export_positions(root: Path) -> list[dict]:
         })
     if not out:
         fail('no included positions found in Targets')
+    # Score-descending is the display order: equal-weight sizing ties every
+    # weight, so Targets row order is not meaningful to a reader.
+    out.sort(key=lambda p: -p['score'])
     return out
 
 
