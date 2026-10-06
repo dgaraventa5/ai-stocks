@@ -189,3 +189,17 @@ Fixtures: `tests/fixtures/scheduled_ops/`.
 4. Revert the recovery PR on a new branch and run the full suite.
 5. Leave branch protection intact; never bypass required `test`, push `main` directly, or restore the ineligible `workflow_dispatch` check design.
 6. Keep Claude tasks disabled, launchd unloaded, and Hermes jobs absent.
+
+## 2026-10-06: PR-head lookup raced the push
+
+Three runs (2026-10-03 05:36Z, 2026-10-06 01:43Z and 02:27Z) failed in "Create
+or locate generated-data PR" with `PR head <old> does not match planned head
+<new>`. The force-push to `automation/performance-series-v2` had succeeded; the
+PR API simply had not registered the new head yet, so the single lookup saw the
+previous commit. The auto-merge step never ran and PR 90 sat open with the site
+series stuck at 2026-10-01.
+
+Fix: the step now polls the PR head for up to about a minute and fails only if
+it never equals the planned head. The exact-SHA guarantee is unchanged — a
+genuinely unexpected head still stops the run. PR 90 was merged by hand.
+
