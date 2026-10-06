@@ -113,6 +113,20 @@ def test_daily_refresh_fails_closed_without_admin_read_permission():
     assert "/actions/permissions/workflow" not in workflow
 
 
+def test_daily_refresh_waits_for_pr_api_to_report_pushed_head():
+    """The PR API lags a just-pushed branch; comparing heads once failed three
+    runs (2026-10-03, 2026-10-06 x2) and stranded the series PR."""
+    workflow = (ROOT / ".github/workflows/daily-refresh.yml").read_text()
+    step = workflow.split("- name: Create or locate generated-data PR")[1]
+    step = step.split("- name: Require PR-associated test and auto-merge")[0]
+
+    loop = step.index("for attempt in")
+    lookup = step.index("headRefOid")
+    verdict = step.index("does not match planned head")
+    assert loop < lookup < verdict
+    assert 'if [ "$head_sha" != "$expected_sha" ]; then' in step[lookup:verdict]
+
+
 def test_docs_record_dispatch_failure_and_repo_scoped_app_recovery():
     design = (ROOT / "docs/ops/scheduled-automation-v1.md").read_text()
 
