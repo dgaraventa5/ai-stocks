@@ -135,6 +135,10 @@ Surface:
 - Any thesis-break signals (severe regulatory escalation, customer loss, product cycle issue)
 - Any **pending securities docket or disclosure mismatch** from Step 2d, stated as what it is: a filed allegation, with the docket number — never as established wrongdoing, and never conflated with a plaintiff-firm "investigation" press release
 
+### 7. Entry hold (rule 35)
+
+If the briefing records an unresolved event the score cannot see — a new government enforcement action, a securities case filed in the last 90 days, a guidance cut, or a transformative transaction since the last reported quarter — add or update the name's entry in `00-master/entry-holds.json` with a reason, the briefing as source, and an expiry just after the next earnings report. If a prior hold's event has resolved, remove it. A hold only defers entry; it never changes a score or a held position.
+
 ## Do not
 
 - Skip Step 1 (mental model articulation) — the diff is the entire point
