@@ -133,6 +133,15 @@ def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
             fails.append(f"{o['ticker']}: not in current Targets roster — "
                          f'executor cannot be pointed at arbitrary symbols')
 
+    # dollar_amount is executor-internal: allocate_buys() sets it from live
+    # cash at send time. A ticket that arrives carrying one would have its
+    # size chosen outside the gates below (which read notional_est), so
+    # refuse it rather than trust or silently strip it.
+    for o in orders:
+        if 'dollar_amount' in o:
+            fails.append(f"{o['ticker']}: ticket order carries dollar_amount — "
+                         f'that field is set by the executor, never by a ticket')
+
     # C2.3 — notional / cash / turnover / account cap
     max_order = float(cfg['MAX_ORDER_NOTIONAL'])
     for o in orders:
@@ -387,6 +396,11 @@ def mcp_order_params(account_number: str, order: dict) -> dict:
     if order.get('dollar_amount') is not None:
         # Dollar-based buy: market + regular hours only, exactly one of
         # quantity / dollar_amount. The server derives the share count.
+        # Buys only — a sell must name the shares it is closing.
+        if order['side'] != 'buy':
+            raise ValueError(f"{order['ticker']}: dollar_amount on a "
+                             f"{order['side']} order — dollar sizing is "
+                             f'buy-only')
         params = {
             'account_number': account_number,
             'symbol': order['ticker'], 'side': order['side'],

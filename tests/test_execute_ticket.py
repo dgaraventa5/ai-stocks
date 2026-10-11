@@ -650,3 +650,21 @@ def test_run_sends_buys_as_dollar_orders_and_records_the_sweep(tmp_path, live_di
     receipt = json.loads(res['receipt'].read_text())
     assert receipt['sweep']['live_cash'] == 93.5
     assert receipt['sweep']['left_idle'] < 0.5
+
+
+def test_ticket_carrying_dollar_amount_is_refused(tmp_path, live_dir):
+    """dollar_amount is set by the executor from live cash. A ticket that
+    arrives with one would be sized outside the notional gates."""
+    orders = [{'ticker': 'NVDA', 'side': 'buy', 'shares': 0.01,
+               'limit_price': 100.75, 'tif': 'day', 'notional_est': 1.0,
+               'dollar_amount': 400.0}]
+    tr = FakeTransport(quotes={'NVDA': 100.0})
+    res = run(make_ticket(tmp_path, orders), live_dir, transport=tr, confirm=True)
+    assert_refused(res, 'dollar_amount')
+    assert tr.placed == []
+
+
+def test_dollar_sizing_is_buy_only():
+    with pytest.raises(ValueError, match='buy-only'):
+        ex.mcp_order_params('1', {'ticker': 'TSM', 'side': 'sell', 'shares': 0.2,
+                                  'limit_price': 248.0, 'dollar_amount': 50.0})
