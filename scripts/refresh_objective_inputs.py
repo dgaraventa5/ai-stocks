@@ -446,6 +446,7 @@ def _default_fetcher(ticker, layer):
     # the signature. apply_guards surfaces them.
     info = dict(info)
     info["_roic_flags"] = [g for g in gaps if g.startswith("roic:")]
+    info["_pe_flags"] = [g for g in gaps if g.startswith("fwd_pe:")]
     return info, fresh
 
 
@@ -519,6 +520,7 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
         mwf = mw_staleness_flag(ticker, layer, today)
         if mwf:
             flags.append(mwf)
+        flags.extend(info.get("_pe_flags") or [])   # rule 36: kept-raw reasons
 
         try:
             dma_value = dma_fetcher(ticker)

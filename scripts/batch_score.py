@@ -188,6 +188,25 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
 
     # ----- Value -----
     inp["fwd_pe"]    = info.get("forwardPE")
+    # Rule 36 (2026-10-10): yfinance forwardPE is on the NEXT FISCAL year,
+    # a different twelve months for off-cycle year-ends. Restate those to the
+    # calendar year December-year names are on; never lowers a multiple.
+    _nfy = info.get("nextFiscalYearEnd")
+    if inp["fwd_pe"] and _nfy:
+        import datetime as _dt
+        from fiscal_calendar import calendar_year_forward_pe
+        _fy_end = _dt.datetime.fromtimestamp(_nfy, _dt.timezone.utc).date()
+        if _fy_end.month != 12:
+            _e0 = _e1 = None
+            try:
+                _ee = t.earnings_estimate
+                _e0 = float(_ee.loc["0y", "avg"])
+                _e1 = float(_ee.loc["+1y", "avg"])
+            except Exception:
+                pass
+            inp["fwd_pe"], _pf = calendar_year_forward_pe(
+                inp["fwd_pe"], _e0, _e1, _fy_end)
+            gaps.extend(f"fwd_pe: {f}" for f in _pf)
     # Col F is layer-conditional (the column header still says EV/EBITDA):
     #   Layer 10 (rule 10): EV / statement FCF, SaaS bands
     #   Layer 9 capacity cohort (rule 13): EV / secured gross MW in $M/MW,

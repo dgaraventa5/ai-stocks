@@ -1,6 +1,8 @@
-# Forward P/E on a common calendar year — DRAFT rule 36
+# Forward P/E on a common calendar year — rule 36
 
-**Status:** DRAFT for Dom's approval. Nothing here is implemented. Written 2026-10-10.
+**Status:** APPROVED by Dom 2026-10-10 and implemented (`scripts/fiscal_calendar.py`, wired in `batch_score.compute_inputs`). Takes effect at the next objective refresh; stamp a methodology seam before that `recalc --sync`.
+
+**Target-year convention as built:** `target_year(today)` = the year after December-year companies' current fiscal year, taking that as `today.year` from March onward and `today.year - 1` in January-February (when they are mid-rollover). No reference ticker is fetched.
 
 ## Problem
 
