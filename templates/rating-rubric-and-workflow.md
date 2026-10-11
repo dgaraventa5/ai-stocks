@@ -60,6 +60,8 @@ Do not hand-tune these here. Category-weight changes are gated on measured Infor
 
 **Sourcing rule:** Cite the specific filing (10-K segment data, 10-Q MD&A, or earnings call transcript) where AI revenue is disclosed or can be reasonably estimated. If estimating, show the math.
 
+**Ad-platform convention (approved by Dom 2026-10-10):** for companies whose revenue is advertising sold through an AI ranking/targeting engine (META, APP, RDDT; the ads side of GOOGL), the model is how the product works, not what the customer is buying — the revenue is AI-*enabled*, not AI-infrastructure-tied. Rate on one shared scale so no ad platform outranks another on rhetoric: **baseline 2**; **3** when filings or company disclosures quantify AI-attributable revenue or lift above roughly 10% of revenue, or a discrete AI revenue line (data licensing, cloud, model access) reaches 10–25%; **capped at 3** unless a discrete non-advertising AI revenue line exceeds 25%. "The AI engine is ~100% of revenue" is the failure mode this replaces (APP was rated 5 on it while META carried 3 on the same facts). Current: META 3, APP 3, GOOGL 3 (Cloud), RDDT 2.
+
 **Layer 11 convention (approved by Dom 2026-08-02):** for Robotics & Physical AI names, D1 measures **robotics/physical-AI revenue as the demand driver** (e.g., Harmonic Drive's reducers = robot joints → high D1 even though the *humanoid* slice is ~4%), discounted where the exposure is automation-*adjacent* capex rather than robotics-driven. Humanoid-ramp specificity is deliberately carried by D5, not double-counted here. AI-datacenter revenue (e.g., RRX switchgear, ALGM's 17% DC) counts toward D1 as AI-infrastructure revenue under the standard definition.
 
 ---

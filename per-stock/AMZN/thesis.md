@@ -3,7 +3,7 @@
 **Layer:** 09 Cloud — Hyperscaler
 **Last reviewed:** 2026-10-05
 **Current conviction:** ✓✓ (canonical Watchlist recalc 73.6, rescored 2026-10-05)
-**Current target allocation:** 6.25% of portfolio (per Targets sheet, equal-weight mode)
+**Current target allocation:** 5.56% of portfolio (per Targets sheet, equal-weight mode, 18 holdings)
 **Thesis-break trigger:** AWS growth decelerates for two consecutive quarters while capex guidance keeps rising (spend without return), OR AWS operating margin compresses materially on depreciation
 
 ---
