@@ -3,7 +3,7 @@
   "definition": "Rule-15 rulings on the EPS YoY input (Watchlist col 18). value=null means a documented blank; a number means an ex-item YoY % (arithmetic stated in basis) that replaces the yfinance GAAP figure. A ruling applies only while quarter_end matches the name's most recent reported quarter (yfinance mostRecentQuarter); after the next print it is STALE and refresh_objective_inputs.py withholds the cell and re-raises it. Human-written; the script never edits this file.",
   "refresh_rule": "Add/replace an entry in the same session that appends the Rating Audit row (audit_row points at it). Remove nothing: a superseded entry is replaced by the new quarter's ruling.",
   "spec": "docs/superpowers/specs/2026-09-08-eps-yoy-override-design.md",
-  "updated": "2026-10-06"
+  "updated": "2026-10-11"
  },
  "CRM": {
   "quarter_end": "2026-07-31",
@@ -116,5 +116,45 @@
   "source": "10-Q q/e 2026-06-30 (acc. 0001652044-26-000071) OI&E table",
   "ruled": "2026-10-06",
   "audit_row": "Rating Audit 2026-10-06 EPS YoY (objective)"
+ },
+ "MU": {
+  "quarter_end": "2026-09-03",
+  "value": 1077.8,
+  "basis": "Operational memory super-cycle, no one-off: FY2026 revenue $133,188M vs $37,378M, operating income $99,340M (75% of revenue) vs $9,770M, net income $84,969M vs $8,539M - net income is below operating income, so nothing non-operating inflates it. Fiscal Q4 (q/e 2026-09-03) GAAP YoY +1077.8% per yfinance earningsQuarterlyGrowth; quarterly statements in yfinance still lag at 2026-05-31, so the Q4 quarter itself was not decomposed.",
+  "source": "10-K FY2026 (filed 2026-10-09, acc. 0000723125-26-000023) consolidated statements of operations; yfinance 2026-10-11",
+  "ruled": "2026-10-11",
+  "audit_row": "Rating Audit 2026-10-11 EPS YoY (objective)"
+ },
+ "TER": {
+  "quarter_end": "2026-06-28",
+  "value": 377.9,
+  "basis": "Operational: Q2 2026 revenue $1,329.0M vs $651.8M (+104%), income from operations $440.8M vs $93.1M (+373%), net income $374.5M vs $78.4M (+377.9%); unusual items -$3.0M; tax rate 15.1% vs 12.7% (works against the jump). Same basis as the 2026-06-24 ruling.",
+  "source": "10-Q q/e 2026-06-28 (filed 2026-07-31, acc. 0001193125-26-327715) via yfinance quarterly statements",
+  "ruled": "2026-10-11",
+  "audit_row": "Rating Audit 2026-10-11 EPS YoY (objective)"
+ },
+ "SMCI": {
+  "quarter_end": "2026-06-30",
+  "value": 503.7,
+  "basis": "Operational AI-server ramp: fiscal Q4 2026 net sales $11,119.8M vs $5,756.9M (+93%), income from operations $1,488.1M vs $228.4M (+552%), net income $1,178.2M vs $195.2M (+503.7%); tax rate 19.7% vs 8.7% (works against the jump). FY2026 income from operations $2,770.5M vs $1,253.0M.",
+  "source": "10-K FY2026 (filed 2026-08-31, acc. 0001375365-26-000022); yfinance quarterly statements",
+  "ruled": "2026-10-11",
+  "audit_row": "Rating Audit 2026-10-11 EPS YoY (objective)"
+ },
+ "HPE": {
+  "quarter_end": "2026-07-31",
+  "value": 404.9,
+  "basis": "Carries the 2026-09-07 ruling into the overrides file so the refresh stops withholding it: Q3 FY26 net earnings $1,540M vs $305M = +404.9%; earnings from operations up +464% ($1,393M vs $247M per that ruling). Note a $373M other-income item this year vs -$180M last year (21% of pre-tax); the operating line still carries the change.",
+  "source": "Rating Audit 2026-09-07 EPS YoY (objective); yfinance quarterly statements 2026-10-11",
+  "ruled": "2026-10-11",
+  "audit_row": "Rating Audit 2026-10-11 EPS YoY (objective)"
+ },
+ "UMC": {
+  "quarter_end": "2026-06-30",
+  "value": null,
+  "basis": "Q2 2026 net income NT$42.26B vs NT$8.90B (+375%) is dominated by net non-operating income of about NT$30.24B (a net expense of NT$0.67B a year earlier) - roughly two-thirds of pre-tax income of NT$45.19B, attributed by management to investment and dividend income. Operating income rose about 38% YoY (NT$14.9B vs NT$10.8B). The cell held a stale 107.9.",
+  "source": "UMC Q2 2026 results, Form 6-K Ex-99 (sec.gov/Archives/edgar/data/0001033767/000119312526322027/umc-ex99.htm); Q2 2026 call",
+  "ruled": "2026-10-11",
+  "audit_row": "Rating Audit 2026-10-11 EPS YoY (objective)"
  }
 }
