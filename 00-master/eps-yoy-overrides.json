@@ -3,7 +3,7 @@
   "definition": "Rule-15 rulings on the EPS YoY input (Watchlist col 18). value=null means a documented blank; a number means an ex-item YoY % (arithmetic stated in basis) that replaces the yfinance GAAP figure. A ruling applies only while quarter_end matches the name's most recent reported quarter (yfinance mostRecentQuarter); after the next print it is STALE and refresh_objective_inputs.py withholds the cell and re-raises it. Human-written; the script never edits this file.",
   "refresh_rule": "Add/replace an entry in the same session that appends the Rating Audit row (audit_row points at it). Remove nothing: a superseded entry is replaced by the new quarter's ruling.",
   "spec": "docs/superpowers/specs/2026-09-08-eps-yoy-override-design.md",
-  "updated": "2026-10-05"
+  "updated": "2026-10-06"
  },
  "CRM": {
   "quarter_end": "2026-07-31",
@@ -92,5 +92,29 @@
   "source": "10-Q q/e 2026-06-30, Note 1 Other Income (Expense), Net (acc. 0001018724-26-000026); 8-K Ex-99.1 filed 2026-07-30",
   "ruled": "2026-08-02",
   "audit_row": "Rating Audit 2026-08-02 EPS YoY (objective)"
+ },
+ "GMED": {
+  "quarter_end": "2026-06-30",
+  "value": null,
+  "basis": "GAAP EPS YoY -25.3% dominated by prior-year one-time items: Q2 2025 net income $202.8M included a $110.561M Nevro bargain purchase gain and a $34.815M valuation-allowance tax benefit; operating income +139.7%",
+  "source": "10-Q filed 2026-08-06, Statements of Income, MD&A Bargain Purchase Gain, Note 14; 8-K Ex-99.1",
+  "ruled": "2026-10-06",
+  "audit_row": "Rating Audit 2026-10-06 EPS YoY (objective)"
+ },
+ "WDC": {
+  "quarter_end": "2026-07-03",
+  "value": null,
+  "basis": "GAAP EPS $8.21 vs $0.67 (+1,125%) dominated by a $2,050M mark-to-market gain on the retained SanDisk stake (prior year: $166M loss + $100M exchange costs)",
+  "source": "8-K Ex-99.1 filed 2026-08-05 reconciliation; 10-K FY2026 Item 7",
+  "ruled": "2026-10-06",
+  "audit_row": "Rating Audit 2026-10-06 EPS YoY (objective)"
+ },
+ "GOOGL": {
+  "quarter_end": "2026-06-30",
+  "value": null,
+  "basis": "Diluted EPS $9.11 vs $2.31 (+294%); equity-securities gain $99,031M is 71% of pre-tax income $138,753M",
+  "source": "10-Q q/e 2026-06-30 (acc. 0001652044-26-000071) OI&E table",
+  "ruled": "2026-10-06",
+  "audit_row": "Rating Audit 2026-10-06 EPS YoY (objective)"
  }
 }
