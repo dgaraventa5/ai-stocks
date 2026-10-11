@@ -760,9 +760,57 @@
         "ALAB": "\u2713\u2713"
       },
       "cash": 0.02
+    },
+    {
+      "date": "2026-10-11",
+      "reason": "membership: +PLTR, +WDC",
+      "kind": "membership",
+      "allocations": {
+        "AVGO": 589.4,
+        "MU": 589.4,
+        "MSFT": 589.4,
+        "CRDO": 589.4,
+        "GMED": 589.4,
+        "FIX": 589.4,
+        "ANET": 589.4,
+        "VRT": 589.4,
+        "NVDA": 589.4,
+        "RDDT": 589.4,
+        "EME": 589.4,
+        "AMZN": 589.4,
+        "TSM": 589.4,
+        "SNDK": 589.4,
+        "META": 589.4,
+        "ALAB": 589.4,
+        "WDC": 589.4,
+        "PLTR": 589.4
+      },
+      "tiers": {
+        "AVGO": "\u2713\u2713",
+        "MU": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "CRDO": "\u2713\u2713",
+        "GMED": "\u2713\u2713",
+        "FIX": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "VRT": "\u2713\u2713",
+        "NVDA": "\u2713\u2713",
+        "RDDT": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "AMZN": "\u2713\u2713",
+        "TSM": "\u2713\u2713",
+        "SNDK": "\u2713\u2713",
+        "META": "\u2713\u2713",
+        "ALAB": "\u2713\u2713",
+        "WDC": "\u2713\u2713",
+        "PLTR": "\u2713\u2713"
+      },
+      "cash": 0.09
     }
   ],
-  "exit_pending": {},
+  "exit_pending": {
+    "AMZN": "2026-10-11"
+  },
   "shadow_events": {
     "BAND_TOP": [
       {
@@ -904,6 +952,26 @@
           "VRT",
           "AMZN"
         ]
+      },
+      {
+        "date": "2026-10-11",
+        "roster": [
+          "NVDA",
+          "TSM",
+          "SNDK",
+          "FIX",
+          "CRDO",
+          "MSFT",
+          "AVGO",
+          "ANET",
+          "MU",
+          "ALAB",
+          "GMED",
+          "EME",
+          "META",
+          "WDC",
+          "PLTR"
+        ]
       }
     ],
     "BAND_NEXT": [
@@ -1040,6 +1108,21 @@
           "ISRG",
           "EQT",
           "CGNX"
+        ]
+      },
+      {
+        "date": "2026-10-11",
+        "roster": [
+          "VRT",
+          "RDDT",
+          "STX",
+          "NVT",
+          "AMZN",
+          "APH",
+          "CDNS",
+          "SNPS",
+          "ORCL",
+          "GOOGL"
         ]
       }
     ],
@@ -1203,6 +1286,26 @@
           "ARM",
           "MOD"
         ]
+      },
+      {
+        "date": "2026-10-11",
+        "roster": [
+          "APP",
+          "BE",
+          "ONTO",
+          "ISRG",
+          "TER",
+          "CGNX",
+          "ARM",
+          "FN",
+          "KEYS",
+          "NTAP",
+          "AAON",
+          "RMBS",
+          "AMD",
+          "NOVT",
+          "PWR"
+        ]
       }
     ],
     "INVVOL_ROSTER": [
@@ -1363,6 +1466,49 @@
           "TSM": 0.093712,
           "VRT": 0.048426
         }
+      },
+      {
+        "date": "2026-10-11",
+        "roster": [
+          "ALAB",
+          "AMZN",
+          "ANET",
+          "AVGO",
+          "CRDO",
+          "EME",
+          "FIX",
+          "GMED",
+          "META",
+          "MSFT",
+          "MU",
+          "NVDA",
+          "PLTR",
+          "RDDT",
+          "SNDK",
+          "TSM",
+          "VRT",
+          "WDC"
+        ],
+        "weights": {
+          "ALAB": 0.030762,
+          "AMZN": 0.068054,
+          "ANET": 0.062379,
+          "AVGO": 0.076598,
+          "CRDO": 0.030299,
+          "EME": 0.053385,
+          "FIX": 0.053836,
+          "GMED": 0.100967,
+          "META": 0.062821,
+          "MSFT": 0.072026,
+          "MU": 0.03928,
+          "NVDA": 0.078385,
+          "PLTR": 0.037378,
+          "RDDT": 0.037687,
+          "SNDK": 0.03,
+          "TSM": 0.084842,
+          "VRT": 0.044391,
+          "WDC": 0.03691
+        }
       }
     ]
   },
@@ -1370,7 +1516,7 @@
     "last_resize_check": "2026-10"
   },
   "methodology_seam": {
-    "date": "2026-09-08",
-    "reason": "rule 34: ROIC switched to computed TTM NOPAT / capital employed (was a stale hand-curated cell, 39% blank)"
+    "date": "2026-10-11",
+    "reason": "rule 36 (forward P/E on a common calendar year), ad-platform D1 convention, and mechanical M2 re-measure, deployed with the 2026-10-06..11 review"
   }
 }
