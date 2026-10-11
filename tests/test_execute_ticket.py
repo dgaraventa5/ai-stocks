@@ -575,3 +575,78 @@ def test_self_funding_ticket_passes_the_cash_gate_by_construction(tmp_path,
     tr = FakeTransport(cash=0.0, quotes={'NVDA': 180.0, 'TSM': 250.0})
     out = run(p, live_dir, transport=tr)
     assert not any('cash' in f for f in out['failures']), out['failures']
+
+
+# ---- buys as dollar orders sized to live cash (2026-10-11) ------------------
+
+def _buy(ticker, notional):
+    return {'ticker': ticker, 'side': 'buy', 'shares': notional / 100.0,
+            'limit_price': 100.75, 'tif': 'day', 'notional_est': notional}
+
+
+def test_dollar_buy_params_carry_dollar_amount_not_quantity():
+    p = ex.mcp_order_params('123456789', {**_buy('NVDA', 50.0),
+                                          'dollar_amount': 49.37,
+                                          'ref_id': 'abc'})
+    assert p['dollar_amount'] == '49.37' and p['type'] == 'market'
+    assert p['market_hours'] == 'regular_hours' and 'quantity' not in p
+    assert 'limit_price' not in p and p['ref_id'] == 'abc'
+    assert all(isinstance(v, str) for v in p.values())
+
+
+def test_allocate_buys_never_exceeds_live_cash():
+    """Cash came in BELOW the ticket (sells filled low): buys shrink pro-rata
+    instead of the last one bouncing for lack of funds."""
+    buys = [_buy('AAA', 60.0), _buy('BBB', 40.0)]
+    sized, sweep = ex.allocate_buys(buys, live_cash=90.0, max_order=1000.0)
+    total = sum(o['dollar_amount'] for o in sized)
+    assert total <= 90.0 - ex.CASH_RESERVE_MIN + 1e-9
+    assert sized[0]['dollar_amount'] / sized[1]['dollar_amount'] == \
+        pytest.approx(1.5, rel=0.01)
+    assert sweep['left_idle'] < 0.5 and sweep['scale'] < 1.0
+
+
+def test_allocate_buys_sweeps_idle_cash_up_to_the_cap():
+    """Cash ABOVE the ticket (dust, haircut residue, a dividend) is put to
+    work — but only up to SWEEP_MAX_SCALE, so a deposit is never deployed by
+    a ticket that did not plan for it."""
+    buys = [_buy('AAA', 50.0), _buy('BBB', 50.0)]
+    sized, sweep = ex.allocate_buys(buys, live_cash=104.0, max_order=1000.0)
+    assert sum(o['dollar_amount'] for o in sized) == pytest.approx(103.73, abs=0.02)
+    sized, sweep = ex.allocate_buys(buys, live_cash=500.0, max_order=1000.0)
+    assert sum(o['dollar_amount'] for o in sized) == pytest.approx(110.0, abs=0.02)
+    assert sweep['scale'] == ex.SWEEP_MAX_SCALE
+
+
+def test_allocate_buys_respects_max_order_and_broker_minimum():
+    sized, _ = ex.allocate_buys([_buy('AAA', 100.0)], live_cash=500.0,
+                                max_order=105.0)
+    assert sized[0]['dollar_amount'] == 105.0
+    sized, _ = ex.allocate_buys([_buy('AAA', 50.0), _buy('BBB', 50.0)],
+                                live_cash=1.6, max_order=1000.0)
+    assert all(o['dollar_amount'] is None for o in sized)   # under $1 each
+
+
+def test_run_sends_buys_as_dollar_orders_and_records_the_sweep(tmp_path, live_dir):
+    """End to end: sells go out by share count, buys by dollars summing to
+    live cash less the reserve, and the receipt records what was done."""
+    orders = [{'ticker': 'TSM', 'side': 'sell', 'shares': 0.2,
+               'limit_price': 248.13, 'tif': 'day', 'notional_est': 50.0},
+              {'ticker': 'AAA', 'side': 'buy', 'shares': 0.6,
+               'limit_price': 100.75, 'tif': 'day', 'notional_est': 60.0},
+              {'ticker': 'NVDA', 'side': 'buy', 'shares': 0.3,
+               'limit_price': 100.75, 'tif': 'day', 'notional_est': 30.0}]
+    tr = FakeTransport(cash=93.5, equity=450.0,
+                       quotes={'TSM': 250.0, 'AAA': 100.0, 'NVDA': 100.0})
+    res = run(make_ticket(tmp_path, orders), live_dir, transport=tr,
+              roster=('TSM', 'AAA', 'NVDA'), confirm=True)
+    assert res['sent'] and res['failures'] == []
+    sells = [o for o in tr.placed if o['side'] == 'sell']
+    buys = [o for o in tr.placed if o['side'] == 'buy']
+    assert all(o.get('dollar_amount') is None for o in sells)
+    assert sorted(o['ticker'] for o in buys) == ['AAA', 'NVDA']
+    spent = sum(o['dollar_amount'] for o in buys)
+    assert 93.0 <= spent <= 93.5 - ex.CASH_RESERVE_MIN + 1e-9
+    receipt = json.loads(res['receipt'].read_text())
+    assert receipt['sweep']['live_cash'] == 93.5
+    assert receipt['sweep']['left_idle'] < 0.5

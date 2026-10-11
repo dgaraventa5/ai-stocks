@@ -161,27 +161,23 @@ def test_build_ticket_fields_and_expiry():
     assert json.loads(json.dumps(tk)) == tk
 
 
-# ---- cash buffer (2026-08-17: the last order failed on insufficient funds) ----
+# ---- cash buffer: 0 by default since 2026-10-11 ------------------------------
 
-def test_buys_leave_a_cash_buffer_for_slippage():
-    """Full redeploy must not consume ~100% of cash.
+def test_default_sizing_targets_all_of_equity():
+    """Targets are sized against 100% of equity, not 98%.
 
-    Robinhood places fractional orders as MARKET orders (the limit price is
-    advisory), and the executor sends them sequentially, so every prior fill's
-    slippage accumulates against the last one. On 2026-08-17 a ticket sized to
-    99.98% of cash filled 14 of 15 and the alphabetically-last name came back
-    "You can only purchase 0 shares of VRT" — broker-speak for insufficient
-    funds. Whichever ticker sorts last is systematically the casualty, so the
-    fix belongs in sizing, not in retry.
+    A 2% buffer was added 2026-08-17 after share-count market buys overspent
+    and the last order of a ~100% ticket was rejected. It left ~2% of the
+    account idle after every ticket, by design. The executor now sends buys as
+    dollar orders scaled to live cash, so sizing no longer needs the slack.
     """
     cash = 1000.0
     weights = {t: 0.25 for t in ('AAA', 'BBB', 'CCC', 'DDD')}
     prices = {t: 100.0 for t in weights}
     res = tt.compute_orders(weights, {}, cash, prices, dict(tt.DEFAULTS))
-    spend = sum(o['shares'] * o['limit_price'] for o in res['orders']
-                if o['side'] == 'buy')
-    assert spend <= cash * 0.99, f'spent {spend} of {cash} — no slack for slippage'
-    assert spend >= cash * 0.95, f'spent only {spend} — buffer is too fat to be useful'
+    spend = sum(o['notional_est'] for o in res['orders'] if o['side'] == 'buy')
+    assert spend == pytest.approx(cash, abs=0.5)
+    assert tt.DEFAULTS['CASH_BUFFER_PCT'] == 0.0
 
 
 def test_cash_buffer_is_configurable():
