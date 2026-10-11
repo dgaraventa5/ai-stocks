@@ -37,6 +37,17 @@ STALE_QUOTE_MARK = 'stale ticket in a moving market'   # C2.5 failure tag
 # cash before sending buys (broker rejects buys placed ahead of settlement:
 # VRT 2026-08-17 "You can only purchase 0 shares").
 FUNDING_WAIT_S = 90       # max wait for sell proceeds before buys are skipped
+# Buys are sent as DOLLAR orders scaled pro-rata to the cash actually in the
+# account once sells have landed (2026-10-11, Dom: "i want as little cash in
+# the account as possible"). The broker spends exactly the dollars named, so
+# buys cannot outspend funding — which is what the old 2% sizing buffer and
+# the unspent slice of the sell-proceeds haircut were protecting, at the cost
+# of ~2-4% of the account sitting idle after every ticket.
+CASH_RESERVE_PCT = 0.0025  # slice of live cash left unspent (fees/rounding)
+CASH_RESERVE_MIN = 0.25    # ...and never less than this many dollars
+SWEEP_MAX_SCALE = 1.10     # buys may grow at most 10% over the ticket to
+                           # absorb idle cash; more than that is not a sweep
+BROKER_MIN_DOLLARS = 1.00  # broker rejects dollar orders under $1
 FUNDING_POLL_S = 5
 REQUIRED_CAPS = ('ACCOUNT_CAP', 'MAX_ORDER_NOTIONAL', 'MAX_TURNOVER_PCT')
 
@@ -218,13 +229,28 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
 
     sells = [o for o in ticket['orders'] if o['side'] == 'sell']
     buys = [o for o in ticket['orders'] if o['side'] != 'sell']
+    sweep = None
     for o in sells:
         place(o)
     if buys:
         needed = sum(o['notional_est'] for o in buys)
         funded = _wait_for_funding(transport, needed, sleeper)
         if funded:
-            for o in buys:
+            live_cash = float(transport.portfolio().get('cash') or 0.0)
+            sized, sweep = allocate_buys(buys, live_cash,
+                                         float(cfg['MAX_ORDER_NOTIONAL']))
+            print(f"  buys sized to live cash {live_cash:.2f}: ticket "
+                  f"{sweep['requested']:.2f} -> sending {sweep['sent']:.2f} "
+                  f"(scale {sweep['scale']:.4f})")
+            for o in sized:
+                if o.get('dollar_amount') is None:
+                    results.append({**o,
+                                    'ref_id': order_ref_id(ticket['ticket_id'], o),
+                                    'order_id': None, 'state': 'not_sent',
+                                    'error': f'under the broker minimum of '
+                                             f'${BROKER_MIN_DOLLARS:.2f} after '
+                                             f'sizing to live cash'})
+                    continue
                 place(o)
         else:
             msg = (f'funding: sell proceeds did not reach cash within '
@@ -237,6 +263,8 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
                                 'error': msg})
     receipt = {'ticket_id': ticket['ticket_id'], 'sent_at': now,
                'checksum': ticket['checksum'], 'orders': results}
+    if sweep is not None:
+        receipt['sweep'] = sweep
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
     if receipt_path.exists():   # all-transmit_error re-run: archive, don't erase
         stamp = now.replace(':', '').replace('-', '')[:15]
@@ -267,6 +295,34 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
               f'(the rest were sent); this run is a failure — regenerate a '
               f'ticket for the missing legs, do NOT re-run this one')
     return {'failures': failures, 'sent': True, 'receipt': receipt_path}
+
+
+def allocate_buys(buys: list[dict], live_cash: float,
+                  max_order: float) -> tuple[list[dict], dict]:
+    """Size each buy in DOLLARS, pro-rata to the cash actually available.
+
+    Returns (orders, sweep). Each order gains `dollar_amount` (None when the
+    slice falls under the broker minimum and must not be sent). The total
+    never exceeds live cash less a small reserve, so no buy can fail for lack
+    of funds; it grows at most SWEEP_MAX_SCALE over the ticket, and no single
+    order exceeds MAX_ORDER_NOTIONAL — both so that unexpected cash (a deposit)
+    is never deployed by a ticket that did not plan for it. Cents round DOWN.
+    """
+    requested = sum(o['notional_est'] for o in buys)
+    reserve = max(CASH_RESERVE_MIN, live_cash * CASH_RESERVE_PCT)
+    budget = max(live_cash - reserve, 0.0)
+    scale = min(budget / requested, SWEEP_MAX_SCALE) if requested > 0 else 0.0
+    out = []
+    for o in buys:
+        dollars = int(min(o['notional_est'] * scale, max_order) * 100) / 100
+        out.append({**o, 'dollar_amount':
+                    dollars if dollars >= BROKER_MIN_DOLLARS else None})
+    sent = sum(o['dollar_amount'] or 0.0 for o in out)
+    sweep = {'live_cash': round(live_cash, 2), 'reserve': round(reserve, 2),
+             'requested': round(requested, 2), 'sent': round(sent, 2),
+             'scale': round(scale, 6),
+             'left_idle': round(live_cash - sent, 2)}
+    return out, sweep
 
 
 def _wait_for_funding(transport, needed: float, sleeper) -> bool:
@@ -328,6 +384,19 @@ def mcp_order_params(account_number: str, order: dict) -> dict:
     - Fractional shares exist ONLY as type=market + regular_hours; there is
       no fractional limit order. The ticket's limit price stays behind as
       the quote-sanity reference; whole-share orders keep real limits."""
+    if order.get('dollar_amount') is not None:
+        # Dollar-based buy: market + regular hours only, exactly one of
+        # quantity / dollar_amount. The server derives the share count.
+        params = {
+            'account_number': account_number,
+            'symbol': order['ticker'], 'side': order['side'],
+            'dollar_amount': f"{order['dollar_amount']:.2f}",
+            'type': 'market', 'time_in_force': 'gfd',
+            'market_hours': 'regular_hours',
+        }
+        if order.get('ref_id'):
+            params['ref_id'] = order['ref_id']
+        return params
     fractional = order['shares'] % 1 != 0
     params = {
         'account_number': account_number,

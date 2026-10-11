@@ -19,7 +19,8 @@ DEFAULTS = {
     'LIMIT_TOL': 0.0075,          # marketable-limit tolerance
     'MAX_WEIGHT': 0.12,           # renormalization cap (mirrors sizing cap)
     'TICKET_TTL_TRADING_DAYS': 2, # expire at the close of the Nth trading day
-    'CASH_BUFFER_PCT': 0.02,      # undeployed slack for slippage (see below)
+    'CASH_BUFFER_PCT': 0.0,       # 0 since 2026-10-11: buys go out as dollar
+                                  # orders sized to live cash (see below)
     # Same-ticket sell proceeds are credited to buys at (1 - haircut) — ONE
     # constant shared with the executor's C2.3 gate (execute_ticket reads it
     # from here), so a ticket the builder scaled to funding passes that gate
@@ -108,14 +109,15 @@ def compute_orders(target_weights: dict[str, float],
 
     mv = {t: p['shares'] * prices[t]
           for t, p in positions.items() if t in prices}
-    # Deploy against equity MINUS a cash buffer. Robinhood places fractional
-    # orders as MARKET orders (limit_price below is advisory) and the executor
-    # sends them sequentially, so each fill's slippage accumulates against the
-    # orders still to come — the ticker sorting last is systematically the one
-    # that runs out of money. Worse, limits are marked up by LIMIT_TOL, so
-    # targeting 100% of equity overspends by that tolerance before slippage is
-    # even considered. Keep the buffer > LIMIT_TOL. (2026-08-17: a 99.98%
-    # ticket filled 14 of 15; VRT came back "You can only purchase 0 shares".)
+    # Targets are sized against ALL of equity (buffer 0 since 2026-10-11, Dom:
+    # "i want all the cash invested"). History: a 2% buffer was added
+    # 2026-08-17 after a ticket sized to 99.98% filled 14 of 15 — share-count
+    # market buys overspend by slippage and the last one ran out of money. It
+    # left ~2% of the account idle forever, by design. The executor now sends
+    # buys as DOLLAR orders scaled to the cash actually in the account
+    # (execute_ticket.allocate_buys), so no order can outspend its funding and
+    # the buffer has nothing left to protect. CASH_BUFFER_PCT stays
+    # cfg-overridable for anyone who wants slack back.
     buffer_pct = float(cfg.get('CASH_BUFFER_PCT', DEFAULTS['CASH_BUFFER_PCT']))
     equity = cash + sum(mv.values())          # true equity — reported as-is
     deployable = equity * (1.0 - buffer_pct)  # what targets are sized against

@@ -677,6 +677,29 @@ one-order-writer invariant is unchanged. The preflight's fix-it message now
 points at that command instead of /mcp. First renewal was still unproven on
 the day of the change (token issued 2026-10-05, ~10-day life).
 
+**Amendment 2026-10-11 (Dom-approved: "i want all the cash invested …
+please fix"): buys are dollar orders sized to live cash; the 2% sizing
+buffer is gone.** Idle cash sat at 2–4% of the account after every ticket,
+by design: `CASH_BUFFER_PCT` held 2% back (added 2026-08-17 after share-count
+market buys overspent and the last order of a ~100% ticket bounced), and the
+unspent slice of the sell-proceeds haircut plus dust added to it. Two
+changes: (1) `trade_ticket.DEFAULTS['CASH_BUFFER_PCT']` is **0** — targets
+are sized against all of equity; (2) `execute_ticket.allocate_buys` — once
+sells have landed, the executor reads live cash and sends each buy as a
+**dollar-amount** market order (`dollar_amount`, never `quantity`), pro-rata
+to the ticket's buys, summing to live cash less a small reserve
+(`CASH_RESERVE_PCT` 0.25%, min $0.25). The broker spends exactly the dollars
+named, so a buy cannot fail for lack of funds — the thing the buffer
+existed to prevent. Bounds, so a ticket never deploys cash it did not plan
+for: buys grow at most `SWEEP_MAX_SCALE` (10%) over the ticket, no order
+exceeds `MAX_ORDER_NOTIONAL`, slices under $1 are receipted `not_sent`.
+Sells are unchanged (share counts). The receipt gains a `sweep` block
+(live cash, scale, sent, left idle). Simulated on the 2026-10-05 snapshot:
+idle after a full ticket falls from ~1.9% of equity to ~0.03%. **Unproven
+live on the day of the change** — dollar orders have never been sent by this
+pipeline; the first receipt is the test. The C2 gate set is otherwise
+unchanged, and the one-order-writer invariant stands.
+
 ### 30. Tradability filter: foreign listings can't enter the portfolio (added 2026-08-11, approved by Dom)
 
 **Context:** 6861.T (Keyence) entered the model at rank 12 / 8.61% — a weight the
