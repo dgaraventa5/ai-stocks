@@ -927,6 +927,38 @@ Code: `scripts/entry_gate.py` (pure, offline); wired in `refresh_targets.py`
 at the entry branch. Tests: `tests/test_entry_gate.py` and the entry-gate
 block in `tests/test_refresh_targets.py`.
 
+### 36. Forward P/E uses the same calendar year for every company (added 2026-10-10, approved by Dom)
+
+**Context:** yfinance `forwardPE` is price over NEXT-FISCAL-YEAR consensus EPS,
+which is a different twelve months for the 69 of 214 names (32%) without a
+December year-end. On a fast grower the later window flatters the multiple:
+WDC, fiscal year ending early July, printed 13.1 on its fiscal-2028 estimate
+against 16.1 on calendar 2027 — worth 0.6 points, and the margin that decided
+whether it entered the portfolio in the 2026-10-10 review.
+
+**Rule:** off-cycle names blend their current-year (`0y`) and next-year (`+1y`)
+consensus EPS by the share of the **target calendar year** each covers; the raw
+multiple is scaled by (`+1y` ÷ blended). The target is the year December-year
+names are on (`fiscal_calendar.target_year`: next year from March onward, this
+year in January–February while they roll). Any part of the target year beyond
+the `+1y` window takes `+1y`, so names like AVGO (November year-end) are
+unchanged. **The rule never lowers a multiple** — a blend that would is kept raw
+and flagged (PANW: its two estimates look to be on different bases). Missing or
+non-positive estimates keep the raw value, flagged. December names and all
+scoring bands are untouched (rule 8 respected: an input's definition changes,
+not a threshold). PEG follows the cell.
+
+**Measured (parked workbook, 2026-10-10):** 41 multiples rise, 7 total scores
+move (≤0.75 pts), one rank-15 crossing (WDC 14 → 17).
+
+**Not covered:** three-year growth measured from a cycle trough (WDC's 27% a
+year starts at the fiscal-2023 low) — same family, no mechanical fix yet.
+
+Code: `scripts/fiscal_calendar.py` (pure), wired in
+`batch_score.compute_inputs`; kept-raw reasons surface in
+`refresh_objective_inputs.py`'s judgment flags. Spec:
+`docs/superpowers/specs/2026-10-10-forward-pe-calendar-year-design.md`.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash
