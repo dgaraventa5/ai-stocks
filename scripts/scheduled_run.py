@@ -17,7 +17,16 @@ to judgment lives here instead:
   hold-tickets   park any trade ticket this run generated (rename to
                  held-ticket-*) so the executor's ticket-*.json glob skips it.
                  Scheduled runs re-score; they never release a trade.
+  branch         create this run's branch (auto/<job>-<date>) from origin/main.
+  land           stage ONLY research/score paths, refuse if anything else (or
+                 anything under tracking/live/) is staged, commit, push the
+                 run's own branch, open the PR.
+  merge          wait for CI on that PR, squash-merge it, sync local main.
   release        drop the lock.
+
+branch/land/merge exist so the unattended session needs no raw git or gh
+write permission: the branch name, the staged paths and the PR merged are all
+fixed here, not chosen by the model.
 
 Names no order tool and sends nothing to the broker (rule 29). Imports
 requests / yfinance / openpyxl lazily (CI minimal-env rule).
@@ -41,6 +50,9 @@ RUN_BRANCH_PREFIX = "auto/"     # every scheduled run's branch: auto/<job>-<date
 MAX_FETCH_FAILURE_RATE = 0.20   # above this the scan is treated as blocked
 FILING_FORMS = {"8-K", "8-K/A", "6-K"}
 EARNINGS_ITEM = "2.02"
+LAND_PATHS = ["per-stock", "00-master", "tracking"]   # the only stageable roots
+PRIVATE_PREFIX = "tracking/live/"
+CI_WAIT_SECONDS = 20 * 60
 
 
 # ── pure decisions (unit-tested) ────────────────────────────────────────────
@@ -114,6 +126,21 @@ def new_actionable_tickets(now_names: list[str], before_names: list[str]) -> lis
     return sorted(n for n in now_names
                   if n.startswith("ticket-") and n.endswith(".json")
                   and n not in before)
+
+
+def staged_violations(paths: list[str]) -> list[str]:
+    """Staged files a scheduled run must never commit (empty = fine)."""
+    ok_roots = tuple(r + "/" for r in LAND_PATHS)
+    return sorted(p for p in paths
+                  if p.startswith(PRIVATE_PREFIX) or not p.startswith(ok_roots))
+
+
+def run_branch(lock: dict | None) -> str | None:
+    """The one branch this run may create, push and merge."""
+    if not lock or not lock.get("job") or not lock.get("started"):
+        return None
+    job = "".join(c for c in str(lock["job"]) if c.isalnum() or c == "-")
+    return f"{RUN_BRANCH_PREFIX}{job}-{str(lock['started'])[:10]}"
 
 
 # ── side-effecting shell ────────────────────────────────────────────────────
@@ -301,6 +328,93 @@ def hold_tickets() -> int:
     return 0
 
 
+def _fail(msg: str) -> int:
+    print(json.dumps({"ok": False, "problem": msg}, indent=2, ensure_ascii=False))
+    return 1
+
+
+def _current_branch() -> str:
+    return _run(["git", "rev-parse", "--abbrev-ref", "HEAD"])[1]
+
+
+def branch() -> int:
+    name = run_branch(_read_lock())
+    if not name:
+        return _fail("no lock — run preflight first")
+    rc, out = _run(["git", "checkout", "-b", name, "origin/main"])
+    if rc:
+        return _fail(f"could not create {name}: {out[:160]}")
+    print(json.dumps({"ok": True, "branch": name}))
+    return 0
+
+
+def land(message: str, body_file: str | None) -> int:
+    lock = _read_lock()
+    name = run_branch(lock)
+    if not name or _current_branch() != name:
+        return _fail(f"not on this run's branch ({name})")
+    _run(["git", "add", "--", *LAND_PATHS])
+    _, staged = _run(["git", "diff", "--cached", "--name-only"])
+    paths = [p for p in staged.splitlines() if p.strip()]
+    bad = staged_violations(paths)
+    if bad:
+        _run(["git", "reset", "-q"])
+        return _fail("refusing to commit: " + ", ".join(bad[:8]))
+    if not paths:
+        return _fail("nothing to commit")
+    rc, out = _run(["git", "commit", "-q", "-m", message])
+    if rc:
+        return _fail(f"commit failed: {out[:160]}")
+    rc, out = _run(["git", "push", "-u", "origin", f"HEAD:refs/heads/{name}"],
+                   timeout=180)
+    if rc:
+        return _fail(f"push failed: {out[:160]}")
+    cmd = ["gh", "pr", "create", "--head", name, "--base", "main",
+           "--title", message.splitlines()[0][:120]]
+    cmd += ["--body-file", body_file] if body_file else ["--body", message]
+    rc, out = _run(cmd, timeout=120)
+    if rc:
+        return _fail(f"PR not created: {out[:160]}")
+    rc, num = _run(["gh", "pr", "view", name, "--json", "number", "-q", ".number"])
+    lock["pr"] = int(num) if num.isdigit() else None
+    LOCK_PATH.write_text(json.dumps(lock, indent=2))
+    print(json.dumps({"ok": True, "pr": lock["pr"], "files": len(paths)}))
+    return 0
+
+
+def merge() -> int:
+    lock = _read_lock() or {}
+    name, pr = run_branch(lock), lock.get("pr")
+    if not name or not pr:
+        return _fail("no PR recorded for this run — run land first")
+    rc, head = _run(["gh", "pr", "view", str(pr), "--json", "headRefName",
+                     "-q", ".headRefName"])
+    if rc or head != name:
+        return _fail(f"PR #{pr} is not this run's branch ({head!r} != {name!r})")
+    deadline = time.time() + CI_WAIT_SECONDS
+    while True:
+        _, checks = _run(["gh", "pr", "checks", str(pr)])
+        if "fail" in checks:
+            return _fail(f"CI failed on PR #{pr} — left open")
+        if "pass" in checks and "pending" not in checks:
+            break
+        if time.time() > deadline:
+            return _fail(f"CI did not finish on PR #{pr} — left open")
+        time.sleep(10)
+    rc, out = _run(["gh", "pr", "merge", str(pr), "--squash", "--delete-branch"],
+                   timeout=180)
+    if rc:
+        return _fail(f"merge failed: {out[:160]}")
+    _run(["git", "checkout", "main"])
+    _run(["git", "fetch", "origin", "main"], timeout=120)
+    rc, out = _run(["git", "merge", "--ff-only", "origin/main"])
+    if rc:
+        return _fail(f"merged, but local main did not fast-forward: {out[:120]}")
+    _run(["git", "branch", "-D", name])
+    print(json.dumps({"ok": True, "merged": pr}))
+    return 0
+
+
 def release() -> int:
     LOCK_PATH.unlink(missing_ok=True)
     print("lock released")
@@ -317,6 +431,11 @@ def main(argv=None) -> int:
     s.add_argument("--days", type=int, default=3)
     s.add_argument("--out")
     sub.add_parser("hold-tickets")
+    sub.add_parser("branch")
+    ln = sub.add_parser("land")
+    ln.add_argument("--message", required=True)
+    ln.add_argument("--body-file")
+    sub.add_parser("merge")
     sub.add_parser("release")
     a = ap.parse_args(argv)
     if a.cmd == "preflight":
@@ -325,6 +444,12 @@ def main(argv=None) -> int:
         return scan_filings(a.scope, a.days, a.out)
     if a.cmd == "hold-tickets":
         return hold_tickets()
+    if a.cmd == "branch":
+        return branch()
+    if a.cmd == "land":
+        return land(a.message, a.body_file)
+    if a.cmd == "merge":
+        return merge()
     return release()
 
 
