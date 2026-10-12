@@ -1,5 +1,7 @@
 # Legacy Claude scheduled tasks
 
+> **Superseded 2026-10-12 (CLAUDE.md rule 37).** The two legacy task IDs below stay disabled. Their work now runs as three new local tasks — `ai-stocks-daily-watch`, `ai-stocks-weekly-scan`, `ai-stocks-rating-research` — described in `docs/ops/scheduled-runs.md`. The Hermes report-only jobs were never activated and remain paused.
+
 Both local Claude task records remain present but disabled. They must not be re-enabled after the Hermes report-only jobs are activated.
 
 | Legacy task | Schedule | State | Replacement |

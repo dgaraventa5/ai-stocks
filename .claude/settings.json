@@ -3,7 +3,38 @@
     "allow": [
       "mcp__claude_ai_Notion__notion-search",
       "mcp__claude_ai_Notion__notion-fetch",
-      "Bash(python3 scripts/recalc_watchlist.py)"
+      "mcp__claude_ai_Notion__notion-create-pages",
+      "mcp__claude_ai_Notion__notion-update-page",
+      "WebSearch",
+      "WebFetch",
+      "Bash(python3 scripts/*)",
+      "Bash(python3 -m pytest *)",
+      "Bash(date *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git fetch*)",
+      "Bash(git checkout*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push origin auto/*)",
+      "Bash(git push -u origin auto/*)",
+      "Bash(git merge --ff-only origin/main)",
+      "Bash(git branch*)",
+      "Bash(gh pr *)",
+      "Bash(gh run *)",
+      "Bash(osascript -e 'display notification *)"
+    ],
+    "deny": [
+      "Bash(python3 scripts/execute_ticket.py*--confirm*)",
+      "Bash(python3 scripts/robinhood_auth.py login*)",
+      "mcp__robinhood__place_equity_order",
+      "mcp__robinhood__place_option_order",
+      "mcp__robinhood__place_crypto_order",
+      "mcp__robinhood__cancel_equity_order",
+      "mcp__robinhood__cancel_option_order",
+      "mcp__robinhood__cancel_crypto_order",
+      "mcp__robinhood__exercise_option"
     ]
   },
   "env": {

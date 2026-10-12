@@ -991,6 +991,46 @@ Code: `scripts/fiscal_calendar.py` (pure), wired in
 `refresh_objective_inputs.py`'s judgment flags. Spec:
 `docs/superpowers/specs/2026-10-10-forward-pe-calendar-year-design.md`.
 
+### 37. Scheduled reports run on this Mac; they re-score but never rate or trade (added 2026-10-12, approved by Dom)
+
+**Context:** the weekly scan last ran 2026-09-18 and the earnings sentinel was
+retired 2026-09-22; the report-only replacements were never switched on. Before
+that, every cloud-session scan from 2026-06-12 fell back to web search because
+the cloud sandbox blocks Yahoo and SEC at its network proxy — so scans ran,
+found news, and re-scored nothing.
+
+**Rule:** three local desktop scheduled tasks, each a thin prompt that invokes
+a project skill: `/daily-watch` (Mon–Fri 15:45 PT — the rule-31 sentinel plus a
+news and filing watch on holdings ∪ top 25), `/weekly-scan` (Sat 08:00 PT) and
+`/rating-research` (Sun 08:00 PT, the rule-12 rotation). Shared protocol:
+`docs/ops/scheduled-runs.md`. They run in the main checkout on this Mac, never
+in a cloud session.
+
+- **Preflight or nothing.** `scripts/scheduled_run.py preflight` proves SEC and
+  Yahoo are reachable, the checkout is a clean current `main`, GitHub is logged
+  in and no earlier run's PR is open. A failure notifies and stops; a run never
+  degrades to a partial report or a web-search stand-in. `scan-filings` exits
+  nonzero when lookups fail — "could not look" must never read as "quiet".
+- **Autonomy = "rescore, hold trades".** A run may write research, refresh
+  objective inputs, run the scoring chain and a model event, add a rule-35
+  entry hold, and merge its own PR once CI passes so the site stays current.
+  It may NOT change a subjective rating (proposals go to
+  `tracking/rating-proposals.md`), write a rule-15 ruling, remove or extend a
+  hold, or edit rules, rubric, bands or cohorts.
+- **Trades are held.** Every ticket a run generates is renamed
+  `held-ticket-*` (`scheduled_run.py hold-tickets`) so the executor skips it.
+  Rule 29 is unchanged; `.claude/settings.json` now denies the broker write
+  tools and `execute_ticket.py --confirm` to every Claude session. The
+  executor's own monthly rebalance (rule 29, 2026-10-05) is not affected.
+- **Reporting:** a Notion page plus one notification when there is something
+  to report; quiet daily runs leave only a machine-local log line.
+
+Rule 31's schedule and prompt are superseded by `/daily-watch`; its detection
+script, state file and two-phase design are unchanged. Rule 35 amendment: a
+scheduled run may ADD an entry hold (it only delays a buy); removing or
+renewing one stays with Dom. The paused Hermes report-only jobs
+(`automation/hermes/`) stay paused and untouched.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash
