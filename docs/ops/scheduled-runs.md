@@ -80,7 +80,7 @@ Targets on the first trading day of each month regardless.
   `tracking/notion-scan-links.json`.
 - **Notification:** the PushNotification tool, one line under 200
   characters, leading with what needs Dom ("PLTR re-scored 74→77, enters at
-  rank 14; ticket HELD"). If the tool is unavailable:
+  rank 14; ticket HELD"). If the tool is unavailable (this fallback is not pre-approved and will prompt):
   `osascript -e 'display notification "<line>" with title "AI stocks"'`.
 - **Quiet daily runs** make no page, no commit and no notification; they
   append one line to `.cache/scheduled-run-log.md` (machine-local). The weekly
