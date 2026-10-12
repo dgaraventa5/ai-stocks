@@ -179,3 +179,85 @@ def test_force_renews_a_token_that_is_still_valid():
     assert ra.access_token(store, http=http, now=lambda: 1_000,
                            force=True) == 'access-2'
     assert store.blob['refresh_token'] == 'refresh-2' and store.saves == 1
+
+
+# ---- a 401 with time left on the clock: renew once and retry (2026-10-12) ----
+
+def _http_401():
+    import urllib.error
+    return urllib.error.HTTPError('https://x', 401, 'Unauthorized', {}, None)
+
+
+def test_transport_renews_and_retries_once_on_401(monkeypatch):
+    """The server can reject a token whose local expiry still says valid.
+    The scheduled run of 2026-10-12 died on exactly that."""
+    import execute_ticket as ex
+    import robinhood_auth
+    calls, renewals = [], []
+
+    def fake_send(self, message):
+        calls.append(self.token)
+        if self.token == 'dead':
+            raise _http_401()
+        return {'ok': True}, {}
+
+    def fake_access_token(force=False):
+        renewals.append(force)
+        return 'fresh'
+
+    monkeypatch.setattr(ex.RobinhoodTransport, '_send', fake_send)
+    monkeypatch.setattr(robinhood_auth, 'access_token', fake_access_token)
+    tr = ex.RobinhoodTransport(token='dead')
+    assert tr._post({'m': 1}) == ({'ok': True}, {})
+    assert calls == ['dead', 'fresh'] and renewals == [True]
+    assert tr.token == 'fresh'
+
+
+def test_transport_does_not_loop_when_renewed_token_is_also_rejected(monkeypatch):
+    import urllib.error
+    import execute_ticket as ex
+    import robinhood_auth
+    calls = []
+
+    def always_401(self, message):
+        calls.append(self.token)
+        raise _http_401()
+
+    monkeypatch.setattr(ex.RobinhoodTransport, '_send', always_401)
+    monkeypatch.setattr(robinhood_auth, 'access_token', lambda force=False: 'fresh')
+    tr = ex.RobinhoodTransport(token='dead')
+    with pytest.raises(urllib.error.HTTPError):
+        tr._post({'m': 1})
+    with pytest.raises(urllib.error.HTTPError):
+        tr._post({'m': 2})          # no second renewal attempt
+    assert calls == ['dead', 'fresh', 'fresh']
+
+
+def test_transport_reraises_the_401_when_renewal_is_refused(monkeypatch):
+    import urllib.error
+    import execute_ticket as ex
+    import robinhood_auth
+
+    def refuse(force=False):
+        raise robinhood_auth.LoginRequired('refused')
+
+    monkeypatch.setattr(ex.RobinhoodTransport, '_send',
+                        lambda self, m: (_ for _ in ()).throw(_http_401()))
+    monkeypatch.setattr(robinhood_auth, 'access_token', refuse)
+    with pytest.raises(urllib.error.HTTPError):
+        ex.RobinhoodTransport(token='dead')._post({'m': 1})
+
+
+def test_transport_does_not_renew_on_other_errors(monkeypatch):
+    import urllib.error
+    import execute_ticket as ex
+    import robinhood_auth
+
+    def boom(self, m):
+        raise urllib.error.HTTPError('https://x', 500, 'Server Error', {}, None)
+
+    monkeypatch.setattr(ex.RobinhoodTransport, '_send', boom)
+    monkeypatch.setattr(robinhood_auth, 'access_token',
+                        lambda force=False: pytest.fail('renewed on a 500'))
+    with pytest.raises(urllib.error.HTTPError):
+        ex.RobinhoodTransport(token='x')._post({'m': 1})
