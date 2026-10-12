@@ -28,3 +28,7 @@ Added as a stub at IPO. Two gates before full scoring: (1) first 10-Q; (2) Curso
 **Source:** context-2026-10-12.md  
 (1) OpenAI will stop supplying models to Cursor (proposed shut-off 2026-11-12, announced 2026-08-28) and has hired two Cursor/SpaceX sales leaders in a month; Anthropic stays. (2) Grok Bot (beta, mid-August) reached a reported 418,000 weekly users by 2026-09-14; no revenue disclosed. (3) Early talks to borrow ~$40B for Nvidia chips; five-year CDS ~195bp, a record. (4) ~$8B cash for 800 MHz spectrum for Starlink Mobile, FCC approval pending. (5) Correction: Cursor was ~$4B+ annualized at June 2026, not ~$1B as the 2026-09-08 briefing stated; and the AI segment includes X advertising ($367M of $2,561M in Q2), so AI ex-ads was 28.1% of revenue, not 32.8%. No rating changes made.
 
+
+## 2026-10-12 — Rescore: balance sheet 5→4; AI-revenue rationale corrected
+**Source:** Rating Audit rows 3096–3097  
+R3 Balance-Sheet 5→4 (Dom-approved): free cash flow about −141% of revenue and five-year CDS at a record ~195bp mean the band-5 conditions no longer hold. D1 held at 4 on a corrected basis (AI ex-X-advertising 28.1% of Q2 revenue; Cursor ~$4B+ annualized, not ~$1B). Score 60.04 → 59.29; no portfolio effect.
