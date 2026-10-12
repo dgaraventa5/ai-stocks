@@ -85,3 +85,20 @@ def test_hold_tickets_renames_new_ticket_out_of_the_executor_glob(tmp_path, monk
 def test_module_never_names_a_broker_write_tool():
     src = (Path(sr.__file__)).read_text()
     assert "place_" not in src and "_order(" not in src
+
+
+def test_only_research_and_score_paths_may_be_staged():
+    ok = ["per-stock/NVDA/news-log.md", "00-master/entry-holds.json",
+          "tracking/score-history.csv"]
+    assert sr.staged_violations(ok) == []
+    bad = ["tracking/live/tickets/ticket-x.json", "scripts/evil.py",
+           ".claude/settings.json", "CLAUDE.md", ".github/workflows/x.yml"]
+    assert sr.staged_violations(ok + bad) == sorted(bad)
+
+
+def test_run_branch_is_fixed_by_the_lock_and_sanitized():
+    assert sr.run_branch({"job": "daily-watch", "started": "2026-10-12T15:51:00"}) \
+        == "auto/daily-watch-2026-10-12"
+    assert sr.run_branch({"job": "x:main --force", "started": "2026-10-12T15:51:00"}) \
+        == "auto/xmain--force-2026-10-12"
+    assert sr.run_branch(None) is None and sr.run_branch({"job": "a"}) is None

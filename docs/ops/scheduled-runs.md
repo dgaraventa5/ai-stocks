@@ -46,24 +46,23 @@ Targets on the first trading day of each month regardless.
    Exit 1 → do nothing else: send the notification with the printed
    problems and stop. Do not "work around" a failed check (no web-search
    substitute for a blocked SEC/Yahoo, no stash of someone's changes).
-2. **Branch.** `git checkout -b <branch from preflight> origin/main`.
-   Skip this step (and 4–5) when the job turns out to have nothing to commit.
+2. **Branch.** `python3 scripts/scheduled_run.py branch` (creates
+   `auto/<job>-<date>` from origin/main). Skip this step (and 4–5) when the
+   job turns out to have nothing to commit.
 3. **Do the job** per its skill. Use the real date (`date +%F`).
 4. **Hold + test.** `python3 scripts/scheduled_run.py hold-tickets`, then
-   `python3 -m pytest tests -q`. Any failure → push the branch, open the PR
-   as a draft with the failure in the body, notify, release the lock, stop.
-   (The next run's preflight will refuse until that PR is dealt with — loud
-   by design.)
-5. **Land.** Stage explicit paths only (never `git add -A`; never anything
-   under `tracking/live/`): `per-stock/`, `tracking/*.md`, `tracking/*.json`,
-   `tracking/*.jsonl`, `tracking/score-history.csv`, `00-master/*.xlsx`,
-   `00-master/*.json`, `00-master/cohort-membership.md`. Commit, push,
-   `gh pr create`, wait for checks
-   (`until gh pr checks <N> | grep -q "pass\|fail"; do sleep 10; done`),
-   `gh pr merge <N> --squash --delete-branch`, then
-   `git checkout main && git merge --ff-only origin/main && git branch -D <branch>`.
-   Confirm the `deploy-site` run for the merge commit succeeded
-   (`gh run list --workflow deploy-site.yml --limit 1`).
+   `python3 -m pytest tests -q`. On a test failure still run step 5's `land`
+   (so the work is visible on a PR) but NOT `merge`; notify, release the lock,
+   stop. The next run's preflight refuses until that PR is dealt with — loud
+   by design.
+5. **Land.** `python3 scripts/scheduled_run.py land --message "<title>"
+   [--body-file <path>]` then `python3 scripts/scheduled_run.py merge`.
+   Do not run `git add`, `git commit`, `git push` or `gh pr merge` yourself —
+   they are deliberately not pre-approved. `land` stages only `per-stock/`,
+   `00-master/` and `tracking/`, refuses if anything else or anything under
+   `tracking/live/` is staged, and pushes only this run's branch; `merge`
+   waits for CI, squash-merges only this run's PR and syncs local main.
+   Then confirm the site deploy: `gh run list --workflow deploy-site.yml --limit 1`.
 6. **Report.** Notion page (below), then one notification, then
    `python3 scripts/scheduled_run.py release`. Always release the lock, on
    every exit path.
