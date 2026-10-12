@@ -23,3 +23,8 @@ SpaceX closed its IPO at $135/share, raising ~$85.7B in net proceeds. Also issue
 ## 2026-06-17 — Added to watchlist (stub)
 **Source:** context-2026-06-17.md  
 Added as a stub at IPO. Two gates before full scoring: (1) first 10-Q; (2) Cursor deal close. xAI reverse-merger included in FY2025 recast (common control). D1–D5 and R1–R5 set provisionally. Growth and Momentum left unscored (insufficient data at IPO date).
+
+## 2026-10-12 — Refresh-context: Cursor supplier risk, Grok Bot traction, $40B debt talks
+**Source:** context-2026-10-12.md  
+(1) OpenAI will stop supplying models to Cursor (proposed shut-off 2026-11-12, announced 2026-08-28) and has hired two Cursor/SpaceX sales leaders in a month; Anthropic stays. (2) Grok Bot (beta, mid-August) reached a reported 418,000 weekly users by 2026-09-14; no revenue disclosed. (3) Early talks to borrow ~$40B for Nvidia chips; five-year CDS ~195bp, a record. (4) ~$8B cash for 800 MHz spectrum for Starlink Mobile, FCC approval pending. (5) Correction: Cursor was ~$4B+ annualized at June 2026, not ~$1B as the 2026-09-08 briefing stated; and the AI segment includes X advertising ($367M of $2,561M in Q2), so AI ex-ads was 28.1% of revenue, not 32.8%. No rating changes made.
+
