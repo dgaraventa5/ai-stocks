@@ -677,6 +677,15 @@ one-order-writer invariant is unchanged. The preflight's fix-it message now
 points at that command instead of /mcp. First renewal was still unproven on
 the day of the change (token issued 2026-10-05, ~10-day life).
 
+**Amendment 2026-10-12: a rejected login triggers one renew-and-retry.** The
+2026-10-12 scheduled run got a 401 with two days left on the token's local
+expiry, reported "login expired", and ran nothing; a forced renewal
+(`robinhood_auth.py renew`) then worked first time with no browser. The server
+decides when a token is dead, so `RobinhoodTransport._post` now treats a 401
+as the trigger: renew once, retry once, never loop. Why the token died early
+is unconfirmed (a newer login for the same account is the likely cause). If
+renewal is refused the 401 surfaces as before and Dom runs `login`.
+
 **Amendment 2026-10-11 (Dom-approved: "i want all the cash invested …
 please fix"): buys are dollar orders sized to live cash; the 2% sizing
 buffer is gone.** Idle cash sat at 2–4% of the account after every ticket,

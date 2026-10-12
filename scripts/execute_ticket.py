@@ -445,6 +445,7 @@ class RobinhoodTransport:
         self._id = 0
         self._session_id: str | None = None
         self._account: str | None = None
+        self._renewed = False     # one renew-and-retry per transport
 
     @staticmethod
     def _find_token() -> str:
@@ -476,6 +477,35 @@ class RobinhoodTransport:
             'Refusing to proceed without credentials.')
 
     def _post(self, message: dict) -> tuple[dict | None, dict]:
+        """`_send`, with ONE renew-and-retry when the server rejects the token.
+
+        The stored login can be dead on the server while its local expiry
+        still says valid: on 2026-10-12 the scheduled run got a 401 with two
+        days left on the clock, reported "login expired", and ran nothing —
+        while a forced renewal worked first time with no browser. Expiry is
+        the server's call, so a 401 is the trigger, not the local timestamp.
+        A 401 means the request was refused before it did anything, and
+        orders carry a deterministic ref_id, so the retry cannot double-place.
+        """
+        import urllib.error
+        try:
+            return self._send(message)
+        except urllib.error.HTTPError as e:
+            if e.code != 401 or self._renewed:
+                raise
+            self._renewed = True
+            try:
+                import robinhood_auth
+                self.token = robinhood_auth.access_token(force=True)
+            except Exception as renew_err:
+                print(f'login rejected (401) and renewal failed '
+                      f'({renew_err})', file=sys.stderr)
+                raise e
+            print('login rejected (401) — renewed the executor login, '
+                  'retrying once', file=sys.stderr)
+            return self._send(message)
+
+    def _send(self, message: dict) -> tuple[dict | None, dict]:
         """One JSON-RPC POST. Handles both application/json and SSE response
         bodies (streamable-HTTP MCP servers answer POSTs with a short SSE
         stream). Returns (parsed JSON-RPC payload or None, response headers)."""
