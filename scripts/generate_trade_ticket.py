@@ -165,6 +165,14 @@ def _targets_weights() -> tuple[dict[str, float], dict]:
 
 
 if __name__ == '__main__':
+    # Takes no arguments. Parse anyway so `--help` (or a typo) prints usage
+    # instead of silently writing a live ticket — which is what happened on
+    # 2026-10-11 when the script was asked for its help text.
+    import argparse
+    argparse.ArgumentParser(
+        description='Write a manual trade ticket from the committed Targets '
+                    'and the latest recon snapshot. Takes no arguments.'
+    ).parse_args()
     weights, title = _targets_weights()
     event = {'date': dt.date.today().isoformat(), 'kind': 'manual',
              'reason': f'manual generation from committed Targets ({title})'}
