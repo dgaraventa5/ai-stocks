@@ -4,6 +4,33 @@ description: Weekly material news scan across the watchlist
 
 Run the weekly news scan per CLAUDE.md.
 
+## Scheduled (unattended) runs — rule 37
+
+When this runs from the scheduler (Saturday 08:00 Pacific, on this Mac), read
+`docs/ops/scheduled-runs.md` and follow its run sequence and limits exactly,
+with `--job weekly-scan`. Differences from an attended run:
+
+- **Step 2** uses `python3 scripts/scheduled_run.py scan-filings --scope all
+  --days 8 --out "$TMPDIR/filings.json"` (exit 1 = SEC lookups failed: report
+  the window as UNCHECKED and stop the scan — do NOT fall back to web search
+  and call it a scan). Read the material filings with parallel subagents.
+- **Step 6** refreshes with `python3 scripts/refresh_objective_inputs.py
+  {TICKERS}` (dry-run first) for every name in the scan's `earnings` list
+  whose Last Updated predates its filing — the daily watch will already have
+  handled holdings and top-25 names; don't redo those. Then
+  `python3 scripts/momentum_50dma.py`, `python3 scripts/refresh_reverse_dcf.py`
+  and `python3 scripts/recalc_watchlist.py --sync`.
+- **Step 7** — `recalc --sync` already ran the portfolio step; do not run
+  `refresh_targets.py` a second time. Any ticket is held, not released.
+- **Step 8** — rating changes are proposals in `tracking/rating-proposals.md`,
+  never applied. Also list open proposals still awaiting Dom, and entry holds
+  expiring in the next 10 days.
+- **Step 10** — heartbeat check only (10a). Skip reconciliation.
+- Report how many daily-watch runs happened this week
+  (`.cache/scheduled-run-log.md` plus the week's `Daily Watch` commits).
+- Publish the Notion page `Weekly News Scan — {date}` and append it to
+  `tracking/notion-scan-links.json`.
+
 ## Steps
 
 0. **For each ✓✓ or ✓✓✓ tier position: articulate your current mental model BEFORE scanning.** Write 1-2 sentences per name on what you currently believe about their AI thesis, customers, competitive position, and recent quarterly results. This is the lightweight version of `/refresh-context` — the diff between your articulated model and what the scan surfaces is the value of the exercise. Without this step you'll silently rationalize new news into your existing model and miss thesis-shifting signals.
