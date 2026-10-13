@@ -1023,7 +1023,9 @@ in a cloud session.
   tools and `execute_ticket.py --confirm` to every Claude session. The
   executor's own monthly rebalance (rule 29, 2026-10-05) is not affected.
 - **Reporting:** a Notion page plus one notification when there is something
-  to report; quiet daily runs leave only a machine-local log line.
+  to report. Every run, quiet or not, lands and merges one line in
+  `tracking/scheduled-run-log.md` (Dom, 2026-10-12), so a missed run is a
+  missing date.
 
 Rule 31's schedule and prompt are superseded by `/daily-watch`; its detection
 script, state file and two-phase design are unchanged. Rule 35 amendment: a

@@ -27,7 +27,8 @@ with `--job weekly-scan`. Differences from an attended run:
   expiring in the next 10 days.
 - **Step 10** — heartbeat check only (10a). Skip reconciliation.
 - Report how many daily-watch runs happened this week
-  (`.cache/scheduled-run-log.md` plus the week's `Daily Watch` commits).
+  (the week's `daily-watch` lines in `tracking/scheduled-run-log.md`; a missing
+  weekday is a missed run — say so).
 - Publish the Notion page `Weekly News Scan — {date}` and append it to
   `tracking/notion-scan-links.json`.
 
