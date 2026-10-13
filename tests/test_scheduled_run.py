@@ -114,3 +114,12 @@ def test_run_log_line_needs_a_lock_and_some_text():
     assert sr.run_log_line(None, "quiet") is None
     assert sr.run_log_line({"job": "daily-watch"}, "quiet") is None
     assert sr.run_log_line({"job": "x", "started": "2026-10-12T15:45:00"}, "  ") is None
+
+
+def test_morning_reconciliation_status_files_do_not_block_a_run():
+    assert sr.git_problems("main", ["tracking/live-status.json",
+                                    "tracking/live-vs-model.json"], 0) == []
+    probs = sr.git_problems("main", ["tracking/live-status.json",
+                                     "00-master/portfolio.xlsx"], 0)
+    assert len(probs) == 1 and "1 tracked" in probs[0] and "portfolio.xlsx" in probs[0]
+    assert sr.staged_violations(sorted(sr.MACHINE_WRITTEN)) == []

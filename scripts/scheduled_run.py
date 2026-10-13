@@ -78,9 +78,18 @@ def lock_is_live(lock: dict | None, now: dt.datetime,
     return (now - started) < dt.timedelta(hours=max_age_hours)
 
 
+# Status files the launchd executor's morning reconciliation rewrites in the
+# main checkout every trading day (already sanitized, rule 29). They are not
+# someone's unfinished work: the run carries them onto its branch and `land`
+# commits them. Blocking on them refused every afternoon run (2026-10-13).
+MACHINE_WRITTEN = frozenset({"tracking/live-status.json",
+                             "tracking/live-vs-model.json"})
+
+
 def git_problems(branch: str, modified: list[str], ahead: int) -> list[str]:
     """Why this checkout cannot host an unattended run (empty = fine)."""
     out = []
+    modified = [m for m in modified if m not in MACHINE_WRITTEN]
     if branch != "main":
         out.append(f"checkout is on '{branch}', not main — another session is "
                    f"mid-work here")
