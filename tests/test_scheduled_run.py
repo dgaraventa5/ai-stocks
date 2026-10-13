@@ -123,3 +123,13 @@ def test_morning_reconciliation_status_files_do_not_block_a_run():
                                      "00-master/portfolio.xlsx"], 0)
     assert len(probs) == 1 and "1 tracked" in probs[0] and "portfolio.xlsx" in probs[0]
     assert sr.staged_violations(sorted(sr.MACHINE_WRITTEN)) == []
+
+
+def test_notification_text_is_an_argument_not_script():
+    hostile = 'x" & (do shell script "rm -rf ~") & "\nline two'
+    args = sr.notify_args(hostile)
+    assert args[0] == "osascript" and args[-2] == "--"
+    assert args[-1] == 'x" & (do shell script "rm -rf ~") & " line two'
+    assert all("do shell script" not in a for a in args[:-1])
+    assert sr.notify_args("   ") is None
+    assert len(sr.notify_args("y" * 500)[-1]) == 230

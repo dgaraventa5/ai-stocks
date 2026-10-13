@@ -26,6 +26,8 @@ to judgment lives here instead:
                  anything under tracking/live/) is staged, commit, push the
                  run's own branch, open the PR.
   merge          wait for CI on that PR, squash-merge it, sync local main.
+  notify         show one macOS notification (Dom, 2026-10-13: the in-app push
+                 was skipped because the run's own window counted as active).
   release        drop the lock.
 
 branch/land/merge exist so the unattended session needs no raw git or gh
@@ -458,6 +460,30 @@ def merge() -> int:
     return 0
 
 
+def notify_args(message: str) -> list[str] | None:
+    """osascript argv for one macOS notification. The text travels as an
+    argument, never inside the script, so it cannot inject AppleScript."""
+    line = " ".join(str(message).split())[:230]
+    if not line:
+        return None
+    return ["osascript",
+            "-e", "on run argv",
+            "-e", 'display notification (item 1 of argv) with title "AI stocks" '
+                  'sound name "Submarine"',
+            "-e", "end run", "--", line]
+
+
+def notify(message: str) -> int:
+    args = notify_args(message)
+    if not args:
+        return _fail("empty notification")
+    rc, out = _run(args, timeout=20)
+    if rc:
+        return _fail(f"notification not shown: {out[:160]}")
+    print(json.dumps({"ok": True, "notified": args[-1]}, ensure_ascii=False))
+    return 0
+
+
 def release() -> int:
     LOCK_PATH.unlink(missing_ok=True)
     print("lock released")
@@ -481,6 +507,8 @@ def main(argv=None) -> int:
     ln.add_argument("--message", required=True)
     ln.add_argument("--body-file")
     sub.add_parser("merge")
+    nt = sub.add_parser("notify")
+    nt.add_argument("--message", required=True)
     sub.add_parser("release")
     a = ap.parse_args(argv)
     if a.cmd == "preflight":
@@ -497,6 +525,8 @@ def main(argv=None) -> int:
         return land(a.message, a.body_file)
     if a.cmd == "merge":
         return merge()
+    if a.cmd == "notify":
+        return notify(a.message)
     return release()
 
 

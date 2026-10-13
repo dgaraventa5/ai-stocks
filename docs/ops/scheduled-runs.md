@@ -83,10 +83,11 @@ Targets on the first trading day of each month regardless.
   `Rating Research — {date}`. No real dollars, share counts or account
   numbers (rule 29). Only the weekly scan appends to
   `tracking/notion-scan-links.json`.
-- **Notification:** the PushNotification tool, one line under 200
-  characters, leading with what needs Dom ("PLTR re-scored 74→77, enters at
-  rank 14; ticket HELD"). If the tool is unavailable (this fallback is not pre-approved and will prompt):
-  `osascript -e 'display notification "<line>" with title "AI stocks"'`.
+- **Notification:** `python3 scripts/scheduled_run.py notify --message "<line>"`
+  — a plain macOS notification, one line under 200 characters, leading with
+  what needs Dom ("PLTR re-scored 74→77, enters at rank 14; ticket HELD"). Do
+  not use the in-app PushNotification tool: it skips delivery when the run's
+  own window counts as active (2026-10-13).
 - **Quiet daily runs** make no Notion page and no notification, but they
   still land and merge their one log line in `tracking/scheduled-run-log.md`.
   The weekly
