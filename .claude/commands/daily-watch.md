@@ -37,9 +37,14 @@ acquisition or divestiture, large financing, a regulator or court action, an
 auditor or going-concern change, a credible competitive or product shock.
 Price moves, analyst targets, dividends and conference appearances are not.
 
-**Quiet day** = nothing due, nothing material, `--check` green. Append
-`{date}: quiet (scope N, filings F)` to `.cache/scheduled-run-log.md`, release
-the lock, and stop. No branch, no page, no notification. Most days end here.
+**Quiet day** = nothing due, nothing material, `--check` green. Branch, then
+`python3 scripts/scheduled_run.py log --text "quiet (scope N, filings F); <any
+not-material or could-not-verify items, one clause each>"`, then `land` and
+`merge` per the protocol, release the lock, and stop. No Notion page, no
+notification. Most days end here.
+
+On every other day, log one line the same way before landing (what reported,
+what moved, what needs Dom).
 
 ## 3. Earnings — briefing phase (`briefing_due`, at most 8 names, highest rank first)
 

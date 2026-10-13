@@ -102,3 +102,15 @@ def test_run_branch_is_fixed_by_the_lock_and_sanitized():
     assert sr.run_branch({"job": "x:main --force", "started": "2026-10-12T15:51:00"}) \
         == "auto/xmain--force-2026-10-12"
     assert sr.run_branch(None) is None and sr.run_branch({"job": "a"}) is None
+
+
+def test_run_log_line_is_one_dated_line_per_run():
+    lock = {"job": "daily-watch", "started": "2026-10-12T15:45:00"}
+    assert (sr.run_log_line(lock, "quiet (scope 25,\n filings 1)")
+            == "- **2026-10-12** (daily-watch) — quiet (scope 25, filings 1)")
+
+
+def test_run_log_line_needs_a_lock_and_some_text():
+    assert sr.run_log_line(None, "quiet") is None
+    assert sr.run_log_line({"job": "daily-watch"}, "quiet") is None
+    assert sr.run_log_line({"job": "x", "started": "2026-10-12T15:45:00"}, "  ") is None

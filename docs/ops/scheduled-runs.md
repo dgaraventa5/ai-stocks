@@ -47,11 +47,16 @@ Targets on the first trading day of each month regardless.
    problems and stop. Do not "work around" a failed check (no web-search
    substitute for a blocked SEC/Yahoo, no stash of someone's changes).
 2. **Branch.** `python3 scripts/scheduled_run.py branch` (creates
-   `auto/<job>-<date>` from origin/main). Skip this step (and 4–5) when the
-   job turns out to have nothing to commit.
-3. **Do the job** per its skill. Use the real date (`date +%F`).
+   `auto/<job>-<date>` from origin/main). Every run branches, quiet or not.
+3. **Do the job** per its skill. Use the real date (`date +%F`). Then log the
+   outcome: `python3 scripts/scheduled_run.py log --text "<one line>"` appends
+   to `tracking/scheduled-run-log.md`. Every run logs and lands (Dom,
+   2026-10-12): nothing a run finds is left only in a chat or on this Mac,
+   and a missed run shows up as a missing date. Put not-material and
+   could-not-verify items in the line, briefly.
 4. **Hold + test.** `python3 scripts/scheduled_run.py hold-tickets`, then
-   `python3 -m pytest tests -q`. On a test failure still run step 5's `land`
+   `python3 -m pytest tests -q`. A quiet run whose only change is its log
+   line skips this step (CI still gates the merge). On a test failure still run step 5's `land`
    (so the work is visible on a PR) but NOT `merge`; notify, release the lock,
    stop. The next run's preflight refuses until that PR is dealt with — loud
    by design.
@@ -81,8 +86,9 @@ Targets on the first trading day of each month regardless.
   characters, leading with what needs Dom ("PLTR re-scored 74→77, enters at
   rank 14; ticket HELD"). If the tool is unavailable (this fallback is not pre-approved and will prompt):
   `osascript -e 'display notification "<line>" with title "AI stocks"'`.
-- **Quiet daily runs** make no page, no commit and no notification; they
-  append one line to `.cache/scheduled-run-log.md` (machine-local). The weekly
+- **Quiet daily runs** make no Notion page and no notification, but they
+  still land and merge their one log line in `tracking/scheduled-run-log.md`.
+  The weekly
   scan reads that file and reports how many daily runs happened.
 - If Notion is not connected, still land the work, say so in the
   notification, and put the report in the PR body.

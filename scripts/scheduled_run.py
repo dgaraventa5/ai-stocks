@@ -18,6 +18,10 @@ to judgment lives here instead:
                  held-ticket-*) so the executor's ticket-*.json glob skips it.
                  Scheduled runs re-score; they never release a trade.
   branch         create this run's branch (auto/<job>-<date>) from origin/main.
+  log            append this run's one-line outcome to the committed run log
+                 (tracking/scheduled-run-log.md). Every run logs, quiet or
+                 not, so each one ends in a merged record and a missed run is
+                 a missing date.
   land           stage ONLY research/score paths, refuse if anything else (or
                  anything under tracking/live/) is staged, commit, push the
                  run's own branch, open the PR.
@@ -52,6 +56,11 @@ FILING_FORMS = {"8-K", "8-K/A", "6-K"}
 EARNINGS_ITEM = "2.02"
 LAND_PATHS = ["per-stock", "00-master", "tracking"]   # the only stageable roots
 PRIVATE_PREFIX = "tracking/live/"
+RUN_LOG = ROOT / "tracking" / "scheduled-run-log.md"
+RUN_LOG_HEADER = (
+    "# Scheduled run log\n\n"
+    "One line per scheduled run (rule 37), written by "
+    "`scripts/scheduled_run.py log`. Append-only.\n\n")
 CI_WAIT_SECONDS = 20 * 60
 
 
@@ -141,6 +150,17 @@ def run_branch(lock: dict | None) -> str | None:
         return None
     job = "".join(c for c in str(lock["job"]) if c.isalnum() or c == "-")
     return f"{RUN_BRANCH_PREFIX}{job}-{str(lock['started'])[:10]}"
+
+
+def run_log_line(lock: dict | None, text: str) -> str | None:
+    """`- **<date>** (<job>) — <text>` for this run, or None without a lock.
+    The text is flattened to one line so the file stays one line per run."""
+    if not lock or not lock.get("job") or not lock.get("started"):
+        return None
+    flat = " ".join(str(text).split())
+    if not flat:
+        return None
+    return f"- **{str(lock['started'])[:10]}** ({lock['job']}) — {flat}"
 
 
 # ── side-effecting shell ────────────────────────────────────────────────────
@@ -348,6 +368,20 @@ def branch() -> int:
     return 0
 
 
+def log(text: str) -> int:
+    lock = _read_lock()
+    name = run_branch(lock)
+    if not name or _current_branch() != name:
+        return _fail(f"not on this run's branch ({name}) — run branch first")
+    line = run_log_line(lock, text)
+    if not line:
+        return _fail("nothing to log")
+    body = RUN_LOG.read_text() if RUN_LOG.exists() else RUN_LOG_HEADER
+    RUN_LOG.write_text(body.rstrip("\n") + "\n" + line + "\n")
+    print(json.dumps({"ok": True, "logged": line}, ensure_ascii=False))
+    return 0
+
+
 def land(message: str, body_file: str | None) -> int:
     lock = _read_lock()
     name = run_branch(lock)
@@ -432,6 +466,8 @@ def main(argv=None) -> int:
     s.add_argument("--out")
     sub.add_parser("hold-tickets")
     sub.add_parser("branch")
+    lg = sub.add_parser("log")
+    lg.add_argument("--text", required=True)
     ln = sub.add_parser("land")
     ln.add_argument("--message", required=True)
     ln.add_argument("--body-file")
@@ -446,6 +482,8 @@ def main(argv=None) -> int:
         return hold_tickets()
     if a.cmd == "branch":
         return branch()
+    if a.cmd == "log":
+        return log(a.text)
     if a.cmd == "land":
         return land(a.message, a.body_file)
     if a.cmd == "merge":
