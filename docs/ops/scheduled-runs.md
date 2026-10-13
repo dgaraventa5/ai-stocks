@@ -42,7 +42,8 @@ Targets on the first trading day of each month regardless.
 
 ## Run sequence (every job)
 
-1. **Preflight.** `python3 scripts/scheduled_run.py preflight --job <job>`.
+1. **Preflight.** (The two reconciliation status files the morning executor rewrites — `tracking/live-status.json`, `tracking/live-vs-model.json` — are expected to be modified; preflight ignores them and `land` commits them with the run.)
+   `python3 scripts/scheduled_run.py preflight --job <job>`.
    Exit 1 → do nothing else: send the notification with the printed
    problems and stop. Do not "work around" a failed check (no web-search
    substitute for a blocked SEC/Yahoo, no stash of someone's changes).
