@@ -150,8 +150,22 @@ def test_daily_refresh_runs_after_yahoo_publishes_and_checks_freshness():
     crons = re.findall(r"cron: '(\d+) (\d+) \* \* ([\d-]+)'", workflow)
     assert crons, "daily-refresh must keep scheduled slots"
     for minute, hour, days in crons:
-        assert days == "2-6"                      # the evening after each session
-        assert 2 <= int(hour) <= 12, f"{hour}:{minute} UTC is before Yahoo's bar"
-    last = max(crons, key=lambda c: (int(c[1]), int(c[0])))
+        # after the 16:00 ET close (20:00 UTC in EDT), same evening or overnight
+        same_day = days == "1-5" and int(hour) >= 20
+        overnight = days == "2-6" and int(hour) <= 12
+        assert same_day or overnight, f"{hour}:{minute} UTC {days} precedes the close"
+    last = max((c for c in crons if c[2] == "2-6"),
+               key=lambda c: (int(c[1]), int(c[0])))
     assert f"github.event.schedule == '{last[0]} {last[1]} * * 2-6'" in workflow
     assert "python scripts/series_freshness.py $STRICT" in workflow
+
+
+def test_site_refresh_launchd_dispatches_after_the_close_only():
+    import plistlib
+    with open(ROOT / "launchd/com.dom.aistocks.site-refresh.plist", "rb") as f:
+        plist = plistlib.load(f)
+    args = plist["ProgramArguments"]
+    assert args[-5:] == ["workflow", "run", "daily-refresh.yml", "--ref", "main"]
+    slots = plist["StartCalendarInterval"]
+    assert {s["Weekday"] for s in slots} == {1, 2, 3, 4, 5}
+    assert all((s["Hour"], s["Minute"]) >= (13, 0) for s in slots)   # PT, after 13:00 close

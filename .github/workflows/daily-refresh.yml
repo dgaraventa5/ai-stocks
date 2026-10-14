@@ -4,10 +4,12 @@ on:
   schedule:
     # Three post-close attempts because GitHub schedule delivery is best-effort.
     # The stable automation branch + PR deduplication makes backstops idempotent.
-    # Yahoo publishes a session's daily bar ~5-6h after the 16:00 ET close
-    # (absent at 21:20 ET, present by 21:55 ET on 2026-10-13), so every slot
-    # sits after that; earlier slots only re-published the prior day. The
-    # last slot runs the freshness check in strict mode (see final step).
+    # Primary trigger is launchd/com.dom.aistocks.site-refresh.plist, which
+    # dispatches this workflow 10 minutes after the close (cron slots run
+    # hours late). The loader fills the newest session from Yahoo's official
+    # close, so any post-close slot is current; the later slots catch the
+    # settled daily bar. The last slot runs the freshness check strictly.
+    - cron: '10 21 * * 1-5'
     - cron: '30 2 * * 2-6'
     - cron: '30 4 * * 2-6'
     - cron: '30 7 * * 2-6'

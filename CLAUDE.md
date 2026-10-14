@@ -1064,7 +1064,13 @@ deployed by `.github/workflows/deploy-site.yml` on push to `main`.
   dispatches CI on the exact PR head; the required `test` check must pass before
   auto-merge. Because a `GITHUB_TOKEN` merge does not trigger another workflow,
   it then explicitly dispatches `deploy-site.yml` on the verified merge SHA.
-  The three weekday backstops remain idempotent, and `performance-log.md`
+  **Post-close timing (2026-10-13):** Dom wants the day's result on the site
+  right after the close. GitHub cron runs hours late, so
+  `launchd/com.dom.aistocks.site-refresh.plist` dispatches the workflow at
+  13:10/13:40 PT; `portfolio_model._adjusted_closes` fills the newest session
+  from Yahoo's official close (its daily bar lands ~21:30 ET). The cron slots
+  stay as idempotent backstops; the last one fails red if the series is still
+  behind (`scripts/series_freshness.py --strict`). `performance-log.md`
   remains attended. See `docs/ops/scheduled-automation-v1.md`.
 - **Scan links:** `tracking/notion-scan-links.json` maps scan dates to Notion
   URLs; the Cowork weekly routine appends to it.

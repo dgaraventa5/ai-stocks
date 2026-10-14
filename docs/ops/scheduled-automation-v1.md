@@ -19,6 +19,8 @@ V1 automation detects, validates, reports, and moves one deterministic generated
 
 The paused launchd 06:35 executor remains a separate live-order path and is not loaded or called. The obsolete 13:35 local performance writer was removed in PR 72.
 
+Post-close trigger (2026-10-13): `launchd/com.dom.aistocks.site-refresh.plist` only runs `gh workflow run daily-refresh.yml` at 13:10 and 13:40 PT on weekdays, because GitHub cron delivery lags by hours. It writes nothing locally; every write still goes through the workflow's protected PR path.
+
 ## Daily deterministic generated-data PR
 
 `Daily site refresh` checks out a fresh hosted runner at `main`, generates only `tracking/performance-series.json`, runs the full `tests` suite, and asks `scripts/generated_data_pr.py` for a mutation-free plan.

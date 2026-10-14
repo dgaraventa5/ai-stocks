@@ -85,11 +85,54 @@ def _series(ticker: str, earliest: str):
     if ticker not in _series_cache:
         import yfinance as yf  # lazy: keeps the portfolio path offline-importable
         start = (dt.date.fromisoformat(earliest) - dt.timedelta(days=5)).isoformat()
-        hist = yf.Ticker(ticker).history(start=start, auto_adjust=True)
+        t = yf.Ticker(ticker)
+        hist = t.history(start=start, auto_adjust=False)
+        try:
+            meta = t.history_metadata or {}
+        except Exception:                       # metadata is optional
+            meta = {}
         time.sleep(0.2)
-        _series_cache[ticker] = (None if hist is None or hist.empty
-                                 else hist['Close'].dropna())
+        _series_cache[ticker] = _adjusted_closes(ticker, hist, meta)
     return _series_cache[ticker]
+
+
+def _adjusted_closes(ticker: str, hist, meta: dict):
+    """Adjusted closes, made current as soon as the session closes.
+
+    Yahoo serves a fresh session's daily row with a blank adjusted close for
+    hours after the bell (2026-10-13: still blank at 21:20 ET), and
+    auto_adjust + dropna silently dropped the whole day, so post-close site
+    refreshes re-published the prior day. Two repairs, newest day only:
+    a blank Adj Close on the LAST row takes that row's raw Close (the
+    adjustment factor of the newest bar is 1); and for a US listing whose
+    last closed session has no row at all, Yahoo's official closing price
+    (`regularMarketPrice` stamped at/after the 16:00 ET close) is appended.
+    The official daily bar replaces either on the next run."""
+    import pandas as pd
+
+    if hist is None or hist.empty:
+        return None
+    col = 'Adj Close' if 'Adj Close' in hist.columns else 'Close'
+    s = hist[col].copy()
+    if s.iloc[-1] != s.iloc[-1] and hist['Close'].iloc[-1] == hist['Close'].iloc[-1]:
+        s.iloc[-1] = hist['Close'].iloc[-1]
+        flag(f'{ticker}: {s.index[-1].date()} adjusted close not yet published '
+             '— using the raw close')
+    s = s.dropna()
+    price, stamp = meta.get('regularMarketPrice'), meta.get('regularMarketTime')
+    if (s.empty or not price or not stamp
+            or meta.get('exchangeTimezoneName') != 'America/New_York'):
+        return s
+    from trading_calendar import ET, close_utc, is_trading_day
+    when = dt.datetime.fromtimestamp(int(stamp), dt.timezone.utc)
+    day = when.astimezone(ET).date()
+    if (day > s.index[-1].date() and is_trading_day(day)
+            and when >= close_utc(day)):
+        ts = pd.Timestamp(day).tz_localize(s.index.tz) if s.index.tz else pd.Timestamp(day)
+        s.loc[ts] = float(price)
+        flag(f'{ticker}: {day} daily bar not yet published — using the '
+             'official closing price')
+    return s
 
 
 def _base_close(s, d: dt.date) -> float | None:
