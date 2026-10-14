@@ -38,7 +38,8 @@ CFG = {
          'allocations': {'AAA': 6000.0, 'BBB': 4000.0}, 'cash': 0.0},
         {'date': '2026-05-28', 'reason': 'resize_monthly',
          'kind': 'resize_monthly',
-         'allocations': {'AAA': 5000.0, 'BBB': 5900.0}, 'cash': 0.0},
+         # marked value on 05-28: 6000*121/100 + 4000*60/50 = 12060
+         'allocations': {'AAA': 6060.0, 'BBB': 6000.0}, 'cash': 0.0},
     ],
     'shadow_events': {
         'BAND_TOP': [{'date': '2026-05-28', 'roster': ['AAA']}],  # mid-history
@@ -85,9 +86,9 @@ def test_event_log_roundtrip(fake_prices, tmp_path, monkeypatch):
     bytes2 = (tmp_path / 'series.json').read_bytes()
     assert out1 == out2 and bytes1 == bytes2      # byte-identical repeat run
     # and the resize splice is continuous: model value on 05-28 equals the
-    # marked value the event re-allocated (5000+5900), no injected jump
+    # marked value the event re-allocated (6060+6000), no injected jump
     d = out1['dates'].index('2026-05-28')
-    assert out1['model'][d] == pytest.approx(10900.0)
+    assert out1['model'][d] == pytest.approx(12060.0)
 
 
 # ---- weighted shadow events (INVVOL_ROSTER, 2026-09-08 flip) ---------------
