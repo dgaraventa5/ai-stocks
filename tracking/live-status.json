@@ -1,13 +1,9 @@
 {
-  "as_of": "2026-10-13",
+  "as_of": "2026-10-14",
   "halted": false,
   "positions": 18,
   "open_orders": 0,
-  "drift_flags": [
-    "CRDO",
-    "RDDT",
-    "WDC"
-  ],
+  "drift_flags": [],
   "regen_needed": [],
   "anomaly_count": 0,
   "cap_exceeded": false,
