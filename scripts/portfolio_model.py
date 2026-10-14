@@ -15,10 +15,16 @@ with the model-only decision: Dom mirrors each membership-changing refresh in
 his account around the day it runs. If that slips, the model is a strategy
 benchmark rather than an account mirror.
 
-Valuation chains automatically: each event's allocations embed all growth
-before it, so marking only the latest event prices the whole history.
-Returns use dividend-adjusted closes (~total return). Names with no price
-data are carried at their event-date value and flagged, never guessed.
+Valuation is chain-linked from prices, not from the dollars stored on each
+event: an event's allocations are read as WEIGHTS, and the book switches at
+the close of the event's date (the last close on or before it, for a weekend
+or holiday). Each event's starting value is the previous book's value at that
+close. Before 2026-10-13 the walk re-based each event on the first close ON
+OR AFTER its date and trusted the stored dollars, so a weekend event (or one
+logged before that day's close) silently dropped a day of return — 2026-08-03,
+2026-09-08 and 2026-10-12 all printed flat. Returns use dividend-adjusted
+closes (~total return). Names with no price data are carried flat and
+flagged, never guessed.
 """
 from __future__ import annotations
 
@@ -86,24 +92,76 @@ def _series(ticker: str, earliest: str):
     return _series_cache[ticker]
 
 
+def _base_close(s, d: dt.date) -> float | None:
+    """The close an event dated `d` switches at: the last close on or before
+    `d` (Friday's for a weekend event), else the first close after it (a name
+    that listed later). None when there is no close at all."""
+    before = s[s.index.date <= d]
+    if not before.empty:
+        return float(before.iloc[-1])
+    after = s[s.index.date > d]
+    return None if after.empty else float(after.iloc[0])
+
+
 def ret_since(ticker: str, frm: str, earliest: str) -> float | None:
-    """Total return from the first close on/after `frm` to the latest close."""
+    """Total return from the close an event dated `frm` switches at (see
+    _base_close) to the latest close."""
     s = _series(ticker, earliest)
-    if s is None:
+    if s is None or s.empty:
         return None
-    sub = s[s.index.date >= dt.date.fromisoformat(frm)]
-    if sub.empty:
+    base = _base_close(s, dt.date.fromisoformat(frm))
+    if not base:
         return None
-    return float(s.iloc[-1] / sub.iloc[0] - 1)
+    return float(s.iloc[-1] / base - 1)
+
+
+def _event_total(ev: dict) -> float:
+    return float(ev.get('cash', 0)) + sum(ev['allocations'].values())
+
+
+def _book_growth(ev: dict, at: dt.date, inception: str) -> float:
+    """Value multiple of event `ev`'s book from its switch close to the last
+    close on or before `at`. Names without prices are carried flat."""
+    total = _event_total(ev)
+    if not total:
+        return 1.0
+    start = dt.date.fromisoformat(ev['date'])
+    g = float(ev.get('cash', 0)) / total
+    for t, alloc in ev['allocations'].items():
+        w = alloc / total
+        s = _series(t, inception)
+        base = None if s is None or s.empty else _base_close(s, start)
+        upto = None if not base else s[s.index.date <= at]
+        if upto is None or upto.empty:
+            g += w
+            continue
+        g += w * float(upto.iloc[-1]) / base
+    return g
+
+
+def event_levels(cfg: dict) -> list[float]:
+    """Chain-linked model value at each event's switch close. Level 0 is the
+    initial deployment's dollars; every later level is the previous book
+    grown to the new event's date — the event's own stored dollars are only
+    used as weights."""
+    events, inception = cfg['events'], cfg['inception']
+    levels = [_event_total(events[0])]
+    for prev, ev in zip(events, events[1:]):
+        at = dt.date.fromisoformat(ev['date'])
+        levels.append(levels[-1] * _book_growth(prev, at, inception))
+    return levels
 
 
 def mark(cfg: dict) -> tuple[float, dict[str, float], list[str]]:
     """(model value now, per-name P&L since last event, names missing prices)."""
     ev = cfg['events'][-1]
-    value = float(ev.get('cash', 0))
+    total = _event_total(ev)
+    scale = event_levels(cfg)[-1] / total if total else 1.0
+    value = float(ev.get('cash', 0)) * scale
     pnl: dict[str, float] = {}
     missing: list[str] = []
     for t, alloc in ev['allocations'].items():
+        alloc *= scale              # stored dollars are weights (see module doc)
         r = ret_since(t, ev['date'], cfg['inception'])
         if r is None:
             missing.append(t)
@@ -334,26 +392,32 @@ def build_daily_series(cfg: dict) -> dict | None:
         flag('series: no EW universe price data — series not built')
         return None
 
+    # Chain-linked walk (module doc): within an event's period the book is
+    # its weights grown from the event's switch close; the period's level is
+    # the previous book's value at that close (event_levels).
     model = pd.Series(0.0, index=idx)
     events = cfg['events']
+    levels = event_levels(cfg)
     for i, ev in enumerate(events):
         start = dt.date.fromisoformat(ev['date'])
         end = (dt.date.fromisoformat(events[i + 1]['date'])
                if i + 1 < len(events) else None)
-        mask = (idx.date >= start)
+        mask = (idx.date > start) if i else (idx.date >= start)
         if end is not None:
-            mask &= (idx.date < end)
+            mask &= (idx.date <= end)
         if not mask.any():
             continue
-        seg = pd.Series(float(ev.get('cash', 0)), index=idx[mask])
+        total = _event_total(ev)
+        scale = levels[i] / total if total else 0.0
+        seg = pd.Series(float(ev.get('cash', 0)) * scale, index=idx[mask])
         for t, alloc in ev['allocations'].items():
             s = _series(t, inception)
-            sub = None if s is None else s[s.index.date >= start]
-            if sub is None or sub.empty:
-                seg += alloc            # carried flat (no price data)
+            base = None if s is None or s.empty else _base_close(s, start)
+            if not base:
+                seg += alloc * scale    # carried flat (no price data)
                 continue
-            seg += alloc * (sub.reindex(idx[mask]).ffill()
-                            / sub.iloc[0]).fillna(1.0)
+            seg += alloc * scale * (s.reindex(idx).ffill()[mask]
+                                    / base).fillna(1.0)
         model[idx[mask]] = seg
 
     # v2 shadows (spec A4/C1): EW_ROSTER = the sizing-null twin of the model's

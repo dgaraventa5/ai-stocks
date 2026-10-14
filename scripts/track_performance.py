@@ -31,7 +31,7 @@ import argparse
 import datetime as dt
 
 from common import ROOT
-from portfolio_model import (build_daily_series, ew_return_since,
+from portfolio_model import (build_daily_series, event_levels, ew_return_since,
                              ew_roster_events, load_cfg, mark, ret_since)
 
 LOG = ROOT / 'tracking' / 'performance-log.md'
@@ -70,7 +70,7 @@ def main() -> None:
     # real-money entry at the latest rebalance has a like-for-like baseline).
     smh, qqq, ew_ret, n_ew = bench(inception)
     reb_date = last_event['date']
-    reb_value = sum(last_event['allocations'].values()) + last_event.get('cash', 0)
+    reb_value = event_levels(cfg)[-1]   # chain-linked (portfolio_model doc)
     model_reb_ret = value / reb_value - 1 if reb_value else None
     r_smh, r_qqq, r_ew, _ = bench(reb_date)
 
