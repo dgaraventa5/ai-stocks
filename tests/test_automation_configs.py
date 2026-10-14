@@ -141,3 +141,17 @@ def test_docs_record_dispatch_failure_and_repo_scoped_app_recovery():
     assert "Pull requests: read/write" in design
     assert "PR 74" in design
     assert "automation/performance-series-v2" in design
+
+
+def test_daily_refresh_runs_after_yahoo_publishes_and_checks_freshness():
+    # 2026-10-13: slots before ~21:55 ET re-published the prior day and passed.
+    import re
+    workflow = (ROOT / ".github/workflows/daily-refresh.yml").read_text()
+    crons = re.findall(r"cron: '(\d+) (\d+) \* \* ([\d-]+)'", workflow)
+    assert crons, "daily-refresh must keep scheduled slots"
+    for minute, hour, days in crons:
+        assert days == "2-6"                      # the evening after each session
+        assert 2 <= int(hour) <= 12, f"{hour}:{minute} UTC is before Yahoo's bar"
+    last = max(crons, key=lambda c: (int(c[1]), int(c[0])))
+    assert f"github.event.schedule == '{last[0]} {last[1]} * * 2-6'" in workflow
+    assert "python scripts/series_freshness.py $STRICT" in workflow

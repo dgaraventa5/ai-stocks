@@ -4,9 +4,13 @@ on:
   schedule:
     # Three post-close attempts because GitHub schedule delivery is best-effort.
     # The stable automation branch + PR deduplication makes backstops idempotent.
-    - cron: '5 21 * * 1-5'
-    - cron: '35 22 * * 1-5'
-    - cron: '35 0 * * 2-6'
+    # Yahoo publishes a session's daily bar ~5-6h after the 16:00 ET close
+    # (absent at 21:20 ET, present by 21:55 ET on 2026-10-13), so every slot
+    # sits after that; earlier slots only re-published the prior day. The
+    # last slot runs the freshness check in strict mode (see final step).
+    - cron: '30 2 * * 2-6'
+    - cron: '30 4 * * 2-6'
+    - cron: '30 7 * * 2-6'
   workflow_dispatch:
 
 # The built-in token only reads the repository. Mutations use a dedicated
@@ -274,3 +278,12 @@ jobs:
             exit 1
           fi
           gh run watch "$deploy_run_id" --exit-status
+
+      # Runs last so a stale run still commits whatever did change. Warns on
+      # any run that ends behind the last closed session; the night's final
+      # slot fails so a missed day turns red instead of passing silently.
+      - name: Check series freshness
+        if: always() && steps.changed.conclusion == 'success'
+        env:
+          STRICT: ${{ github.event.schedule == '30 7 * * 2-6' && '--strict' || '' }}
+        run: python scripts/series_freshness.py $STRICT
