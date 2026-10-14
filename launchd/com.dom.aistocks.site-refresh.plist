@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Post-close dashboard refresh (2026-10-13). Starts the GitHub
+     daily-refresh workflow at 13:10 and 13:40 PT on weekdays (10 and 40
+     minutes after the NYSE close). GitHub's own cron slots run hours late
+     (the 21:05 UTC slot fired at 00:14 UTC), but a workflow_dispatch starts
+     within seconds. This job only asks GitHub to run the workflow — it
+     touches no repo files, trades nothing, and is safe on holidays (the
+     rebuild finds no new bar and commits nothing). If the Mac is asleep at
+     13:10, launchd fires on wake; the GitHub cron slots remain the backstop.
+     Activate:
+       cp launchd/com.dom.aistocks.site-refresh.plist ~/Library/LaunchAgents/
+       launchctl load ~/Library/LaunchAgents/com.dom.aistocks.site-refresh.plist
+     Deactivate:
+       launchctl unload ~/Library/LaunchAgents/com.dom.aistocks.site-refresh.plist -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.dom.aistocks.site-refresh</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/caffeinate</string>
+    <string>-s</string>
+    <string>-i</string>
+    <string>/opt/homebrew/bin/gh</string>
+    <string>workflow</string>
+    <string>run</string>
+    <string>daily-refresh.yml</string>
+    <string>--ref</string>
+    <string>main</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/dom/Hermes/projects/ai-stocks</string>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>10</integer></dict>
+    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>40</integer></dict>
+    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>10</integer></dict>
+    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>40</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>10</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>40</integer></dict>
+    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>10</integer></dict>
+    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>40</integer></dict>
+    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>10</integer></dict>
+    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>13</integer><key>Minute</key><integer>40</integer></dict>
+  </array>
+  <key>StandardOutPath</key>
+  <string>/Users/dom/Library/Logs/aistocks-site-refresh.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/dom/Library/Logs/aistocks-site-refresh.log</string>
+</dict>
+</plist>
