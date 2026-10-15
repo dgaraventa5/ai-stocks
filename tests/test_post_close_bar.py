@@ -56,3 +56,20 @@ def test_present_row_is_not_overwritten():
     meta = {**NY, 'regularMarketPrice': 999.0, 'regularMarketTime': CLOSE_1013}
     s = pm._adjusted_closes('X', hist([99.0, 100.0, 101.0]), meta)
     assert list(s) == [99.0, 100.0, 101.0]
+
+
+@pytest.mark.parametrize('stamp', [
+    pd.Timestamp('2026-10-13 16:00', tz='America/New_York'),   # formatted metadata
+    pd.Timestamp('2026-10-13 20:00'),                           # naive UTC
+    float(CLOSE_1013),
+])
+def test_official_close_accepts_every_timestamp_form(stamp):
+    # 2026-10-14: GitHub's yfinance returned a Timestamp; int() crashed every run.
+    meta = {**NY, 'regularMarketPrice': 103.5, 'regularMarketTime': stamp}
+    s = pm._adjusted_closes('X', hist([99.0, 100.0], n=2), meta)
+    assert s.index[-1].date() == dt.date(2026, 10, 13) and s.iloc[-1] == 103.5
+
+
+def test_unreadable_timestamp_skips_the_append_instead_of_crashing():
+    meta = {**NY, 'regularMarketPrice': 103.5, 'regularMarketTime': 'soon'}
+    assert len(pm._adjusted_closes('X', hist([99.0, 100.0], n=2), meta)) == 2
