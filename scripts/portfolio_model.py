@@ -96,6 +96,20 @@ def _series(ticker: str, earliest: str):
     return _series_cache[ticker]
 
 
+def _as_utc(stamp) -> dt.datetime | None:
+    """yfinance's regularMarketTime as an aware UTC datetime. It arrives as
+    epoch seconds from the raw chart call, but as a pandas Timestamp once
+    yfinance has formatted the metadata (seen on GitHub's runners
+    2026-10-14: int() on it crashed every refresh)."""
+    try:
+        if isinstance(stamp, dt.datetime):          # incl. pandas Timestamp
+            return (stamp.replace(tzinfo=dt.timezone.utc) if stamp.tzinfo is None
+                    else stamp.astimezone(dt.timezone.utc))
+        return dt.datetime.fromtimestamp(float(stamp), dt.timezone.utc)
+    except (TypeError, ValueError, OverflowError, OSError):
+        return None
+
+
 def _adjusted_closes(ticker: str, hist, meta: dict):
     """Adjusted closes, made current as soon as the session closes.
 
@@ -124,7 +138,10 @@ def _adjusted_closes(ticker: str, hist, meta: dict):
             or meta.get('exchangeTimezoneName') != 'America/New_York'):
         return s
     from trading_calendar import ET, close_utc, is_trading_day
-    when = dt.datetime.fromtimestamp(int(stamp), dt.timezone.utc)
+    when = _as_utc(stamp)
+    if when is None:                    # unrecognised metadata never sinks a run
+        flag(f'{ticker}: unreadable regularMarketTime {stamp!r} — official close skipped')
+        return s
     day = when.astimezone(ET).date()
     if (day > s.index[-1].date() and is_trading_day(day)
             and when >= close_utc(day)):
