@@ -25,5 +25,12 @@
   "set": "2026-10-12",
   "expires": "2026-11-10",
   "review_event": "Q3 2026 results (listed for 2026-11-05, unconfirmed)"
+ },
+ "INTU": {
+  "reason": "Securities class actions Baldwin v. Intuit, 3:26-cv-07086 (N.D. Cal., filed 2026-07-10) and Bruce v. Intuit, 5:26-cv-08518 (N.D. Cal., filed 2026-08-17; inside the 90-day window) over TurboTax pricing claims - allegations only; Ontario class certified 2026-07-24",
+  "source": "per-stock/INTU/context-2026-10-16.md",
+  "set": "2026-10-16",
+  "expires": "2026-11-21",
+  "review_event": "Q1 FY27 results (expected 2026-11-19, unconfirmed)"
  }
 }
