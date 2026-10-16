@@ -42,9 +42,9 @@ members: DELL, FLEX, HPE, NTAP, P, SMCI, STX, WDC
 metrics: ev_ebitda=abs(20)  fcf_yield=pct(20)  ps=pct(20)  roic=pct(20)  gm=pct(20)  fcf_mgn=pct(20)
 members: AMZN, APLD, BTDR, CIFR, CLSK, CORZ, CRWV, GOOGL, HIVE, HUT, IREN, KEEL, META, MSFT, NBIS, ORCL, RIOT, SHAZ, WULF, WYFI
 
-## Layer 10 — 22 names
-metrics: ev_ebitda=pct(21)  fcf_yield=pct(22)  ps=pct(22)  roic=pct(22)  gm=pct(22)  fcf_mgn=pct(22)
-members: AAPL, ADBE, ADSK, APP, CRM, CRWD, DDOG, FTNT, HOOD, INTU, MDB, NOW, PANW, PATH, PLTR, RDDT, SNOW, SPCX, TEM, TSLA, WDAY, ZS
+## Layer 10 — 25 names
+metrics: ev_ebitda=pct(24)  fcf_yield=pct(25)  ps=pct(25)  roic=pct(23)  gm=pct(25)  fcf_mgn=pct(25)
+members: AAPL, ADBE, ADSK, APP, CRM, CRWD, DDOG, FTNT, HOOD, INTU, LMND, MDB, NOW, PANW, PATH, PLTR, RDDT, SHOP, SNOW, SPCX, TEM, TSLA, UPST, WDAY, ZS
 
 ## Layer 11 — 39 names
 metrics: ev_ebitda=pct(34)  fcf_yield=pct(36)  ps=pct(39)  roic=pct(23)  gm=pct(39)  fcf_mgn=pct(36)
