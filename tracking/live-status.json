@@ -1,17 +1,17 @@
 {
-  "as_of": "2026-10-15",
+  "as_of": "2026-10-16",
   "halted": false,
   "positions": 18,
   "open_orders": 0,
   "drift_flags": [
+    "AMZN",
     "ANET",
     "CRDO",
     "FIX",
     "GMED",
-    "META",
     "MSFT",
     "NVDA",
-    "SNDK",
+    "RDDT",
     "VRT",
     "WDC"
   ],
