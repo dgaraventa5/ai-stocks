@@ -270,8 +270,6 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
                     f"FCF-Yield via {src} ({', '.join(got) or 'none available'})")
 
     # ----- Quality -----
-    # ROIC not exposed by yfinance.info; leave blank (don't substitute ROA)
-    gaps.append("ROIC: not exposed by yfinance.info — leave blank")
     gm = info.get("grossMargins")
     if gm is not None and not _is_missing(gm):
         inp["gross_mgn"] = round(gm * 100, 2)
@@ -440,7 +438,7 @@ def run(tickers: list[tuple[str, str]], dry_run: bool = False,
         ))
 
         marker = "✓" if status == "ok" else "✗"
-        gap_n = len([g for g in gaps if not g.startswith("ROIC:")])  # ROIC gap is universal
+        gap_n = len(gaps)
         print(f"  [{i:>3}/{len(todo)}] {marker} {ticker:<6} {company[:35]:<35} "
               f"{elapsed:5.1f}s  gaps={gap_n}  {status}")
 
@@ -498,7 +496,7 @@ def main() -> None:
             f.write("| Ticker | Company | Row | Status | Gaps | Seconds |\n")
             f.write("|---|---|---:|---|---|---:|\n")
             for r in summary["log"]:
-                gap_short = "; ".join(g for g in r["gaps"] if not g.startswith("ROIC:"))[:90] or "—"
+                gap_short = "; ".join(r["gaps"])[:90] or "—"
                 f.write(f"| {r['ticker']} | {r['company'][:40]} | "
                         f"{r['row'] or '—'} | {r['status']} | {gap_short} | {r['seconds']} |\n")
         print(f"Summary written to {out.relative_to(ROOT)}")
