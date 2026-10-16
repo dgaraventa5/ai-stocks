@@ -85,11 +85,41 @@ def seam_blocks_confirm(clock_start: str, today: str, seam: dict | None,
             and dt.date.fromisoformat(today) < end)
 
 
+def _open_seams(cfg: dict) -> list[dict]:
+    """The current seam plus any earlier seams kept open by stamp_seam."""
+    seams = list(cfg.get('methodology_seams_open') or [])
+    if cfg.get('methodology_seam'):
+        seams.append(cfg['methodology_seam'])
+    return seams
+
+
+def blocking_seam(clock_start: str, today: str, cfg: dict) -> dict | None:
+    """The open seam whose window damps a clock started on clock_start
+    (the latest-ending one if several do), else None. Checks every seam still open, so a new deploy inside an older seam's
+    window does not cut that older seam's damping short."""
+    hits = [s for s in _open_seams(cfg)
+            if seam_blocks_confirm(clock_start, today, s)]
+    # Several can cover one clock: report the one that damps longest.
+    return max(hits, key=lambda s: s['date']) if hits else None
+
+
 def stamp_seam(reason: str) -> dict:
-    """Record a methodology seam starting today in the performance config."""
+    """Record a methodology seam starting today in the performance config.
+    A previous seam whose window is still open is kept in
+    `methodology_seams_open` (added 2026-10-16: re-stamping used to overwrite
+    it, which would have let AMZN's seam-damped exit confirm two days early)."""
     cfg = load_cfg()
-    cfg['methodology_seam'] = {'date': dt.date.today().isoformat(),
-                               'reason': reason}
+    today = dt.date.today()
+    kept = []
+    for seam in _open_seams(cfg):
+        end = dt.date.fromisoformat(seam['date']) + dt.timedelta(days=SEAM_DAYS)
+        if today < end and seam['date'] != today.isoformat():
+            kept.append(seam)
+    if kept:
+        cfg['methodology_seams_open'] = kept
+    else:
+        cfg.pop('methodology_seams_open', None)
+    cfg['methodology_seam'] = {'date': today.isoformat(), 'reason': reason}
     save_cfg(cfg)
     return cfg['methodology_seam']
 
@@ -433,15 +463,14 @@ def refresh(dry_run: bool = False, resize: bool = False,
             statuses[t] = f'EXIT (resize, {below(t)})'
             flag(f'{t}: EXIT (resize — {below(t)})')
         elif (t in exit_pending and exit_pending[t] != today
-              and seam_blocks_confirm(exit_pending[t], today,
-                                      cfg.get('methodology_seam'))):
+              and blocking_seam(exit_pending[t], today, cfg)):
             # Rule 32-C: the clock started inside an open methodology-seam
             # window — hold the name and keep the ORIGINAL clock date until
             # the window closes, so a methodology deploy alone can't trade
             # the book before the market gets SEAM_DAYS to disagree.
             include.append(t)
             new_pending[t] = exit_pending[t]
-            seam = cfg['methodology_seam']
+            seam = blocking_seam(exit_pending[t], today, cfg)
             damp_end = (dt.date.fromisoformat(seam['date'])
                         + dt.timedelta(days=SEAM_DAYS)).isoformat()
             statuses[t] = (f'EXIT PENDING (seam-damped until {damp_end}, '
@@ -464,9 +493,8 @@ def refresh(dry_run: bool = False, resize: bool = False,
             # printing "confirms next refresh" there reads as a scheduled exit
             # that is not going to happen (observed 2026-09-08 on NTAP during
             # the rule-34 ROIC deploy).
-            if seam_blocks_confirm(new_pending[t], today,
-                                   cfg.get('methodology_seam')):
-                _seam = cfg['methodology_seam']
+            _seam = blocking_seam(new_pending[t], today, cfg)
+            if _seam:
                 _end = (dt.date.fromisoformat(_seam['date'])
                         + dt.timedelta(days=SEAM_DAYS)).isoformat()
                 flag(f'{t}: {below(t)} — EXIT PENDING, confirm seam-damped '

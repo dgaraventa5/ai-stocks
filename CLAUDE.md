@@ -1033,6 +1033,12 @@ scheduled run may ADD an entry hold (it only delays a buy); removing or
 renewing one stays with Dom. The paused Hermes report-only jobs
 (`automation/hermes/`) stay paused and untouched.
 
+### 38. Layer 10 D5 measures AI adoption, not hyperscaler sales (added 2026-10-16, approved by Dom)
+
+**Context:** D5 ("tie to the AI buildout") had supplier bands (hyperscaler revenue) for Layers 1-8, buyer bands for Layer 9 and a robotics lens for Layer 11, but none for Layer 10. Layer 10 had drifted into three readings at once: supplier-literal (WDAY/ADBE/INTU/TSLA at 1), role-based (PLTR/NOW/CRM/TEM at 3) and buyer-lens (SPCX at 5). Dom: application companies are consumers of AI at the end of the chain and will never feasibly sell to hyperscalers, so scoring them on it penalizes them for their role. The goal is exposure to businesses that understand AI and use it to grow.
+
+**Rule:** for Layer 10, D5 reads **"is AI demonstrably working for this business?"** — bands in the rubric D5 section (Layer 10 framework). 5 = AI is a measured growth engine visible in company results; **one quarter of evidence is enough** (deliberately early: this space moves too fast to wait for two). Guards: rate measured evidence, not narrative; discount widening or acquisition-inflated metrics; demand FROM AI buyers is D1, not D5. Parallel 5-max-for-role scale per rule 23. **Supersedes** the same-day decision to keep Layer 10 on the supplier lens (TSLA D5 = 1) and the 2026-05-18 PLTR "intermediated chain" call. Known D1/D5 overlap accepted and disclosed (rule-23 P4 family). Deployed with a rule-32-C seam. Re-rate D5 with every Layer-10 subjective refresh (rule 12).
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

@@ -713,6 +713,36 @@ def test_seam_blocks_confirm_unit():
     assert rt.seam_blocks_confirm('2026-07-02', '2026-07-05', None) is False
 
 
+
+def test_blocking_seam_keeps_older_open_seam():
+    """A second deploy inside an open seam must not cut the first seam's
+    damping short (AMZN, 2026-10-16)."""
+    old = {'date': '2026-10-11', 'reason': 'first'}
+    new = {'date': '2026-10-16', 'reason': 'second'}
+    cfg = {'methodology_seam': new, 'methodology_seams_open': [old]}
+    assert rt.blocking_seam('2026-10-11', '2026-10-17', cfg) == old
+    assert rt.blocking_seam('2026-10-16', '2026-10-17', cfg) == new
+    assert rt.blocking_seam('2026-10-11', '2026-10-18', cfg) is None
+    assert rt.blocking_seam('2026-10-11', '2026-10-17',
+                            {'methodology_seam': new}) is None
+
+
+def test_stamp_seam_keeps_open_prior(monkeypatch):
+    import datetime as dt
+    store = {'methodology_seam': {'date': (dt.date.today()
+                                           - dt.timedelta(days=5)).isoformat(),
+                                  'reason': 'first'}}
+    monkeypatch.setattr(rt, 'load_cfg', lambda: store)
+    monkeypatch.setattr(rt, 'save_cfg', lambda c: None)
+    rt.stamp_seam('second')
+    assert store['methodology_seam']['reason'] == 'second'
+    assert [s['reason'] for s in store['methodology_seams_open']] == ['first']
+    store['methodology_seam']['date'] = (dt.date.today()
+                                         - dt.timedelta(days=30)).isoformat()
+    store.pop('methodology_seams_open')
+    rt.stamp_seam('third')
+    assert 'methodology_seams_open' not in store
+
 # ---- equal-weight sizing mode + INVVOL_ROSTER shadow (2026-09-08 flip) -----
 
 def _equal_pcfg():

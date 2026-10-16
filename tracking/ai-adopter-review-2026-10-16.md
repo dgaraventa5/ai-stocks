@@ -76,3 +76,30 @@ securities docket in RECAP or a disclosure mismatch (RECAP is incomplete: it
 does not list RDDT's known 3:25-cv-05144 class action). LMND shows a run of
 individual policyholder suits in Texas federal courts (Aug–Sep 2026), which
 read as ordinary claims disputes. No R4 change.
+
+## Follow-up: Layer-10 D5 re-rated on the AI-adoption lens (same day, rule 38)
+
+Dom rejected a literal supplier-lens cleanup: application companies consume AI
+and will never feasibly sell to hyperscalers. Layer-10 D5 now reads "is AI
+demonstrably working for this business?" (bands in the rubric), with **one
+quarter of evidence enough for 5** (Dom: buy before the market prices it).
+SPCX set to 5 at Dom's call. INTU, WDAY, ADSK, ZS and SNOW were re-researched
+first (their briefings dated from June); their other rating changes went in
+the same pass. INTU got a rule-35 entry hold (Bruce v. Intuit filed inside 90
+days). Seam stamped; `stamp_seam` now keeps an earlier open seam, so AMZN's
+exit stays damped to 2026-10-18.
+
+| Ticker | TOTAL | Tradable rank | Tier |
+|---|---|---|---|
+| PLTR | 74.3 → 76.3 | 11 → 10 | ✓✓ |
+| RDDT | 72.6 → 75.4 | 18 → 11 | ✓✓ |
+| APP | 70.7 → 73.7 | 26 → 14 (entry deferred by hold to 2026-11-15) | ✓✓ |
+| WDAY | 61.0 → 66.6 | 97 → 52 | ✓ |
+| ZS | 59.3 → 64.9 | 111 → 66 | ✓ |
+| SNOW | 54.8 → 60.3 | 145 → 104 | ? → ✓ |
+| ADBE | 62.9 → 65.9 | 80 → 54 | ✓ |
+| UPST | 54.8 → 57.8 | 144 → 124 | ? → ✓ |
+| DDOG / PANW / CRWD | −1.0 each | | ✓ |
+
+Portfolio: freeze, no ticket; rule-25 gate green. Capitulation flag fired on
+ADSK (forecast logged).

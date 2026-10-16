@@ -972,6 +972,26 @@
           "WDC",
           "PLTR"
         ]
+      },
+      {
+        "date": "2026-10-16",
+        "roster": [
+          "NVDA",
+          "TSM",
+          "SNDK",
+          "FIX",
+          "CRDO",
+          "MSFT",
+          "AVGO",
+          "ANET",
+          "MU",
+          "PLTR",
+          "RDDT",
+          "ALAB",
+          "GMED",
+          "APP",
+          "EME"
+        ]
       }
     ],
     "BAND_NEXT": [
@@ -1123,6 +1143,21 @@
           "SNPS",
           "ORCL",
           "GOOGL"
+        ]
+      },
+      {
+        "date": "2026-10-16",
+        "roster": [
+          "META",
+          "WDC",
+          "VRT",
+          "STX",
+          "NVT",
+          "AMZN",
+          "APH",
+          "CDNS",
+          "SNPS",
+          "ORCL"
         ]
       }
     ],
@@ -1291,6 +1326,26 @@
         "date": "2026-10-11",
         "roster": [
           "APP",
+          "BE",
+          "ONTO",
+          "ISRG",
+          "TER",
+          "CGNX",
+          "ARM",
+          "FN",
+          "KEYS",
+          "NTAP",
+          "AAON",
+          "RMBS",
+          "AMD",
+          "NOVT",
+          "PWR"
+        ]
+      },
+      {
+        "date": "2026-10-16",
+        "roster": [
+          "GOOGL",
           "BE",
           "ONTO",
           "ISRG",
@@ -1516,7 +1571,13 @@
     "last_resize_check": "2026-10"
   },
   "methodology_seam": {
-    "date": "2026-10-11",
-    "reason": "rule 36 (forward P/E on a common calendar year), ad-platform D1 convention, and mechanical M2 re-measure, deployed with the 2026-10-06..11 review"
-  }
+    "date": "2026-10-16",
+    "reason": "rule 38: Layer-10 D5 re-rated on the AI-adoption lens (25 names) + 5 refreshed names, 2026-10-16"
+  },
+  "methodology_seams_open": [
+    {
+      "date": "2026-10-11",
+      "reason": "rule 36 (forward P/E on a common calendar year), ad-platform D1 convention, and mechanical M2 re-measure, deployed with the 2026-10-06..11 review"
+    }
+  ]
 }
