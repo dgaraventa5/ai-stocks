@@ -57,23 +57,28 @@ class _Col:
 
 
 class _Ticker:
-    def __init__(self, inc, bs, info=None):
+    def __init__(self, inc, bs, info=None, ticker=None):
         self.quarterly_income_stmt = inc
         self.quarterly_balance_sheet = bs
         self.info = info or {}
+        if ticker:
+            self.ticker = ticker
 
 
 def _tk(op=(100, 100, 100, 100), pretax=(400,), tax=(84,), assets=1500.0,
-        cur_liab=500.0, asof=dt.date(2026, 6, 30), mrq=None):
+        cur_liab=500.0, asof=dt.date(2026, 6, 30), mrq=None, extra=None,
+        ticker=None):
     """Capital employed = assets - cur_liab (default 1000)."""
-    inc = _Frame({"Operating Income": list(op), "Pretax Income": list(pretax),
-                  "Tax Provision": list(tax)}, columns=[_Col(asof)])
+    rows = {"Operating Income": list(op), "Pretax Income": list(pretax),
+            "Tax Provision": list(tax)}
+    rows.update(extra or {})
+    inc = _Frame(rows, columns=[_Col(asof)])
     bs = _Frame({"Total Assets": [assets], "Current Liabilities": [cur_liab]})
     info = {}
     if mrq:
         info["mostRecentQuarter"] = int(dt.datetime(
             mrq.year, mrq.month, mrq.day, tzinfo=dt.UTC).timestamp())
-    return _Ticker(inc, bs, info)
+    return _Ticker(inc, bs, info, ticker)
 
 
 def test_basic_roic():
@@ -149,6 +154,67 @@ def test_current_statements_not_flagged_stale():
     assert v is not None and not any(f.startswith("STALE") for f in flags)
 
 
+# --- Yahoo's "special charge" add-back (2026-10-16, SHOP) --------------------
+# Yahoo's quarterly "Operating Income" adds back whatever it files as a special
+# charge. For SHOP that includes "transaction and loan losses", a line on the
+# company's own income statement, so Yahoo printed 629 for Q2 2026 against the
+# 10-Q's 488. Shape below: Yahoo 100/qtr, GAAP 80/qtr, 20/qtr filed as special.
+_SHOP_SHAPE = {"Total Operating Income As Reported": [80, 80, 80, 80],
+               "Special Income Charges": [-20, -20, -20, -20]}
+
+
+def test_listed_name_uses_gaap_operating_income(monkeypatch):
+    """320 GAAP op x (1-0.21) / 1000 = 25.28%, not the 31.6% on Yahoo's line."""
+    monkeypatch.setitem(roic.GAAP_OPERATING_INCOME, "TEST", "fixture")
+    v, flags = roic.statement_roic(_tk(extra=_SHOP_SHAPE, ticker="TEST"))
+    assert v == 25.28
+    assert any("GAAP operating income" in f for f in flags)
+
+
+def test_listed_name_without_as_reported_line_subtracts_special_charges(monkeypatch):
+    monkeypatch.setitem(roic.GAAP_OPERATING_INCOME, "TEST", "fixture")
+    shape = {"Special Income Charges": [-20, -20, -20, -20]}
+    v, _ = roic.statement_roic(_tk(extra=shape, ticker="TEST"))
+    assert v == 25.28
+
+
+def test_listed_name_with_no_gaap_figure_keeps_yahoo_line_and_flags(monkeypatch):
+    """Rule 3: a missing GAAP figure is flagged, not silently swapped."""
+    monkeypatch.setitem(roic.GAAP_OPERATING_INCOME, "TEST", "fixture")
+    v, flags = roic.statement_roic(_tk(ticker="TEST"))
+    assert v == 31.6
+    assert any("GAAP operating income unavailable" in f for f in flags)
+
+
+def test_unlisted_name_keeps_yahoo_operating_income():
+    """One-off impairments and restructuring stay excluded for everyone else
+    (MBLY's -3.8B goodwill charge must not sink its ROIC for a year)."""
+    v, _ = roic.statement_roic(_tk(extra=_SHOP_SHAPE, ticker="OTHER"))
+    assert v == 31.6
+
+
+def test_shop_is_listed_with_a_citation():
+    assert "10-Q" in roic.GAAP_OPERATING_INCOME["SHOP"]
+
+
+def test_charges_stripped_every_quarter_raise_review_flag():
+    """Unlisted name, charges every quarter worth >10% of op income: flag it
+    for a 10-Q check. The value is unchanged -- a flag, never a swap."""
+    v, flags = roic.statement_roic(_tk(extra=_SHOP_SHAPE, ticker="OTHER"))
+    assert v == 31.6
+    assert any(f.startswith("REVIEW") for f in flags)
+
+
+def test_one_off_charge_does_not_raise_review_flag():
+    shape = {"Special Income Charges": [-300, 0, 0, 0]}
+    _, flags = roic.statement_roic(_tk(extra=shape, ticker="OTHER"))
+    assert not any(f.startswith("REVIEW") for f in flags)
+
+
+def test_small_recurring_charge_does_not_raise_review_flag():
+    shape = {"Special Income Charges": [-5, -5, -5, -5]}
+    _, flags = roic.statement_roic(_tk(extra=shape, ticker="OTHER"))
+    assert not any(f.startswith("REVIEW") for f in flags)
 # --- Financial-company statement templates (insurers, lenders) -------------
 # Yahoo files LMND (insurer) and UPST (lender) on templates with no operating-
 # income line and an unclassified balance sheet (no Current Liabilities). Their
