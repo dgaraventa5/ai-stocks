@@ -919,6 +919,18 @@ values run systematically lower than the old column (NVDA 103 → 60, MSFT 29 �
 stamped (rule 32-C); NTAP fell to rank 20 and its exit clock is seam-damped to
 2026-09-15. Impact method: rule-24 style before/after against a temp workbook.
 
+**Amendment 2026-10-16 (PENDING Dom's approval): financial-company templates.**
+Yahoo files insurers and lenders (LMND, UPST — the only two on the Watchlist)
+with no operating-income line and no Current Liabilities, so both were blank.
+When the operating line is absent altogether, ROIC = (Total Revenue − Total
+Expenses, else Pretax Income) × (1 − tax) / stockholders' equity, flagged
+`FINANCIAL TEMPLATE`. Their income is already after interest (UPST books its
+funding interest as an operating expense), so equity is the matching base;
+equity + debt would charge the debt twice. Known cost: a return on equity is
+amplified by leverage relative to the TA − CL names it ranks against.
+Non-positive equity blanks. A name with an operating line but no Current
+Liabilities stays blank (before-interest income over equity would flatter it).
+
 ### 35. Entry gate: research before entry (added 2026-10-06, approved by Dom)
 
 **Context:** A score built from quarterly filings and 1–5 ratings cannot react
