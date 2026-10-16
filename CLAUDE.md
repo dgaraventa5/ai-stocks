@@ -919,7 +919,7 @@ values run systematically lower than the old column (NVDA 103 â†’ 60, MSFT 29 â†
 stamped (rule 32-C); NTAP fell to rank 20 and its exit clock is seam-damped to
 2026-09-15. Impact method: rule-24 style before/after against a temp workbook.
 
-**Amendment 2026-10-16 (pending Dom's approval): Yahoo's "special charge"
+**Amendment 2026-10-16 (approved by Dom; seam stamped): Yahoo's "special charge"
 add-back.** Yahoo's "Operating Income" adds back whatever it files as a special
 charge. Right for one-offs, wrong for SHOP: it files Shopify's "transaction and
 loan losses" (an operating line on the 10-Q) as restructuring, printing Q2 2026
