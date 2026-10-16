@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<ownershipDocument>
+
+    <schemaVersion>X0609</schemaVersion>
+
+    <documentType>4</documentType>
+
+    <periodOfReport>2026-10-05</periodOfReport>
+
+    <notSubjectToSection16>0</notSubjectToSection16>
+
+    <issuer>
+        <issuerCik>0001713445</issuerCik>
+        <issuerName>Reddit, Inc.</issuerName>
+        <issuerTradingSymbol>RDDT</issuerTradingSymbol>
+        <issuerForeignTradingSymbol></issuerForeignTradingSymbol>
+    </issuer>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0001913168</rptOwnerCik>
+            <rptOwnerName>Newhouse Steven O</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerNonUSAddressFlag>false</rptOwnerNonUSAddressFlag>
+            <rptOwnerStreet1>C/O REDDIT, INC.</rptOwnerStreet1>
+            <rptOwnerStreet2>303 2ND STREET, SOUTH TOWER, 5TH FLOOR</rptOwnerStreet2>
+            <rptOwnerCity>SAN FRANCISCO</rptOwnerCity>
+            <rptOwnerState>CA</rptOwnerState>
+            <rptOwnerZipCode>94107</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>1</isDirector>
+            <isOfficer>0</isOfficer>
+            <isTenPercentOwner>0</isTenPercentOwner>
+            <isOther>0</isOther>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <aff10b5One>0</aff10b5One>
+
+    <nonDerivativeTable>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Class A common stock, par value $0.0001 per share</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-10-05</value>
+            </transactionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>A</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>115</value>
+                    <footnoteId id="F1"/>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>0</value>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>A</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>13302</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeHolding>
+            <securityTitle>
+                <value>Class A common stock, par value $0.0001 per share</value>
+            </securityTitle>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>16182</value>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>I</value>
+                </directOrIndirectOwnership>
+                <natureOfOwnership>
+                    <value>Indirect interest in a corporation</value>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </natureOfOwnership>
+            </ownershipNature>
+        </nonDerivativeHolding>
+    </nonDerivativeTable>
+
+    <derivativeTable></derivativeTable>
+
+    <footnotes>
+        <footnote id="F1">The shares are fully vested and will be settled in shares of the Issuer's Class A Common Stock either (i) on a date selected by the Reporting Person pursuant to the Issuer's Amended and Restated Non-Employee Director Compensation Program (the &quot;Program&quot;), or (ii) as otherwise provided by the Program.</footnote>
+        <footnote id="F2">Advance Magazine Publishers Inc., a New York corporation (&quot;AMPI&quot;), owns the securities of the Company set forth on this report. Mr. Newhouse, by virtue of his affiliations with Advance Publications, Inc. a New York corporation (&quot;API&quot;), and certain holders of equity in API, may be deemed to beneficially own the securities of the Company owned directly by AMPI. API is the indirect parent company of AMPI.</footnote>
+        <footnote id="F3">Mr. Newhouse disclaims beneficial ownership of the securities owned by AMPI, and this report shall not be deemed an admission that Mr. Newhouse is the beneficial owner of such shares for purposes of Section 16 or for any other purpose.</footnote>
+    </footnotes>
+
+    <remarks></remarks>
+
+    <ownerSignature>
+        <signatureName>/s/ Julie Rogers, Attorney-in-Fact</signatureName>
+        <signatureDate>2026-10-07</signatureDate>
+    </ownerSignature>
+</ownershipDocument>
