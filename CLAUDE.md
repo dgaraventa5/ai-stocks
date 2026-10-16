@@ -919,6 +919,22 @@ values run systematically lower than the old column (NVDA 103 → 60, MSFT 29 �
 stamped (rule 32-C); NTAP fell to rank 20 and its exit clock is seam-damped to
 2026-09-15. Impact method: rule-24 style before/after against a temp workbook.
 
+**Amendment 2026-10-16 (approved by Dom; seam stamped): Yahoo's "special charge"
+add-back.** Yahoo's "Operating Income" adds back whatever it files as a special
+charge. Right for one-offs, wrong for SHOP: it files Shopify's "transaction and
+loan losses" (an operating line on the 10-Q) as restructuring, printing Q2 2026
+operating income of $629M against the 10-Q's $488M (ROIC 14.96 → 11.67). Names
+on `roic.GAAP_OPERATING_INCOME` use the GAAP line ("Total Operating Income As
+Reported"); a name joins only on cited income-statement evidence (the rule-15
+standard). Every other name keeps Yahoo's line, so one-off impairments stay out.
+A `REVIEW` flag fires when Yahoo strips charges in all four quarters worth >10%
+of operating income — a prompt to read the 10-Q, never a value change. Rejected:
+GAAP for every name (puts one-off impairments into 40+ names, e.g. MBLY's −$3.8B
+goodwill) and a recurrence-steadiness cutoff (the cutoff itself would pick names).
+Note "Revenue − Total Expenses" and "EBIT" both equal Yahoo's adjusted figure, so
+neither detects the gap. LMND/UPST stay blank: no operating-income line and an
+unclassified balance sheet (no current liabilities) — a separate question.
+
 ### 35. Entry gate: research before entry (added 2026-10-06, approved by Dom)
 
 **Context:** A score built from quarterly filings and 1–5 ratings cannot react

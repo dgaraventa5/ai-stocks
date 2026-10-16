@@ -59,6 +59,31 @@ from __future__ import annotations
 TAX_MIN, TAX_MAX, TAX_DEFAULT = 0.0, 0.35, 0.21
 
 _OP_KEYS = ("Operating Income", "EBIT")
+_GAAP_OP_KEY = "Total Operating Income As Reported"
+_SPECIAL_KEY = "Special Income Charges"
+
+# Names whose GAAP operating income must replace Yahoo's "Operating Income"
+# (added 2026-10-16). Yahoo's line adds back whatever it files as a "special
+# charge". That is right for genuine one-offs (impairments, a restructuring) and
+# stays the rule for everyone else. It is wrong when Yahoo files a line that the
+# company itself reports as an ordinary operating cost, so a name goes on this
+# list only on documented evidence from its own income statement -- the rule-15
+# standard, not a mechanical threshold. Rejected alternatives, measured on the
+# Watchlist 2026-10-16: (a) GAAP for every name, which would put one-off
+# impairments into 40+ names' ROIC for a year (MBLY -3.8B goodwill, INTC, ENTG);
+# (b) GAAP whenever charges recur at a steady size, whose cutoff would decide
+# names by itself (steadiness SHOP 0.77, AVGO 0.49, CRM 0.41 -- the last two are
+# company-labeled restructuring). The REVIEW flag below surfaces candidates.
+GAAP_OPERATING_INCOME = {
+    "SHOP": ("transaction and loan losses ($141M in Q2 2026) are an operating "
+             "line on Shopify's own income statement (10-Q Q2 2026 p.7); Yahoo "
+             "files them as a restructuring charge and adds them back, printing "
+             "operating income of $629M against the 10-Q's $488M"),
+}
+
+# REVIEW flag: charges stripped in all four quarters, worth more than this share
+# of TTM operating income. A prompt to read the 10-Q, never a value change.
+REVIEW_SHARE = 0.10
 _EQ_KEYS = ("Stockholders Equity", "Total Equity Gross Minority Interest")
 _CASH_KEYS = ("Cash Cash Equivalents And Short Term Investments",
               "Cash And Cash Equivalents")
@@ -94,7 +119,41 @@ def effective_tax_rate(pretax, tax):
     return r, False
 
 
-def statement_roic(t) -> tuple[float | None, list[str]]:
+def _last4(df, key):
+    """Last four quarterly values (most recent first), or None if short."""
+    if df is None or key not in df.index:
+        return None
+    s = df.loc[key].dropna()
+    return [float(v) for v in s.iloc[:4]] if len(s) >= 4 else None
+
+
+def _operating_income(inc, ticker):
+    """(TTM operating income, flags), honoring GAAP_OPERATING_INCOME."""
+    flags: list[str] = []
+    op = _ttm(inc, _OP_KEYS)
+    special = _last4(inc, _SPECIAL_KEY)
+    if ticker in GAAP_OPERATING_INCOME:
+        gaap = _ttm(inc, (_GAAP_OP_KEY,))
+        if gaap is None and op is not None and special is not None:
+            gaap = op + sum(special)
+        if gaap is None:
+            flags.append("GAAP operating income unavailable — Yahoo's line "
+                         "kept (overstates; see GAAP_OPERATING_INCOME)")
+        else:
+            flags.append(f"GAAP operating income used ({ticker}: Yahoo adds "
+                         f"back an operating cost)")
+            return gaap, flags
+    elif (op is not None and special is not None and op != 0
+          and all(v < 0 for v in special)
+          and abs(sum(special)) > REVIEW_SHARE * abs(op)):
+        flags.append(f"REVIEW: Yahoo strips charges every quarter "
+                     f"({abs(sum(special)) / abs(op):.0%} of operating income) "
+                     f"— check the 10-Q; if they are an operating line, add "
+                     f"the name to roic.GAAP_OPERATING_INCOME")
+    return op, flags
+
+
+def statement_roic(t, ticker=None) -> tuple[float | None, list[str]]:
     """(ROIC %, flags) for a yfinance Ticker. None when not computable.
 
     Returns the reason in flags so callers can report a gap rather than paper
@@ -135,7 +194,8 @@ def statement_roic(t) -> tuple[float | None, list[str]]:
     if asof:
         flags.append(f"as-of {asof}")
 
-    op = _ttm(inc, _OP_KEYS)
+    op, opflags = _operating_income(inc, ticker or getattr(t, "ticker", None))
+    flags.extend(opflags)
     if op is None:
         return None, ["no 4 quarters of operating income"]
     pretax = _ttm(inc, ("Pretax Income",))
