@@ -1626,13 +1626,17 @@
     "last_resize_check": "2026-10"
   },
   "methodology_seam": {
-    "date": "2026-10-16",
-    "reason": "rule 38: Layer-10 D5 re-rated on the AI-adoption lens (25 names) + 5 refreshed names, 2026-10-16; + rule 34 amendment: GAAP operating income for SHOP (PR 162)"
+    "date": "2026-10-17",
+    "reason": "rule 34 amendment: financial-template ROIC (LMND, UPST)"
   },
   "methodology_seams_open": [
     {
       "date": "2026-10-11",
       "reason": "rule 36 (forward P/E on a common calendar year), ad-platform D1 convention, and mechanical M2 re-measure, deployed with the 2026-10-06..11 review"
+    },
+    {
+      "date": "2026-10-16",
+      "reason": "rule 38: Layer-10 D5 re-rated on the AI-adoption lens (25 names) + 5 refreshed names, 2026-10-16; + rule 34 amendment: GAAP operating income for SHOP (PR 162)"
     }
   ]
 }

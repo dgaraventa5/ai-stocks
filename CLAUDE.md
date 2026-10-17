@@ -936,7 +936,7 @@ neither detects the gap. LMND/UPST stay blank: no operating-income line and an
 unclassified balance sheet (no current liabilities) — a separate question
 (see the next amendment).
 
-**Amendment 2026-10-16 (PENDING Dom's approval): financial-company templates.**
+**Amendment 2026-10-16 (approved by Dom 2026-10-17; seam stamped): financial-company templates.**
 Yahoo files insurers and lenders (LMND, UPST — the only two on the Watchlist)
 with no operating-income line and no Current Liabilities, so both were blank.
 When the operating line is absent altogether, ROIC = (Total Revenue − Total
