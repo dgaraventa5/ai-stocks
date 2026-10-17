@@ -933,7 +933,20 @@ GAAP for every name (puts one-off impairments into 40+ names, e.g. MBLY's −$3.
 goodwill) and a recurrence-steadiness cutoff (the cutoff itself would pick names).
 Note "Revenue − Total Expenses" and "EBIT" both equal Yahoo's adjusted figure, so
 neither detects the gap. LMND/UPST stay blank: no operating-income line and an
-unclassified balance sheet (no current liabilities) — a separate question.
+unclassified balance sheet (no current liabilities) — a separate question
+(see the next amendment).
+
+**Amendment 2026-10-16 (approved by Dom 2026-10-17; seam stamped): financial-company templates.**
+Yahoo files insurers and lenders (LMND, UPST — the only two on the Watchlist)
+with no operating-income line and no Current Liabilities, so both were blank.
+When the operating line is absent altogether, ROIC = (Total Revenue − Total
+Expenses, else Pretax Income) × (1 − tax) / stockholders' equity, flagged
+`FINANCIAL TEMPLATE`. Their income is already after interest (UPST books its
+funding interest as an operating expense), so equity is the matching base;
+equity + debt would charge the debt twice. Known cost: a return on equity is
+amplified by leverage relative to the TA − CL names it ranks against.
+Non-positive equity blanks. A name with an operating line but no Current
+Liabilities stays blank (before-interest income over equity would flatter it).
 
 ### 35. Entry gate: research before entry (added 2026-10-06, approved by Dom)
 

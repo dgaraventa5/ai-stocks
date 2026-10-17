@@ -215,3 +215,76 @@ def test_small_recurring_charge_does_not_raise_review_flag():
     shape = {"Special Income Charges": [-5, -5, -5, -5]}
     _, flags = roic.statement_roic(_tk(extra=shape, ticker="OTHER"))
     assert not any(f.startswith("REVIEW") for f in flags)
+# --- Financial-company statement templates (insurers, lenders) -------------
+# Yahoo files LMND (insurer) and UPST (lender) on templates with no operating-
+# income line and an unclassified balance sheet (no Current Liabilities). Their
+# income is reported AFTER the cost of the money they borrow, so the matching
+# capital base is shareholders' equity, not TA - CL or equity + debt.
+
+def _fin_tk(rev=None, total_exp=None, pretax=(25, 25, 25, 25), tax=(0, 0, 0, 0),
+            assets=3000.0, equity=500.0, cur_liab=None):
+    rows = {"Pretax Income": list(pretax), "Tax Provision": list(tax)}
+    if rev is not None:
+        rows["Total Revenue"] = list(rev)
+    if total_exp is not None:
+        rows["Total Expenses"] = list(total_exp)
+    bs = {"Total Assets": [assets], "Stockholders Equity": [equity]}
+    if cur_liab is not None:
+        bs["Current Liabilities"] = [cur_liab]
+    return _Ticker(_Frame(rows, columns=[_Col(dt.date(2026, 6, 30))]),
+                   _Frame(bs))
+
+
+def test_insurer_uses_revenue_less_expenses_over_equity():
+    """LMND shape: Total Revenue / Total Expenses / Pretax, no operating line.
+    Revenue - expenses = -40/qtr -> -160 TTM; loss -> statutory 21%;
+    -160 x 0.79 / 500 = -25.28%."""
+    v, flags = roic.statement_roic(_fin_tk(
+        rev=(250,) * 4, total_exp=(290,) * 4, pretax=(-40,) * 4, tax=(1,) * 4))
+    assert v == -25.28
+    assert any(f.startswith("FINANCIAL TEMPLATE") for f in flags)
+
+
+def test_lender_falls_back_to_pretax_over_equity():
+    """UPST shape: no operating line and no Total Expenses -> pretax income,
+    whose interest cost is already an operating expense for a lender.
+    100 TTM x (1 - 0.02) / 500 = 19.6%."""
+    v, flags = roic.statement_roic(_fin_tk(pretax=(25,) * 4, tax=(0.5,) * 4))
+    assert v == 19.6
+    assert any("pretax income" in f for f in flags)
+
+
+def test_financial_template_ignores_debt_in_denominator():
+    """Income after interest over equity + debt would charge debt twice (its
+    interest in the numerator AND its principal in the base). Assets and
+    any debt must not move the answer -- only equity does."""
+    a, _ = roic.statement_roic(_fin_tk(assets=3000.0))
+    b, _ = roic.statement_roic(_fin_tk(assets=9000.0))
+    assert a == b
+
+
+def test_financial_template_non_positive_equity_blanks():
+    v, flags = roic.statement_roic(_fin_tk(equity=0.0))
+    assert v is None and any("equity non-positive" in f for f in flags)
+
+
+def test_financial_template_needs_four_quarters():
+    v, flags = roic.statement_roic(_fin_tk(pretax=(25, 25)))
+    assert v is None and any("4 quarters" in f for f in flags)
+
+
+def test_operating_income_without_current_liabilities_stays_blank():
+    """The equity base is only for after-interest income. A normal operating-
+    income line (before interest) over equity would flatter leveraged names, so
+    a classified-income / unclassified-balance-sheet name stays blank."""
+    inc = _Frame({"Operating Income": [100] * 4, "Pretax Income": [400],
+                  "Tax Provision": [84]}, columns=[_Col(dt.date(2026, 6, 30))])
+    bs = _Frame({"Total Assets": [1500.0], "Stockholders Equity": [800.0]})
+    v, flags = roic.statement_roic(_Ticker(inc, bs))
+    assert v is None and any("current liabilities" in f for f in flags)
+
+
+def test_standard_names_never_take_the_financial_path():
+    v, flags = roic.statement_roic(_tk())
+    assert v == 31.6
+    assert not any(f.startswith("FINANCIAL TEMPLATE") for f in flags)

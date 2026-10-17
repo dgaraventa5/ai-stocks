@@ -194,15 +194,19 @@ def statement_roic(t, ticker=None) -> tuple[float | None, list[str]]:
     if asof:
         flags.append(f"as-of {asof}")
 
-    op, opflags = _operating_income(inc, ticker or getattr(t, "ticker", None))
-    flags.extend(opflags)
-    if op is None:
-        return None, ["no 4 quarters of operating income"]
     pretax = _ttm(inc, ("Pretax Income",))
     tax = _ttm(inc, ("Tax Provision",))
     rate, defaulted = effective_tax_rate(pretax, tax)
     if defaulted:
         flags.append(f"effective tax rate unusable/clamped -> {rate:.0%}")
+
+    op, opflags = _operating_income(inc, ticker or getattr(t, "ticker", None))
+    flags.extend(opflags)
+    if op is None:
+        if inc is not None and not any(
+                k in inc.index for k in _OP_KEYS + (_GAAP_OP_KEY,)):
+            return _financial_template_roic(inc, bs, rate, flags)
+        return None, flags + ["no 4 quarters of operating income"]
 
     ta = _latest(bs, ("Total Assets",))
     cl = _latest(bs, ("Current Liabilities",))
@@ -214,3 +218,45 @@ def statement_roic(t, ticker=None) -> tuple[float | None, list[str]]:
             f"capital employed non-positive ({ic/1e6:,.0f}M) — ratio meaningless"]
 
     return round(op * (1 - rate) / ic * 100, 2), flags
+
+
+def _financial_template_roic(inc, bs, rate, flags):
+    """Return on equity for names Yahoo files on a financial-company template.
+
+    Added 2026-10-16 for LMND (insurer) and UPST (lender), which were blank:
+    Yahoo gives them no operating-income line and an unclassified balance sheet
+    (no Current Liabilities), so neither half of the standard formula exists.
+
+    Numerator -- Total Revenue - Total Expenses when both are filed (LMND; it
+    leaves out non-operating items), else Pretax Income (UPST). Both are AFTER
+    interest, and for these businesses that is right: borrowed money is the raw
+    material. UPST's own 10-Q books its funding interest inside operating
+    expenses (us-gaap InterestExpenseOperating, $12.5M in Q2 2026) and its GAAP
+    operating income ($14.6M) sits within ~$2.6M of pretax ($17.2M).
+
+    Denominator -- stockholders' equity. Because the numerator has already paid
+    the interest, adding debt to the base would charge the debt twice. (Equity +
+    debt was measured as the alternative: UPST 7.6% -> 2.1%, LMND -21% -> -15%.)
+    The cost: this is a return on EQUITY, so leverage amplifies it relative to
+    the TA - CL names it is ranked against. Flagged, never silent (rule 3).
+
+    Gated on the operating line being absent altogether, so a normal company
+    with a missing quarter never lands here.
+    """
+    rev = _ttm(inc, ("Total Revenue",))
+    exp = _ttm(inc, ("Total Expenses",))
+    if rev is not None and exp is not None:
+        op, basis = rev - exp, "revenue - total expenses"
+    else:
+        op, basis = _ttm(inc, ("Pretax Income",)), "pretax income"
+    if op is None:
+        return None, flags + ["no 4 quarters of operating income or pretax income"]
+    eq = _latest(bs, _EQ_KEYS)
+    if eq is None:
+        return None, flags + ["no stockholders equity"]
+    if eq <= 0:
+        return None, flags + [
+            f"equity non-positive ({eq/1e6:,.0f}M) — ratio meaningless"]
+    flags.append(f"FINANCIAL TEMPLATE: {basis} / stockholders equity "
+                 "(return-on-equity proxy, after interest)")
+    return round(op * (1 - rate) / eq * 100, 2), flags
