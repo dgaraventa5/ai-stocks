@@ -8,3 +8,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-06-22 | Q1 2026 6-K / earnings call (refresh-context) | Q1 2026: rev $1.634B (+3% YoY), GAAP GM 27.6%, EPS $0.40 (+14% beat). Q2 guided up (~$1.76B, EPS ~$0.43). Comms/DC +32% YoY; silicon photonics guided ~2x in 2026, $1B run-rate target by 2028, designed in at 3 of top-4 transceiver OEMs. Auto $382M (+24% YoY, −11% QoQ). Note: GFS files 6-K/20-F (foreign private issuer), not 10-Q/8-K. |
 
 - **2026-09-18** (weekly scan, SEC EDGAR): 6-K 2026-09-08: Securities Issuance Agreement with the U.S. Department of Commerce — 9,907,399 shares at $37.85 (~$375M by arithmetic), with voting/transfer restrictions.
+
+- **2026-10-17** (weekly scan, SEC EDGAR) — 6-K 2026-10-14 (Ex. 99.1): selected as operator/technology provider for two new Malta, NY fabs under a US-Japan initiative of up to $21B Japanese funding; first fab ~$10B, online 2029, ~900k 300mm wafers/yr.

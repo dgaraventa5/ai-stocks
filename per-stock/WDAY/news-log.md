@@ -7,3 +7,5 @@
 - **2026-10-01**: 8-K. New $1.5B revolver (Oct 2031 maturity) replaces the $1.0B facility; undrawn. (8-K, accession 0001104659-26-112898)
 - **2026-10-13**: 8-K. Agreement to acquire C1.ai (ConductorOne, agentic identity governance); terms undisclosed (~$1.2B per an unverified blog); expected to close in Q4 FY27. ([newsroom](https://newsroom.workday.com/2026-10-13-Workday-to-Acquire-C1-ai,-a-Leading-Agentic-Identity-Platform-for-People-and-Agents?asPDF=1))
 - **2026-10-16**: Refresh briefing written (context-2026-10-16.md). WDAY +54% vs IGV +23% over 126 trading days.
+
+- **2026-10-17** (weekly scan, SEC EDGAR) — 8-K 2026-10-13: definitive agreement to acquire ConductorOne (agentic identity platform for people and AI agents); close expected fiscal Q4 FY2027; price not disclosed.
