@@ -992,6 +992,26 @@
           "APP",
           "EME"
         ]
+      },
+      {
+        "date": "2026-10-17",
+        "roster": [
+          "NVDA",
+          "TSM",
+          "SNDK",
+          "CRDO",
+          "FIX",
+          "MSFT",
+          "AVGO",
+          "ANET",
+          "MU",
+          "PLTR",
+          "ALAB",
+          "RDDT",
+          "GMED",
+          "WDC",
+          "APP"
+        ]
       }
     ],
     "BAND_NEXT": [
@@ -1158,6 +1178,21 @@
           "CDNS",
           "SNPS",
           "ORCL"
+        ]
+      },
+      {
+        "date": "2026-10-17",
+        "roster": [
+          "META",
+          "VRT",
+          "EME",
+          "NVT",
+          "STX",
+          "SNPS",
+          "AMZN",
+          "APH",
+          "ORCL",
+          "ASML"
         ]
       }
     ],
@@ -1360,6 +1395,26 @@
           "AMD",
           "NOVT",
           "PWR"
+        ]
+      },
+      {
+        "date": "2026-10-17",
+        "roster": [
+          "CDNS",
+          "GOOGL",
+          "BE",
+          "ONTO",
+          "ISRG",
+          "TER",
+          "FN",
+          "KEYS",
+          "CGNX",
+          "ARM",
+          "NTAP",
+          "AAON",
+          "RMBS",
+          "AMD",
+          "NOVT"
         ]
       }
     ],

@@ -10,3 +10,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-06-22 | 6-K | Letter to Shareholders supplemental to the July 2 AGM proxy (governance; not financial). |
 
 - **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): FULL EXIT of $85M equity position.
+
+- **2026-10-17** (weekly scan, SEC EDGAR) — 6-Ks 2026-10-13: expanded multi-year SiGe agreement with Semtech, which will invest to secure dedicated SiGe capacity across US/Israel/Japan fabs for AI optical and copper interconnects (no $ value); EGM 2026-11-25 to re-vote exec pay policy that failed at the July AGM; Q3 results 2026-11-02.
