@@ -1236,6 +1236,21 @@
           "ORCL",
           "ASML"
         ]
+      },
+      {
+        "date": "2026-10-19",
+        "roster": [
+          "META",
+          "VRT",
+          "EME",
+          "NVT",
+          "STX",
+          "SNPS",
+          "AMZN",
+          "APH",
+          "ORCL",
+          "CDNS"
+        ]
       }
     ],
     "BAND_TAIL": [
@@ -1443,6 +1458,26 @@
         "date": "2026-10-17",
         "roster": [
           "CDNS",
+          "GOOGL",
+          "BE",
+          "ONTO",
+          "ISRG",
+          "TER",
+          "FN",
+          "KEYS",
+          "CGNX",
+          "ARM",
+          "NTAP",
+          "AAON",
+          "RMBS",
+          "AMD",
+          "NOVT"
+        ]
+      },
+      {
+        "date": "2026-10-19",
+        "roster": [
+          "ASML",
           "GOOGL",
           "BE",
           "ONTO",
