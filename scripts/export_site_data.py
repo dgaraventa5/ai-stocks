@@ -98,6 +98,27 @@ def export_positions(root: Path) -> list[dict]:
     return out
 
 
+def attach_holding_returns(root: Path, positions: list[dict]) -> None:
+    """Per-name return since entry, vs SPY, and a growth-of-1 sparkline from
+    the series' `holdings` block (portfolio_model.holding_returns). All
+    relative — no dollars. A series predating the block, or a name the
+    builder could not price, gets nulls and the page shows a dash."""
+    sp = root / 'tracking' / 'performance-series.json'
+    held = json.loads(sp.read_text()).get('holdings') if sp.exists() else None
+    if held is None:
+        warn('performance-series.json has no holdings block — per-stock '
+             'returns omitted (rebuild with track_performance.py --series-only)')
+        held = {}
+    for p in positions:
+        h = held.get(p['ticker'])
+        if h is None and held:
+            warn(f"{p['ticker']}: no per-stock return in the series")
+        p['since'] = h['since'] if h else None
+        p['ret'] = h['ret'] if h else None
+        p['vs_spy'] = h['vs_spy'] if h else None
+        p['spark'] = h['spark'] if h else None
+
+
 def export_performance(root: Path) -> dict:
     sp = root / 'tracking' / 'performance-series.json'
     if not sp.exists():
@@ -383,6 +404,7 @@ def main(root: Path | None = None) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     positions = export_positions(root)
+    attach_holding_returns(root, positions)
     performance = export_performance(root)
     changes = export_changes(root)
     theses = export_theses(root, [p['ticker'] for p in positions])
