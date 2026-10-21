@@ -389,6 +389,54 @@ def ew_return_since(cfg: dict, frm: str) -> float | None:
     return float(ew.iloc[-1] / sub.iloc[0] - 1)
 
 
+def held_since(events: list[dict], ticker: str) -> str | None:
+    """Date of the event that opened `ticker`'s current holding stretch: walk
+    back from the latest event while the name stays in the book. A name that
+    was sold and bought back dates from the re-entry. None if not held now."""
+    since = None
+    for ev in reversed(events):
+        if ticker not in ev['allocations']:
+            break
+        since = ev['date']
+    return since
+
+
+def holding_returns(cfg: dict, idx, spy) -> dict:
+    """Per-name performance of the current book since each name's entry,
+    priced like the model walk: from the close the entry event switches at
+    (_base_close) to the latest close. `spy` is growth-of-1 on `idx`.
+
+    {ticker: {since, ret, vs_spy, spark}} — spark is growth-of-1 on each
+    calendar date from that base close on (the Positions page sparkline).
+    Names without price data are omitted; the page shows a dash."""
+    events = cfg['events']
+    if not events:
+        return {}
+    out = {}
+    for t in sorted(events[-1]['allocations']):
+        since = held_since(events, t)
+        s = _series(t, cfg['inception'])
+        if s is None or s.empty:
+            continue
+        d = dt.date.fromisoformat(since)
+        before = s[s.index.date <= d]
+        base_ts = before.index[-1] if not before.empty else s.index[0]
+        base = float(s.loc[base_ts])
+        if not base:
+            continue
+        mask = idx.date >= base_ts.date()
+        if not mask.any():
+            continue
+        path = (s.reindex(idx).ffill()[mask] / base).dropna()
+        spy_path = spy.reindex(idx).ffill()[mask]
+        ret = float(path.iloc[-1] - 1)
+        spy_ret = float(spy_path.iloc[-1] / spy_path.iloc[0] - 1)
+        out[t] = {'since': since, 'ret': round(ret, 6),
+                  'vs_spy': round(ret - spy_ret, 6),
+                  'spark': [round(float(v), 4) for v in path]}
+    return out
+
+
 def _may_overwrite_series(out: dict) -> bool:
     """High-water-mark guard: a rebuild may correct historical values but must
     never DROP a trading day already recorded in the committed series.
@@ -508,6 +556,7 @@ def build_daily_series(cfg: dict) -> dict | None:
             'EW': [round(float(v), 6) for v in ew],
             **{name: pad(s) for name, s in shadows.items()},
         },
+        'holdings': holding_returns(cfg, idx, spy),
     }
     strict = [out['model']] + [out['bench'][k]
                                for k in ('SMH', 'QQQ', 'SPY', 'EW')]

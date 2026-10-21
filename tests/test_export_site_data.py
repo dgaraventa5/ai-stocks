@@ -272,3 +272,29 @@ def test_performance_shadow_series_null_padded(repo):
     assert top[1] == 10000.0 and top[2] == 10500.0      # scaled to notional
     assert perf['summary']['vs_ew_roster'] == (
         pytest.approx((perf['model'][-1] / perf['model'][0] - 1) - 0.02))
+
+
+def test_positions_carry_per_stock_returns(repo):
+    """Series `holdings` block lands on positions.json; a name the builder
+    could not price gets nulls (the page shows a dash)."""
+    import json
+    sp = repo / 'tracking' / 'performance-series.json'
+    series = json.loads(sp.read_text())
+    series['holdings'] = {'NVDA': {'since': '2026-05-26', 'ret': 0.12,
+                                   'vs_spy': 0.05, 'spark': [1.0, 1.05, 1.12]}}
+    sp.write_text(json.dumps(series))
+    ex.main(repo)
+    pos = {p['ticker']: p for p in json.loads(
+        (repo / 'site' / 'data' / 'positions.json').read_text())}
+    assert pos['NVDA']['ret'] == 0.12 and pos['NVDA']['vs_spy'] == 0.05
+    assert pos['NVDA']['since'] == '2026-05-26'
+    assert pos['NVDA']['spark'] == [1.0, 1.05, 1.12]
+    assert pos['TSM']['ret'] is None and pos['TSM']['spark'] is None
+
+
+def test_positions_without_holdings_block_still_export(repo, capsys):
+    ex.main(repo)
+    import json
+    pos = json.loads((repo / 'site' / 'data' / 'positions.json').read_text())
+    assert all(p['ret'] is None for p in pos)
+    assert 'no holdings block' in capsys.readouterr().err

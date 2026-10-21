@@ -74,3 +74,25 @@ def test_mark_agrees_with_series_and_ret_since_uses_fridays_close():
     assert pnl == {'AAA': pytest.approx(110.0)} and missing == []
     assert pm.ret_since('AAA', '2026-10-11', CFG['inception']) == pytest.approx(0.10)
     assert pm.event_levels(CFG) == pytest.approx([1000.0, 1100.0])
+
+
+def test_held_since_dates_from_the_current_stretch():
+    events = [{'date': '2026-01-01', 'allocations': {'AAA': 1}},
+              {'date': '2026-02-01', 'allocations': {'BBB': 1}},
+              {'date': '2026-03-01', 'allocations': {'AAA': 1, 'BBB': 1}},
+              {'date': '2026-04-01', 'allocations': {'AAA': 1, 'BBB': 1}}]
+    assert pm.held_since(events, 'AAA') == '2026-03-01'   # re-entry restarts
+    assert pm.held_since(events, 'BBB') == '2026-02-01'
+    assert pm.held_since(events, 'CCC') is None
+
+
+def test_holdings_block_prices_from_the_entry_close():
+    # AAA entered on the Sunday event: base = Friday's close (100), so
+    # Monday's +10% counts; SPY flat, so vs_spy == ret.
+    out = pm.build_daily_series(CFG)
+    h = out['holdings']
+    assert set(h) == {'AAA'}
+    assert h['AAA']['since'] == '2026-10-11'
+    assert h['AAA']['ret'] == pytest.approx(0.10)
+    assert h['AAA']['vs_spy'] == pytest.approx(0.10)
+    assert h['AAA']['spark'] == [1.0, 1.1, 1.1]          # Fri, Mon, Tue

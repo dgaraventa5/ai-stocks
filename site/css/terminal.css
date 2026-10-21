@@ -142,6 +142,10 @@ details.explainer[open] summary { margin-bottom: 12px; }
 .cat-metrics li { margin: 1px 0; }
 .cat-kind { font-size: 11px; margin-top: 8px; font-style: italic; }
 
+/* Positions: per-stock return sparkline (dashed line = entry price). */
+.spark { display: block; }
+.spark-base { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 2; }
+
 .thesis-row td {
   background: #11151c; color: var(--dim); font-size: 12.5px;
   padding: 8px 12px 10px; border-left: 2px solid var(--green);
@@ -206,7 +210,8 @@ a, label, select, tr.clickable { -webkit-tap-highlight-color: transparent; }
   /* Changes filter drops below the heading instead of colliding with it. */
   .panel h2 select { float: none !important; display: block; margin-top: 8px; width: 100%; }
 
-  /* Positions: drop secondary columns (Company, Notional) — ticker, weight,
-     score and tier carry the story on a phone. */
-  #positions tr > *:nth-child(2), #positions tr > *:nth-child(5) { display: none; }
+  /* Positions: phones keep the per-stock returns in view: company, layer, weight and
+     notional drop (equal weight makes the last two identical on every row). */
+  #positions tr > *:nth-child(2), #positions tr > *:nth-child(3),
+  #positions tr > *:nth-child(4), #positions tr > *:nth-child(5) { display: none; }
 }
