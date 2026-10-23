@@ -216,6 +216,24 @@
       "live_since_deploy_pct": -10.31,
       "model_since_deploy_pct": -8.96,
       "shortfall_since_deploy_pct": -1.35
+    },
+    {
+      "date": "2026-10-21",
+      "live_pct": -7.72,
+      "model_pct": -5.53,
+      "shortfall_pct": -2.19,
+      "live_since_deploy_pct": -7.32,
+      "model_since_deploy_pct": -9.23,
+      "shortfall_since_deploy_pct": 1.91
+    },
+    {
+      "date": "2026-10-22",
+      "live_pct": -11.02,
+      "model_pct": -5.53,
+      "shortfall_pct": -5.49,
+      "live_since_deploy_pct": -10.64,
+      "model_since_deploy_pct": -9.23,
+      "shortfall_since_deploy_pct": -1.41
     }
   ],
   "deployment_date": "2026-08-17"
