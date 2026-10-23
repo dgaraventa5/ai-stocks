@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-20",
+  "as_of": "2026-10-22",
   "halted": true,
   "positions": 18,
   "open_orders": 0,
@@ -9,9 +9,9 @@
     "CRDO",
     "EME",
     "FIX",
+    "GMED",
     "META",
     "MU",
-    "PLTR",
     "SNDK",
     "VRT",
     "WDC"

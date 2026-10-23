@@ -1054,6 +1054,26 @@
           "WDC",
           "APP"
         ]
+      },
+      {
+        "date": "2026-10-23",
+        "roster": [
+          "NVDA",
+          "TSM",
+          "SNDK",
+          "CRDO",
+          "FIX",
+          "MSFT",
+          "AVGO",
+          "ANET",
+          "MU",
+          "PLTR",
+          "ALAB",
+          "RDDT",
+          "META",
+          "GMED",
+          "WDC"
+        ]
       }
     ],
     "BAND_NEXT": [
@@ -1241,6 +1261,21 @@
         "date": "2026-10-19",
         "roster": [
           "META",
+          "VRT",
+          "EME",
+          "NVT",
+          "STX",
+          "SNPS",
+          "AMZN",
+          "APH",
+          "ORCL",
+          "CDNS"
+        ]
+      },
+      {
+        "date": "2026-10-23",
+        "roster": [
+          "APP",
           "VRT",
           "EME",
           "NVT",
