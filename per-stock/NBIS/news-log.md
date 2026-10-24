@@ -12,3 +12,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-07-03 | weekly scan (Yahoo Finance/CNBC 7/1) | Meta reportedly building "Meta Compute," a business to sell excess AI compute — direct competitive threat given Meta's up-to-$27B Nebius deal. NBIS fell ~17% 7/1, continued weakness into 7/2 (low $207.30). |
 
 - **2026-09-18** (weekly scan, SEC EDGAR): 6-K 2026-09-08: named Palantir's preferred sovereign AI infrastructure partner; Nebius compute to sit inside the Palantir enterprise perimeter (no $/MW disclosed).
+
+- **2026-10-24** (weekly scan, SEC EDGAR) — 6-K 2026-10-22 (Ex.99.1): $3.5B senior secured bridge loan from Citi (SOFR+2.75% stepping to 3.50%, matures 2027-10-16) for DC construction and GPUs; cites >$40B of IG customer contracts available for asset-backed financing.

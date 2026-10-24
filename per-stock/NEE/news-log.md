@@ -13,3 +13,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-06-10 | Backfill: 8-K Ex. 99 + Marcellus Drilling News (March 2026) | US Commerce selected NEER for 9.5 GW gas in TX+PA under US-Japan deal; PA leg = "South Mon," 4.3 GW / ~$17B serving up to 3.5 GW large load. US/Japan own assets; NEER develops/builds/operates. Definitive agreements pending. |
 | 2026-06-09 | Form 425 (SEC) | NEE/D proposed $2.25B customer bill credits over 24 months post-close (VA ~$1.78B, SC ~$383M, NC ~$68M) + job protections, presented to Virginia Commission on Electric Utility Regulation — active concession package on merger approval path. |
 | 2026-07-28/29 ⚠️ | weekly scan (StockTitan) | NextEra Energy and Brookfield announced a ~$100B Kentucky data-center campus. Q2 results (7/24): adjusted EPS +9.5% YoY, NEER earnings +18%. |
+
+- **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-21 (Ex.99): Q3 revenue $8.09B (+1.6%), GAAP EPS $2.28 vs $1.18, adjusted EPS $1.24 vs $1.13; 8%+ adj. EPS CAGR through 2032 reaffirmed; backlog 36.7GW. Objective inputs refreshed; GAAP EPS YoY +95.9% vs adjusted +9.7% — flagged for a possible rule-15 ruling.

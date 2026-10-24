@@ -17,3 +17,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-07-03** (weekly scan, Bloomberg 6/29, DataCenterDynamics 7/1) — Taiwanese authorities raided Supermicro's local office and two supply-chain partners (9 sites, ~50 servers seized) as part of a widening probe into alleged NVIDIA AI-chip smuggling to China via Japan. Follow-up 7/1: Supermicro published an open letter disputing the "raid" framing, stating Taiwan authorities confirmed Supermicro is **not the target** — four Taiwan employees questioned (two pending hearing, two released on bail); alleged target is third-party smuggling using Supermicro servers.
 
 - **2026-10-17** (weekly scan, SEC EDGAR) — 8-K 2026-10-15: CFO David Weigand ceased serving; Mark Long (ex-WDC CFO 2016-19) appointed CFO effective 2026-10-14; filing gives no reason for the departure.
+
+- **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-20 (Ex.99.1, preliminary): Q1 FY27 revenue est. $18.5-19.5B vs $14.5-15.5B guide (~26% above midpoint), GM 12.0-12.5% vs 10.4-10.8% guide; full results 2026-11-03. Rule-9 immediate bar once finals land.

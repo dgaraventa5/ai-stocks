@@ -8,3 +8,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-04-22 | Earnings call / WFE outlook (TIKR, Seeking Alpha) | 2026 WFE raised to ~$140B w/ upside bias, growth into 2027; advanced packaging guided >40% growth 2026; DRAM record 23% of systems on HBM3E/4. |
 | 2026-04-22 | 8-K Ex-99.1 guidance | Q4 FY26 (June-Q) guide: rev $6.6B ±$400M, GM 50.5% ±1pt, OpM 36.5% ±1pt, EPS $1.65 ±$0.15 — sequential acceleration, margins up. |
 | 2026-04-22 | 10-Q (q/e 3/29/26) | China revenue mix 34% (vs 35% prior Q, 37% YoY) — declining but still top structural/export-control risk; Korea 23%, Taiwan 23%. Stock +6.1% on print; Mizuho PT to $380. |
+
+- **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-21 (Ex.99.1): Sep-qtr revenue $8.22B (+54% YoY, +22% QoQ), GAAP GM 52.3%, EPS $2.19 GAAP / $2.20 non-GAAP; China 35%; next-qtr guide $8.60B ± $0.4B, EPS $2.33 ± $0.15. Objective inputs refreshed.

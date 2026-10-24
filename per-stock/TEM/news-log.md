@@ -12,3 +12,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-09-28 | [zonebourse list](https://www.zonebourse.com/cours/action/TEMPUS-AI-INC-171113321/actualite-communiques/) | FDA clearance of ECG-AI tool flagging undiagnosed mitral regurgitation. |
 | 2026-10-07 | [Tempus release](https://www.tempus.com/news/pr/tempus-announces-multi-year-collaboration-with-moderna-and-merck/) | Expanded multi-year collaboration with Moderna and Merck for intismeran autogene sample logistics and, if approved, sequencing; terms undisclosed. |
 | 2026-10-16 | context-2026-10-16.md (10-Q p.2, p.58) | Briefing correction: not net cash (~$1.36B converts vs $816M cash+securities); DOJ EDNY CID (FCA/AKS, since 2024) and four Illinois GIPA class actions disclosed. |
+
+- **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-23 (Item 8.01): data-licensing deals with Bristol-Myers Squibb ($137.5M fixed through 2031) and Pathos AI (up to $55M) — $192.5M over ~5 years.
