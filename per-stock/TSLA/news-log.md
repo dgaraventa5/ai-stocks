@@ -14,3 +14,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-10-02 | 8-K Item 2.02 (Q3 P&D release) | Q3 2026: >486k delivered, >464k produced, 13.7 GWh storage — ~−2% YoY vs the credit-expiry pull-forward Q3'25 record (497,099). |
 | 2026-10-15 | refresh-context (Motley Fool, TheChargePort) | Robotaxi: Tesla claims 300+ Cybercabs in Austin, 8x in 30 days; Texas registrations ~319 Cybercabs + ~420 Model Y robotaxis (Oct 10). No ride counts or economics disclosed. |
 | 2026-10-15 | refresh-context (CNBC, The Next Web) | 2nd-gen Roadster unveiled at SpaceX McGregor: SpaceX cold-gas thrusters (brief hops), 0–60 <1s claimed, production 2028, no FSD. Revives SpaceX-merger talk; not an AI-thesis development. |
+
+- **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-21 (Ex.99.1): Q3 revenue $28.05B (-0.2% YoY), GAAP EPS $0.22 vs $0.39, non-GAAP $0.48 vs $0.50, deliveries 486.5k (-2%), FCF $1.5B; Cybercab rides in Austin, Optimus production started in Fremont. Objective inputs refreshed.

@@ -9,3 +9,5 @@
 - **2026-10-16**: Refresh briefing written (context-2026-10-16.md). WDAY +54% vs IGV +23% over 126 trading days.
 
 - **2026-10-17** (weekly scan, SEC EDGAR) — 8-K 2026-10-13: definitive agreement to acquire ConductorOne (agentic identity platform for people and AI agents); close expected fiscal Q4 FY2027; price not disclosed.
+
+- **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-23 (Ex.1.1/4.2): issued $2.5B senior notes (5.70% 2029 to 6.50% 2036); ~$1.0B to retire 3.50% April-2027 notes, rest general purposes.

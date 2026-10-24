@@ -16,3 +16,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-09-10 | yfinance insider_transactions (Form 4) | CEO Paul Gu second open-market purchase, 50,000 sh at $25.55 (~$1.28M). |
 | 2026-10-05 | [TIKR](https://www.tikr.com/blog/upstart-stock-sits-about-7-above-its-52-week-low-as-q3-originations-top-4-1-billion-time-to-sell-or-load-up) | Preliminary Q3 originations $4.118B — first sequential decline (−2.6% QoQ) of the cycle; stock ~$24, −45% YTD. |
 | 2026-10-16 | yfinance calendar | Q3 2026 results scheduled 2026-11-03 (before the open). |
+
+- **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-20 (Item 1.01): up to $200M senior secured revolver (MUFG) to fund initial capitalization of Upstart Bank, N.A. (pending regulatory approval).

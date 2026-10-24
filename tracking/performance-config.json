@@ -852,7 +852,10 @@
       "cash": -0.05
     }
   ],
-  "exit_pending": {},
+  "exit_pending": {
+    "EME": "2026-10-24",
+    "VRT": "2026-10-24"
+  },
   "shadow_events": {
     "BAND_TOP": [
       {
@@ -1286,6 +1289,21 @@
           "ORCL",
           "CDNS"
         ]
+      },
+      {
+        "date": "2026-10-24",
+        "roster": [
+          "APP",
+          "STX",
+          "NVT",
+          "EME",
+          "VRT",
+          "LRCX",
+          "SNPS",
+          "AMZN",
+          "ORCL",
+          "APH"
+        ]
       }
     ],
     "BAND_TAIL": [
@@ -1547,6 +1565,26 @@
           "AMD",
           "NOVT",
           "PWR"
+        ]
+      },
+      {
+        "date": "2026-10-24",
+        "roster": [
+          "GOOGL",
+          "CDNS",
+          "ASML",
+          "BE",
+          "ONTO",
+          "TER",
+          "FN",
+          "CGNX",
+          "ARM",
+          "KEYS",
+          "RMBS",
+          "AMD",
+          "NTAP",
+          "NOVT",
+          "ADSK"
         ]
       }
     ],
