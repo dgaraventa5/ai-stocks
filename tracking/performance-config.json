@@ -1528,6 +1528,26 @@
           "AMD",
           "NOVT"
         ]
+      },
+      {
+        "date": "2026-10-23",
+        "roster": [
+          "ASML",
+          "GOOGL",
+          "BE",
+          "ONTO",
+          "ISRG",
+          "TER",
+          "FN",
+          "KEYS",
+          "CGNX",
+          "ARM",
+          "NTAP",
+          "RMBS",
+          "AMD",
+          "NOVT",
+          "PWR"
+        ]
       }
     ],
     "INVVOL_ROSTER": [
