@@ -10,3 +10,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-04-22 | 10-Q (q/e 3/29/26) | China revenue mix 34% (vs 35% prior Q, 37% YoY) — declining but still top structural/export-control risk; Korea 23%, Taiwan 23%. Stock +6.1% on print; Mizuho PT to $380. |
 
 - **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-21 (Ex.99.1): Sep-qtr revenue $8.22B (+54% YoY, +22% QoQ), GAAP GM 52.3%, EPS $2.19 GAAP / $2.20 non-GAAP; China 35%; next-qtr guide $8.60B ± $0.4B, EPS $2.33 ± $0.15. Objective inputs refreshed.
+- **2026-10-26** (daily watch, 8-K 2026-10-21 Ex-99.1 + 10-Q filed 2026-10-22; context-2026-10-26.md) — Sep-qtr beat its own guide modestly (rev $8.22B vs $8.10B guide, non-GAAP EPS $2.20 vs $2.15; ~1–2% vs consensus, no rule-9 flag); Dec-qtr guide $8.60B / $2.33; 10-Q reports no material legal proceedings. Re-scored 72.42 → 74.03 (rank 23 → 16).

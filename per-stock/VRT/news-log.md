@@ -16,3 +16,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 
 - **2026-09-02** (rule-12 refresh, 8-K acc. 0001628280-26-059961): declared quarterly dividend $0.0625/sh, record 2026-09-14, payable 2026-09-24 (routine).
 - **2026-09-01** (weekly scan) — Legal thread still pre-litigation: two more firms (Grabar Law Office, Robbins LLP) posted "investigating claims" solicitation notices alongside the four already tracked (Bronstein Gewirtz, Schall/SBS, Pomerantz, Hagens Berman) — no filed complaint or SEC action confirmed.
+- **2026-10-26** (8-K Items 7.01/9.01, acc. 0001628280-26-067127) — Completed acquisition of King Environmental Services (Dublin; fluid management/commissioning for liquid-cooled data centers, EMEA); terms undisclosed, "not expected to be material" — tuck-in extending the 2025 PurgeRite services platform. Not material.
