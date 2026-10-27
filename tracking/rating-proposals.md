@@ -60,3 +60,35 @@ Effect if approved: Total 79.79 → 80.29, rank 6 → 6; membership change: no (
 Status: PROPOSED
 
 _All nine 2026-10-18 proposals together: ANET 79.40→78.65 (rank 8→9), FIX 81.44→80.44 (5), SNDK 81.90→82.90 (3→2), MSFT 79.79→79.79 (6). No membership change. Ratings that hold, per name, are listed in each per-stock/{T}/context-2026-10-18.md Section 6 and addendum._
+
+## 2026-10-27 — CRDO — M2 Relative Strength 5 → 2  (confidence High)
+Event: yfinance adjusted closes, 126 trading days 2026-04-28 → 2026-10-27: CRDO +0.2% vs SMH +13.4% = −13.2pp; 63 days (from 2026-07-29): −6.4% vs +10.5% = −16.9pp. Two drawdowns: −20.0% on 2026-09-02 after Q1 FY27 (GAAP EPS and FCF light; TIKR 2026-10-20) and −21.6% in the week of Oct 12–16 during a semis selloff (TIKR). Briefing: per-stock/CRDO/context-2026-10-27.md.
+Why: Band 2 'Underperforming sector by 5-20%' on both windows. The 5 dates from before both drawdowns.
+Effect if approved: Total 81.58 → 80.08, rank 5 → 5; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
+Status: PROPOSED
+
+## 2026-10-27 — GOOGL — M2 Relative Strength 4 → 2  (confidence High)
+Event: yfinance adjusted closes, 126 trading days 2026-04-28 → 2026-10-27: GOOGL −7.9% vs QQQ +9.9% = −17.8pp (vs SPY +8.6%: −16.5pp); 63 days: −4.4% vs QQQ +9.0% = −13.4pp.
+Why: Band 2 'Underperforming sector by 5-20%' on both windows and either benchmark. Q3 results land 2026-10-28 after the close, so this reading may move within days.
+Effect if approved: Total 71.58 → 70.58, rank 26 → 29 (tradable); membership change: no (GOOGL is not held and sits under an entry hold to 2026-11-05). Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
+Status: PROPOSED
+
+## 2026-10-27 — NVDA — M2 Relative Strength 1 → 2  (confidence High)
+Event: yfinance adjusted closes, 126 trading days 2026-04-28 → 2026-10-27: NVDA +2.3% vs SMH +13.4% = −11.1pp; 63 days: +14.6% vs +10.5% = +4.1pp.
+Why: Band 2 'Underperforming sector by 5-20%' on the 6-month window the band names; band 1 needs a >20pp lag. The 3-month read (band 3) is better still, so 1 overstates the lag.
+Effect if approved: Total 83.87 → 84.37, rank 2 → 2; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
+Status: PROPOSED
+
+## 2026-10-27 — NVDA — M1 EPS Revisions 4 → 5  (confidence Med)
+Event: yfinance eps_trend/eps_revisions pulled 2026-10-27: next-FY (+1y) EPS consensus $15.91 vs $12.81 90 days ago (+24%) and $15.68 30 days ago; 7 up / 0 down in 30 days on +1y, 2 up / 0 down on current FY. Q2 FY27 beat and Q3 guide of $108B above ~$104.2B consensus (8-K 2026-08-26; Webull recap). Current-quarter estimate had 1 down revision in 7 days.
+Why: Band 5 'Multiple upward revisions. Beat-and-raise pattern. Consensus moving higher.' The 2026-05-18 audit held 4 because +1y was up only 15% with 4 up / 0 down ('not loud'); today's +24% matches ALAB's band-5 precedent (+28%). Caveat: most of the move came 60–90 days ago, around the August print; the last 30 days are flatter.
+Effect if approved: Total 83.87 → 84.37, rank 2 → 2; membership change: no (with the M2 proposal too: 84.87, rank 2). Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
+Status: PROPOSED
+
+## 2026-10-27 — ALAB — R2 Geographic Risk 5 → 3  (confidence Med)
+Event: 10-Q Q2 2026 (filed 2026-08-05) Note 2, revenue by billing location: China 38.9%, Singapore 29.0%, Taiwan 27.0%, US 1.4%. The 2026-05-18 audit basis for 5 was 'Mostly US, some Taiwan', which the filing contradicts.
+Why: Band 3 'Two legs. Shipment concentration PLUS China/trade-policy overhang (current or plausible restrictions)'. Worst plausible shock: a China/Taiwan trade or export restriction on shipments to ALAB's contract manufacturers, exposing up to ~66% of billed revenue (38.9% + 27.0%). Mitigants: billing location is the contract manufacturer's, not where the chips are deployed, and no restriction bites today. The 67% of PP&E in Taiwan is small lab/test equipment, not an asset leg. Consistent with the SNDK proposal of 2026-10-18 (47% China/HK ship-to → 3) and the AMD/AMAT anchors.
+Effect if approved: Total 75.80 → 74.30, rank 12 → 14 (RDDT and WDC each move up one); membership change: no (exit is below rank 18). Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
+Status: PROPOSED
+
+_All five 2026-10-27 proposals together: NVDA 83.87→84.87 (rank 2), CRDO 81.58→80.08 (5), ALAB 75.80→74.30 (12→14), GOOGL 71.58→70.58 (26→29). No membership change. Ratings that hold, per name, are listed in each per-stock/{T}/context-2026-10-27.md Section 6. Flagged, not proposed: ALAB M3 2→3 (12-month Form 4 pull shows 0 buys, 171 10b5-1 sales and 38 discretionary sales worth ~$54M, mostly 2025-11-17, which ages out 2026-11-17; the 2 rested on a tiebreaker the decision procedure no longer has, but band 2 vs 3 needs the discretionary sales sized as % of holdings, which was not done); ALAB and CRDO R1 basis (direct contract-manufacturer customer vs end customer: ALAB 29% direct, CRDO 43% direct / 33% largest end customer; a rubric question for Dom, not new data); NVDA R4 (Hu v. NVIDIA 5:26-cv-05496 substance unread)._
