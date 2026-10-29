@@ -892,6 +892,50 @@
         "LRCX": "\u2713\u2713"
       },
       "cash": -0.04
+    },
+    {
+      "date": "2026-10-29",
+      "reason": "membership: +EME",
+      "kind": "membership",
+      "allocations": {
+        "CRDO": 575.1,
+        "RDDT": 575.1,
+        "MU": 575.1,
+        "AVGO": 575.1,
+        "GMED": 575.1,
+        "WDC": 575.1,
+        "ALAB": 575.1,
+        "SNDK": 575.1,
+        "MSFT": 575.1,
+        "ANET": 575.1,
+        "TSM": 575.1,
+        "NVDA": 575.1,
+        "FIX": 575.1,
+        "LRCX": 575.1,
+        "META": 575.1,
+        "PLTR": 575.1,
+        "EME": 575.1
+      },
+      "tiers": {
+        "CRDO": "\u2713\u2713",
+        "RDDT": "\u2713\u2713",
+        "MU": "\u2713\u2713",
+        "AVGO": "\u2713\u2713",
+        "GMED": "\u2713\u2713",
+        "WDC": "\u2713\u2713",
+        "ALAB": "\u2713\u2713",
+        "SNDK": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "TSM": "\u2713\u2713",
+        "NVDA": "\u2713\u2713",
+        "FIX": "\u2713\u2713\u2713",
+        "LRCX": "\u2713\u2713",
+        "META": "\u2713\u2713",
+        "PLTR": "\u2713\u2713",
+        "EME": "\u2713\u2713"
+      },
+      "cash": -0.07
     }
   ],
   "exit_pending": {},
@@ -1136,6 +1180,26 @@
           "WDC",
           "LRCX"
         ]
+      },
+      {
+        "date": "2026-10-29",
+        "roster": [
+          "FIX",
+          "NVDA",
+          "TSM",
+          "SNDK",
+          "CRDO",
+          "META",
+          "MSFT",
+          "AVGO",
+          "ANET",
+          "MU",
+          "PLTR",
+          "ALAB",
+          "RDDT",
+          "WDC",
+          "EME"
+        ]
       }
     ],
     "BAND_NEXT": [
@@ -1377,6 +1441,21 @@
           "AMZN",
           "ORCL",
           "APH"
+        ]
+      },
+      {
+        "date": "2026-10-29",
+        "roster": [
+          "LRCX",
+          "GMED",
+          "APP",
+          "STX",
+          "NVT",
+          "VRT",
+          "APH",
+          "SNPS",
+          "AMZN",
+          "ORCL"
         ]
       }
     ],
@@ -1942,6 +2021,47 @@
           "SNDK": 0.036463,
           "TSM": 0.101706,
           "WDC": 0.042954
+        }
+      },
+      {
+        "date": "2026-10-29",
+        "roster": [
+          "ALAB",
+          "ANET",
+          "AVGO",
+          "CRDO",
+          "EME",
+          "FIX",
+          "GMED",
+          "LRCX",
+          "META",
+          "MSFT",
+          "MU",
+          "NVDA",
+          "PLTR",
+          "RDDT",
+          "SNDK",
+          "TSM",
+          "WDC"
+        ],
+        "weights": {
+          "ALAB": 0.032828,
+          "ANET": 0.055167,
+          "AVGO": 0.070176,
+          "CRDO": 0.03,
+          "EME": 0.071052,
+          "FIX": 0.046421,
+          "GMED": 0.089511,
+          "LRCX": 0.046299,
+          "META": 0.058252,
+          "MSFT": 0.12,
+          "MU": 0.048621,
+          "NVDA": 0.075161,
+          "PLTR": 0.054211,
+          "RDDT": 0.043389,
+          "SNDK": 0.032956,
+          "TSM": 0.088577,
+          "WDC": 0.03738
         }
       }
     ]
