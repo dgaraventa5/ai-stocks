@@ -8,3 +8,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-04-29 | 8-K (Item 2.02) / Q1 2026 PR | Q2 2026 guide: sales $8.1–$8.2B (+43–45% YoY), adj EPS $1.14–$1.16 — beat-and-raise on AI datacom. |
 | 2026-01-09 | Amphenol IR | Closed $10.5B acquisition of CommScope CCS (fiber connectivity); ~$4.1B FY2026 sales, ~$0.15 EPS accretion; goodwill stepped to $17.5B (10-Q). |
 | 2026-05-06 | 8-K (Item 1.01) | Underwriting agreement for €1.1B senior notes (€600M 3.375% '29 + €500M 3.875% '34), closed ~2026-05-12; net leverage 1.6x at Q1-end. |
+| 2026-10-28 | 8-K Items 2.02/8.01 (acc. 0001104659-26-119421); context-2026-10-28.md | Q3 2026: sales $10.23B (+65%, +37% organic), adj. EPS $0.80 post-split (guide $0.70–0.71), book-to-bill 1.19; Q4 guide $10.3–10.5B; ~$1.6B of bolt-on acquisitions; dividend +20%, new $4B buyback. Score 71.86 → 72.64. |
