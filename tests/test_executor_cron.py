@@ -167,6 +167,35 @@ def test_ticket_gen_skips_when_ticket_already_covers_event(live_dir):
     assert gen_calls == []      # unexpired + unexecuted → still actionable
 
 
+def test_uncovered_model_event_reminds_and_writes_no_ticket(live_dir):
+    # Rule 37: the executor asks, it does not generate. The 2026-10-30 ticket
+    # was parked by a scheduled run and rewritten live here the next morning.
+    (live_dir / 'tickets' / 'held-ticket-2026-08-12-membership.json').write_text(
+        json.dumps({'ticket_id': '2026-08-12-membership',
+                    'expires_at': '2026-08-14T20:00:00Z',
+                    'basis_event': {'date': '2026-08-12', 'kind': 'membership'},
+                    'orders': []}))
+    notes = []
+    assert ec.remind_held_event(
+        live_dir, {'date': '2026-08-12', 'kind': 'membership'},
+        notes.append, now=NOW) is True
+    assert len(notes) == 1 and 'approval' in notes[0]
+    assert list((live_dir / 'tickets').glob('ticket-*.json')) == []
+
+
+def test_released_ticket_covers_event_so_no_reminder(live_dir):
+    (live_dir / 'tickets' / 'ticket-2026-08-12-manual.json').write_text(
+        json.dumps({'ticket_id': '2026-08-12-manual',
+                    'expires_at': '2026-08-14T20:00:00Z',
+                    'basis_event': {'date': '2026-08-12', 'kind': 'manual'},
+                    'orders': []}))
+    notes = []
+    assert ec.remind_held_event(
+        live_dir, {'date': '2026-08-12', 'kind': 'membership'},
+        notes.append, now=NOW) is False
+    assert notes == []
+
+
 def test_full_turnover_ticket_never_auto_executed(live_dir):
     """The wrapper runs the executor WITHOUT --allow-full-turnover; a
     full-redeploy refusal therefore halts + notifies rather than sneaking a

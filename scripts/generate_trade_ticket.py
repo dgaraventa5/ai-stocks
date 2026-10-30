@@ -45,7 +45,8 @@ def _exit_pending() -> set[str]:
 
 def generate(target_weights: dict[str, float], event: dict, *,
              live_dir: Path = LIVE_DIR, prices_fn=None,
-             now: str | None = None, no_buy=None) -> Path | None:
+             now: str | None = None, no_buy=None,
+             held: bool = False) -> Path | None:
     """Build + write the ticket. Returns the path, or None (flagged) when no
     reconciliation snapshot exists — deltas from assumed holdings are exactly
     the compounding error B2 forbids, so we refuse rather than guess."""
@@ -93,11 +94,12 @@ def generate(target_weights: dict[str, float], event: dict, *,
 
     tdir = live_dir / 'tickets'
     tdir.mkdir(parents=True, exist_ok=True)
-    path = tdir / f"ticket-{ticket['ticket_id']}.json"
+    prefix = 'held-ticket' if held else 'ticket'
+    path = tdir / f"{prefix}-{ticket['ticket_id']}.json"
     n = 1
     while path.exists():   # append-only: a regenerated ticket is a NEW file (B3)
         n += 1
-        path = tdir / f"ticket-{ticket['ticket_id']}-{n}.json"
+        path = tdir / f"{prefix}-{ticket['ticket_id']}-{n}.json"
     path.write_text(json.dumps(ticket, indent=2) + '\n')
     f = ticket.get('funding') or {}
     print(f'ticket written: {path} ({len(ticket["orders"])} orders, '
@@ -145,9 +147,11 @@ def retire_superseded(tdir: Path, rdir: Path, *, keep: Path, now: str) -> list:
     return retired
 
 
-def on_model_event(event: dict, weights: dict[str, float]) -> Path | None:
-    """B1 hook target: refresh_targets calls this on every real fired event."""
-    return generate(weights, event)
+def on_model_event(event: dict, weights: dict[str, float],
+                   **kwargs) -> Path | None:
+    """B1 hook target: refresh_targets calls this on every real fired event.
+    Rule 37: written held, so a model change never trades without Dom."""
+    return generate(weights, event, held=True, **kwargs)
 
 
 def _targets_weights() -> tuple[dict[str, float], dict]:

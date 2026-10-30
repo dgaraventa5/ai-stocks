@@ -36,9 +36,11 @@ A scheduled run MUST NOT:
   never run `execute_ticket.py --confirm` (rule 29).
 - touch `~/.hermes`, other sessions' branches, worktrees or untracked files.
 
-Known limit, stated plainly: a held ticket only stops *that* ticket. The
-launchd executor's monthly rebalance (rule 29, 2026-10-05) trades to the
-Targets on the first trading day of each month regardless.
+Every model event writes a `held-ticket-*`, in any session (2026-10-30). The
+06:35 executor sends Dom a reminder for an uncovered event and never writes
+that ticket itself. Known limit, stated plainly: the launchd executor's monthly
+rebalance (rule 29, 2026-10-05) trades to the Targets on the first trading day
+of each month regardless.
 
 ## Run sequence (every job)
 
@@ -105,5 +107,6 @@ proposals awaiting a yes/no, EPS rulings, held tickets, expiring entry holds.
 
 In an attended session: say "release the held ticket". Held tickets go stale
 (2-trading-day expiry, 3% quote drift), so release means regenerating from a
-fresh reconciliation, then Dom runs `python3 scripts/execute_ticket.py
---ticket <path> --confirm` himself.
+fresh reconciliation with `python3 scripts/generate_trade_ticket.py`. That
+writes a live `ticket-*`, so it sends at the next 06:35 run, or sooner if Dom
+runs `python3 scripts/execute_ticket.py --ticket <path> --confirm` himself.

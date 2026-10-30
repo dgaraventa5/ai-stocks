@@ -1060,6 +1060,17 @@ in a cloud session.
   Rule 29 is unchanged; `.claude/settings.json` now denies the broker write
   tools and `execute_ticket.py --confirm` to every Claude session. The
   executor's own monthly rebalance (rule 29, 2026-10-05) is not affected.
+  **Amendment 2026-10-30 (Dom-approved): held is now real, for every model
+  event.** The hold had never worked: `hold-tickets` parked a ticket, then the
+  next 06:35 executor run found the event uncovered and wrote a live one. The
+  2026-10-30 review showed the cost: a blank WDC EPS cell, META scoring ~5.6
+  points high and an RDDT buy after a 29% fall were all in live tickets, and
+  only the halt stopped them. Now `on_model_event` writes `held-ticket-*` in
+  every session, attended or not, and the executor's `ticket_gen` step only
+  sends a reminder. A trade needs Dom: he asks in an attended session, a fresh
+  `ticket-*` is generated from a new reconciliation, and it sends via his
+  `--confirm` or the next 06:35 run. The first-of-month rebalance still
+  generates and trades on its own (rule 29, 2026-10-05).
 - **Reporting:** a Notion page plus one notification when there is something
   to report. Every run, quiet or not, lands and merges one line in
   `tracking/scheduled-run-log.md` (Dom, 2026-10-12), so a missed run is a
