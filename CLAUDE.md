@@ -1090,6 +1090,21 @@ renewing one stays with Dom. The paused Hermes report-only jobs
 
 **Rule:** for Layer 10, D5 reads **"is AI demonstrably working for this business?"** — bands in the rubric D5 section (Layer 10 framework). 5 = AI is a measured growth engine visible in company results; **one quarter of evidence is enough** (deliberately early: this space moves too fast to wait for two). Guards: rate measured evidence, not narrative; discount widening or acquisition-inflated metrics; demand FROM AI buyers is D1, not D5. Parallel 5-max-for-role scale per rule 23. **Supersedes** the same-day decision to keep Layer 10 on the supplier lens (TSLA D5 = 1) and the 2026-05-18 PLTR "intermediated chain" call. Known D1/D5 overlap accepted and disclosed (rule-23 P4 family). Deployed with a rule-32-C seam. Re-rate D5 with every Layer-10 subjective refresh (rule 12).
 
+### 39. Every portfolio name has a three-sentence thesis (added 2026-10-30, approved by Dom)
+
+Section 1 of `per-stock/{T}/thesis.md` is what the site shows. For every Targets
+name (`Include?=Y`) it is exactly three sentences: what the business is and its
+AI role, why it is owned, and the main risk. **No dates, status notes or
+heading tags** in that section. Rewriting it does not touch the file's other
+sections.
+
+**On entry:** when a name joins the Targets, write its thesis in the same
+session if it has none, from the latest briefing. An existing three-sentence
+thesis is left alone. `python3 scripts/portfolio_theses.py` lists gaps, and
+`tests/test_portfolio_theses.py` fails the build on any, so a scheduled run
+cannot land an entry without one. Writing a thesis is allowed in scheduled runs;
+it changes no score.
+
 ## Common tools and libraries (pre-approved for installation)
 
 ```bash

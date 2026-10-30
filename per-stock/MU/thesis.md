@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> One of three memory makers and a critical bottleneck for AI accelerators: 16 take-or-pay Strategic Customer Agreements (~$100B contracted revenue, $22B upfront deposits) have partially de-cyclicalized the business; HBM4 is in high-volume production for NVIDIA Vera Rubin; data center revenue exceeded $25B in Q3 FY26 (60%+ of total), annualizing above $100B. This is no longer a pure commodity memory business.
+> Micron is one of three makers of the high-bandwidth memory that AI chips depend on, and that memory is in short supply. Multi-year take-or-pay contracts have made a boom-and-bust business steadier, and its newest HBM4 memory is shipping in volume for NVIDIA's next platform. The main risk is that memory stays cyclical and new supply eventually brings prices down, because those contracts have not yet been tested in a downturn.
 
 ---
 

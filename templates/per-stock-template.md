@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> {Three sentences, no dates or status notes: what the business is and its AI role; why it is owned; the main risk.}
 
 ---
 

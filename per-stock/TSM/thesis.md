@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> TSMC is the sole manufacturer that can fabricate leading-edge AI chips at scale, making roughly 90% of the world's AI accelerator wafers for Nvidia, AMD, and every hyperscaler's custom silicon; its 2nm and advanced-packaging capacity is sold out years ahead.
+> TSMC manufactures nearly all of the world's leading-edge AI chips, for NVIDIA, AMD and the big cloud companies' custom designs alike. It wins whichever chip designer wins, and its newest 2nm process is now ramping into revenue. The main risk is geography, because most of its advanced capacity sits in Taiwan.
 
 ---
 

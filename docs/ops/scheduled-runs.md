@@ -23,6 +23,8 @@ A scheduled run MAY, without asking:
 - refresh objective inputs and run the scoring chain, including a model event
   (`refresh_targets.py`) when membership changes or an exit clock confirms;
 - ADD a rule-35 entry hold for a not-held name (a hold only delays a buy);
+- write the three-sentence thesis for a name that joined the Targets without
+  one (rule 39);
 - commit, open a PR, merge it once CI passes, and confirm the site deployed.
 
 A scheduled run MUST NOT:

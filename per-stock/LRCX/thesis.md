@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> Lam Research makes the etch and deposition tools used to build advanced memory and logic chips. AI is driving demand for more complex chips and high-bandwidth memory, which need more of those steps, and its revenue outlook keeps rising. The main risk is China, which is about a third of sales and exposed to export controls.
 
 ---
 

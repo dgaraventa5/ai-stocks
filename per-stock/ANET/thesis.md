@@ -12,7 +12,7 @@
 
 ## 1. One-line thesis
 
-> The premier high-end data center switching vendor whose Ethernet fabric and EOS software are winning AI back-end networks away from InfiniBand at the largest hyperscalers, with AI now a fast-growing chunk of revenue anchored by Microsoft and Meta.
+> Arista sells the high-end Ethernet switches that connect AI clusters at the largest cloud companies. Ethernet is taking share inside AI data centers, and Arista has raised its revenue outlook repeatedly this year. The main risks are NVIDIA's fast-growing Ethernet business, which has passed Arista in data-center share, and its reliance on Meta and Microsoft for a large part of its sales.
 
 ---
 

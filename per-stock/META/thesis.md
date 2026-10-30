@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> Meta is both the largest non-cloud AI-infrastructure *buyer* ($130–145B FY2026 capex, MTIA silicon, 7GW→14GW data-center ramp) and an *emerging* AI seller (Muse personal AI agent, Muse Spark model API, prospective Meta Compute cloud) — using its own AI silicon and models to compound ad-targeting and feed-recommendation returns across 3B+ daily-active social users while opening new direct AI revenue lines that expand the business beyond pure advertising.
+> Meta uses AI to improve ad targeting and its feeds across billions of daily users, and that shows up directly in its revenue growth. It is also one of the largest AI buyers, building its own chips, models and data centers. The main risk is that spending has outrun cash flow, which has already pushed it to raise equity, while legal costs add to the pressure.
 
 ---
 

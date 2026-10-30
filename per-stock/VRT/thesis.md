@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> Near-pure-play supplier of the power and cooling gear every AI data center needs (liquid cooling, UPS, busway, switchgear): Q2 2026 sales grew +24% (+18% organic) with organic orders +152% and backlog back to ~$15B, gross margin expanded to 37.7%, and FY2026 guidance was raised again to ~$14.0B sales; the pending ~$2.6B UtilityInnovation Group deal extends it from cooling racks into on-site power, the constraint now gating AI build-outs. Main caution is price — it is a crowded, richly valued consensus AI long.
+> Vertiv supplies the power and cooling equipment that every AI data center needs. Orders and backlog have grown strongly, and it is expanding into on-site power, one of the main limits on AI buildouts. The main risk is that it is a popular AI stock, so any stumble in orders could hit it hard.
 
 ---
 

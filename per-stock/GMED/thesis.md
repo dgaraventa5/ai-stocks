@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> The cheapest growth in surgical robotics: a spine franchise compounding ~27% headline (~13% organic ex-Nevro) at 68.5% gross margin and ~15x forward earnings, where Excelsius robotics/navigation is the share-gain engine — an enabling technology that locks hospitals into Globus implants — rather than a standalone robot story.
+> Globus Medical is a spine and orthopedic implant company whose surgical robots help hospitals adopt its implants. The robots make it a lower-priced way to own surgical robotics, because they tie hospitals to its products. The main risks are that rivals are recruiting its sales reps in a very competitive spine market and that AI matters less here than for most of the portfolio.
 
 ---
 

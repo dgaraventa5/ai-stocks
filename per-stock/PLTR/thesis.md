@@ -12,7 +12,7 @@
 
 ## 1. One-line thesis
 
-> Owned as the operating system for enterprise and government AI: its Ontology and AIP platform turn AI into production decisions on top of deeply entrenched federal contracts, making Palantir an AI infrastructure peer rather than a downstream app consumer.
+> Palantir sells software that puts AI to work in the daily operations of governments and large companies. Its US commercial and government revenue are both growing rapidly, and existing customers keep expanding what they buy. The main risk is valuation, because the stock is priced for that growth to continue.
 
 ---
 
