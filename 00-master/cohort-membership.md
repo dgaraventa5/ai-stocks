@@ -7,11 +7,11 @@ has >= 8 non-null); `abs` = absolute-band fallback. Layer 09 col-F
 (EV/*) is always `abs` (mixed EV/EBITDA + EV/MW).
 
 ## Layer 01 — 33 names
-metrics: ev_ebitda=pct(32)  fcf_yield=pct(33)  ps=pct(33)  roic=pct(33)  gm=pct(33)  fcf_mgn=pct(33)
+metrics: ev_ebitda=pct(31)  fcf_yield=pct(33)  ps=pct(33)  roic=pct(33)  gm=pct(33)  fcf_mgn=pct(33)
 members: AEP, AR, BE, BW, BWXT, CCJ, CEG, CMI, D, DUK, EQT, ETR, EXE, GNRC, LEU, NEE, NNE, NRG, NXT, OKLO, PLUG, PPL, PSIX, PUMP, RRC, SEI, SMR, SO, TE, TLN, UEC, VST, XEL
 
 ## Layer 02 — 11 names
-metrics: ev_ebitda=pct(11)  fcf_yield=pct(10)  ps=pct(11)  roic=pct(11)  gm=pct(11)  fcf_mgn=pct(11)
+metrics: ev_ebitda=pct(11)  fcf_yield=pct(11)  ps=pct(11)  roic=pct(11)  gm=pct(11)  fcf_mgn=pct(11)
 members: ABBNY, ATKR, ETN, GEV, HTHIY, HUBB, MTZ, NVT, POWL, PWR, SBGSY
 
 ## Layer 03 — 11 names
@@ -19,7 +19,7 @@ metrics: ev_ebitda=pct(11)  fcf_yield=pct(11)  ps=pct(11)  roic=pct(11)  gm=pct(
 members: AAON, CARR, DLR, EME, EQIX, FIX, IRM, JCI, MOD, TT, VRT
 
 ## Layer 04 — 28 names
-metrics: ev_ebitda=pct(28)  fcf_yield=pct(27)  ps=pct(28)  roic=pct(27)  gm=pct(28)  fcf_mgn=pct(27)
+metrics: ev_ebitda=pct(28)  fcf_yield=pct(27)  ps=pct(28)  roic=pct(28)  gm=pct(28)  fcf_mgn=pct(27)
 members: ACLS, AEIS, AIP, AMAT, AMKR, ARM, ASML, ASX, BESIY, CAMT, CDNS, CEVA, COHU, ENTG, FORM, KEYS, KLAC, KLIC, KN, LRCX, MKSI, ONTO, PLAB, SNPS, TER, TOELY, TTMI, UCTT
 
 ## Layer 05 — 8 names
@@ -47,6 +47,6 @@ metrics: ev_ebitda=pct(24)  fcf_yield=pct(25)  ps=pct(25)  roic=pct(25)  gm=pct(
 members: AAPL, ADBE, ADSK, APP, CRM, CRWD, DDOG, FTNT, HOOD, INTU, LMND, MDB, NOW, PANW, PATH, PLTR, RDDT, SHOP, SNOW, SPCX, TEM, TSLA, UPST, WDAY, ZS
 
 ## Layer 11 — 39 names
-metrics: ev_ebitda=pct(34)  fcf_yield=pct(36)  ps=pct(39)  roic=pct(23)  gm=pct(39)  fcf_mgn=pct(36)
+metrics: ev_ebitda=pct(34)  fcf_yield=pct(37)  ps=pct(39)  roic=pct(23)  gm=pct(39)  fcf_mgn=pct(37)
 members: 2049.TW, 2252.HK, 2498.HK, 2590.HK, 6268.T, 6324.T, 6383.T, 6481.T, 6506.T, 6861.T, 6954.T, 9880.HK, AEVA, ALNT, AUTO.OL, AVAV, BSL.DE, CGNX, DRO.AX, GMED, HSAI, ISRG, KGX.DE, KTOS, MBLY, NOVT, ONDS, OUST, PDYN, PRCT, RCAT, RRX, SERV, SSII, SYM, TKR, TNC, UMAC, VPG
 
