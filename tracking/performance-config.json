@@ -987,8 +987,8 @@
     }
   ],
   "exit_pending": {
-    "LRCX": "2026-10-30",
-    "GMED": "2026-10-30"
+    "RDDT": "2026-10-30",
+    "LRCX": "2026-10-30"
   },
   "shadow_events": {
     "BAND_TOP": [
@@ -1264,12 +1264,12 @@
           "MSFT",
           "ANET",
           "AVGO",
-          "RDDT",
           "EME",
           "PLTR",
           "WDC",
           "ALAB",
-          "ASML"
+          "ASML",
+          "VRT"
         ]
       }
     ],
@@ -1532,7 +1532,7 @@
       {
         "date": "2026-10-30",
         "roster": [
-          "VRT",
+          "RDDT",
           "STX",
           "META",
           "GMED",
