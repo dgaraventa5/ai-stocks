@@ -358,6 +358,53 @@ def _drift_then_ok(live_dir, second_failures=None):
     return old, new, seen, runner, regen
 
 
+def test_quote_drift_retry_refused_when_model_moved_since_ticket(live_dir):
+    # Rule 37: a retry rebuilds from the live Targets, so a model change after
+    # the release would trade unapproved. Nothing is sent and nothing halts.
+    (live_dir / 'tickets' / 'ticket-2026-08-12-membership.json').write_text(
+        json.dumps({'ticket_id': '2026-08-12-membership',
+                    'expires_at': '2026-08-14T20:00:00Z',
+                    'basis_event': {'date': '2026-08-12', 'kind': 'membership'},
+                    'orders': []}))
+    regen_calls, notes = [], []
+
+    def runner(p):
+        return {'failures': [STALE], 'sent': False, 'receipt': None}
+
+    rc = ec.cron_run(live_dir, runner=runner, notifier=notes.append, now=NOW,
+                     regen=lambda b=None: regen_calls.append(b),
+                     last_event_date='2026-08-13')
+    assert rc == 0
+    assert regen_calls == []
+    assert not (live_dir / 'trading-halt.flag').exists()
+    assert any('approval' in n for n in notes)
+
+
+def test_quote_drift_retry_runs_when_model_unchanged(live_dir):
+    old = write_ticket(live_dir / 'tickets', '2026-08-12-membership',
+                       '2026-08-14T20:00:00Z')
+    tk = json.loads(old.read_text())
+    tk['basis_event'] = {'date': '2026-08-12', 'kind': 'membership'}
+    old.write_text(json.dumps(tk))
+    new = live_dir / 'tickets' / 'ticket-2026-08-12-membership-2.json'
+
+    def regen(basis=None):
+        new.write_text(old.read_text())
+        return new
+
+    seen = []
+
+    def runner(p):
+        seen.append(p)
+        return ({'failures': [STALE], 'sent': False, 'receipt': None}
+                if p == old else {'failures': [], 'sent': True, 'receipt': 'r'})
+
+    rc = ec.cron_run(live_dir, runner=runner, notifier=lambda m: None, now=NOW,
+                     regen=regen, last_event_date='2026-08-12')
+    assert rc == 0
+    assert seen == [old, new]
+
+
 def test_quote_drift_refusal_regenerates_and_executes_fresh_ticket(live_dir):
     old, new, seen, runner, regen = _drift_then_ok(live_dir)
     notes = []

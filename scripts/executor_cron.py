@@ -62,10 +62,12 @@ def _is_stale_quote(failure: str) -> bool:
     return STALE_QUOTE_MARK in failure
 
 
-def cron_run(live_dir: Path, runner, notifier, now: str, regen=None) -> int:
+def cron_run(live_dir: Path, runner, notifier, now: str, regen=None,
+             last_event_date: str | None = None) -> int:
     """One scheduled pass. runner(ticket_path) -> execute_ticket.run result.
     regen(basis_event) -> fresh ticket path (or None) for the quote-drift
-    retry; basis_event is the refused ticket's own event (None if absent)."""
+    retry; basis_event is the refused ticket's own event (None if absent).
+    last_event_date is the newest model event's date (rule 37 retry check)."""
     live_dir = Path(live_dir)
     ticket = pick_ticket(live_dir, now)
     if ticket is None:
@@ -89,6 +91,15 @@ def cron_run(live_dir: Path, runner, notifier, now: str, regen=None) -> int:
     # failure, or a still-stale regeneration, halts as before.
     if (res['failures'] and regen is not None
             and all(_is_stale_quote(f) for f in res['failures'])):
+        # Rule 37: the retry rebuilds from the live Targets, so if the model
+        # moved after this ticket it would trade a change Dom never approved.
+        basis_date = (json.loads(ticket.read_text()).get('basis_event')
+                      or {}).get('date', '')
+        if last_event_date and last_event_date > basis_date:
+            notifier(f'executor cron: ticket {ticket.name} refused on quote '
+                     f'drift and the model changed since — nothing sent, '
+                     f'needs your approval')
+            return 0
         notifier(f'executor cron: ticket {ticket.name} refused on quote '
                  f'drift only — regenerating with live quotes')
         try:
@@ -410,8 +421,8 @@ def main(mode: str = 'auto') -> int:
             return exec_run(ticket_path, live_dir=LIVE_DIR,
                             roster=_load_roster(), transport=transport,
                             confirm=True, now=now)
-        if cron_run(LIVE_DIR, runner, macos_notify, now,
-                    regen=regenerate) != 0:
+        if cron_run(LIVE_DIR, runner, macos_notify, now, regen=regenerate,
+                    last_event_date=last_event()['date']) != 0:
             raise RuntimeError('execution refused or transport error (see log)')
 
     def ticket_step():
