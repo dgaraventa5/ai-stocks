@@ -19,10 +19,12 @@ CFG = {'ACCOUNT_CAP': 500.0, 'MAX_ORDER_NOTIONAL': 200.0,
 class FakeTransport:
     """Records order placements; serves canned portfolio/quotes reads."""
 
-    def __init__(self, cash=500.0, equity=500.0, quotes=None, fail_on=()):
+    def __init__(self, cash=500.0, equity=500.0, quotes=None, fail_on=(),
+                 positions=None):
         self._cash, self._equity = cash, equity
         self._quotes = quotes or {}
         self._fail_on = set(fail_on)
+        self._positions = positions or {}
         self.placed = []
 
     def portfolio(self):
@@ -30,6 +32,9 @@ class FakeTransport:
 
     def quotes(self, tickers):
         return {t: self._quotes[t] for t in tickers if t in self._quotes}
+
+    def positions(self):
+        return dict(self._positions)
 
     def place_equity_order(self, order):
         if order['ticker'] in self._fail_on:
@@ -127,6 +132,44 @@ def test_already_executed_refused(tmp_path, live_dir):
 def test_ticker_outside_roster_refused(tmp_path, live_dir):
     p = make_ticket(tmp_path)
     assert_refused(run(p, live_dir, roster=('TSM',), confirm=True), 'roster')
+
+
+# A sell of a name the model exited is off the roster by definition. The AMZN
+# exit was refused every morning from 2026-10-19 until this was fixed.
+
+def exit_sell(shares=1.0):
+    return [{'ticker': 'AMZN', 'side': 'sell', 'shares': shares,
+             'limit_price': 99.25, 'tif': 'day', 'notional_est': 100.0}]
+
+
+def test_exit_sell_of_held_name_passes_roster_gate(tmp_path, live_dir):
+    t = FakeTransport(quotes={'AMZN': 100.0}, positions={'AMZN': 1.0})
+    res = run(make_ticket(tmp_path, orders=exit_sell()), live_dir,
+              transport=t, confirm=True)
+    assert res['failures'] == []
+    assert [o['ticker'] for o in t.placed] == ['AMZN']
+
+
+def test_sell_of_name_not_held_refused(tmp_path, live_dir):
+    t = FakeTransport(quotes={'AMZN': 100.0}, positions={'NVDA': 1.0})
+    assert_refused(run(make_ticket(tmp_path, orders=exit_sell()), live_dir,
+                       transport=t, confirm=True), 'roster')
+    assert t.placed == []
+
+
+def test_exit_sell_above_shares_held_refused(tmp_path, live_dir):
+    t = FakeTransport(quotes={'AMZN': 100.0}, positions={'AMZN': 0.5})
+    assert_refused(run(make_ticket(tmp_path, orders=exit_sell()), live_dir,
+                       transport=t, confirm=True), 'exceeds shares held')
+    assert t.placed == []
+
+
+def test_buy_off_roster_refused_even_when_held(tmp_path, live_dir):
+    orders = [{**exit_sell()[0], 'side': 'buy', 'limit_price': 100.75}]
+    t = FakeTransport(quotes={'AMZN': 100.0}, positions={'AMZN': 1.0})
+    assert_refused(run(make_ticket(tmp_path, orders=orders), live_dir,
+                       transport=t, confirm=True), 'roster')
+    assert t.placed == []
 
 
 # ---- C2.3: notional / cash / turnover / account cap ----
