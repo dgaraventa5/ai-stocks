@@ -1264,12 +1264,12 @@
           "MSFT",
           "ANET",
           "AVGO",
-          "RDDT",
           "EME",
           "PLTR",
           "WDC",
           "ALAB",
-          "ASML"
+          "ASML",
+          "VRT"
         ]
       }
     ],
@@ -1532,7 +1532,7 @@
       {
         "date": "2026-10-30",
         "roster": [
-          "VRT",
+          "RDDT",
           "STX",
           "META",
           "GMED",
