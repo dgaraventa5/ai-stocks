@@ -1263,13 +1263,13 @@
           "CRDO",
           "MSFT",
           "ANET",
-          "META",
           "AVGO",
           "RDDT",
           "EME",
           "PLTR",
           "WDC",
-          "ALAB"
+          "ALAB",
+          "ASML"
         ]
       }
     ],
@@ -1532,9 +1532,9 @@
       {
         "date": "2026-10-30",
         "roster": [
-          "ASML",
           "VRT",
           "STX",
+          "META",
           "GMED",
           "APP",
           "NVT",
