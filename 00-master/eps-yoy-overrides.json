@@ -188,5 +188,13 @@
   "source": "10-Q q/e 2026-06-30, p.7, p.14-15, MD&A table p.30 (per-stock/SHOP/context-2026-10-16.md)",
   "ruled": "2026-10-16",
   "audit_row": "Rating Audit 2026-10-16 EPS YoY (objective)"
+ },
+ "META": {
+  "quarter_end": "2026-09-30",
+  "value": 2.0,
+  "basis": "EPS excluding each year's one-off: $7.40 vs $7.25 (+2%). GAAP $3.83 vs $1.05 (+265%) is dominated by a $15.93B one-time non-cash tax charge in Q3 2025 ($6.20 a share) and a $9.89B state attorneys general settlement charge in Q3 2026 ($3.57 a share). Same ex-item standard as WDC.",
+  "source": "8-K Ex-99.1 filed 2026-10-21 (acc. 0001628280-26-066700); 8-K Ex-99.1 filed 2025-10-29 (acc. 0001628280-25-047114)",
+  "ruled": "2026-10-30",
+  "audit_row": "Rating Audit 2026-10-30 EPS YoY (objective)"
  }
 }
