@@ -51,6 +51,24 @@ def test_generate_writes_ticket_from_snapshot_actuals(live_dir):
     assert abs(by['TSM']['notional_est'] - 200.0) < 1.0
 
 
+def test_model_event_ticket_is_written_held(live_dir):
+    # Rule 37: a model change never reaches the executor's ticket-*.json glob.
+    p = gt.on_model_event(EVENT, {'NVDA': 0.5, 'TSM': 0.4}, live_dir=live_dir,
+                          prices_fn=PRICES.get, now='2026-08-13T21:30:00Z')
+    assert p.name == 'held-ticket-2026-08-13-membership.json'
+    assert list((live_dir / 'tickets').glob('ticket-*.json')) == []
+
+
+def test_held_ticket_retires_older_live_ticket(live_dir):
+    old = gt.generate({'NVDA': 0.5, 'TSM': 0.4}, EVENT, live_dir=live_dir,
+                      prices_fn=PRICES.get, now='2026-08-13T21:30:00Z')
+    gt.on_model_event(dict(EVENT, date='2026-08-14'),
+                      {'NVDA': 0.5, 'TSM': 0.4}, live_dir=live_dir,
+                      prices_fn=PRICES.get, now='2026-08-14T21:30:00Z')
+    assert not old.exists()
+    assert list((live_dir / 'tickets').glob('ticket-*.json')) == []
+
+
 def test_generate_refuses_without_snapshot(tmp_path, capsys):
     empty = tmp_path / 'live'
     (empty / 'recon').mkdir(parents=True)

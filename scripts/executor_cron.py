@@ -267,6 +267,18 @@ def ticket_gen_if_stale(live_dir: Path, last_event: dict, gen,
     return False
 
 
+def remind_held_event(live_dir: Path, last_event: dict, notifier,
+                      now: str | None = None) -> bool:
+    """Rule 37: a model event no live ticket covers waits for Dom. Remind him
+    each run; never write the ticket here. This step used to generate one,
+    which undid every held ticket the morning after it was parked."""
+    return ticket_gen_if_stale(
+        live_dir, last_event,
+        gen=lambda ev: notifier(f"pipeline: model event {ev['date']}-"
+                                f"{ev['kind']} is waiting for your approval"),
+        now=now)
+
+
 # ------------------------------------------------- monthly rebalance (2026-10-05)
 
 REBALANCE_JOB = 'rebalance_monthly'
@@ -403,13 +415,7 @@ def main(mode: str = 'auto') -> int:
             raise RuntimeError('execution refused or transport error (see log)')
 
     def ticket_step():
-        from generate_trade_ticket import generate, _targets_weights
-        event = last_event()
-        if ticket_gen_if_stale(
-                LIVE_DIR, event,
-                gen=lambda ev: generate(_targets_weights()[0], ev)):
-            macos_notify(f'pipeline: generated ticket for uncovered model '
-                         f'event {event["date"]}-{event["kind"]}')
+        remind_held_event(LIVE_DIR, last_event(), macos_notify)
 
     def recon_step():
         _reconcile_via_transport(transport, macos_notify)
