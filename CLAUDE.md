@@ -1070,7 +1070,9 @@ in a cloud session.
   sends a reminder. A trade needs Dom: he asks in an attended session, a fresh
   `ticket-*` is generated from a new reconciliation, and it sends via his
   `--confirm` or the next 06:35 run. The first-of-month rebalance still
-  generates and trades on its own (rule 29, 2026-10-05).
+  generates and trades on its own (rule 29, 2026-10-05; Dom kept this
+  automatic on 2026-10-30). A quote-drift retry is refused when a model event
+  is newer than the ticket, because the retry rebuilds from the live Targets.
 - **Reporting:** a Notion page plus one notification when there is something
   to report. Every run, quiet or not, lands and merges one line in
   `tracking/scheduled-run-log.md` (Dom, 2026-10-12), so a missed run is a
