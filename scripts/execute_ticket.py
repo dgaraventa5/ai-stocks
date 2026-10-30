@@ -69,7 +69,8 @@ def _in_regular_hours(now_iso: str) -> bool:
 def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
              cash: float, equity: float, quotes: dict[str, float],
              receipt_path: Path, halt_path: Path, now: str,
-             allow_full_turnover: bool = False) -> list[str]:
+             allow_full_turnover: bool = False,
+             held: dict[str, float] | None = None) -> list[str]:
     """C2 gates. Returns ALL failures (empty list = ticket may transmit)."""
     fails: list[str] = []
     orders = ticket.get('orders', [])
@@ -127,11 +128,21 @@ def validate(ticket: dict, *, cfg: dict | None, roster: set[str],
         fails.append(f'kill switch present ({halt_path.name}) — clear it '
                      f'deliberately after investigating')
 
-    # C2.2 — roster allowlist
+    # C2.2 — roster allowlist. A name the model just exited is off the roster
+    # by definition, so a sell passes when the account really holds that many
+    # shares (2026-10-30: this gate refused the AMZN exit from 10-19 on). Buys
+    # stay roster-only.
     for o in orders:
-        if o['ticker'] not in roster:
-            fails.append(f"{o['ticker']}: not in current Targets roster — "
-                         f'executor cannot be pointed at arbitrary symbols')
+        if o['ticker'] in roster:
+            continue
+        have = (held or {}).get(o['ticker'], 0.0)
+        if o['side'] == 'sell' and have > 0:
+            if o['shares'] > have + 1e-6:
+                fails.append(f"{o['ticker']}: sell of {o['shares']} exceeds "
+                             f'shares held ({have})')
+            continue
+        fails.append(f"{o['ticker']}: not in current Targets roster — "
+                     f'executor cannot be pointed at arbitrary symbols')
 
     # dollar_amount is executor-internal: allocate_buys() sets it from live
     # cash at send time. A ticket that arrives carrying one would have its
@@ -199,6 +210,9 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
 
     pf = transport.portfolio()
     quotes = transport.quotes([o['ticker'] for o in ticket.get('orders', [])])
+    held = (transport.positions()
+            if any(o['side'] == 'sell' and o['ticker'] not in roster
+                   for o in ticket.get('orders', [])) else {})
 
     print(f"ticket {ticket['ticket_id']}  "
           f"({len(ticket.get('orders', []))} orders, "
@@ -210,7 +224,7 @@ def run(ticket_path, *, live_dir: Path, roster: set[str], transport,
     fails = validate(ticket, cfg=cfg, roster=roster, cash=pf['cash'],
                      equity=pf['equity'], quotes=quotes,
                      receipt_path=receipt_path, halt_path=halt_path, now=now,
-                     allow_full_turnover=allow_full_turnover)
+                     allow_full_turnover=allow_full_turnover, held=held)
     for f in fails:
         print(f'  REFUSE: {f}')
     if fails:

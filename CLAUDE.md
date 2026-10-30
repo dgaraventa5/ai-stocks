@@ -709,6 +709,15 @@ live on the day of the change** — dollar orders have never been sent by this
 pipeline; the first receipt is the test. The C2 gate set is otherwise
 unchanged, and the one-order-writer invariant stands.
 
+**Amendment 2026-10-30 (Dom-approved): exit sells pass the roster gate.** C2.2
+refused every order for a name outside Targets `Include?=Y`, sells included, so
+a name the model exited could never be sold: the AMZN exit was refused every
+morning from 2026-10-19 and raised the halt on 2026-10-28. A sell of an
+off-roster name now passes when a live positions read shows the account holds
+it and the order does not exceed the shares held. Buys stay roster-only, and a
+sell of a name the account does not hold is still refused. The rest of the C2
+gate set is unchanged, and the halt flag remains Dom's alone to clear.
+
 ### 30. Tradability filter: foreign listings can't enter the portfolio (added 2026-08-11, approved by Dom)
 
 **Context:** 6861.T (Keyence) entered the model at rank 12 / 8.61% — a weight the
