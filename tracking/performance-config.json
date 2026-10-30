@@ -987,8 +987,8 @@
     }
   ],
   "exit_pending": {
-    "WDC": "2026-10-30",
-    "LRCX": "2026-10-30"
+    "LRCX": "2026-10-30",
+    "GMED": "2026-10-30"
   },
   "shadow_events": {
     "BAND_TOP": [
@@ -1268,8 +1268,8 @@
           "RDDT",
           "EME",
           "PLTR",
-          "ALAB",
-          "ASML"
+          "WDC",
+          "ALAB"
         ]
       }
     ],
@@ -1532,12 +1532,12 @@
       {
         "date": "2026-10-30",
         "roster": [
+          "ASML",
           "VRT",
           "STX",
           "GMED",
           "APP",
           "NVT",
-          "WDC",
           "AMZN",
           "RMBS",
           "LRCX",
