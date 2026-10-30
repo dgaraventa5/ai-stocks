@@ -8,10 +8,9 @@
 
 ---
 
-## 1. One-line thesis [STALE - revisit]
-> *2026-06-19: DustPhotonics close (May 28) makes CRDO a vertically integrated optical+electrical company. The one-liner no longer captures this — "AECs and SerDes chips" is now one leg of a three-leg optical platform.*
+## 1. One-line thesis
 
-> A fabless connectivity specialist whose revenue is almost entirely AI infrastructure: its Active Electrical Cables and proprietary SerDes chips link GPU to GPU inside hyperscaler clusters, with five hyperscaler customers and rivals licensing rather than designing around its IP.
+> Credo makes the active electrical cables and connectivity chips that link AI servers inside large clusters, and it added optical products through its DustPhotonics purchase. Nearly all of its revenue comes from AI buildouts, which gives it some of the purest exposure in networking. The main risk is concentration, because a handful of end customers make up most of its sales and the stock has fallen hard on a single earnings miss.
 
 ---
 

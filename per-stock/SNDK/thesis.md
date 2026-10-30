@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> A NAND-flash and storage maker spun out of Western Digital that rides the cyclical memory upswing, with enterprise SSDs into data centers as its direct AI hook (only roughly a seventh of revenue today) and next-generation high-bandwidth flash still in customer qualification.
+> Sandisk makes NAND flash memory and solid-state storage, and it was spun out of Western Digital. The data-center share of its revenue is approaching half, and tight supply has pushed margins to extraordinary levels. The main risk is that NAND is one of the most cyclical markets in technology, so today's pricing is unlikely to last once supply catches up.
 
 ---
 

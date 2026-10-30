@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> Astera Labs is a near pure-play on AI cluster connectivity, making the retimers and switches that move data between accelerators inside AI servers; its Scorpio fabric is becoming the connectivity standard outside Nvidia's ecosystem and is set to be its largest product line.
+> Astera Labs makes the connectivity chips that move data between processors inside AI servers, and nearly all of its revenue comes from AI. Its Scorpio switches are becoming a key option for systems built outside NVIDIA's ecosystem. The main risks are that a small group of customers makes up most of its sales and that larger chip companies are competing for the same sockets.
 
 ---
 

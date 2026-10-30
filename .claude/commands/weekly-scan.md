@@ -22,6 +22,8 @@ with `--job weekly-scan`. Differences from an attended run:
   and `python3 scripts/recalc_watchlist.py --sync`.
 - **Step 7** — `recalc --sync` already ran the portfolio step; do not run
   `refresh_targets.py` a second time. Any ticket is held, not released.
+  Then run `python3 scripts/portfolio_theses.py` and write a rule-39 thesis
+  for any name it lists.
 - **Step 8** — rating changes are proposals in `tracking/rating-proposals.md`,
   never applied. Also list open proposals still awaiting Dom, and entry holds
   expiring in the next 10 days.

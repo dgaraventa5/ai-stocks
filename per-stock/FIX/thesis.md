@@ -8,9 +8,9 @@
 
 ---
 
-## 1. One-line thesis [STALE - revisit]
+## 1. One-line thesis
 
-> A mechanical and electrical contractor that has become a core picks-and-shovels play on AI infrastructure: nearly half its revenue is data-center work, backlog has more than doubled, and it does the cooling and buildout for essentially every major hyperscaler.
+> Comfort Systems is a mechanical and electrical contractor that builds and cools data centers for the largest technology companies. Its backlog is growing quickly and margins are holding near record levels as AI campuses race to get built. The main risk is that construction follows spending cycles, so a pause in data-center projects would hit it fast.
 
 ---
 

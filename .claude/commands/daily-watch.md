@@ -103,6 +103,10 @@ the confirming run for an exit clock, or a newly enterable name). Then
 `python3 scripts/capitulation_flag.py {exit-side tickers} --log-forecast` for
 any name exiting or on an exit clock (rule 32-A).
 
+Then `python3 scripts/portfolio_theses.py`. For any name it lists, write section
+1 of its `thesis.md` per rule 39: three sentences from the latest briefing, no
+dates or status notes.
+
 Report exactly what the model did: entered, exited, clock started (and the
 date it can confirm), deferred by the entry gate, or nothing.
 

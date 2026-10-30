@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> Reddit is a human-conversation corpus business that happens to run an ad platform: AI makes the corpus more valuable (it is cited in 46.4% of all AI-generated social-media answers, and Google/OpenAI data-licensing deals are live), while AI-optimized bidding and machine translation have driven 7 consecutive quarters of >60% revenue growth — but the same AI wave is eroding the Google-referral funnel that delivers ~40-50% of Reddit's traffic, creating a two-sided bet where the AI tailwind (corpus, licensing) and the AI headwind (referral compression) run through the same asset.
+> Reddit is an advertising business built on human conversations, with fast revenue growth and strong margins. AI tools have improved its ads, but that keeps it level with Meta and Google rather than ahead of them. The main risk is existential, because AI answers are cutting the search traffic that brings in new users, which could cap its growth and shrink the platform.
 
 ---
 

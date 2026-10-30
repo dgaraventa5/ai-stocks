@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> Owned for its enterprise distribution of AI: the Azure-plus-OpenAI partnership and Copilot ride on top of Office and Active Directory lock-in, turning a fast-growing AI revenue run rate into the largest disclosed single-company AI buildout.
+> Microsoft sells AI through Azure and through Copilot, which sits on top of the Office software businesses already run. That distribution gives it one of the largest paying customer bases for AI, and it is spending heavily to meet the demand. The main risk is that the cost of the buildout grows faster than AI revenue, with much of that demand tied to OpenAI.
 
 ---
 

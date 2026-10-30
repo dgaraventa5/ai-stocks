@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> ASML is the only company that makes the extreme ultraviolet lithography machines needed to produce the most advanced chips. Customer demand now exceeds its planned supply through 2028, and management ties that mainly to AI investment. The main risks are export limits on China, which is still a meaningful share of sales, and any slowdown in chipmaker spending.
 
 ---
 

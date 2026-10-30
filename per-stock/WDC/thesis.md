@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> Western Digital is now a pure-play nearline-HDD oligopolist (with Seagate) after spinning off its flash/NAND business as SanDisk in early 2026, and the AI data deluge has it sold out of HDD capacity through CY2026 with long-term agreements fixing volume *and* price into CY2029 — driving gross margin above 50% for the first time ever (50.5% non-GAAP, Q3 FY26) and structural $/TB pricing up ~9% YoY, on a net-cash balance sheet.
+> Western Digital is now a pure hard-drive company and one of a few suppliers of the high-capacity drives that store AI data. Its capacity is sold under long-term agreements that fix both volume and price, and margins are at record levels. The main risk is that hard drives have always been cyclical and reported capacity additions from rivals could loosen supply.
 
 ---
 

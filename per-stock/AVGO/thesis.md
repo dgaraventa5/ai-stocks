@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> Broadcom is the leading designer of the custom AI chips (XPUs) hyperscalers build to reduce dependence on Nvidia — Google's TPU, Meta's MTIA, plus OpenAI, Anthropic and Apple — and it supplies the high-end Ethernet networking silicon that ties AI clusters together; AI silicon revenue is ~$10.8B/quarter and 49% of total (Q2 FY26, 8-K 2026-06-03), with management guiding >$100B of annual AI revenue as the FY27 *floor*.
+> Broadcom designs custom AI chips for companies that want an alternative to NVIDIA, led by Google, and it supplies much of the Ethernet silicon that connects AI clusters. AI is now about half of its revenue and still growing fast. The main risk is concentration in a few customers, including financial backstops tied to one private AI customer's ability to pay.
 
 ---
 

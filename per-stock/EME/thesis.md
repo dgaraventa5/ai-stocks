@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> A premier electrical and mechanical contractor riding the AI data-center buildout: roughly 30% of revenue now comes from data-center construction, with a record backlog up about a third year-over-year as hyperscalers race to build out new compute campuses.
+> EMCOR is a large electrical and mechanical contractor that builds and services data centers along with many other kinds of buildings. Data-center work is a growing share of its business and has helped drive a record backlog. The main risk is that rising reliance on data centers leaves it more exposed to a slowdown in that one market.
 
 ---
 

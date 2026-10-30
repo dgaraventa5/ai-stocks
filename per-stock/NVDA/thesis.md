@@ -12,7 +12,7 @@
 
 ## 1. One-line thesis
 
-> NVIDIA is the core holding for AI training compute: it commands roughly 80% of the AI accelerator market, and its CUDA software ecosystem plus InfiniBand/NVLink networking lock in customers so deeply that nearly all large AI clusters are built on its chips.
+> NVIDIA supplies most of the accelerators used to train and run AI models, and its software and networking make those chips hard to replace. Management's outlook for next year is well ahead of Wall Street estimates, yet the stock has lagged the rest of the chip sector. The main risk is that its largest customers design more of their own chips to reduce what they spend with NVIDIA.
 
 ---
 
