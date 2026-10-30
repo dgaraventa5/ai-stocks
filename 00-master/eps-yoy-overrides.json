@@ -102,12 +102,12 @@
   "audit_row": "Rating Audit 2026-10-06 EPS YoY (objective)"
  },
  "WDC": {
-  "quarter_end": "2026-07-03",
-  "value": null,
-  "basis": "GAAP EPS $8.21 vs $0.67 (+1,125%) dominated by a $2,050M mark-to-market gain on the retained SanDisk stake (prior year: $166M loss + $100M exchange costs)",
-  "source": "8-K Ex-99.1 filed 2026-08-05 reconciliation; 10-K FY2026 Item 7",
-  "ruled": "2026-10-06",
-  "audit_row": "Rating Audit 2026-10-06 EPS YoY (objective)"
+  "quarter_end": "2026-10-02",
+  "value": 161.0,
+  "basis": "Non-GAAP EPS $4.64 vs $1.78 (+161%). GAAP $4.63 vs $3.07 (+50.5%) understates growth: the prior-year quarter included a $611M Sandisk retained-interest gain, and the stake was fully disposed by 2026-07-03, so this quarter has no such gain. Prior-year quarter had 14 weeks.",
+  "source": "8-K Ex-99.1 filed 2026-10-22 (acc. 0001628280-26-066882); 10-Q filed 2025-10-31 (acc. 0001628280-25-047613)",
+  "ruled": "2026-10-30",
+  "audit_row": "Rating Audit 2026-10-30 EPS YoY (objective)"
  },
  "GOOGL": {
   "quarter_end": "2026-06-30",
