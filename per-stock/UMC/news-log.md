@@ -9,3 +9,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-04-29 | Q1 2026 earnings call | Q2 guide: shipments +high-single-digit QoQ, GM ~30%, util low-80%; 2026 capex US$1.5B. CFO expects high-teens 22nm growth, H2 2026 wafer price HIKES (cycle/pricing reversal). |
 | 2026 | newkerala / TechPowerUp | Intel 12nm collaboration on track; certification by YE2026, production from 2027 (capital-light FinFET access; no 2026 rev). |
 | 2026-07-29 ⚠️ | weekly scan (Benzinga / StockTitan) | Q2 EPS beat 255% ($0.54 vs. $0.15 est.); raised 2026 capex guide to $2.0B (from $1.5B) on AI demand, utilization 85%; board approved a Singapore cleanroom + silicon-photonics expansion and a new Tainan fab shell. |
+| 2026-10-28 | weekly scan, 6-K (acc. 0001193125-26-435003) | Q3 revenue NT$74.24B +25.6%, GM 34.0%, utilization 92%; extra ~US$3.2B capex budget; US$1.8B convertible bonds issued Oct 13. |

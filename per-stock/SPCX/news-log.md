@@ -34,3 +34,4 @@ Added as a stub at IPO. Two gates before full scoring: (1) first 10-Q; (2) Curso
 R3 Balance-Sheet 5→4 (Dom-approved): free cash flow about −141% of revenue and five-year CDS at a record ~195bp mean the band-5 conditions no longer hold. D1 held at 4 on a corrected basis (AI ex-X-advertising 28.1% of Q2 revenue; Cursor ~$4B+ annualized, not ~$1B). Score 60.04 → 59.29; no portfolio effect.
 
 - **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-20 (Ex.99.1): Q3 revenue $14.575B (+161% YoY), GAAP EPS $0.35 vs -$0.36, adj. EBITDA $8.8B; capex $19.6B ($16.4B SI); 1.7GW nameplate compute; agreed to buy 800MHz spectrum (price undisclosed). No numeric guidance. Objective inputs refreshed; EPS YoY override STALE (needs re-ruling).
+- **2026-10-26** (weekly scan, 8-K, acc. 0001104659-26-118614) — Binding Apollo commitment for a GPU master finance lease, ~$40B principal, ~5-5.25-year terms, close by year-end, schedules begin 1H27; fixed rate not set.
