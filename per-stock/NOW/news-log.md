@@ -12,3 +12,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-07-22 | Q2 FY26 8-K (acc 0001373715-26-000072) + 10-Q | Sub rev $3,877M +24.5% (+23% cc), cRPO $13.2B +21%, renewal 98%; AI ACV >$1B; GAAP EPS $0.29 vs $0.37 incl. $273M unrealized investment gain; Q3 guide sub +20% cc, cRPO +19.5%; FY sub guide raised to $15.76–15.78B. Federal customer = 13% of revenue. |
 | 2026-10-07 | ServiceNow newsroom | Q3 FY26 results scheduled 2026-10-28 after close. |
 | 2026-10-16 | yfinance | Stock $140.63 (−5.3% on day, IGV −5.2%); +45.5% over 126 trading days vs IGV +22.1%. See context-2026-10-16.md. |
+| 2026-10-28 | weekly scan, 8-K (acc. 0001373715-26-000095) | Q3 revenue $4,106M +20.5%, GAAP EPS $0.27 vs $0.48, non-GAAP $1.00; cRPO $13.65B; FY subscription raised to $15,780-15,790M; AI ACV target raised to $1.7B. |

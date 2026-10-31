@@ -7,7 +7,7 @@ has >= 8 non-null); `abs` = absolute-band fallback. Layer 09 col-F
 (EV/*) is always `abs` (mixed EV/EBITDA + EV/MW).
 
 ## Layer 01 — 33 names
-metrics: ev_ebitda=pct(31)  fcf_yield=pct(33)  ps=pct(33)  roic=pct(33)  gm=pct(33)  fcf_mgn=pct(33)
+metrics: ev_ebitda=pct(32)  fcf_yield=pct(33)  ps=pct(33)  roic=pct(33)  gm=pct(33)  fcf_mgn=pct(33)
 members: AEP, AR, BE, BW, BWXT, CCJ, CEG, CMI, D, DUK, EQT, ETR, EXE, GNRC, LEU, NEE, NNE, NRG, NXT, OKLO, PLUG, PPL, PSIX, PUMP, RRC, SEI, SMR, SO, TE, TLN, UEC, VST, XEL
 
 ## Layer 02 — 11 names

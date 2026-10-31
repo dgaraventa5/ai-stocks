@@ -9,3 +9,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-07-01 | TrendForce | ASE raised advanced-packaging (CoWoS/FOCoS) quotes >20% in AI-driven price hike — real pricing power in a historically commodity business. |
 | 2026-08-03 | 6-K | Priced US$1.0B zero-coupon currency-linked convertible bonds due 2031 (Reg S) to fund capex/refinance bank borrowings; ND/E crept 0.40→0.47. |
 | 2026-08-10 | 6-K / PRNewswire | July 2026 monthly revenue NT$73.8B +43.2% YoY (ATM +49.5%) — YoY growth accelerating above the Q2 print. |
+| 2026-10-29 | weekly scan, 6-K (acc. 0000950103-26-016324) | Q3 revenue NT$244,161M +44.8%, GM 22.1% vs 21.0%, ATM GM 30.6% vs 27.3%; Q4 +6-8%, GM 23-24%; debt NT$406B vs NT$306B. |

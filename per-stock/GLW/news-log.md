@@ -13,3 +13,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-07-27/28** ⚠️ (weekly scan (earnings coverage)) — Q2 beat (EPS $0.78 vs. $0.75; revenue $4.74B vs. $4.63B) on AI-related optical-comms demand, but stock fell ~12% on weak Q3 revenue guidance — a 'beat but fell' divergence worth an expectations-flag check (rule 14) at next context refresh.
 
 - **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-11: new at-the-market equity program for up to $2.0B of common stock (Goldman Sachs), general corporate purposes.
+- **2026-10-27** (weekly scan, 8-K, acc. 0000024741-26-000273) — Q3 core sales $5.08B +19%, core EPS $0.91; Q4 $5.2-5.3B, EPS $0.96-1.00; four multibillion customer deals (Verizon, AT&T named); solar ramp slower.

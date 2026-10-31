@@ -12,3 +12,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-06-02 | PR Newswire 302787906 / biztimes | Generac SIGNED global supply agreement with unnamed "leading hyperscale data center operator" for backup power gensets after multi-factory qualification audits. No $ disclosed. Stock +~8%. |
 
 - **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-16 (Items 1.01/3.02): long-term Amazon data-center backup-generator supply agreement, initial deliveries $2.4B over 2027–28; warrant to Amazon for up to 1.69M shares @ $200.93 vesting against up to $8B of payments.
+- **2026-10-28** (weekly scan, 8-K, acc. 0001437749-26-033685) — Q3 sales $1.29B +16%, adj EPS $2.54; sales guide held; EBITDA margin 20.5-21.0%; Amazon supply deal (previously disclosed) initial deliveries $2.4B across 2027-28.
