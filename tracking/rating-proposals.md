@@ -98,3 +98,101 @@ Event: Q3 2026 shareholder letter (8-K Ex-99.2, acc. 0001713445-26-000114, 2026-
 Why: Band 1 = AI-native tools can directly produce the core output AND active erosion is visible (funnel/share loss). AI search answers now substitute for the click to a Reddit thread for logged-out users, and the company has quantified the funnel loss for the first time. Band 2 ('no active erosion yet') no longer describes it. Against (why confidence is Low): revenue +53% with pricing up, Q4 guide still ~+40%, and logged-in/app users — over 80% of monetization — grew sequentially, so erosion is in the funnel, not yet in revenue.
 Effect if approved: Total 75.53 → 74.78, tradable rank 13 → 14 (WDC moves up one); membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation, before the 2026-10-30 re-score.
 Status: APPROVED by Dom 2026-10-30, applied
+
+## 2026-11-01 — MU — M3 Insider Activity 3 → 5  (confidence High on facts, Med on weight)
+Event: Form 4 (acc. 0002058769-26-000002, filed 2026-01-15, raw XML checked): director Teyin M. Liu bought 23,200 shares in code-P open-market trades on 2026-01-13/14 at $336.63–337.50, about $7.82M, 10b5-1 box false. The 2026-09-08 briefing's "no open-market buys" covered only the August window.
+Why: Decision procedure step 1 and band 5: a lone discretionary open-market buy above $1M. Against: Sadana (23.4%) and Gomo (29.0%) discretionary selling would be band 2 without the buy, and the procedure stops at step 1. The buy leaves the 12-month window 2027-01-14. Briefing: per-stock/MU/context-2026-11-01.md.
+Effect if approved: Total 88.62 → 89.62, rank 1 → 1; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — MU — R1 Customer Concentration 3 → 5  (confidence High)
+Event: 10-K filed 2026-10-09, revenue note: "No customer accounted for 10% or more of total revenue in 2026"; one customer was 17% in FY2025.
+Why: Band 5 'Diversified. No customer >15% of revenue.' The 3 predates the full-year disclosure. Against: demand is correlated across hyperscalers, but the band scores single-customer share.
+Effect if approved: Total 88.62 → 90.12, rank 1 → 1; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — MU — R4 Regulatory/Litigation Risk 3 → 2  (confidence Med)
+Event: 10-K filed 2026-10-09, contingencies note: DRAM price-fixing class action against Micron, Samsung and SK hynix (N.D. Cal., filed 2026-06-25; a similar Hawaii complaint 2026-07-17) seeking treble damages for a period from 2022-10-26; YMTC patent suits in several countries, with a Munich order against accused 3D NAND in Germany under appeal (briefing, Section 2). All allegations; no loss estimate. Offsets: Netlist settled, the securities case is closed.
+Why: Band 2 'Material litigation or active regulatory investigations.' The antitrust case targets the price rise behind FY26 results and the patent suits pertain to substantially all products, which no longer reads as band 3 'immaterial'. Band 1 not reached: private complaint at the pleading stage, no government probe found. litigation_check.py was skipped (HTTP 401).
+Effect if approved: Total 88.62 → 87.87, rank 1 → 1; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — GOOGL — M2 Relative Strength 4 → 2  (confidence High on XLC; benchmark is Dom's call)
+Event: Yahoo adjusted closes to 2026-10-30, after the −12.6% fall on 2026-10-29: 126 days −27.4% vs XLC −13.9% = −13.4pp; 63 days −25.0% vs −10.0% = −15.1pp. On QQQ: −30.0pp and −23.8pp. Replaces the numbers in the 2026-10-27 proposal, same band.
+Why: Band 2 'Underperforming sector by 5-20%' on XLC, the basis Dom held 2026-10-10. On QQQ it is band 1. XLC is itself heavy in Alphabet and Meta, so it flatters GOOGL; the rubric names no benchmark for this name. Briefing: per-stock/GOOGL/context-2026-11-01.md.
+Effect if approved: Total 72.08 → 71.08, rank 26 → 30 (tradable); membership change: no (not held). At 1 instead (QQQ basis) the fall would be 1.5 points. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — GOOGL — M1 EPS Revisions 4 → 3  (confidence Low)
+Event: Yahoo EPS trend 2026-11-01: Q4 $3.35 → $3.21 (−4.0%) and Q1 2027 $3.44 → $3.34 (−2.7%) over 30 days; FY2027 $14.95 → $14.84 (−0.8%), still +0.5% over 90 days. The FY2026 drop of $0.89 equals the Q3 miss, so it is the print replacing an estimate, not a forward cut. 30-day counts still lean up, mostly before the print.
+Why: Band 3 'Stable estimates. Neutral revision trend.' Levels point to band 2, counts to band 4. Low confidence: post-print revisions may not be fully in the data yet.
+Effect if approved: Total 72.08 → 71.58, rank 26 → 26; membership change: no. With M2 too: 70.58, rank 30. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — SPCX — D5 AI Adoption 5 → 4  (confidence Med)
+Event: Q3 10-Q (filed 2026-10-22): Customer B, in the SI segment, is 34.5% of revenue, up from under 10% a year ago; Cursor added $608M from acquisition; Grok Bot has 800,000 paid weekly users with no revenue figure.
+Why: Rule 38 asks if the company's own AI use is working. Guard (c) says demand from AI buyers is D1, and compute rental is that demand; guard (b) discounts acquired businesses. What remains fits band 4, a disclosed AI product with results moving the same way. Against: Dom set 5 on 2026-10-16 deliberately early, and Cursor and Grok Bot are growing fast. Briefing: per-stock/SPCX/context-2026-11-01.md, Section 6.
+Effect if approved: Total 60.34 → 59.34, rank 101 → 110; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — SPCX — M1 EPS Revisions 4 → 5  (confidence Med)
+Event: Yahoo EPS trend 2026-11-01: next-year EPS $0.57 → $4.03 over 90 days and $1.86 → $4.03 over 30, with 4 up and 0 down in 30 days. Q3 EPS $0.35 vs $0.16 estimate. About $1.49B of Q3 net income was one-time (10-Q Notes 7, 8, 15).
+Why: Band 5 'Multiple upward revisions. Beat-and-raise pattern. Consensus moving higher.' Against: few analysts, and the current-quarter estimate slipped $0.46 → $0.38 in 7 days.
+Effect if approved: Total 60.34 → 61.00, rank 101 → 100; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — SPCX — R4 Regulatory/Litigation Risk 3 → 2  (confidence Med)
+Event: Q3 10-Q, legal note: Virginia AG notice of violation 2026-10-19 (contemplating suit over Grok images); NAACP Clean Air Act case with a pending injunction motion against the Colossus II turbines; $350M accrued current and $399M other liabilities for litigation losses at 2026-09-30. California AG investigation (Bloomberg, 2026-01-14).
+Why: Band 2 'Material litigation or active regulatory investigations.' The 3 rested on structural FAA/FCC exposure and governance, not active government action. Band 1 not reached: no suit by an AG yet. litigation_check.py was skipped (HTTP 401).
+Effect if approved: Total 60.34 → 59.59, rank 101 → 109; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — POWL — M2 Relative Strength 5 → 1  (confidence High)
+Event: Yahoo adjusted closes to 2026-10-30: 126 days −43.2% vs XLI −2.7% = −40.5pp; 63 days −28.9% vs −8.4% = −20.5pp.
+Why: Band 1 'Lagging sector by >20%' on both windows. The 5 dates from 2026-05-18. Briefing: per-stock/POWL/context-2026-11-01.md.
+Effect if approved: Total 69.11 → 67.11, rank 38 → 52; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — POWL — M1 EPS Revisions 4 → 3  (confidence High)
+Event: Yahoo EPS trend 2026-11-01: 90 days FY $5.45 → $5.37, current quarter $1.60 → $1.56, next quarter $1.21 → $1.27, next year $6.66 → $6.82. 30-day counts FY 2 up / 2 down.
+Why: Band 3 'Stable estimates. Neutral revision trend.' Moves offset.
+Effect if approved: Total 69.11 → 68.61, rank 38 → 38; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — POWL — M3 Insider Activity 3 → 2  (confidence Med)
+Event: Form 4 XML, 2025-12 to 2026-10: no open-market buys. Second-tier officers (including VP R&D W. Mauney) sold 27–54% of their stakes outside plans, about $5.8M together. CEO and CFO sold under plans only. The parser's $58.2M "discretionary" figure is overstated: $35.0M is T. Powell exchange-fund transfers.
+Why: Band 2 'Discretionary selling 15-30% of holdings ... across multiple executives', read down from band 1 because the top officers did not sell discretionarily and the dollars are small. The rubric has no precedent for this split. Seller table in the briefing, Section 2.
+Effect if approved: Total 69.11 → 68.61, rank 38 → 38; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — POWL — D1 AI Revenue 4 → 3  (confidence Med)
+Event: 10-Q filed 2026-08-04, revenue by market: commercial and other industrial $171.4M of $859.5M for nine months (19.9%), 24.5% in FQ3. Data center is a subset of that line. Backlog share is 40%.
+Why: Band 3, 10–25% of revenue. The 4 is a forward claim from backlog; it returns if reported data-center revenue clears 25%.
+Effect if approved: Total 69.11 → 68.11, rank 38 → 41; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — POWL — D4 Capacity Expansion 5 → 4  (confidence Med)
+Event: 10-Q filed 2026-08-04 and FQ3 call: footprint +20% and backlog $2.4B, but capex about 1.2% of revenue and the $70–100M greenfield plant is not committed.
+Why: Band 4 'Active expansion in progress.' Band 5 needs a major funded multi-year buildout, and the rubric warns that announced is not committed. Returns to 5 if the greenfield is committed.
+Effect if approved: Total 69.11 → 68.11, rank 38 → 41; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — POWL — D5 Hyperscaler Exposure 4 → 2  (confidence Low)
+Event: The $400M+ order is a neocloud campus, customer unnamed (Fool FQ2 transcript, 2026-05-05), about 17% of backlog. No hyperscaler is named or quantified in the 10-Q.
+Why: Band 2 'Indirect exposure'. Band 4 needs an anchor at 15–30% of revenue. Band 3 applies if a hyperscaler end-user is shown for the other large orders, which are undisclosed. The FY2026 10-K may settle this.
+Effect if approved: Total 69.11 → 67.11, rank 38 → 52; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — POWL — R2 Geographic Risk 4 → 5  (confidence Med)
+Event: 10-Q filed 2026-08-04, segment note: Canada 10.1% of nine-month revenue, 7.7% in FQ3, $31.4M of assets. No risk-geography concentration, no China leg.
+Why: Band 5. Worst plausible shock: US-Canada trade friction, 10.1% of revenue exposed, and a shock would not impair all of it. Borderline on the nine-month figure only.
+Effect if approved: Total 69.11 → 69.86, rank 38 → 34; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-01 — POWL — R3 Balance Sheet Risk 4 → 5  (confidence High)
+Event: 10-Q filed 2026-08-04: no revolver borrowings, cash about $634M, nine-month FCF $184.7M. About $350M of customer advances sit in that cash.
+Why: Band 5 'Net cash position. Strong FCF generation. No debt concerns.'
+Effect if approved: Total 69.11 → 69.86, rank 38 → 34; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+_All 2026-11-01 proposals together: MU 88.62→90.37 (rank 1), GOOGL 72.08→70.58 (26→30), SPCX 60.34→59.25 (101→110), POWL 69.11→63.61 (38→82). No membership change and no tier change for MU or GOOGL; no change to any top-20 rank. No change proposed: MU D1, D3, D4, D5, M1, M2, R2, R3, R5; GOOGL D1–D5, M3, R1–R5; SPCX D1–D4, M2, M3, R1–R3, R5; POWL D2, D3, R1, R4, R5. Flagged, not proposed: MU D2 4→5 (ASP +180% and supply allocation are real, but band 4 literally describes a three-supplier market, CXMT is growing, and the rubric warns against rating past pricing); MU R2 (the 2026-09-08 Taiwan strike trigger is literally met, band 1 is not: 11 officials struck 24 hours, no output impact reported); SPCX R1 stays 3 on a new basis (one compute customer at 34.5%; band 2 starts at 40%). POWL reports FQ4 about 2026-11-17 and its 10-K follows, which bears on D1, D4, D5 and R1. Rule-15 rulings are pending for GOOGL and SPCX._
