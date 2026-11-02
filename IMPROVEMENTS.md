@@ -4,7 +4,6 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 
 ## Open
 
-- [ ] SEC requests: retry transient failures — one network blip loses that name's filings for the run, and up to 20% of names can fail with the scan still exiting 0 (`scripts/common.py:62-70` has no retry; run log 2026-10-24 records 12 lookups lost to a DNS blip). Done when: tests with a stubbed `requests.get` show two failures then success returns the response, a 404 makes exactly one call, three failures raise, and every attempt goes through `sec_limiter.wait()`. [9, S]
 - [ ] Litigation check: stop reporting green when it could not look — CourtListener now returns 401 for every ticker and the script still exits 0 (`python3 scripts/litigation_check.py MU` reproduced 2026-11-01; `scripts/litigation_check.py:187-191` sends no auth, `main()` always returns 0). Done when: mocked 401 and timeout tests show a named skip reason, a `checked N, skipped M` line and a nonzero exit; an optional `COURTLISTENER_TOKEN` env var is sent when set. A real token is Dom's step. [9, S]
 - [ ] Site: show the data date and stale warning on every page — four of six pages have an empty footer, so a stalled refresh looks healthy and the "not investment advice" line is missing (`footer` is only set at `site/js/dashboard.js:47` and `site/js/watchlist.js:141`). Done when: `#footer` contains the data date and "not investment advice" on all 6 pages at 375 and 1280, a Playwright route overriding `as_of` to 10 days old shows a visible stale note, and real data does not. [9, S]
 - [ ] Rating audit: report expired research and add tests — rule 12 says a briefing must be within the window, but the code accepts any age, so it prints "0 UNGATED" while 116 names fail the rule as written, and the gate has no tests (`scripts/audit_rating_integrity.py:100`; no `tests/test_audit_rating_integrity*`). Done when: `--summary` prints an EXPIRED count split by held / top 25 / rest, matching an independently computed figure, default exit codes are unchanged, and new offline tests fail if `MIN_ADDED` is altered. Making EXPIRED a hard gate stays Dom's call. [6, S]
@@ -29,6 +28,7 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 
 ## Done
 
+- [x] SEC requests: retry transient failures — network errors, cut-off bodies, 429 and 5xx now get up to three attempts through the rate limiter (`f1f02a91`).
 - [x] Sentinel: treat an empty price lookup as a failure — an empty `history()` frame now reaches `due_events` as a failed lookup and is flagged, not deferred (`2ba3c89a`).
 
 ## Rejected
