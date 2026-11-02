@@ -469,6 +469,14 @@ the last model event (measured against the event's stored tiers, NOT the Targets
 sheet, so an out-of-band score edit can't hide staleness). Rule 18 (refresh_targets
 is the single Targets writer) still holds — this just makes running it non-optional.
 
+**Amendment 2026-11-01 (Dom-approved): the gate guards commits, not publishing.**
+`tests/test_targets_reweight_gate.py` is deselected in `daily-refresh.yml`,
+`deploy-site.yml`, and the `ci.yml` run for the automated
+`automation/performance-series-v2` PR. Every other PR keeps it. Why: the gate
+goes red by design when an exit clock comes due, and it was also stopping the
+site's performance update, which never touches Targets (all four refreshes on
+2026-10-31 failed this way).
+
 ### 26. Exit-pending clock lives in performance-config.json (added 2026-08-02, approved by Dom)
 
 **Context:** The 2-run exit confirm clock was persisted only in the Targets sheet's
