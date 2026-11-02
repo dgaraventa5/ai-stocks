@@ -120,6 +120,8 @@ with `--job weekly-scan`. Differences from an attended run:
 
    c. Never call MCP order tools in this or any step. Execution is `execute_ticket.py`, run by Dom or his launchd schedule only.
 
+11. **Run health.** `python3 scripts/run_health.py` compares the run log to the schedule and sorts failed `daily-refresh.yml` runs into by-design and real. Exit 1 goes in the report, and never stops the scan.
+
 ## Output
 
 Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
@@ -129,6 +131,7 @@ Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **🩸 Capitulation flags** (Step 7d firings on exit-side names + forecasts logged; only if any)
 - **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
 - **🎯 Calibration** (newly resolved forecasts + needs_review items from Step 9; only if any)
+- **🩺 Run health** (missed runs in the last 14 days, real workflow failures, any check that could not look; only if any)
 - **🔴 Live pipeline** (halt flag contents if raised; stale heartbeats; drift/regen flags from Step 10; only in attended runs)
 - **Routine filings** (one-line each: ticker, filing type, generic descriptor)
 - **New 13F activity** (only if any)

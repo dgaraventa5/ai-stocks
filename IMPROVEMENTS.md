@@ -14,10 +14,10 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 - [ ] Show which quarter each score rests on — Last Updated stamps every refresh even when Yahoo still serves the old quarter (`scripts/refresh_objective_inputs.py:424`), and the site's "Data as of" is the performance date, not the scores date. Decision: wire a read-only `scripts/input_currency.py` into `/weekly-scan`, and add a scores date to the exporter?
 - [ ] Schedule quarterly work — no quarterly rescore or calibration report has ever been written, so the forecasts resolved 2026-10-17 are ungraded. Decision: schedule `/rescore-quarterly`?
 - [ ] Decide whether expired research should block — `audit_rating_integrity.py` now reports names whose only research is past the 90-day window (123 on 2026-11-02, none held or top 25), but they still pass the rule-12 gate. Decision: make EXPIRED a hard gate, keep it as a report, or limit it to held and top 25?
-- [ ] Decide how to use the run health check — nothing runs `scripts/run_health.py` yet, and wiring it into `/weekly-scan` touches an Off-limits file. Its exit stays 1 for good once any slot is missed, because the log is append-only, and until a calibration report exists. Decision: wire it in as a report, and if the exit code should mean anything, add a recent-days window first?
 
 ## Done
 
+- [x] Put run health in the weekly scan — `/weekly-scan` Step 11 reports it, and only misses from the last 14 days fail the exit code, so an old miss ages out. Approved by Dom 2026-11-02.
 - [x] Hold thinned peer baskets through the grace window — a forecast with any peer missing prices now stays open until grace ends, then grades on the same 25% rule, approved by Dom 2026-11-02. A forecast with a delisted peer therefore waits the full 30 days, and `resolve_forecasts.py` exits 1 for it until then.
 - [x] Merge the rule-13 cohort check — `scripts/layer_cohorts.py` is now the one definition and all four scoring files import it. All 217 scores came out identical before and after on 2026-11-02. The live cohort is 15 names, while rule 13 still lists 12.
 - [x] Retire the ten finished scripts — the nine one-offs and `weekly_scan_runner.py` are deleted, approved by Dom 2026-11-02, and stay in git history. The six watch-only 13F funds now live in `.claude/commands/thirteenf-delta.md`, and `/weekly-scan` reads them there.
