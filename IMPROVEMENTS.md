@@ -4,8 +4,6 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 
 ## Open
 
-- [ ] Run health check: detect missed runs and sort failed workflows — the run log only records runs that happened and nothing compares it to the schedule (2026-10-21 and 10-22 daily watches missing; `daily-refresh.yml` failed 11 of its last 40 runs, mixing by-design gate failures with real ones). Add read-only `scripts/run_health.py`. Done when: against the current log it lists 10-21 and 10-22 as missed and 10-25 as late, labels run 41206957214 by-design and 41071239494 real, reports no calibration report, writes nothing, and `tests/test_run_health.py` passes offline. [4.5, M]
-  - Note 2026-11-02: reverted after three failed evaluations (the `.claude/loop.md` limit). Every Done-when condition passed on the last run, and no run was mislabelled. The script and tests are parked outside the repo. Left to fix: `test_a_late_run_alone_exits_zero` contains no late run, and two exit paths have no test (`problem` on the default path, a job with no runs). Also decide before wiring it up: the exit stays 1 forever once any slot is missed, because the log is append-only.
 
 ## Needs Dom
 <!-- Findings the loop must not act on: they touch Off-limits paths, need a deletion, or need something only Dom can do. The loop never works these. Approved items are done in an attended session; declined items move to Rejected. -->
@@ -22,9 +20,11 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 - [ ] Decide whether expired research should block — `audit_rating_integrity.py` now reports names whose only research is past the 90-day window (123 on 2026-11-02, none held or top 25), but they still pass the rule-12 gate. Decision: make EXPIRED a hard gate, keep it as a report, or limit it to held and top 25?
 - [ ] Decide how a thinned peer basket should grade — a forecast still gets a permanent grade when up to 25% of its peers have no prices, even inside the grace window (`scripts/forecast_resolvers.py:73`, `MISSING_CONSTITUENT_TOLERANCE`), so a partial throttle can grade on a smaller basket. Rule 17 treats resolution rules as frozen. Decision: hold these inside grace, or keep the tolerance?
 - [ ] Pin the CI test tools — `requirements.txt` is now pinned, but `pytest` is still installed unpinned (`.github/workflows/ci.yml:22`, `daily-refresh.yml:63`), and `deploy-site.yml:16` installs `openpyxl pytest` unpinned. Workflows are Off-limits to the loop. Action: pin them in an attended session.
+- [ ] Decide how to use the run health check — nothing runs `scripts/run_health.py` yet, and wiring it into `/weekly-scan` touches an Off-limits file. Its exit stays 1 for good once any slot is missed, because the log is append-only, and until a calibration report exists. Decision: wire it in as a report, and if the exit code should mean anything, add a recent-days window first?
 
 ## Done
 
+- [x] Run health check: detect missed runs and sort failed workflows — `scripts/run_health.py` lists 10-21 and 10-22 as missed and 10-25 as late, labels failed runs by-design or real, and writes nothing (`5b12ac93`). Dom chose to commit after a fourth evaluation failed on test gaps only; those gaps were closed afterwards and no evaluator has reviewed the closing tests.
 - [x] Sentinel: cross-check earnings against SEC filings — flags a fresh Item 2.02 8-K the calendar lacks, reports 6-K filers as `not cross-checkable`, and sets `blocked` with a nonzero exit over 20% failed lookups (`25cee55b`). A live pass on 2026-11-02 showed 0 of 25 empty calendars, so a normal day does not block.
 - [x] Pin exact package versions — all 25 packages pinned to what CI runs, suite passes on a fresh Python 3.12 venv, pip-audit clean (`ba73369e`).
 - [x] Forecast resolver: hold transient price failures in the grace window — degraded results inside grace write nothing, a raised throttle is counted not a crash, and any ungraded due forecast exits nonzero (`1981c16d`).
