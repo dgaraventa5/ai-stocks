@@ -22,7 +22,7 @@ having is not "a case exists" (plaintiff-firm press releases already spam
 that); it is **"a case exists AND the company's own filings don't mention
 it,"** which is precisely the blind spot that produced the BW miss.
 
-METHOD (free data, no auth)
+METHOD (free data; CourtListener now wants a free account's token)
 ---------------------------
 1. Query the CourtListener/RECAP index of federal dockets by case name.
    PACER itself requires credentials; Stanford's Securities Class Action
@@ -62,11 +62,15 @@ check. Specifically:
 Usage:
   python3 scripts/litigation_check.py BW
   python3 scripts/litigation_check.py BW MPWR WYFI --years 3
+
+Exits nonzero if any ticker was skipped: a skip is "could not look", never
+"clean". The optional COURTLISTENER_TOKEN env var is sent when set.
 """
 from __future__ import annotations
 
 import argparse
 import html
+import os
 import re
 import sys
 import time
@@ -181,6 +185,11 @@ def courtlistener_search(query: str, *, filed_after: str, timeout: int = 30,
     """
     import requests  # lazy: deploy-site CI installs only openpyxl+pytest
 
+    headers = {"User-Agent": USER_AGENT}
+    token = os.environ.get("COURTLISTENER_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = f"Token {token}"
+
     delay = backoff
     for attempt in range(retries + 1):
         try:
@@ -188,9 +197,12 @@ def courtlistener_search(query: str, *, filed_after: str, timeout: int = 30,
                 CL_SEARCH,
                 params={"q": query, "type": "r", "filed_after": filed_after,
                         "order_by": "dateFiled desc"},
-                headers={"User-Agent": USER_AGENT}, timeout=timeout)
+                headers=headers, timeout=timeout)
         except Exception as e:  # network down, DNS, TLS
-            return [], f"CourtListener unreachable ({type(e).__name__}: {e})"
+            # A rejected header is quoted in the message, and skip reasons get
+            # copied into committed briefings: no message when a token is set.
+            detail = type(e).__name__ if token else f"{type(e).__name__}: {e}"
+            return [], f"CourtListener unreachable ({detail})"
         if resp.status_code == 429:
             if attempt == retries:
                 return [], (f"CourtListener rate-limited (HTTP 429) after "
@@ -198,6 +210,12 @@ def courtlistener_search(query: str, *, filed_after: str, timeout: int = 30,
             sleep(delay)
             delay *= 2
             continue
+        if resp.status_code in (401, 403):
+            if token:
+                return [], (f"CourtListener rejected COURTLISTENER_TOKEN "
+                            f"(HTTP {resp.status_code})")
+            return [], (f"CourtListener refused the request (HTTP "
+                        f"{resp.status_code}) — set COURTLISTENER_TOKEN")
         if resp.status_code != 200:
             return [], f"CourtListener returned HTTP {resp.status_code}"
         try:
@@ -372,14 +390,18 @@ def main(argv: list[str] | None = None) -> int:
                          "CourtListener 429s at ~1s spacing)")
     args = ap.parse_args(argv)
 
+    skipped = 0
     for i, t in enumerate(args.tickers):
         if i:
             time.sleep(args.delay)
-        print(check(t.upper(),
-                    args.company if len(args.tickers) == 1 else None,
-                    args.years, all_other=args.all_other))
+        report = check(t.upper(),
+                       args.company if len(args.tickers) == 1 else None,
+                       args.years, all_other=args.all_other)
+        skipped += report.startswith(f"{t.upper()} SKIPPED")
+        print(report)
         print()
-    return 0
+    print(f"checked {len(args.tickers) - skipped}, skipped {skipped}")
+    return 1 if skipped else 0
 
 
 if __name__ == "__main__":
