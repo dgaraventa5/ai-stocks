@@ -7,12 +7,17 @@ per-name research. Same failure that hit Layer 2 in May. Objective inputs have
 an earnings-triggered refresh (CLAUDE.md rule 9); subjective ratings had NO
 trigger and no gate. This closes both gaps. See CLAUDE.md rule 12.
 
-Two violation classes:
+Three classes:
   GATE  (hard) -- name carries subjective ratings but thesis.md is unpopulated
                   (substantially the template). These ratings are unbacked.
                   Exit code is nonzero if any exist, so this can gate scoring.
   STALE (soft) -- name is rated + thesis populated, but its most recent Rating
                   Audit entry is older than --stale-days (default 90).
+  EXPIRED (report) -- no populated thesis, and the newest briefing is past that
+                  same window. Rule 12 says a briefing only counts inside it,
+                  but the gate accepts any age, so these pass the gate. Reported
+                  split by held / top 25 / rest; whether it should block is
+                  Dom's call, so it never changes the exit code.
 
 A thesis is "populated" if it has >MIN_ADDED bytes of content beyond the
 template baseline (read live from templates/per-stock-template.md so the
@@ -117,9 +122,37 @@ def audit(layer_filter=None, stale_days=90):
         backing = ('thesis' if has_thesis
                    else f'brief {brief_age}d' if brief_age is not None
                    else 'NONE')
+        expired = (not has_thesis and brief_age is not None
+                   and brief_age > stale_days)
         rows.append(dict(tkr=tkr, layer=layer[:2], backing=backing,
-                         last=last, age=review_age, gate=gate, stale=stale))
+                         last=last, age=review_age, gate=gate, stale=stale,
+                         expired=expired))
     return rows
+
+
+def _held_and_top() -> tuple[set[str], set[str]]:
+    """Current Targets names, and the top 25 tradable ranks."""
+    from earnings_sentinel import _holdings, build_scope, latest_ranked_rows
+    return set(_holdings()), set(build_scope([], latest_ranked_rows()))
+
+
+def split_expired(rows, held, top) -> dict[str, list[str]]:
+    """Expired names by group. A held name counts as held even if also top 25."""
+    names = sorted(x['tkr'] for x in rows if x.get('expired'))
+    return {'held': [t for t in names if t in held],
+            'top': [t for t in names if t in top and t not in held],
+            'rest': [t for t in names if t not in held and t not in top]}
+
+
+def expired_line(rows) -> tuple[str, dict[str, list[str]] | None]:
+    count = sum(1 for x in rows if x.get('expired'))
+    try:
+        held, top = _held_and_top()
+    except Exception as e:     # the split is a report; never change the exit code
+        return f"{count} EXPIRED (split unavailable: {type(e).__name__})", None
+    groups = split_expired(rows, held, top)
+    return (f"{count} EXPIRED (held {len(groups['held'])}, top 25 "
+            f"{len(groups['top'])}, rest {len(groups['rest'])})"), groups
 
 
 def main():
@@ -150,10 +183,11 @@ def main():
         return 0
 
     scope = f"layer {args.layer}" if args.layer else "all layers"
+    expired_text, expired_groups = expired_line(rows)
     if args.summary:
         print(f"rating-integrity ({scope}): {len(rows)} rated names | "
               f"{len(gates)} UNGATED (no thesis) | {len(stales)} stale "
-              f"(>{args.stale_days}d)")
+              f"(>{args.stale_days}d) | {expired_text}")
         return 1 if gates else 0
 
     print(f"=== Subjective-rating integrity audit — {scope} "
@@ -176,6 +210,13 @@ def main():
             print(f"  {x['tkr']:<6}{x['layer']:<4}{x['last'] or '—':<12}{x['age']!s:>5}")
     else:
         print("  none")
+
+    print(f"\nEXPIRED — no populated thesis, newest briefing older than "
+          f"{args.stale_days}d: {expired_text}")
+    if expired_groups:
+        for label, key in (('held', 'held'), ('top 25', 'top')):
+            if expired_groups[key]:
+                print(f"  {label}: {' '.join(expired_groups[key])}")
 
     print(f"\nGATE blocks scoring. Run /refresh-context on UNGATED names before "
           f"trusting their AI ratings. Exit nonzero = {len(gates)} gate "
