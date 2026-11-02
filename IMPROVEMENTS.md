@@ -15,6 +15,18 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 - [ ] Run health check: detect missed runs and sort failed workflows — the run log only records runs that happened and nothing compares it to the schedule (2026-10-21 and 10-22 daily watches missing; `daily-refresh.yml` failed 11 of its last 40 runs, mixing by-design gate failures with real ones). Add read-only `scripts/run_health.py`. Done when: against the current log it lists 10-21 and 10-22 as missed and 10-25 as late, labels run 41206957214 by-design and 41071239494 real, reports no calibration report, writes nothing, and `tests/test_run_health.py` passes offline. [4.5, M]
 - [ ] Sentinel: cross-check earnings against SEC filings — Yahoo's calendar missed STX and MSFT in one week, and a 429 hit four names, yet the script always exits 0 (run log 10-23, 10-27, 10-28; `scripts/earnings_sentinel.py:186-187`). Done when: a test where the calendar lacks a name with a fresh Item 2.02 8-K produces a `flagged` entry, foreign filers report "not cross-checkable", a test where over 20% of lookups fail sets `blocked: true` and exits nonzero, and existing sentinel tests pass. [4.5, M]
 
+## Needs Dom
+<!-- Findings the loop must not act on: they touch Off-limits paths, need a deletion, or need something only Dom can do. The loop never works these. Approved items are done in an attended session; declined items move to Rejected. -->
+
+- [ ] Retire nine finished one-off scripts — they have no remaining job and most can overwrite live workbooks; six hardcode the main checkout's path, so running one from a worktree still writes to main (`add_50dma_metric`, `apply_compzone_rerate`, `apply_ep_moat_fix`, `apply_layer1_rerate`, `apply_layer1_rerate_batch2`, `batch_robotics_20260802`, `build_workbooks`, `remove_ctra`, `reweight_and_add_peg`). Decision: delete them? They stay in git history.
+- [ ] Retire `scripts/weekly_scan_runner.py` — frozen on a September window, turns SEC errors into "no filings", and the README still calls it primary (`:37-38`, `:108-109`). Move its six 13F fund CIKs somewhere tracked first. Decision: delete it?
+- [ ] Upgrade local packages — certifi, urllib3 and soupsieve on this Mac carry published advisories, reachability unchecked. The executor runs on Homebrew Python, so pinning `requirements.txt` does not reach it. Action: Dom upgrades Homebrew Python packages.
+- [ ] Get a CourtListener token — the litigation check returns 401 for every name without one. Action: Dom creates a free account; the code side is in Open.
+- [ ] Track hyperscaler capex and thesis-break triggers — `tracking/hyperscaler-capex.xlsx` has no inputs filled, `/capex-update` has no caller, and 11 of 17 portfolio names have a placeholder break trigger. Decision: who writes the triggers, and should a read-only `scripts/thesis_watch.py` be wired into `/weekly-scan`?
+- [ ] Show which quarter each score rests on — Last Updated stamps every refresh even when Yahoo still serves the old quarter (`scripts/refresh_objective_inputs.py:424`), and the site's "Data as of" is the performance date, not the scores date. Decision: wire a read-only `scripts/input_currency.py` into `/weekly-scan`, and add a scores date to the exporter?
+- [ ] Schedule quarterly work — no quarterly rescore or calibration report has ever been written, so the forecasts resolved 2026-10-17 are ungraded. Decision: schedule `/rescore-quarterly`?
+- [ ] Fix the rule-13 cohort check duplication — `is_layer9_capacity` lives in four scoring files, so a cohort change has to hit all four. Decision: consolidate, with a before/after score check?
+
 ## Done
 
 ## Rejected

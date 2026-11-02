@@ -1209,7 +1209,7 @@ Improve the system's plumbing so it can run for years without Dom watching it.
 - Audience: Dom, and the friends who read the site.
 
 ### Off-limits
-The loop must never change any of these. `.claude/off-limits.txt` is the checkable list of paths; if a change needs one, record it as a note for Dom and leave it undone.
+The loop must never change any of these. `.claude/off-limits.txt` is the checkable list of paths; if a change needs one, put it in Needs Dom and leave it undone.
 - **Scoring and methodology:** bands, weights, cohorts, rubric, ratings, rulings, holds, the code that computes scores or positions, the workbooks, and tracking data.
 - **Order path:** ticket generation, the executor, broker login, reconciliation, launchd jobs, `tracking/live/`, and the permission rules in `.claude/settings.json`.
 - **Privacy gates:** the site exporter, the privacy tests and sanitizers, and the site password worker.
@@ -1231,7 +1231,7 @@ Run from the worktree root. All verified 2026-11-01.
 `tests/test_targets_reweight_gate.py` can go red on its own when an exit clock or entry hold comes due. That is rule 25 asking Dom's pipeline to act, not a defect. Leave it red and do NOT run `refresh_targets.py` to clear it.
 
 ### Self-improvement workflow
-- Backlog lives in IMPROVEMENTS.md (Open / Done / Rejected).
+- Backlog lives in IMPROVEMENTS.md (Open / Needs Dom / Done / Rejected). The loop never works Needs Dom items; Dom approves them for an attended session.
 - /audit refills the backlog. The evaluator subagent verifies work before it is checked off.
 - Work happens on the `improvements` branch only, in `/Users/dom/Hermes/projects/ai-stocks-worktrees/improvements`, never in the main checkout (scheduled runs refuse to start unless it is a clean `main`). Never push. Never commit to main.
 - Stage files by explicit path (`git add -A` and `git add .` are denied).
