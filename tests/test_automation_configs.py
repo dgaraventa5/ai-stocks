@@ -169,3 +169,22 @@ def test_site_refresh_launchd_dispatches_after_the_close_only():
     slots = plist["StartCalendarInterval"]
     assert {s["Weekday"] for s in slots} == {1, 2, 3, 4, 5}
     assert all((s["Hour"], s["Minute"]) >= (13, 0) for s in slots)   # PT, after 13:00 close
+
+
+GATE_DESELECT = (
+    "--deselect tests/test_targets_reweight_gate.py"
+    "::test_targets_reflect_current_scores"
+)
+
+
+def test_rule25_gate_blocks_commits_not_publishing():
+    refresh = (ROOT / ".github/workflows/daily-refresh.yml").read_text()
+    deploy = (ROOT / ".github/workflows/deploy-site.yml").read_text()
+    ci = (ROOT / ".github/workflows/ci.yml").read_text()
+    assert f"python -m pytest tests -q {GATE_DESELECT}" in refresh
+    assert f"python -m pytest tests -q {GATE_DESELECT}" in deploy
+    # ci.yml keeps the gate for every PR but the automated series PR.
+    assert ci.count(GATE_DESELECT) == 1
+    assert '"$HEAD_REF" = "automation/performance-series-v2"' in ci
+    assert '"$HEAD_REPO" = "$GITHUB_REPOSITORY"' in ci
+    assert "          else\n            python -m pytest tests -q\n" in ci
