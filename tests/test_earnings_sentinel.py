@@ -265,3 +265,243 @@ def test_price_history_returns_newest_close_date(monkeypatch):
     import earnings_sentinel as es
     _stub_yfinance(monkeypatch, [dt.date(2026, 8, 11), dt.date(2026, 8, 12)])
     assert es._fetch_latest_close(["AAA"]) == {"AAA": dt.date(2026, 8, 12)}
+
+
+# ---- SEC cross-check ---------------------------------------------------------
+import pytest
+
+from earnings_sentinel import (
+    NOT_CROSS_CHECKABLE, _fetch_earnings_filings, cross_check, filing_signal,
+    lookups_blocked,
+)
+
+
+@pytest.fixture(autouse=True)
+def _no_sec_calls(monkeypatch):
+    """main() must never reach SEC from a test; a test opts in by overriding."""
+    import earnings_sentinel as es
+    monkeypatch.setattr(es, "_fetch_earnings_filings", lambda tickers, today: {})
+
+
+def _recent(*rows):
+    forms, dates, items = zip(*rows) if rows else ((), (), ())
+    return {"form": list(forms), "filingDate": list(dates), "items": list(items),
+            "accessionNumber": ["a"] * len(rows), "primaryDocument": ["d"] * len(rows)}
+
+
+TODAY = dt.date(2026, 8, 12)
+
+
+def test_filing_signal_finds_a_fresh_item_202():
+    recent = _recent(("8-K", "2026-08-11", "2.02,9.01"), ("8-K", "2026-08-10", "5.07"))
+    assert filing_signal(recent, TODAY) == ["2026-08-11"]
+
+
+def test_filing_signal_ignores_an_old_item_202():
+    assert filing_signal(_recent(("8-K", "2026-07-01", "2.02")), TODAY) == []
+
+
+def test_filing_signal_marks_a_6k_filer_foreign():
+    recent = _recent(("6-K", "2026-08-11", ""), ("20-F", "2026-03-01", ""))
+    assert filing_signal(recent, TODAY) == NOT_CROSS_CHECKABLE
+
+
+def test_filing_signal_keeps_a_domestic_filer_with_a_stray_6k():
+    recent = _recent(("6-K", "2026-08-11", ""), ("8-K", "2026-08-11", "2.02"))
+    assert filing_signal(recent, TODAY) == ["2026-08-11"]
+
+
+def _base():
+    return {"briefing_due": [], "rescore_due": [], "flagged": {}}
+
+
+def test_8k_the_calendar_missed_is_flagged():
+    # the STX / MSFT case: Yahoo's next date is weeks out, the 8-K is already filed
+    out = cross_check(_base(), ["AAA"], {"AAA": [_ts(2026, 9, 20, 16, 30)]},
+                      {"AAA": ["2026-08-11"]}, _state(), NOW_WED_EVE)
+    assert "2026-08-11" in out["flagged"]["AAA"]
+    assert "not on the earnings calendar" in out["flagged"]["AAA"]
+
+
+def test_calendar_that_lists_the_report_is_not_flagged():
+    out = cross_check(_base(), ["AAA"], {"AAA": [_ts(2026, 8, 11, 16, 30)]},
+                      {"AAA": ["2026-08-11"]}, _state(), NOW_WED_EVE)
+    assert out["flagged"] == {}
+
+
+def test_8k_filed_a_day_after_the_calendar_date_is_not_flagged():
+    out = cross_check(_base(), ["AAA"], {"AAA": [_ts(2026, 8, 10, 16, 30)]},
+                      {"AAA": ["2026-08-11"]}, _state(), NOW_WED_EVE)
+    assert out["flagged"] == {}
+
+
+def test_report_already_rescored_is_not_flagged_again():
+    st = _state(AAA={"rescored": "2026-08-11"})
+    out = cross_check(_base(), ["AAA"], {"AAA": []}, {"AAA": ["2026-08-11"]}, st, NOW_WED_EVE)
+    assert out["flagged"] == {}
+
+
+def test_an_existing_flag_keeps_its_reason():
+    base = _base()
+    base["flagged"]["AAA"] = "earnings-date lookup failed"
+    out = cross_check(base, ["AAA"], {"AAA": "error"}, {"AAA": ["2026-08-11"]},
+                      _state(), NOW_WED_EVE)
+    assert out["flagged"]["AAA"].startswith("earnings-date lookup failed; ")
+    assert "2026-08-11" in out["flagged"]["AAA"]
+
+
+def test_foreign_filers_are_reported_not_cross_checkable():
+    out = cross_check(_base(), ["BBB", "AAA"], {}, {"AAA": NOT_CROSS_CHECKABLE,
+                                                    "BBB": NOT_CROSS_CHECKABLE},
+                      _state(), NOW_WED_EVE)
+    assert out["not_cross_checkable"] == ["AAA", "BBB"] and out["flagged"] == {}
+
+
+def test_failed_filing_lookup_is_flagged():
+    out = cross_check(_base(), ["AAA"], {}, {"AAA": "error"}, _state(), NOW_WED_EVE)
+    assert out["flagged"]["AAA"] == "SEC filing lookup failed"
+
+
+def test_same_day_report_stamped_later_than_the_run_is_not_flagged():
+    now = _ts(2026, 8, 12, 10, 0)
+    out = cross_check(_base(), ["AAA"], {"AAA": [_ts(2026, 8, 12, 16, 30)]},
+                      {"AAA": ["2026-08-12"]}, _state(), now)
+    assert out["flagged"] == {}
+
+
+def test_calendar_date_after_today_does_not_cover_a_filed_8k():
+    # Yahoo a day late is exactly the missed report this check exists to catch
+    now = _ts(2026, 8, 12, 18, 30)
+    out = cross_check(_base(), ["AAA"], {"AAA": [_ts(2026, 8, 13, 16, 30)]},
+                      {"AAA": ["2026-08-12"]}, _state(), now)
+    assert "2026-08-12" in out["flagged"]["AAA"]
+
+
+def test_malformed_rescored_date_does_not_crash_the_run():
+    st = _state(AAA={"rescored": "8/11"})
+    out = cross_check(_base(), ["AAA"], {"AAA": []}, {"AAA": ["2026-08-11"]}, st, NOW_WED_EVE)
+    assert "2026-08-11" in out["flagged"]["AAA"]
+
+
+def test_failed_filing_lookup_keeps_an_existing_flag():
+    base = _base()
+    base["flagged"]["AAA"] = "latest-close lookup failed"
+    out = cross_check(base, ["AAA"], {}, {"AAA": "error"}, _state(), NOW_WED_EVE)
+    assert out["flagged"]["AAA"] == ("latest-close lookup failed; "
+                                     "SEC filing lookup failed")
+
+
+GOOD = [_ts(2026, 8, 11, 16, 30)]
+
+
+def test_over_a_fifth_of_yahoo_lookups_failing_blocks():
+    cal = {f"T{i}": ("error" if i < 3 else GOOD) for i in range(10)}
+    assert lookups_blocked(cal, {}, {}) is True
+
+
+def test_a_fifth_or_fewer_failing_does_not_block():
+    cal = {f"T{i}": ("error" if i < 2 else GOOD) for i in range(10)}
+    assert lookups_blocked(cal, {}, {}) is False
+
+
+def test_empty_calendar_answers_count_as_failed_lookups():
+    cal = {f"T{i}": ([] if i < 3 else GOOD) for i in range(10)}
+    assert lookups_blocked(cal, {}, {}) is True
+
+
+def test_failed_closes_count_with_yahoo():
+    cal = {f"T{i}": GOOD for i in range(8)}
+    closes = {"T0": "error", "T1": "error", "T2": "error"}
+    assert lookups_blocked(cal, closes, {}) is True
+
+
+def test_sec_failures_block_on_their_own_count():
+    cal = {f"T{i}": GOOD for i in range(10)}
+    filings = {f"T{i}": ("error" if i < 3 else []) for i in range(10)}
+    assert lookups_blocked(cal, {}, filings) is True
+
+
+def test_foreign_filers_do_not_count_as_sec_lookups():
+    filings = {"AAA": "error", "BBB": []} | {
+        f"F{i}": NOT_CROSS_CHECKABLE for i in range(20)}
+    assert lookups_blocked({"AAA": GOOD}, {}, filings) is True
+
+
+def test_all_foreign_scope_is_not_blocked_by_sec():
+    assert lookups_blocked({"AAA": GOOD}, {}, {"AAA": NOT_CROSS_CHECKABLE}) is False
+
+
+def test_an_empty_scope_blocks():
+    assert lookups_blocked({}, {}, {}) is True
+
+
+def _detect(tmp_path, monkeypatch, calendar, closes, filings):
+    import earnings_sentinel as es
+    monkeypatch.setattr(es, "STATE_PATH", tmp_path / "state.json")
+    hist = tmp_path / "score-history.csv"
+    hist.write_text("date,ticker,total_score,rank,tier\n2026-08-11,AAA,84.0,1,X\n")
+    monkeypatch.setattr(es, "SCORE_HISTORY", hist)
+    monkeypatch.setattr(es, "_holdings", lambda: ["AAA"])
+    monkeypatch.setattr(es, "_fetch_calendar", lambda ts: calendar)
+    monkeypatch.setattr(es, "_fetch_latest_close", lambda ts: closes)
+    monkeypatch.setattr(es, "_fetch_earnings_filings", lambda ts, today: filings)
+    monkeypatch.setattr(es, "_now", lambda: NOW_WED_EVE)
+    return main([])
+
+
+def test_main_flags_an_8k_the_calendar_lacks(tmp_path, monkeypatch, capsys):
+    rc = _detect(tmp_path, monkeypatch, {"AAA": [_ts(2026, 9, 20, 16, 30)]}, {},
+                 {"AAA": ["2026-08-11"]})
+    out = _json.loads(capsys.readouterr().out)
+    assert rc == 0 and out["blocked"] is False
+    assert "2026-08-11" in out["flagged"]["AAA"]
+
+
+def test_main_exits_nonzero_when_blocked(tmp_path, monkeypatch, capsys):
+    rc = _detect(tmp_path, monkeypatch, {"AAA": "error"}, {}, {"AAA": []})
+    captured = capsys.readouterr()
+    assert rc == 1 and _json.loads(captured.out)["blocked"] is True
+    assert "do not report" in captured.err
+
+
+def _stub_sec(monkeypatch, cik, get):
+    import common
+    monkeypatch.setattr(common, "cik_for", lambda t: cik)
+    monkeypatch.setattr(common, "sec_get", get)
+
+
+def _unused_sec(*a, **k):
+    raise AssertionError("no SEC call expected")
+
+
+def test_fetch_marks_a_dotted_ticker_without_calling_sec(monkeypatch):
+    _stub_sec(monkeypatch, "0000000001", _unused_sec)
+    assert _fetch_earnings_filings(["6954.T"], TODAY) == {
+        "6954.T": NOT_CROSS_CHECKABLE}
+
+
+def test_fetch_marks_a_name_with_no_cik_not_cross_checkable(monkeypatch):
+    _stub_sec(monkeypatch, None, _unused_sec)
+    assert _fetch_earnings_filings(["AAA"], TODAY) == {"AAA": NOT_CROSS_CHECKABLE}
+
+
+def test_fetch_reads_fresh_item_202_dates(monkeypatch):
+    payload = {"filings": {"recent": _recent(("8-K", "2026-08-11", "2.02"))}}
+    _stub_sec(monkeypatch, "0000000001",
+              lambda url, **k: _types.SimpleNamespace(json=lambda: payload))
+    assert _fetch_earnings_filings(["AAA"], TODAY) == {"AAA": ["2026-08-11"]}
+
+
+def test_fetch_failure_becomes_a_blocked_run(monkeypatch):
+    def down(url, **k):
+        raise OSError("SEC down")
+
+    _stub_sec(monkeypatch, "0000000001", down)
+    filings = _fetch_earnings_filings(["AAA", "BBB"], TODAY)
+    assert filings == {"AAA": "error", "BBB": "error"}
+    assert lookups_blocked({"AAA": GOOD, "BBB": GOOD}, {}, filings) is True
+
+
+def test_main_exits_nonzero_on_an_empty_calendar(tmp_path, monkeypatch, capsys):
+    assert _detect(tmp_path, monkeypatch, {"AAA": []}, {}, {"AAA": []}) == 1
+    assert _json.loads(capsys.readouterr().out)["blocked"] is True
