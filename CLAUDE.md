@@ -1219,7 +1219,7 @@ The loop must never change any of these. `.claude/off-limits.txt` is the checkab
 
 ### Commands
 Run from the worktree root. All verified 2026-11-01.
-- Install: `pip install -r requirements.txt pytest`
+- Install: `pip install -r requirements.txt -r requirements-test.txt`
 - Test: `python3 -m pytest tests -q` (about 10 seconds)
 - Syntax check: `python3 -m compileall -q scripts`
 - Build the site data: `python3 scripts/export_site_data.py && python3 scripts/check_site.py`
