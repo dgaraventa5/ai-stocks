@@ -4,7 +4,6 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 
 ## Open
 
-- [ ] Sentinel: treat an empty price lookup as a failure — a failed Yahoo lookup reads as "close not printed yet", so a post-earnings re-score can defer silently until the report ages out (`scripts/earnings_sentinel.py:151` maps an empty `history()` frame to `None`; the `"error"` branch only fires on an exception, and yfinance returns empty rather than raising). Done when: a new test with a stubbed empty frame shows the ticker in `flagged`, and existing sentinel tests still pass, including the `None` quiet-defer test at `tests/test_earnings_sentinel.py:137`. [9, S]
 - [ ] SEC requests: retry transient failures — one network blip loses that name's filings for the run, and up to 20% of names can fail with the scan still exiting 0 (`scripts/common.py:62-70` has no retry; run log 2026-10-24 records 12 lookups lost to a DNS blip). Done when: tests with a stubbed `requests.get` show two failures then success returns the response, a 404 makes exactly one call, three failures raise, and every attempt goes through `sec_limiter.wait()`. [9, S]
 - [ ] Litigation check: stop reporting green when it could not look — CourtListener now returns 401 for every ticker and the script still exits 0 (`python3 scripts/litigation_check.py MU` reproduced 2026-11-01; `scripts/litigation_check.py:187-191` sends no auth, `main()` always returns 0). Done when: mocked 401 and timeout tests show a named skip reason, a `checked N, skipped M` line and a nonzero exit; an optional `COURTLISTENER_TOKEN` env var is sent when set. A real token is Dom's step. [9, S]
 - [ ] Site: show the data date and stale warning on every page — four of six pages have an empty footer, so a stalled refresh looks healthy and the "not investment advice" line is missing (`footer` is only set at `site/js/dashboard.js:47` and `site/js/watchlist.js:141`). Done when: `#footer` contains the data date and "not investment advice" on all 6 pages at 375 and 1280, a Playwright route overriding `as_of` to 10 days old shows a visible stale note, and real data does not. [9, S]
@@ -26,8 +25,11 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 - [ ] Show which quarter each score rests on — Last Updated stamps every refresh even when Yahoo still serves the old quarter (`scripts/refresh_objective_inputs.py:424`), and the site's "Data as of" is the performance date, not the scores date. Decision: wire a read-only `scripts/input_currency.py` into `/weekly-scan`, and add a scores date to the exporter?
 - [ ] Schedule quarterly work — no quarterly rescore or calibration report has ever been written, so the forecasts resolved 2026-10-17 are ungraded. Decision: schedule `/rescore-quarterly`?
 - [ ] Fix the rule-13 cohort check duplication — `is_layer9_capacity` lives in four scoring files, so a cohort change has to hit all four. Decision: consolidate, with a before/after score check?
+- [ ] Stop sentinel flags counting as a quiet day — `/daily-watch` defines quiet as "nothing due, nothing material, `--check` green" and never mentions `flagged`, so a day whose only news is a failed lookup sends no page or notification (`.claude/commands/daily-watch.md:39`; `2ba3c89a` makes these flags more common). The file is Off-limits to the loop. Decision: treat a non-empty `flagged` as not quiet, or require it in the run-log line?
 
 ## Done
+
+- [x] Sentinel: treat an empty price lookup as a failure — an empty `history()` frame now reaches `due_events` as a failed lookup and is flagged, not deferred (`2ba3c89a`).
 
 ## Rejected
 <!-- Items Dom doesn't want, each with a one-line reason. /audit must never re-propose these. -->
