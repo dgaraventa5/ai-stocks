@@ -58,6 +58,8 @@ with `--job weekly-scan`. Differences from an attended run:
    - Going concern or auditor changes
    - Legal/regulatory actions
 
+   **Thesis-break check.** Run `python3 scripts/thesis_watch.py` and compare the week's filings and news to each printed trigger. Lead the report with any trigger that fired, citing the source. A firing changes no rating and trades nothing: it says the reason for owning the name needs Dom's review. Exit 1 means a portfolio name has no trigger, so list it.
+
 5. **Also check** for new 13F-HR filings in the past 7 days from the funds listed in `.claude/commands/thirteenf-delta.md` (tracked and watch-only). If found, note them — these can be followed up with `/thirteenf-delta`.
 
 6. **Earnings-triggered objective refresh (Rule #9).** For any ticker where the 8-K scan surfaced quarterly earnings results (Item 2.02 "Results of Operations and Financial Condition"):
@@ -132,6 +134,7 @@ Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **💼 Portfolio pipeline** (ENTER/EXIT/pending/blocked changes; tier-change reallocations for existing holdings with old→new Target %; weekly mark vs benchmarks; any concentration flags)
 - **🩸 Capitulation flags** (Step 7d firings on exit-side names + forecasts logged; only if any)
 - **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
+- **🧨 Thesis-break triggers** (any that fired this week, with source, and any name with no trigger; only if any)
 - **🗓️ Inputs behind** (names from Step 6e whose scores rest on an old quarter; only if any)
 - **🎯 Calibration** (newly resolved forecasts + needs_review items from Step 9; only if any)
 - **🩺 Run health** (missed runs in the last 14 days, real workflow failures, any check that could not look; only if any)

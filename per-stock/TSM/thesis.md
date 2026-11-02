@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** {what single development would force exit}
+**Thesis-break trigger:** A conflict, blockade or export ban stops TSMC shipping from its Taiwan fabs, OR a top AI-chip customer moves a flagship AI chip to another foundry. (draft, awaiting Dom's review)
 
 ---
 

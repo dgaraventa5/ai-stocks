@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** {what single development would force exit}
+**Thesis-break trigger:** ASML drops its statement that planned 2027-2028 supply will not meet customer demand, OR cuts its annual sales guidance (EUR 44-45B for 2026) because chipmakers delay EUV orders. (draft, awaiting Dom's review)
 
 ---
 
