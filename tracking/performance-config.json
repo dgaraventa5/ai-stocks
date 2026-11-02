@@ -1028,11 +1028,51 @@
         "CRDO": "\u2713\u2713"
       },
       "cash": -0.06
+    },
+    {
+      "date": "2026-11-02",
+      "reason": "membership: -GMED",
+      "kind": "membership",
+      "allocations": {
+        "CRDO": 571.02,
+        "EME": 571.02,
+        "ANET": 571.02,
+        "MU": 571.02,
+        "WDC": 571.02,
+        "AVGO": 571.02,
+        "MSFT": 571.02,
+        "PLTR": 571.02,
+        "ALAB": 571.02,
+        "FIX": 571.02,
+        "VRT": 571.02,
+        "NVDA": 571.02,
+        "SNDK": 571.02,
+        "ASML": 571.02,
+        "META": 571.02,
+        "TSM": 571.02
+      },
+      "tiers": {
+        "CRDO": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "MU": "\u2713\u2713\u2713",
+        "WDC": "\u2713\u2713",
+        "AVGO": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "PLTR": "\u2713\u2713",
+        "ALAB": "\u2713\u2713",
+        "FIX": "\u2713\u2713\u2713",
+        "VRT": "\u2713\u2713",
+        "NVDA": "\u2713\u2713",
+        "SNDK": "\u2713\u2713",
+        "ASML": "\u2713\u2713",
+        "META": "\u2713\u2713",
+        "TSM": "\u2713\u2713"
+      },
+      "cash": 0.06
     }
   ],
-  "exit_pending": {
-    "GMED": "2026-10-31"
-  },
+  "exit_pending": {},
   "shadow_events": {
     "BAND_TOP": [
       {
@@ -2298,11 +2338,50 @@
           "VRT": 0.041057,
           "WDC": 0.039853
         }
+      },
+      {
+        "date": "2026-11-02",
+        "roster": [
+          "ALAB",
+          "ANET",
+          "ASML",
+          "AVGO",
+          "CRDO",
+          "EME",
+          "FIX",
+          "META",
+          "MSFT",
+          "MU",
+          "NVDA",
+          "PLTR",
+          "SNDK",
+          "TSM",
+          "VRT",
+          "WDC"
+        ],
+        "weights": {
+          "ALAB": 0.035115,
+          "ANET": 0.058053,
+          "ASML": 0.073956,
+          "AVGO": 0.07524,
+          "CRDO": 0.030655,
+          "EME": 0.078844,
+          "FIX": 0.05018,
+          "META": 0.064585,
+          "MSFT": 0.12,
+          "MU": 0.052641,
+          "NVDA": 0.081697,
+          "PLTR": 0.064134,
+          "SNDK": 0.035133,
+          "TSM": 0.090939,
+          "VRT": 0.045159,
+          "WDC": 0.04367
+        }
       }
     ]
   },
   "sizing_state": {
-    "last_resize_check": "2026-10"
+    "last_resize_check": "2026-11"
   },
   "methodology_seam": {
     "date": "2026-10-17",
