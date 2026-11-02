@@ -2,6 +2,7 @@
 import datetime as dt
 import sys
 import types
+from pathlib import Path
 
 import pytest
 
@@ -82,7 +83,7 @@ def test_failure_rate_counts_only_names_it_tried(capsys):
     quarter = lambda t: ic.FAILED if t == "T6" else D(2026, 9, 30)    # 1 of 4 tried
     assert ic.report(tickers, TODAY, quarter,
                      lambda t, _: filed.get(t, D(2026, 10, 21))) == 1
-    assert "NOT CHECKABLE (no earnings 8-K): T0, T1, T2, T3, T4, T5" in capsys.readouterr().out
+    assert "NOT CHECKABLE (no CIK or earnings 8-K): T0, T1, T2, T3, T4, T5" in capsys.readouterr().out
 
 
 def test_nothing_checkable_is_blocked_not_all_clear(capsys):
@@ -90,8 +91,19 @@ def test_nothing_checkable_is_blocked_not_all_clear(capsys):
                      lambda t, _: ic.NOT_CHECKABLE) == 1
 
 
-@pytest.mark.parametrize("recent", [{}, {"form": ["8-K"], "filingDate": ["2026-10-21"]}])
-def test_an_unusable_filings_block_is_a_failure(recent):
+@pytest.mark.parametrize("missing", ["form", "filingDate", "items",
+                                     "accessionNumber", "primaryDocument"])
+def test_a_filings_block_missing_a_column_is_a_failure(missing):
+    recent = _recent(("8-K", "2026-10-21", "2.02"))
+    del recent[missing]
+    with pytest.raises(ValueError):
+        ic.newest_earnings_filing(recent, TODAY)
+
+
+@pytest.mark.parametrize("change", [{"items": []}, {"filingDate": [None]},
+                                    {"form": ["8-K", "8-K"]}])
+def test_an_empty_or_uneven_filings_block_is_a_failure(change):
+    recent = {**_recent(("8-K", "2026-10-21", "2.02")), **change}
     with pytest.raises(ValueError):
         ic.newest_earnings_filing(recent, TODAY)
 
@@ -116,6 +128,10 @@ def test_no_revenue_row_or_empty_frame_is_a_failure(monkeypatch):
     _yahoo(monkeypatch, pd.DataFrame())
     assert ic._statement_quarter("AAA") == ic.FAILED
     _yahoo(monkeypatch, None)
+    assert ic._statement_quarter("AAA") == ic.FAILED
+    no_values = pd.DataFrame({pd.Timestamp("2026-09-30"): [None, 0.4]},
+                             index=["Total Revenue", "Diluted EPS"])
+    _yahoo(monkeypatch, no_values)
     assert ic._statement_quarter("AAA") == ic.FAILED
 
 
@@ -150,3 +166,11 @@ def test_the_lookback_window_limits_old_prints():
     old = TODAY - dt.timedelta(days=ic.LOOKBACK_DAYS + 1)
     recent = _recent(("8-K", old.isoformat(), "2.02"))
     assert ic.newest_earnings_filing(recent, TODAY) == ic.NOT_CHECKABLE
+
+
+def test_the_weekly_scan_runs_it_and_reports_what_it_could_not_check():
+    root = Path(ic.__file__).resolve().parent.parent
+    text = (root / ".claude" / "commands" / "weekly-scan.md").read_text()
+    assert "python3 scripts/input_currency.py --scope all" in text
+    assert "list every COULD NOT CHECK name and any US-listed NOT CHECKABLE name" in text
+    assert "treat exit 1 as could-not-check, never as all clear" in text

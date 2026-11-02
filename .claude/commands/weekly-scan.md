@@ -72,7 +72,7 @@ with `--job weekly-scan`. Differences from an attended run:
 
    d. Compute the before/after Total Score for refreshed names. If any name's score moves by >5 points or crosses a tier boundary, flag with ⚠️ — this is a potential portfolio-level signal.
 
-   e. **Which quarter scores rest on.** After the refreshes, run `python3 scripts/input_currency.py --scope all`. It lists names whose newest earnings 8-K is on a later quarter than Yahoo's statements, so Last Updated moved but the inputs did not. Report them as behind, list every COULD NOT CHECK name, and treat exit 1 as could-not-check, never as all clear. BEHIND is a prompt to look: the 8-K can be a preliminary release or a presentation.
+   e. **Which quarter scores rest on.** After the refreshes, run `python3 scripts/input_currency.py --scope all`. It lists names whose newest earnings 8-K is on a later quarter than Yahoo's statements, so Last Updated moved but the inputs did not. Report them as behind, list every COULD NOT CHECK name and any US-listed NOT CHECKABLE name, since its statements were never compared, and treat exit 1 as could-not-check, never as all clear. BEHIND is a prompt to look: the 8-K can be a preliminary release or a presentation.
 
    **Why this exists:** During the 2026-05-26 MU review, 2-month-stale objective inputs after Q2 earnings caused a 14-point scoring error and a full tier miss (#23 → #4). The weekly scan already touches every name's 8-Ks; catching earnings and refreshing inputs in the same pass prevents this class of miss. If `/earnings-update` was already run on a name during the week, skip the refresh — don't duplicate work.
 

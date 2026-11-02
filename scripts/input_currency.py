@@ -29,12 +29,15 @@ NEWER_QUARTER_DAYS = 100    # a next-quarter print needs 91 days plus closing th
 LOOKBACK_DAYS = 200
 FAILED = "error"
 NOT_CHECKABLE = "not checkable"     # no 8-Ks to compare against
+_FILING_COLUMNS = ("form", "filingDate", "items", "accessionNumber", "primaryDocument")
 
 
 def newest_earnings_filing(recent: dict, today: dt.date):
     """Newest Item 2.02 8-K date, or NOT_CHECKABLE for a filer with none.
     Raises on a block that can't answer, so it counts as a failed lookup."""
-    if not recent.get("form") or "items" not in recent:
+    columns = [recent.get(k) for k in _FILING_COLUMNS]
+    if (not all(columns) or len({len(c) for c in columns}) != 1
+            or not all(recent["filingDate"])):
         raise ValueError("unusable filings block")
     start = today - dt.timedelta(days=LOOKBACK_DAYS)
     dates = [f["date"] for f in sr.filings_in_window(recent, start, today, {"8-K"})
@@ -101,7 +104,7 @@ def report(tickers, today, quarter_of=_statement_quarter, filed_of=_filed_date) 
     for t, _, _ in failed:
         print(f"  COULD NOT CHECK: {t}")
     if skipped:
-        print(f"  NOT CHECKABLE (no earnings 8-K): {', '.join(r[0] for r in skipped)}")
+        print(f"  NOT CHECKABLE (no CIK or earnings 8-K): {', '.join(r[0] for r in skipped)}")
     if sr.scan_blocked(len(rows) - len(skipped), len(failed)):
         print("BLOCKED: too many lookups failed, so do not read this as all clear",
               file=sys.stderr)

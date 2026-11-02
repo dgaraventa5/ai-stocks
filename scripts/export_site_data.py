@@ -35,14 +35,23 @@ TARGETS_HEADERS = ['Ticker', 'Layer', 'TOTAL', 'Tier', 'Rank', 'Status',
                    'Include?', 'Override', 'Target %', 'Notes']
 
 
+def _is_iso_date(text: str) -> bool:
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', text, re.ASCII):
+        return False
+    try:
+        dt.date.fromisoformat(text)
+    except ValueError:
+        return False
+    return True
+
+
 def scores_as_of(root: Path) -> str | None:
     """Newest date in the score panel. Performance moves daily; scores don't."""
     path = root / 'tracking' / 'score-history.csv'
     if not path.exists():
         return None
     dates = (r.split(',', 1)[0] for r in path.read_text().splitlines())
-    return max((d for d in dates if re.fullmatch(r'\d{4}-\d{2}-\d{2}', d)),
-               default=None)
+    return max((d for d in dates if _is_iso_date(d)), default=None)
 
 
 def fail(msg: str) -> NoReturn:
