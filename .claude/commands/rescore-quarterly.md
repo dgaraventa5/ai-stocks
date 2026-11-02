@@ -6,6 +6,31 @@ Run the quarterly rescore for the AI Supply Chain Research project. Refer to CLA
 
 **This command is designed for `/goal` mode.**
 
+## Scheduled (unattended) runs — rule 37
+
+When this runs from the scheduler (the 22nd of Feb, May, Aug and Nov at 12:00
+Pacific, on this Mac), read `docs/ops/scheduled-runs.md` and follow its run
+sequence and limits exactly, with `--job quarterly-rescore`. Differences from an
+attended run:
+
+- **Before step 0**, run `python3 scripts/audit_rating_integrity.py --summary`.
+  A GATE violation goes at the top of the report as a failure, and the rescore
+  continues for every other name (rule 12). Rating changes are proposals in
+  `tracking/rating-proposals.md`, never applied.
+- **Step 0** is bounded: `/refresh-context` for at most 8 names, holdings first,
+  then top-25 names with no briefing in the last 30 days. Every other ✓✓ or ✓✓✓
+  name stays with the weekly `/rating-research` rotation. List the names skipped.
+- **Step 2** refreshes with `python3 scripts/refresh_objective_inputs.py {TICKERS}`
+  (dry-run first), then `python3 scripts/momentum_50dma.py`,
+  `python3 scripts/refresh_reverse_dcf.py` and
+  `python3 scripts/recalc_watchlist.py --sync`.
+- **Step 5** appends the `ew_events` entry but does NOT run
+  `track_performance.py`. `daily-refresh.yml` is the only scheduled writer of the
+  series and rebuilds it on its next run.
+- **Step 6** runs as written. BSS at or below 0 is a finding for the report, and
+  changes nothing.
+- Publish the Notion page `Quarterly Rescore — {date}`.
+
 ## Completion criteria
 
 - [ ] Every Watchlist row with Last Updated > 90 days has refreshed financial inputs

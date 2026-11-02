@@ -1045,10 +1045,11 @@ that, every cloud-session scan from 2026-06-12 fell back to web search because
 the cloud sandbox blocks Yahoo and SEC at its network proxy — so scans ran,
 found news, and re-scored nothing.
 
-**Rule:** three local desktop scheduled tasks, each a thin prompt that invokes
+**Rule:** four local desktop scheduled tasks, each a thin prompt that invokes
 a project skill: `/daily-watch` (Mon–Fri 15:45 PT — the rule-31 sentinel plus a
-news and filing watch on holdings ∪ top 25), `/weekly-scan` (Sat 08:00 PT) and
-`/rating-research` (Sun 08:00 PT, the rule-12 rotation). Shared protocol:
+news and filing watch on holdings ∪ top 25), `/weekly-scan` (Sat 08:00 PT),
+`/rating-research` (Sun 08:00 PT, the rule-12 rotation) and `/rescore-quarterly`
+(the 22nd of Feb, May, Aug and Nov at 12:00 PT, added 2026-11-02, Dom). Shared protocol:
 `docs/ops/scheduled-runs.md`. They run in the main checkout on this Mac, never
 in a cloud session.
 

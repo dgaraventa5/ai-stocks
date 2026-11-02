@@ -1,6 +1,6 @@
 # Scheduled runs — shared protocol (CLAUDE.md rule 37)
 
-Three unattended jobs keep research and scores current. Each is a project
+Four unattended jobs keep research and scores current. Each is a project
 skill; the desktop scheduler only holds a thin prompt that invokes it.
 
 | Job (`--job`) | Skill | Schedule (Pacific) | What it does |
@@ -8,6 +8,7 @@ skill; the desktop scheduler only holds a thin prompt that invokes it.
 | `daily-watch` | `/daily-watch` | Mon–Fri 15:45 | Earnings sentinel (briefing, then mechanical re-score) + news and filing watch on holdings ∪ top 25 |
 | `weekly-scan` | `/weekly-scan` | Sat 08:00 | Full-watchlist filing scan, objective refresh, portfolio pipeline, weekly mark |
 | `rating-research` | `/rating-research` | Sun 08:00 | Fresh briefings for the stalest rated names, with rating proposals |
+| `quarterly-rescore` | `/rescore-quarterly` | 22nd of Feb, May, Aug, Nov at 12:00 | Refreshes rows over 90 days old, re-baselines the EW benchmark, writes the rescore and calibration reports |
 
 **Where they run: this Mac, in the main checkout — never a cloud session.**
 Cloud sandboxes block Yahoo and SEC at the network proxy (every cloud scan from
@@ -83,7 +84,7 @@ this check.
   (`notion-search`, `notion-fetch`, `notion-create-pages`; load with
   ToolSearch). Search for the exact title first and update rather than
   duplicate. Titles: `Daily Watch — {date}`, `Weekly News Scan — {date}`,
-  `Rating Research — {date}`. No real dollars, share counts or account
+  `Rating Research — {date}`, `Quarterly Rescore — {date}`. No real dollars, share counts or account
   numbers (rule 29). Only the weekly scan appends to
   `tracking/notion-scan-links.json`.
 - **Notification:** `python3 scripts/scheduled_run.py notify --message "<line>"`
