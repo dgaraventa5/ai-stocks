@@ -148,7 +148,8 @@ def _fetch_latest_close(tickers):
     for t in tickers:
         try:
             h = yf.Ticker(t).history(period="5d")
-            out[t] = h.index[-1].date() if len(h) else None
+            # yfinance returns an empty frame on a failed lookup, it doesn't raise
+            out[t] = h.index[-1].date() if len(h) else "error"
         except Exception:
             out[t] = "error"                             # → flagged downstream (I2)
         time.sleep(0.1)

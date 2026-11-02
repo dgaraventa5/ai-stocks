@@ -224,3 +224,44 @@ def test_main_mark_updates_state(tmp_path, monkeypatch):
     assert main(["--mark", "briefed", "AAA", "2026-08-11"]) == 0
     from earnings_sentinel import load_state
     assert load_state(tmp_path / "state.json")["tickers"]["AAA"]["briefed"] == "2026-08-11"
+
+
+# ---- _fetch_latest_close ---------------------------------------------------
+import sys as _sys
+import types as _types
+
+
+class _FakeHistory:
+    def __init__(self, days):
+        self.index = [dt.datetime(d.year, d.month, d.day) for d in days]
+
+    def __len__(self):
+        return len(self.index)
+
+
+def _stub_yfinance(monkeypatch, days):
+    import earnings_sentinel as es
+    fake = _types.ModuleType("yfinance")
+    fake.Ticker = lambda t: _types.SimpleNamespace(
+        history=lambda period: _FakeHistory(days))
+    monkeypatch.setitem(_sys.modules, "yfinance", fake)
+    monkeypatch.setattr(es.time, "sleep", lambda s: None)
+
+
+def test_empty_price_history_is_a_failed_lookup(monkeypatch):
+    # yfinance returns an empty frame on a failed lookup rather than raising,
+    # so empty must reach due_events as a failure, not as "no close yet".
+    import earnings_sentinel as es
+    _stub_yfinance(monkeypatch, [])
+    closes = es._fetch_latest_close(["AAA"])
+    assert closes == {"AAA": "error"}
+    cal = {"AAA": [_ts(2026, 8, 11, 16, 30)]}
+    out = due_events(["AAA"], cal, closes, _state(), NOW_WED_EVE)
+    assert out["flagged"]["AAA"] == "latest-close lookup failed"
+    assert out["rescore_due"] == []
+
+
+def test_price_history_returns_newest_close_date(monkeypatch):
+    import earnings_sentinel as es
+    _stub_yfinance(monkeypatch, [dt.date(2026, 8, 11), dt.date(2026, 8, 12)])
+    assert es._fetch_latest_close(["AAA"]) == {"AAA": dt.date(2026, 8, 12)}
