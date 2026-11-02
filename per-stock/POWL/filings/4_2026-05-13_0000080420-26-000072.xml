@@ -1,0 +1,347 @@
+<?xml version="1.0"?>
+<ownershipDocument>
+
+    <schemaVersion>X0609</schemaVersion>
+
+    <documentType>4</documentType>
+
+    <periodOfReport>2026-05-11</periodOfReport>
+
+    <notSubjectToSection16>0</notSubjectToSection16>
+
+    <issuer>
+        <issuerCik>0000080420</issuerCik>
+        <issuerName>POWELL INDUSTRIES INC</issuerName>
+        <issuerTradingSymbol>POWL</issuerTradingSymbol>
+        <issuerForeignTradingSymbol></issuerForeignTradingSymbol>
+    </issuer>
+
+    <reportingOwner>
+        <reportingOwnerId>
+            <rptOwnerCik>0002025220</rptOwnerCik>
+            <rptOwnerName>Mauney William Marshall Jr</rptOwnerName>
+        </reportingOwnerId>
+        <reportingOwnerAddress>
+            <rptOwnerNonUSAddressFlag>false</rptOwnerNonUSAddressFlag>
+            <rptOwnerStreet1>8550 MOSLEY ROAD</rptOwnerStreet1>
+            <rptOwnerStreet2></rptOwnerStreet2>
+            <rptOwnerCity>HOUSTON</rptOwnerCity>
+            <rptOwnerState>TX</rptOwnerState>
+            <rptOwnerZipCode>77075</rptOwnerZipCode>
+            <rptOwnerStateDescription></rptOwnerStateDescription>
+        </reportingOwnerAddress>
+        <reportingOwnerRelationship>
+            <isDirector>0</isDirector>
+            <isOfficer>1</isOfficer>
+            <isTenPercentOwner>0</isTenPercentOwner>
+            <isOther>0</isOther>
+            <officerTitle>Vice President, R&amp;D</officerTitle>
+        </reportingOwnerRelationship>
+    </reportingOwner>
+
+    <aff10b5One>0</aff10b5One>
+
+    <nonDerivativeTable>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-05-11</value>
+            </transactionDate>
+            <deemedExecutionDate>
+                <value>2026-05-11</value>
+            </deemedExecutionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>S</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>927</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>321.86</value>
+                    <footnoteId id="F1"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>12426</value>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-05-11</value>
+            </transactionDate>
+            <deemedExecutionDate>
+                <value>2026-05-11</value>
+            </deemedExecutionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>S</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>386</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>322.70</value>
+                    <footnoteId id="F4"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>12040</value>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-05-11</value>
+            </transactionDate>
+            <deemedExecutionDate>
+                <value>2026-05-11</value>
+            </deemedExecutionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>S</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>176</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>323.82</value>
+                    <footnoteId id="F5"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>11864</value>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-05-11</value>
+            </transactionDate>
+            <deemedExecutionDate>
+                <value>2026-05-11</value>
+            </deemedExecutionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>S</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>313</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>324.87</value>
+                    <footnoteId id="F6"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>11551</value>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-05-11</value>
+            </transactionDate>
+            <deemedExecutionDate>
+                <value>2026-05-11</value>
+            </deemedExecutionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>S</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>623</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>325.97</value>
+                    <footnoteId id="F7"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>10928</value>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-05-11</value>
+            </transactionDate>
+            <deemedExecutionDate>
+                <value>2026-05-11</value>
+            </deemedExecutionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>S</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>66</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>327.06</value>
+                    <footnoteId id="F8"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>10862</value>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+        <nonDerivativeTransaction>
+            <securityTitle>
+                <value>Common Stock</value>
+            </securityTitle>
+            <transactionDate>
+                <value>2026-05-11</value>
+            </transactionDate>
+            <deemedExecutionDate>
+                <value>2026-05-11</value>
+            </deemedExecutionDate>
+            <transactionCoding>
+                <transactionFormType>4</transactionFormType>
+                <transactionCode>S</transactionCode>
+                <equitySwapInvolved>0</equitySwapInvolved>
+            </transactionCoding>
+            <transactionAmounts>
+                <transactionShares>
+                    <value>9</value>
+                </transactionShares>
+                <transactionPricePerShare>
+                    <value>327.69</value>
+                    <footnoteId id="F9"/>
+                </transactionPricePerShare>
+                <transactionAcquiredDisposedCode>
+                    <value>D</value>
+                </transactionAcquiredDisposedCode>
+            </transactionAmounts>
+            <postTransactionAmounts>
+                <sharesOwnedFollowingTransaction>
+                    <value>10853</value>
+                    <footnoteId id="F2"/>
+                    <footnoteId id="F3"/>
+                </sharesOwnedFollowingTransaction>
+            </postTransactionAmounts>
+            <ownershipNature>
+                <directOrIndirectOwnership>
+                    <value>D</value>
+                </directOrIndirectOwnership>
+            </ownershipNature>
+        </nonDerivativeTransaction>
+    </nonDerivativeTable>
+
+    <derivativeTable></derivativeTable>
+
+    <footnotes>
+        <footnote id="F1">The price reported in Column 4 is an average price; shares were sold in multiple transactions.  Reporting range is $321.39-$322.39, inclusive.  Reporting person, upon request, will provide Powell Industries, Inc. or the staff of the Securities &amp; Exchange Commission full information regarding the number of shares sold at each price within the ranges set for in this footnote.</footnote>
+        <footnote id="F2">Includes shares that have a time-based vesting provision.</footnote>
+        <footnote id="F3">The reported number of shares have been adjusted to reflect the impact of the issuer's 3-for-1 forward split of its Common Stock effected on April 2, 2026.</footnote>
+        <footnote id="F4">The price reported in Column 4 is an average price; shares were sold in multiple transactions.  Reporting range is $322.43-$323.40, inclusive.  Reporting person, upon request, will provide Powell Industries, Inc. or the staff of the Securities &amp; Exchange Commission full information regarding the number of shares sold at each price within the ranges set for in this footnote.</footnote>
+        <footnote id="F5">The price reported in Column 4 is an average price; shares were sold in multiple transactions.  Reporting range is $323.44-$324.39, inclusive.  Reporting person, upon request, will provide Powell Industries, Inc. or the staff of the Securities &amp; Exchange Commission full information regarding the number of shares sold at each price within the ranges set for in this footnote.</footnote>
+        <footnote id="F6">The price reported in Column 4 is an average price; shares were sold in multiple transactions.  Reporting range is $324.47-$325.10, inclusive.  Reporting person, upon request, will provide Powell Industries, Inc. or the staff of the Securities &amp; Exchange Commission full information regarding the number of shares sold at each price within the ranges set for in this footnote.</footnote>
+        <footnote id="F7">The price reported in Column 4 is an average price; shares were sold in multiple transactions.  Reporting range is $325.44-$326.54, inclusive.  Reporting person, upon request, will provide Powell Industries, Inc. or the staff of the Securities &amp; Exchange Commission full information regarding the number of shares sold at each price within the ranges set for in this footnote.</footnote>
+        <footnote id="F8">The price reported in Column 4 is an average price; shares were sold in multiple transactions.  Reporting range is $326.66-$327.45, inclusive.  Reporting person, upon request, will provide Powell Industries, Inc. or the staff of the Securities &amp; Exchange Commission full information regarding the number of shares sold at each price within the ranges set for in this footnote.</footnote>
+        <footnote id="F9">The price reported in Column 4 is an average price; shares were sold in multiple transactions.  Reporting range is $327.68-$327.71, inclusive.  Reporting person, upon request, will provide Powell Industries, Inc. or the staff of the Securities &amp; Exchange Commission full information regarding the number of shares sold at each price within the ranges set for in this footnote.</footnote>
+    </footnotes>
+
+    <remarks></remarks>
+
+    <ownerSignature>
+        <signatureName>Michael W. Metcalf, Power of Attorney for William Marshall Mauney, Jr.</signatureName>
+        <signatureDate>2026-05-12</signatureDate>
+    </ownerSignature>
+</ownershipDocument>
