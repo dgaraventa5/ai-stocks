@@ -1,17 +1,19 @@
 """Which quarter does each score rest on? Read-only check.
 
 Last Updated stamps every refresh, even when Yahoo still serves the old quarter,
-so a fresh date can sit on stale statements. This compares Yahoo's newest
-quarterly statement to the company's newest earnings 8-K and writes nothing.
+so a fresh date can sit on stale statements. This compares the newest quarter
+with revenue in Yahoo's statements to the company's newest earnings 8-K, and
+changes no project data.
 
   python3 scripts/input_currency.py                # holdings and the top 25
   python3 scripts/input_currency.py --scope all    # every Watchlist name
 
 A name is BEHIND when its newest earnings 8-K came at least NEWER_QUARTER_DAYS
-after Yahoo's newest quarter-end: that gap is too long for a report on that
-quarter, so the 8-K must cover a later one. Exits nonzero only when too many
-lookups failed for the result to mean anything. Being behind is a report item,
-not a failure, because only Yahoo can clear it.
+after that quarter-end: too long for a report on that quarter, so the 8-K almost
+certainly covers a later one. An Item 2.02 8-K can also be a preliminary release
+or a presentation, so read BEHIND as a prompt to look, not as a fact. Exits
+nonzero only when too many lookups failed, or none worked, for the result to
+mean anything.
 """
 from __future__ import annotations
 
@@ -22,14 +24,18 @@ import time
 
 import scheduled_run as sr
 
-NEWER_QUARTER_DAYS = 85     # next quarter-end is ~91 days on; Q4 prints land within ~75
+NEWER_QUARTER_DAYS = 100    # a next-quarter print needs 91 days plus closing the books
+                            # (10+); slow Q4 prints land up to ~90 days out
 LOOKBACK_DAYS = 200
 FAILED = "error"
 NOT_CHECKABLE = "not checkable"     # no 8-Ks to compare against
 
 
 def newest_earnings_filing(recent: dict, today: dt.date):
-    """Newest Item 2.02 8-K date, or NOT_CHECKABLE for a filer with none."""
+    """Newest Item 2.02 8-K date, or NOT_CHECKABLE for a filer with none.
+    Raises on a block that can't answer, so it counts as a failed lookup."""
+    if not recent.get("form") or "items" not in recent:
+        raise ValueError("unusable filings block")
     start = today - dt.timedelta(days=LOOKBACK_DAYS)
     dates = [f["date"] for f in sr.filings_in_window(recent, start, today, {"8-K"})
              if f["earnings"]]
@@ -37,19 +43,20 @@ def newest_earnings_filing(recent: dict, today: dt.date):
 
 
 def classify(quarter, filed) -> str:
-    if quarter == FAILED or filed == FAILED:
-        return "failed"
     if filed == NOT_CHECKABLE:
         return "not_checkable"
+    if quarter == FAILED or filed == FAILED:
+        return "failed"
     return "behind" if (filed - quarter).days >= NEWER_QUARTER_DAYS else "current"
 
 
 def _statement_quarter(ticker):
+    """Newest quarter with revenue. Yahoo can post a column with only EPS days
+    before the statements fill in, so a column alone proves nothing."""
     import yfinance as yf                                # lazy (CI minimal-env)
     try:
-        df = yf.Ticker(ticker).quarterly_income_stmt
-        cols = df.dropna(axis=1, how="all").columns if df is not None else []
-        return max(cols).date() if len(cols) else FAILED
+        revenue = yf.Ticker(ticker).quarterly_income_stmt.loc["Total Revenue"].dropna()
+        return max(revenue.index).date() if len(revenue) else FAILED
     except Exception:                                    # noqa: BLE001
         return FAILED
     finally:
@@ -66,7 +73,7 @@ def _filed_date(ticker, today):
             return NOT_CHECKABLE
         data = sec_get(f"https://data.sec.gov/submissions/CIK{cik}.json",
                        host_data_sec=True).json()
-        return newest_earnings_filing(data.get("filings", {}).get("recent", {}), today)
+        return newest_earnings_filing(data["filings"]["recent"], today)
     except Exception:                                    # noqa: BLE001
         return FAILED
 
@@ -76,7 +83,10 @@ def _today() -> dt.date:
 
 
 def report(tickers, today, quarter_of=_statement_quarter, filed_of=_filed_date) -> int:
-    rows = [(t, quarter_of(t), filed_of(t, today)) for t in tickers]
+    rows = []
+    for t in tickers:
+        filed = filed_of(t, today)
+        rows.append((t, None if filed == NOT_CHECKABLE else quarter_of(t), filed))
     by_status: dict[str, list] = {}
     for row in rows:
         by_status.setdefault(classify(row[1], row[2]), []).append(row)
@@ -90,7 +100,9 @@ def report(tickers, today, quarter_of=_statement_quarter, filed_of=_filed_date) 
         print(f"  BEHIND: {t} Yahoo statements end {quarter}, earnings 8-K filed {filed}")
     for t, _, _ in failed:
         print(f"  COULD NOT CHECK: {t}")
-    if sr.scan_blocked(len(rows), len(failed)):
+    if skipped:
+        print(f"  NOT CHECKABLE (no earnings 8-K): {', '.join(r[0] for r in skipped)}")
+    if sr.scan_blocked(len(rows) - len(skipped), len(failed)):
         print("BLOCKED: too many lookups failed, so do not read this as all clear",
               file=sys.stderr)
         return 1

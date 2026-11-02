@@ -40,8 +40,9 @@ def scores_as_of(root: Path) -> str | None:
     path = root / 'tracking' / 'score-history.csv'
     if not path.exists():
         return None
-    rows = path.read_text().splitlines()[1:]
-    return max((r.split(',', 1)[0] for r in rows if r.strip()), default=None)
+    dates = (r.split(',', 1)[0] for r in path.read_text().splitlines())
+    return max((d for d in dates if re.fullmatch(r'\d{4}-\d{2}-\d{2}', d)),
+               default=None)
 
 
 def fail(msg: str) -> NoReturn:

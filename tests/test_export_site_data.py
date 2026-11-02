@@ -239,6 +239,7 @@ def test_main_writes_all_files(repo):
     assert meta['last_rebalance'] == '2026-06-10'
     assert meta['holdings'] == 2
     assert meta['scored'] == 2   # canonical recalc fixture scores both names
+    assert 'scores_as_of' in meta
 
 
 def test_privacy_no_real_dollars_anywhere(repo):
@@ -313,3 +314,10 @@ def test_scores_as_of_is_empty_without_a_panel(tmp_path):
     (tmp_path / 'tracking').mkdir()
     (tmp_path / 'tracking' / 'score-history.csv').write_text('date,ticker\n')
     assert ex.scores_as_of(tmp_path) is None
+
+
+def test_scores_as_of_exports_only_a_date(tmp_path):
+    (tmp_path / 'tracking').mkdir()
+    (tmp_path / 'tracking' / 'score-history.csv').write_text(
+        'date,ticker\n2026-11-02,AAA\n>>>>>>> some-branch\nNVDA,1,2\ndate,ticker\n')
+    assert ex.scores_as_of(tmp_path) == '2026-11-02'

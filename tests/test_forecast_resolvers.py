@@ -75,6 +75,22 @@ def test_thinned_cohort_waits_out_grace_then_grades_on_the_same_rule():
     assert "(4 names)" in graded.evidence
 
 
+def test_the_tolerance_boundary_is_unchanged():
+    after_grace = dt.date(2026, 9, 29) + dt.timedelta(days=r.GRACE_DAYS + 1)
+    fast, slow = _ramp(100, 0.05), _ramp(100, 0.01)
+
+    quarter_missing = {"AVGO": fast, "NVDA": slow, "MU": slow, "AMD": slow, "TSM": {}}
+    res = r.resolve_rel_strength_1q(_forecast(constituents=("NVDA", "MU", "AMD", "TSM")),
+                                    price_loader=_loader(quarter_missing), today=after_grace)
+    assert res.status == "resolved"
+
+    over = {"AVGO": fast, "NVDA": slow, "MU": slow, "AMD": slow, "TSM": {}, "ASML": {}}
+    res = r.resolve_rel_strength_1q(
+        _forecast(constituents=("NVDA", "MU", "AMD", "TSM", "ASML")),
+        price_loader=_loader(over), today=after_grace)
+    assert res.status == "needs_review"
+
+
 def test_full_cohort_grades_without_waiting():
     table = {"AVGO": _ramp(100, 0.05), "NVDA": _ramp(100, 0.01), "MU": _ramp(100, 0.01)}
     res = r.resolve_rel_strength_1q(_forecast(), price_loader=_loader(table),
