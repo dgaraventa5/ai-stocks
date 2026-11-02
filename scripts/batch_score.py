@@ -46,6 +46,7 @@ import adr_currency
 from openpyxl import load_workbook
 
 from common import ROOT, flag, per_stock_dir
+from layer_cohorts import is_layer9_capacity as _is_layer9_capacity
 from new_ticker import scaffold
 from yfinance_fundamentals import build_financials
 
@@ -149,13 +150,6 @@ def _secured_mw(ticker: str) -> float | None:
 
 def _is_layer10(layer: str | None) -> bool:
     return bool(layer) and str(layer).strip().startswith("10")
-
-
-def _is_layer9_capacity(layer: str | None) -> bool:
-    if not layer or not str(layer).strip().startswith("09"):
-        return False
-    l = str(layer).lower()
-    return "bitcoin" in l or "neocloud" in l
 
 
 ROIC_SKIP_FOREIGN = True   # rule 34; see compute_inputs

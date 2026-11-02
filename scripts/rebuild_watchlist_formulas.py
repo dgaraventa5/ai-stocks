@@ -25,6 +25,8 @@ from pathlib import Path
 
 from openpyxl import load_workbook
 
+from layer_cohorts import is_layer9_capacity
+
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 XLSX = str(_REPO_ROOT / '00-master/ai_supply_chain_scoring.xlsx')
 
@@ -46,17 +48,6 @@ F_L9_EVMW = ('IFERROR(IF(F{r}="","",IF(F{r}<=2,100,IF(F{r}<=4,90,IF(F{r}<=6,75,'
 
 def is_layer10(layer: str) -> bool:
     return bool(layer) and layer.strip().startswith('10')
-
-
-def is_layer9_capacity(layer: str) -> bool:
-    """Rule 13 cohort: Layer 9 bitcoin-miner pivots and neoclouds.
-
-    Hyperscalers keep standard EV/EBITDA.
-    """
-    if not layer or not layer.strip().startswith('09'):
-        return False
-    l = layer.lower()
-    return 'bitcoin' in l or 'neocloud' in l
 
 
 def f_segment_for(layer: str) -> str:
