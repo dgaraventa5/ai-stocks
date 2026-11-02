@@ -72,6 +72,7 @@ def cron_run(live_dir: Path, runner, notifier, now: str, regen=None,
     ticket = pick_ticket(live_dir, now)
     if ticket is None:
         return 0                                  # quiet no-op (normal case)
+    notify_skipped_buys(ticket, notifier)
 
     def attempt(path):
         try:
@@ -92,13 +93,12 @@ def cron_run(live_dir: Path, runner, notifier, now: str, regen=None,
     if (res['failures'] and regen is not None
             and all(_is_stale_quote(f) for f in res['failures'])):
         # Rule 37: the retry rebuilds from the live Targets, so if the model
-        # moved after this ticket it would trade a change Dom never approved.
+        # moved after this ticket, leave it to the newer event's own ticket.
         basis_date = (json.loads(ticket.read_text()).get('basis_event')
                       or {}).get('date', '')
         if last_event_date and last_event_date > basis_date:
             notifier(f'executor cron: ticket {ticket.name} refused on quote '
-                     f'drift and the model changed since — nothing sent, '
-                     f'needs your approval')
+                     f'drift and the model changed since — nothing sent')
             return 0
         notifier(f'executor cron: ticket {ticket.name} refused on quote '
                  f'drift only — regenerating with live quotes')
@@ -278,16 +278,11 @@ def ticket_gen_if_stale(live_dir: Path, last_event: dict, gen,
     return False
 
 
-def remind_held_event(live_dir: Path, last_event: dict, notifier,
-                      now: str | None = None) -> bool:
-    """Rule 37: a model event no live ticket covers waits for Dom. Remind him
-    each run; never write the ticket here. This step used to generate one,
-    which undid every held ticket the morning after it was parked."""
-    return ticket_gen_if_stale(
-        live_dir, last_event,
-        gen=lambda ev: notifier(f"pipeline: model event {ev['date']}-"
-                                f"{ev['kind']} is waiting for your approval"),
-        now=now)
+def notify_skipped_buys(ticket_path: Path, notifier) -> None:
+    """Rule 37: say which buys the data check left off a ticket, and why."""
+    for t, why in json.loads(Path(ticket_path).read_text()).get(
+            'skipped_buys', {}).items():
+        notifier(f"pipeline: {t} buy left off the ticket: {'; '.join(why)}")
 
 
 # ------------------------------------------------- monthly rebalance (2026-10-05)
@@ -413,8 +408,13 @@ def main(mode: str = 'auto') -> int:
                 'reason': last_ev.get('reason', '')}
 
     def regenerate(basis=None):
-        from generate_trade_ticket import generate, _targets_weights
-        return generate(_targets_weights()[0], basis or last_event())
+        from generate_trade_ticket import (generate, on_model_event,
+                                           _targets_weights)
+        event = basis or last_event()
+        # A buy the data check left off must not come back on the retry.
+        if event.get('kind') == REBALANCE_JOB:
+            return generate(_targets_weights()[0], event)
+        return on_model_event(event, _targets_weights()[0])
 
     def execute_step():
         def runner(ticket_path):
@@ -426,7 +426,10 @@ def main(mode: str = 'auto') -> int:
             raise RuntimeError('execution refused or transport error (see log)')
 
     def ticket_step():
-        remind_held_event(LIVE_DIR, last_event(), macos_notify)
+        from generate_trade_ticket import on_model_event, _targets_weights
+        ticket_gen_if_stale(
+            LIVE_DIR, last_event(),
+            gen=lambda ev: on_model_event(ev, _targets_weights()[0]))
 
     def recon_step():
         _reconcile_via_transport(transport, macos_notify)

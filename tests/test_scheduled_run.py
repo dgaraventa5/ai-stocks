@@ -56,32 +56,6 @@ def test_scan_is_blocked_when_lookups_mostly_fail_or_nothing_was_tried():
     assert not sr.scan_blocked(200, 3)
 
 
-def test_only_tickets_created_during_the_run_are_held():
-    before = ["ticket-2026-10-12-manual.json"]
-    now = ["ticket-2026-10-12-manual.json", "ticket-2026-10-13-membership.json",
-           "held-ticket-2026-10-01-membership.json",
-           "superseded-ticket-2026-10-05-manual.json"]
-    assert sr.new_actionable_tickets(now, before) == [
-        "ticket-2026-10-13-membership.json"]
-
-
-def test_hold_tickets_renames_new_ticket_out_of_the_executor_glob(tmp_path, monkeypatch):
-    tdir = tmp_path / "live" / "tickets"
-    tdir.mkdir(parents=True)
-    (tdir / "ticket-old.json").write_text("{}")
-    (tdir / "ticket-new.json").write_text("{}")
-    (tdir / "held-ticket-new.json").write_text("{}")       # earlier hold, same name
-    lock = tmp_path / "lock.json"
-    lock.write_text(json.dumps({"tickets_before": ["ticket-old.json"]}))
-    monkeypatch.setattr(sr, "LIVE_DIR", tmp_path / "live")
-    monkeypatch.setattr(sr, "LOCK_PATH", lock)
-    assert sr.hold_tickets() == 0
-    names = sorted(p.name for p in tdir.iterdir())
-    assert names == ["held-ticket-new.2.json", "held-ticket-new.json",
-                     "ticket-old.json"]
-    assert sorted(p.name for p in tdir.glob("ticket-*.json")) == ["ticket-old.json"]
-
-
 def test_module_never_names_a_broker_write_tool():
     src = (Path(sr.__file__)).read_text()
     assert "place_" not in src and "_order(" not in src

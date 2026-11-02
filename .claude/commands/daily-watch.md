@@ -4,7 +4,7 @@ description: Weekday watch — earnings sentinel (brief, then re-score) plus new
 
 Run the daily watch. This is normally an unattended scheduled run: do not stop
 to ask questions. **Read `docs/ops/scheduled-runs.md` first and follow its run
-sequence and limits exactly** (preflight → branch → job → hold + test → land →
+sequence and limits exactly** (preflight → branch → job → test → land →
 report → release). Read CLAUDE.md rules 9, 12, 25, 26, 29, 31, 35.
 
 Scope: current holdings ∪ top 25 tradable ranks (the earnings-sentinel scope).
@@ -117,6 +117,6 @@ Per the protocol. Notion page `Daily Watch — {date}`:
 - **What happened** — two or three sentences.
 - **Earnings** — table: ticker, result vs consensus, score and rank before → after.
 - **News** — one line per material item with its source link.
-- **Model** — events, exit clocks, entry holds added; "ticket HELD" if one was generated.
+- **Model** — events, exit clocks, entry holds added; and any buys the data check left off a ticket.
 - **Needs you** — rating proposals (yes/no each), EPS rulings, held ticket.
 - **Could not verify** — anything unchecked or undated.

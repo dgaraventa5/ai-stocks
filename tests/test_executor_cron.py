@@ -167,33 +167,27 @@ def test_ticket_gen_skips_when_ticket_already_covers_event(live_dir):
     assert gen_calls == []      # unexpired + unexecuted → still actionable
 
 
-def test_uncovered_model_event_reminds_and_writes_no_ticket(live_dir):
-    # Rule 37: the executor asks, it does not generate. The 2026-10-30 ticket
-    # was parked by a scheduled run and rewritten live here the next morning.
+def test_uncovered_model_event_generates_a_ticket(live_dir):
+    # Rule 37 (2026-11-01): a held ticket does not cover its event, so the
+    # event still gets a live ticket, built through the data check.
     (live_dir / 'tickets' / 'held-ticket-2026-08-12-membership.json').write_text(
         json.dumps({'ticket_id': '2026-08-12-membership',
                     'expires_at': '2026-08-14T20:00:00Z',
                     'basis_event': {'date': '2026-08-12', 'kind': 'membership'},
                     'orders': []}))
-    notes = []
-    assert ec.remind_held_event(
+    made = []
+    assert ec.ticket_gen_if_stale(
         live_dir, {'date': '2026-08-12', 'kind': 'membership'},
-        notes.append, now=NOW) is True
-    assert len(notes) == 1 and 'approval' in notes[0]
-    assert list((live_dir / 'tickets').glob('ticket-*.json')) == []
+        gen=made.append, now=NOW) is True
+    assert len(made) == 1
 
 
-def test_released_ticket_covers_event_so_no_reminder(live_dir):
-    (live_dir / 'tickets' / 'ticket-2026-08-12-manual.json').write_text(
-        json.dumps({'ticket_id': '2026-08-12-manual',
-                    'expires_at': '2026-08-14T20:00:00Z',
-                    'basis_event': {'date': '2026-08-12', 'kind': 'manual'},
-                    'orders': []}))
+def test_skipped_buys_are_notified_with_their_reasons(tmp_path):
+    p = tmp_path / 'ticket.json'
+    p.write_text(json.dumps({'skipped_buys': {'RDDT': ['fell 29% in 5 sessions']}}))
     notes = []
-    assert ec.remind_held_event(
-        live_dir, {'date': '2026-08-12', 'kind': 'membership'},
-        notes.append, now=NOW) is False
-    assert notes == []
+    ec.notify_skipped_buys(p, notes.append)
+    assert notes == ['pipeline: RDDT buy left off the ticket: fell 29% in 5 sessions']
 
 
 def test_full_turnover_ticket_never_auto_executed(live_dir):
@@ -377,7 +371,7 @@ def test_quote_drift_retry_refused_when_model_moved_since_ticket(live_dir):
     assert rc == 0
     assert regen_calls == []
     assert not (live_dir / 'trading-halt.flag').exists()
-    assert any('approval' in n for n in notes)
+    assert any('model changed since' in n for n in notes)
 
 
 def test_quote_drift_retry_runs_when_model_unchanged(live_dir):

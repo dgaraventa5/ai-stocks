@@ -14,9 +14,6 @@ to judgment lives here instead:
                  scope or the whole watchlist. Fetch failures are counted and
                  a high failure rate exits 1 — "no filings" and "could not
                  look" must never read the same.
-  hold-tickets   park any trade ticket this run generated (rename to
-                 held-ticket-*) so the executor's ticket-*.json glob skips it.
-                 Scheduled runs re-score; they never release a trade.
   branch         create this run's branch (auto/<job>-<date>) from origin/main.
   log            append this run's one-line outcome to the committed run log
                  (tracking/scheduled-run-log.md). Every run logs, quiet or
@@ -140,14 +137,6 @@ def scan_blocked(n_attempted: int, n_failed: int,
     return (n_failed / n_attempted) > max_rate
 
 
-def new_actionable_tickets(now_names: list[str], before_names: list[str]) -> list[str]:
-    """Tickets the executor would pick up that did not exist at preflight."""
-    before = set(before_names)
-    return sorted(n for n in now_names
-                  if n.startswith("ticket-") and n.endswith(".json")
-                  and n not in before)
-
-
 def staged_violations(paths: list[str]) -> list[str]:
     """Staged files a scheduled run must never commit (empty = fine)."""
     ok_roots = tuple(r + "/" for r in LAND_PATHS)
@@ -183,11 +172,6 @@ def _run(cmd: list[str], timeout: int = 60) -> tuple[int, str]:
         return p.returncode, (p.stdout + p.stderr).strip()
     except (OSError, subprocess.TimeoutExpired) as e:
         return 1, str(e)
-
-
-def _ticket_names() -> list[str]:
-    tdir = LIVE_DIR / "tickets"
-    return sorted(p.name for p in tdir.glob("ticket-*.json")) if tdir.exists() else []
 
 
 def _read_lock() -> dict | None:
@@ -269,8 +253,7 @@ def preflight(job: str) -> int:
 
     LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
     LOCK_PATH.write_text(json.dumps({
-        "job": job, "started": now.isoformat(timespec="seconds"),
-        "tickets_before": _ticket_names()}, indent=2))
+        "job": job, "started": now.isoformat(timespec="seconds")}, indent=2))
     print(json.dumps({"ok": True, "job": job,
                       "branch": f"{RUN_BRANCH_PREFIX}{job}-{now:%Y-%m-%d}",
                       "date": f"{now:%Y-%m-%d}"}, indent=2))
@@ -339,23 +322,6 @@ def scan_filings(scope: str, days: int, out_path: str | None) -> int:
         print("SCAN BLOCKED: too many SEC lookups failed — do not report this "
               "window as quiet", file=sys.stderr)
         return 1
-    return 0
-
-
-def hold_tickets() -> int:
-    lock = _read_lock() or {}
-    fresh = new_actionable_tickets(_ticket_names(), lock.get("tickets_before", []))
-    tdir = LIVE_DIR / "tickets"
-    held = []
-    for name in fresh:
-        target = tdir / f"held-{name}"
-        n = 2
-        while target.exists():                    # append-only, never overwrite
-            target = tdir / f"held-{Path(name).stem}.{n}.json"
-            n += 1
-        (tdir / name).rename(target)
-        held.append(target.name)
-    print(json.dumps({"held": held}, indent=2))
     return 0
 
 
@@ -499,7 +465,6 @@ def main(argv=None) -> int:
     s.add_argument("--scope", choices=["watch", "all"], default="watch")
     s.add_argument("--days", type=int, default=3)
     s.add_argument("--out")
-    sub.add_parser("hold-tickets")
     sub.add_parser("branch")
     lg = sub.add_parser("log")
     lg.add_argument("--text", required=True)
@@ -515,8 +480,6 @@ def main(argv=None) -> int:
         return preflight(a.job)
     if a.cmd == "scan-filings":
         return scan_filings(a.scope, a.days, a.out)
-    if a.cmd == "hold-tickets":
-        return hold_tickets()
     if a.cmd == "branch":
         return branch()
     if a.cmd == "log":
