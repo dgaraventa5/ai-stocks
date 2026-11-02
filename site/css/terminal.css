@@ -159,6 +159,7 @@ details.explainer[open] summary { margin-bottom: 12px; }
   padding: 10px; font-size: 13px;
 }
 .footer { color: var(--dim); font-size: 11px; margin-top: 28px; }
+.stale-note { color: var(--red); }
 select, .filter {
   background: var(--panel); color: var(--text); border: 1px solid var(--border);
   border-radius: 6px; font-family: var(--mono); font-size: 13px; padding: 4px 8px;

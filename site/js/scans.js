@@ -1,4 +1,5 @@
 renderNav('scans.html');
+renderFooter();
 
 (async () => {
   try {

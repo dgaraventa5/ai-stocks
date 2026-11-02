@@ -1,4 +1,5 @@
 renderNav('watchlist.html');
+renderFooter({ showScored: true });
 
 const TIER_CLASS = { '✓✓✓': 'tier-3', '✓✓': 'tier-2', '✓': 'tier-1',
   '?': 'tier-q', '✗': 'tier-x' };
@@ -137,9 +138,5 @@ function renderExplainer(m) {
     document.getElementById('search').addEventListener('input', e => {
       query = e.target.value; render();
     });
-
-    document.getElementById('footer').textContent =
-      `${scored} names scored · $10,000 notional base · not investment advice` +
-      ` · generated ${meta.generated_at}`;
   } catch (e) { showError('main', e.message); }
 })();

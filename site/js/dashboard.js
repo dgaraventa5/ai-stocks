@@ -1,4 +1,5 @@
 renderNav('index.html');
+renderFooter();
 
 (async () => {
   try {
@@ -43,9 +44,6 @@ renderNav('index.html');
         <td class="dim">${esc(c.date)}</td><td><b>${esc(c.ticker || '—')}</b></td>
         <td>${esc(c.type)}${c.detail ? ' <span class="dim">' + esc(c.detail) + '</span>' : ''}</td>
         <td class="dim">${esc(c.note || '')}</td></tr>`).join('');
-
-    document.getElementById('footer').textContent =
-      `$10,000 notional base · not investment advice · generated ${meta.generated_at}`;
   } catch (e) {
     showError('main', e.message);
   }

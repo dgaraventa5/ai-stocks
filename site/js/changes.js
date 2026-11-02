@@ -1,4 +1,5 @@
 renderNav('changes.html');
+renderFooter();
 
 (async () => {
   try {
