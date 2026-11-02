@@ -51,22 +51,35 @@ def test_generate_writes_ticket_from_snapshot_actuals(live_dir):
     assert abs(by['TSM']['notional_est'] - 200.0) < 1.0
 
 
-def test_model_event_ticket_is_written_held(live_dir):
-    # Rule 37: a model change never reaches the executor's ticket-*.json glob.
+def test_model_event_ticket_is_live_when_the_check_is_clean(live_dir, monkeypatch):
+    monkeypatch.setattr(gt, '_skipped_buys', lambda check, orders: {})
     p = gt.on_model_event(EVENT, {'NVDA': 0.5, 'TSM': 0.4}, live_dir=live_dir,
                           prices_fn=PRICES.get, now='2026-08-13T21:30:00Z')
-    assert p.name == 'held-ticket-2026-08-13-membership.json'
-    assert list((live_dir / 'tickets').glob('ticket-*.json')) == []
+    assert p.name == 'ticket-2026-08-13-membership.json'
+    assert 'skipped_buys' not in json.loads(p.read_text())
 
 
-def test_held_ticket_retires_older_live_ticket(live_dir):
-    old = gt.generate({'NVDA': 0.5, 'TSM': 0.4}, EVENT, live_dir=live_dir,
-                      prices_fn=PRICES.get, now='2026-08-13T21:30:00Z')
-    gt.on_model_event(dict(EVENT, date='2026-08-14'),
-                      {'NVDA': 0.5, 'TSM': 0.4}, live_dir=live_dir,
-                      prices_fn=PRICES.get, now='2026-08-14T21:30:00Z')
-    assert not old.exists()
-    assert list((live_dir / 'tickets').glob('ticket-*.json')) == []
+def test_flagged_buy_is_left_off_and_the_rest_still_trades(live_dir):
+    p = gt.generate({'NVDA': 0.5, 'TSM': 0.4}, EVENT, live_dir=live_dir,
+                    prices_fn=PRICES.get, now='2026-08-13T21:30:00Z',
+                    buy_check=lambda orders: {'TSM': ['fell 29% in 5 sessions']})
+    ticket = json.loads(p.read_text())
+    assert p.name == 'ticket-2026-08-13-membership.json'
+    assert ticket['skipped_buys'] == {'TSM': ['fell 29% in 5 sessions']}
+    assert not any(o['ticker'] == 'TSM' for o in ticket['orders'])
+    assert any(o['ticker'] == 'NVDA' and o['side'] == 'sell'
+               for o in ticket['orders'])
+
+
+def test_broken_check_lets_no_buy_through(live_dir):
+    def boom(orders):
+        raise RuntimeError('no data')
+    p = gt.generate({'NVDA': 0.5, 'TSM': 0.4}, EVENT, live_dir=live_dir,
+                    prices_fn=PRICES.get, now='2026-08-13T21:30:00Z',
+                    buy_check=boom)
+    ticket = json.loads(p.read_text())
+    assert not any(o['side'] == 'buy' for o in ticket['orders'])
+    assert 'TSM' in ticket['skipped_buys']
 
 
 def test_generate_refuses_without_snapshot(tmp_path, capsys):

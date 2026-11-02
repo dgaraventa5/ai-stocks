@@ -1081,6 +1081,19 @@ in a cloud session.
   generates and trades on its own (rule 29, 2026-10-05; Dom kept this
   automatic on 2026-10-30). A quote-drift retry is refused when a model event
   is newer than the ticket, because the retry rebuilds from the live Targets.
+  **Amendment 2026-11-01 (Dom-approved): model events trade automatically,
+  with a data check; this replaces the 2026-10-30 hold.** `on_model_event` writes
+  a live `ticket-*` in every session, the next 06:35 run trades it, and
+  `hold-tickets` is gone. `scripts/ticket_data_check.py` leaves a buy off the
+  ticket, and the executor notifies Dom, when: EPS YoY is blank, or is ≥100% in
+  size on revenue growth under 30%, with no rule-15 ruling for the current
+  quarter; revenue growth is blank; the score moved ≥5 pts in 7 days; the name
+  fell ≥15% in 5 sessions; or a lookup failed. Sells and other buys still go, a
+  held-back buy waits for the next ticket, and a broken check lets no buy
+  through. Replayed on six past tickets it flagged the META, WDC and RDDT cases.
+  It checks buys only, so an exit caused by a bad score still trades, and the
+  monthly rebalance does not run it. The session stays read-only toward the
+  broker, and rule 29's one order writer is unchanged.
 - **Reporting:** a Notion page plus one notification when there is something
   to report. Every run, quiet or not, lands and merges one line in
   `tracking/scheduled-run-log.md` (Dom, 2026-10-12), so a missed run is a

@@ -43,10 +43,21 @@ def _exit_pending() -> set[str]:
         return set()
 
 
+def _skipped_buys(buy_check, orders: list[dict]) -> dict:
+    """Run the data check. If it breaks, no buy has been checked, so none go."""
+    if buy_check is None:
+        return {}
+    try:
+        return buy_check(orders)
+    except Exception as e:
+        return {o['ticker']: [f'data check failed ({e})']
+                for o in orders if o['side'] == 'buy'}
+
+
 def generate(target_weights: dict[str, float], event: dict, *,
              live_dir: Path = LIVE_DIR, prices_fn=None,
              now: str | None = None, no_buy=None,
-             held: bool = False) -> Path | None:
+             buy_check=None) -> Path | None:
     """Build + write the ticket. Returns the path, or None (flagged) when no
     reconciliation snapshot exists — deltas from assumed holdings are exactly
     the compounding error B2 forbids, so we refuse rather than guess."""
@@ -83,6 +94,11 @@ def generate(target_weights: dict[str, float], event: dict, *,
     no_buy = _exit_pending() if no_buy is None else set(no_buy)
     result = tt.compute_orders(target_weights, snap['positions'],
                                snap['cash'], prices, cfg, no_buy=no_buy)
+    skipped_buys = _skipped_buys(buy_check, result['orders'])
+    if skipped_buys:
+        result = tt.compute_orders(target_weights, snap['positions'],
+                                   snap['cash'], prices, cfg,
+                                   no_buy=no_buy | set(skipped_buys))
     for u in result['untradeable']:
         _flag(f"{u['ticker']}: {u['reason']}")
     for s in result['skipped']:
@@ -91,15 +107,18 @@ def generate(target_weights: dict[str, float], event: dict, *,
     now = now or dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     ticket = tt.build_ticket(result, basis_event=event, created_at=now,
                              cfg=cfg, account_state_as_of=snap['as_of'])
+    if skipped_buys:
+        ticket['skipped_buys'] = skipped_buys
+        for t, why in skipped_buys.items():
+            _flag(f"{t}: buy left off the ticket: {'; '.join(why)}")
 
     tdir = live_dir / 'tickets'
     tdir.mkdir(parents=True, exist_ok=True)
-    prefix = 'held-ticket' if held else 'ticket'
-    path = tdir / f"{prefix}-{ticket['ticket_id']}.json"
+    path = tdir / f"ticket-{ticket['ticket_id']}.json"
     n = 1
     while path.exists():   # append-only: a regenerated ticket is a NEW file (B3)
         n += 1
-        path = tdir / f"{prefix}-{ticket['ticket_id']}-{n}.json"
+        path = tdir / f"ticket-{ticket['ticket_id']}-{n}.json"
     path.write_text(json.dumps(ticket, indent=2) + '\n')
     f = ticket.get('funding') or {}
     print(f'ticket written: {path} ({len(ticket["orders"])} orders, '
@@ -150,8 +169,11 @@ def retire_superseded(tdir: Path, rdir: Path, *, keep: Path, now: str) -> list:
 def on_model_event(event: dict, weights: dict[str, float],
                    **kwargs) -> Path | None:
     """B1 hook target: refresh_targets calls this on every real fired event.
-    Rule 37: written held, so a model change never trades without Dom."""
-    return generate(weights, event, held=True, **kwargs)
+    Rule 37: the ticket trades at the next 06:35 run, minus any buy the data
+    check flags."""
+    import ticket_data_check
+    return generate(weights, event, buy_check=ticket_data_check.check_buys,
+                    **kwargs)
 
 
 def _targets_weights() -> tuple[dict[str, float], dict]:

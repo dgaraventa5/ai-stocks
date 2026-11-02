@@ -33,16 +33,16 @@ A scheduled run MUST NOT:
 - write a rule-15 EPS ruling (withheld cells stay withheld; list them);
 - remove, shorten or extend an entry hold; edit CLAUDE.md, the rubric,
   methodology bands, cohort membership or `capacity-mw.json`;
-- release a trade: every ticket the run generates is parked by
-  `scheduled_run.py hold-tickets`. Never call a Robinhood order/write tool,
-  never run `execute_ticket.py --confirm` (rule 29).
+- place a trade. Never call a Robinhood order/write tool, never run
+  `execute_ticket.py --confirm` (rule 29). A model event's ticket trades at the
+  next 06:35 executor run, not from the session.
 - touch `~/.hermes`, other sessions' branches, worktrees or untracked files.
 
-Every model event writes a `held-ticket-*`, in any session (2026-10-30). The
-06:35 executor sends Dom a reminder for an uncovered event and never writes
-that ticket itself. Known limit, stated plainly: the launchd executor's monthly
-rebalance (rule 29, 2026-10-05) trades to the Targets on the first trading day
-of each month regardless.
+Every model event writes a live ticket, in any session (2026-11-01). The next
+06:35 executor run trades it. `scripts/ticket_data_check.py` leaves flagged buys
+off that ticket and the executor notifies Dom; sells and other buys still go.
+The monthly rebalance (rule 29, 2026-10-05) is a separate path and does not run
+this check.
 
 ## Run sequence (every job)
 
@@ -59,8 +59,7 @@ of each month regardless.
    2026-10-12): nothing a run finds is left only in a chat or on this Mac,
    and a missed run shows up as a missing date. Put not-material and
    could-not-verify items in the line, briefly.
-4. **Hold + test.** `python3 scripts/scheduled_run.py hold-tickets`, then
-   `python3 -m pytest tests -q`. A quiet run whose only change is its log
+4. **Test.** `python3 -m pytest tests -q`. A quiet run whose only change is its log
    line skips this step (CI still gates the merge). On a test failure still run step 5's `land`
    (so the work is visible on a PR) but NOT `merge`; notify, release the lock,
    stop. The next run's preflight refuses until that PR is dealt with — loud
@@ -89,7 +88,7 @@ of each month regardless.
   `tracking/notion-scan-links.json`.
 - **Notification:** `python3 scripts/scheduled_run.py notify --message "<line>"`
   — a plain macOS notification, one line under 200 characters, leading with
-  what needs Dom ("PLTR re-scored 74→77, enters at rank 14; ticket HELD"). Do
+  what needs Dom ("PLTR re-scored 74→77, enters at rank 14; ticket trades at the next 06:35 run"). Do
   not use the in-app PushNotification tool: it skips delivery when the run's
   own window counts as active (2026-10-13).
 - **Quiet daily runs** make no Notion page and no notification, but they
