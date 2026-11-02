@@ -15,7 +15,8 @@ renderFooter();
       [fmtPct(s.total_return), 'Since inception', pctClass(s.total_return)],
       [fmtPct(s.vs_spy), 'vs S&amp;P 500', pctClass(s.vs_spy)],
       [String(meta.holdings), 'Holdings', ''],
-      [esc(meta.as_of), 'Data as of', 'dim'],
+      [esc(meta.as_of), 'Performance as of', 'dim'],
+      [esc(meta.scores_as_of ?? 'n/a'), 'Scores as of', 'dim'],
     ].map(([v, k, cls]) =>
       `<div class="stat"><div class="v ${cls}">${v}</div><div class="k">${k}</div></div>`
     ).join('');

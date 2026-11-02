@@ -35,6 +35,15 @@ TARGETS_HEADERS = ['Ticker', 'Layer', 'TOTAL', 'Tier', 'Rank', 'Status',
                    'Include?', 'Override', 'Target %', 'Notes']
 
 
+def scores_as_of(root: Path) -> str | None:
+    """Newest date in the score panel. Performance moves daily; scores don't."""
+    path = root / 'tracking' / 'score-history.csv'
+    if not path.exists():
+        return None
+    rows = path.read_text().splitlines()[1:]
+    return max((r.split(',', 1)[0] for r in rows if r.strip()), default=None)
+
+
 def fail(msg: str) -> NoReturn:
     print(f'EXPORT ERROR: {msg}', file=sys.stderr)
     raise SystemExit(1)
@@ -417,6 +426,7 @@ def main(root: Path | None = None) -> None:
         'generated_at': dt.datetime.now(dt.timezone.utc).isoformat(
             timespec='seconds'),
         'as_of': performance['as_of'],
+        'scores_as_of': scores_as_of(root),
         'last_rebalance': cfg['events'][-1]['date'],
         'holdings': len(positions),
         'scored': sum(1 for r in watchlist if r['score'] is not None),

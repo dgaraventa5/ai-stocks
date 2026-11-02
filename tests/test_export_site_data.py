@@ -298,3 +298,18 @@ def test_positions_without_holdings_block_still_export(repo, capsys):
     pos = json.loads((repo / 'site' / 'data' / 'positions.json').read_text())
     assert all(p['ret'] is None for p in pos)
     assert 'no holdings block' in capsys.readouterr().err
+
+
+def test_scores_as_of_is_the_newest_panel_date(tmp_path):
+    (tmp_path / 'tracking').mkdir()
+    (tmp_path / 'tracking' / 'score-history.csv').write_text(
+        'date,ticker,total_score,rank,tier\n'
+        '2026-10-30,AAA,80,1,x\n2026-11-02,AAA,81,1,x\n2026-10-31,BBB,70,2,x\n')
+    assert ex.scores_as_of(tmp_path) == '2026-11-02'
+
+
+def test_scores_as_of_is_empty_without_a_panel(tmp_path):
+    assert ex.scores_as_of(tmp_path) is None
+    (tmp_path / 'tracking').mkdir()
+    (tmp_path / 'tracking' / 'score-history.csv').write_text('date,ticker\n')
+    assert ex.scores_as_of(tmp_path) is None

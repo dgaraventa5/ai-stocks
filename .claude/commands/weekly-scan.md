@@ -70,6 +70,8 @@ with `--job weekly-scan`. Differences from an attended run:
 
    d. Compute the before/after Total Score for refreshed names. If any name's score moves by >5 points or crosses a tier boundary, flag with ⚠️ — this is a potential portfolio-level signal.
 
+   e. **Which quarter scores rest on.** After the refreshes, run `python3 scripts/input_currency.py --scope all`. It lists names whose newest earnings 8-K is on a later quarter than Yahoo's statements, so Last Updated moved but the inputs did not. Report them as behind, and treat exit 1 as could-not-check, never as all clear.
+
    **Why this exists:** During the 2026-05-26 MU review, 2-month-stale objective inputs after Q2 earnings caused a 14-point scoring error and a full tier miss (#23 → #4). The weekly scan already touches every name's 8-Ks; catching earnings and refreshing inputs in the same pass prevents this class of miss. If `/earnings-update` was already run on a name during the week, skip the refresh — don't duplicate work.
 
 7. **Portfolio pipeline + weekly mark (added 2026-06-09).** After any score refreshes from Step 6:
@@ -130,6 +132,7 @@ Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **💼 Portfolio pipeline** (ENTER/EXIT/pending/blocked changes; tier-change reallocations for existing holdings with old→new Target %; weekly mark vs benchmarks; any concentration flags)
 - **🩸 Capitulation flags** (Step 7d firings on exit-side names + forecasts logged; only if any)
 - **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
+- **🗓️ Inputs behind** (names from Step 6e whose scores rest on an old quarter; only if any)
 - **🎯 Calibration** (newly resolved forecasts + needs_review items from Step 9; only if any)
 - **🩺 Run health** (missed runs in the last 14 days, real workflow failures, any check that could not look; only if any)
 - **🔴 Live pipeline** (halt flag contents if raised; stale heartbeats; drift/regen flags from Step 10; only in attended runs)

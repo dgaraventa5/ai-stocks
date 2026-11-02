@@ -29,3 +29,4 @@ def test_only_the_shared_footer_writes_to_the_footer():
 def test_footer_states_the_disclaimer_and_data_date():
     common = (SITE / "js" / "common.js").read_text()
     assert "not investment advice" in common and "data as of" in common
+    assert "scores as of" in common and "meta.scores_as_of" in common
