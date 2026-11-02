@@ -206,3 +206,109 @@ def test_every_hit_lands_in_some_bucket():
                 "dateFiled": "2024-01-01", "dateTerminated": None,
                 "suitNature": "190 Contract: Other", "cause": "28:1332 Diversity"}
     assert not lc.is_securities(contract) and not lc.is_ip(contract)
+
+
+def _stub_get(monkeypatch, fake_get):
+    monkeypatch.setitem(__import__("sys").modules, "requests",
+                        type("m", (), {"get": staticmethod(fake_get)}))
+
+
+def _company(monkeypatch):
+    monkeypatch.setattr(lc, "_company_from_watchlist", lambda t: "Babcock Wilcox Inc")
+    monkeypatch.setattr(lc, "latest_periodic_filing", lambda t: None)
+
+
+def test_401_is_a_named_skip_and_a_failed_run(monkeypatch, capsys):
+    _company(monkeypatch)
+    _stub_get(monkeypatch, lambda *a, **k: _Resp(401))
+    assert lc.main(["BW", "--delay", "0"]) != 0
+    out = capsys.readouterr().out
+    assert "BW SKIPPED" in out and "401" in out and "COURTLISTENER_TOKEN" in out
+    assert "checked 0, skipped 1" in out
+
+
+def test_timeout_is_a_named_skip_and_a_failed_run(monkeypatch, capsys):
+    _company(monkeypatch)
+
+    def fake_get(*a, **k):
+        raise TimeoutError("read timed out")
+
+    _stub_get(monkeypatch, fake_get)
+    assert lc.main(["BW", "--delay", "0"]) != 0
+    out = capsys.readouterr().out
+    assert "BW SKIPPED" in out and "TimeoutError" in out
+    assert "checked 0, skipped 1" in out
+
+
+def test_mixed_run_counts_both_and_fails(monkeypatch, capsys):
+    _company(monkeypatch)
+    seq = [_Resp(200, {"results": []}), _Resp(401)]
+    _stub_get(monkeypatch, lambda *a, **k: seq.pop(0))
+    assert lc.main(["AAA", "BBB", "--delay", "0"]) != 0
+    assert "checked 1, skipped 1" in capsys.readouterr().out
+
+
+def test_clean_run_exits_zero(monkeypatch, capsys):
+    _company(monkeypatch)
+    _stub_get(monkeypatch, lambda *a, **k: _Resp(200, {"results": []}))
+    assert lc.main(["BW", "--delay", "0"]) == 0
+    assert "checked 1, skipped 0" in capsys.readouterr().out
+
+
+def test_token_is_sent_when_set(monkeypatch):
+    seen = {}
+
+    def fake_get(*a, **k):
+        seen.update(k["headers"])
+        return _Resp(200, {"results": []})
+
+    _stub_get(monkeypatch, fake_get)
+    monkeypatch.setenv("COURTLISTENER_TOKEN", "fictional-token")
+    lc.courtlistener_search("q", filed_after="2023-01-01")
+    assert seen["Authorization"] == "Token fictional-token"
+
+
+def test_no_auth_header_without_a_token(monkeypatch):
+    seen = {}
+
+    def fake_get(*a, **k):
+        seen.update(k["headers"])
+        return _Resp(200, {"results": []})
+
+    _stub_get(monkeypatch, fake_get)
+    monkeypatch.delenv("COURTLISTENER_TOKEN", raising=False)
+    lc.courtlistener_search("q", filed_after="2023-01-01")
+    assert "Authorization" not in seen
+
+
+def test_token_never_appears_in_a_skip_reason(monkeypatch):
+    # requests quotes the header value when it rejects one, and skip reasons
+    # get copied into committed briefings.
+    def fake_get(*a, **k):
+        raise ValueError(f"bad header: {k['headers']['Authorization']!r}")
+
+    _stub_get(monkeypatch, fake_get)
+    monkeypatch.setenv("COURTLISTENER_TOKEN", "fictional\ntoken\n")
+    _, skip = lc.courtlistener_search("q", filed_after="2023-01-01")
+    assert "fictional" not in skip and "ValueError" in skip
+
+
+def test_surrounding_whitespace_is_stripped_from_the_token(monkeypatch):
+    seen = {}
+
+    def fake_get(*a, **k):
+        seen.update(k["headers"])
+        return _Resp(200, {"results": []})
+
+    _stub_get(monkeypatch, fake_get)
+    monkeypatch.setenv("COURTLISTENER_TOKEN", " fictional-token\n")
+    lc.courtlistener_search("q", filed_after="2023-01-01")
+    assert seen["Authorization"] == "Token fictional-token"
+
+
+def test_rejected_token_is_not_told_to_set_a_token(monkeypatch):
+    _stub_get(monkeypatch, lambda *a, **k: _Resp(401))
+    monkeypatch.setenv("COURTLISTENER_TOKEN", "fictional-token")
+    _, skip = lc.courtlistener_search("q", filed_after="2023-01-01")
+    assert "rejected" in skip and "401" in skip and "fictional" not in skip
+    assert "set COURTLISTENER_TOKEN" not in skip

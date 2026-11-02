@@ -1,4 +1,5 @@
 renderNav('positions.html');
+renderFooter();
 
 // Growth-of-1 path since entry → a small inline SVG line. The dashed line is
 // the entry price, so above it = up since the model bought.

@@ -16,10 +16,13 @@ import zoneinfo
 from pathlib import Path
 
 from portfolio_sizing import is_tradable
+from scheduled_run import filings_in_window, scan_blocked
 
 ET = zoneinfo.ZoneInfo("America/New_York")
 DEFAULT_TOP_N = 25
 MAX_REPORT_AGE_DAYS = 5     # older unprocessed reports fall to the weekly cadence
+CALENDAR_MATCH_DAYS = 3     # a filing this close to a calendar date is that report
+NOT_CROSS_CHECKABLE = "not cross-checkable"   # no Item 2.02 8-Ks to compare against
 _OPEN = dt.time(9, 30)
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -90,6 +93,70 @@ def due_events(scope, calendar, latest_close, state, now):
     return out
 
 
+def filing_signal(recent: dict, today: dt.date):
+    """Fresh Item 2.02 8-K dates from a submissions `filings.recent` block.
+    A filer that reports on Form 6-K has none, so it can't be cross-checked."""
+    forms = recent.get("form", [])
+    if "6-K" in forms and "8-K" not in forms:
+        return NOT_CROSS_CHECKABLE
+    start = today - dt.timedelta(days=MAX_REPORT_AGE_DAYS)
+    return sorted(f["date"] for f in filings_in_window(recent, start, today, {"8-K"})
+                  if f["earnings"])
+
+
+def cross_check(out, scope, calendar, filings, state, now):
+    """Yahoo's calendar misses reports, so compare it to SEC's own record.
+    filings: {t: [dates] | "error" | NOT_CROSS_CHECKABLE}. Flags a fresh 8-K with
+    no calendar date near it; a report already re-scored is left alone."""
+    out["not_cross_checkable"] = sorted(
+        t for t in scope if filings.get(t) == NOT_CROSS_CHECKABLE)
+    tickers_state = state.get("tickers", {})
+    today = now.astimezone(ET).date()
+
+    def add_flag(t, reason):
+        prior = out["flagged"].get(t)
+        out["flagged"][t] = f"{prior}; {reason}" if prior else reason
+
+    def near(day, other):
+        return abs((day - other).days) <= CALENDAR_MATCH_DAYS
+
+    for t in scope:
+        found = filings.get(t)
+        if found == "error":
+            add_flag(t, "SEC filing lookup failed")
+            continue
+        if not found or found == NOT_CROSS_CHECKABLE:
+            continue
+        filed = dt.date.fromisoformat(found[-1])
+        dates = calendar.get(t)
+        # By date, not clock: a same-day report stamped later than this run counts.
+        listed = [d for d in (ts.astimezone(ET).date() for ts in dates)
+                  if d <= today] if isinstance(dates, list) else []
+        try:
+            rescored = dt.date.fromisoformat(tickers_state.get(t, {}).get("rescored", ""))
+        except ValueError:                 # mark() doesn't validate its date
+            rescored = None
+        if any(near(filed, d) for d in listed) or (rescored and near(filed, rescored)):
+            continue
+        add_flag(t, f"Item 2.02 8-K filed {found[-1]} is not on the earnings "
+                    f"calendar: check it was briefed and re-scored")
+    return out
+
+
+def lookups_blocked(calendar, latest_close, filings) -> bool:
+    """True when too many Yahoo or SEC lookups failed for a quiet result to mean
+    anything. Each source is judged alone so one can't dilute the other."""
+    def failed(values):
+        return sum(v == "error" for v in values)
+
+    # yfinance can answer a throttled calendar request with an empty table
+    yahoo = ["error" if v == [] else v for v in calendar.values()]
+    yahoo += latest_close.values()
+    sec = [v for v in filings.values() if v != NOT_CROSS_CHECKABLE]
+    return scan_blocked(len(yahoo), failed(yahoo)) or (
+        bool(sec) and scan_blocked(len(sec), failed(sec)))
+
+
 def load_state(path: Path = STATE_PATH) -> dict:
     path = Path(path)
     if not path.exists():
@@ -148,10 +215,31 @@ def _fetch_latest_close(tickers):
     for t in tickers:
         try:
             h = yf.Ticker(t).history(period="5d")
-            out[t] = h.index[-1].date() if len(h) else None
+            # yfinance returns an empty frame on a failed lookup, it doesn't raise
+            out[t] = h.index[-1].date() if len(h) else "error"
         except Exception:
             out[t] = "error"                             # → flagged downstream (I2)
         time.sleep(0.1)
+    return out
+
+
+def _fetch_earnings_filings(tickers, today):
+    from common import cik_for, sec_get                  # lazy (CI minimal-env)
+    out = {}
+    for t in tickers:
+        if "." in t:                                     # foreign local line
+            out[t] = NOT_CROSS_CHECKABLE
+            continue
+        try:
+            cik = cik_for(t)
+            if not cik:
+                out[t] = NOT_CROSS_CHECKABLE
+                continue
+            data = sec_get(f"https://data.sec.gov/submissions/CIK{cik}.json",
+                           host_data_sec=True).json()
+            out[t] = filing_signal(data.get("filings", {}).get("recent", {}), today)
+        except Exception:
+            out[t] = "error"                             # → flagged and counted
     return out
 
 
@@ -180,9 +268,17 @@ def main(argv=None) -> int:
                      <= MAX_REPORT_AGE_DAYS
                      for ts in calendar.get(t))]
     latest_close = _fetch_latest_close(recent)
-    out = due_events(scope, calendar, latest_close, load_state(STATE_PATH), now)
+    state = load_state(STATE_PATH)
+    filings = _fetch_earnings_filings(scope, now.astimezone(ET).date())
+    out = due_events(scope, calendar, latest_close, state, now)
+    cross_check(out, scope, calendar, filings, state, now)
     out["scope_size"] = len(scope)
+    out["blocked"] = lookups_blocked(calendar, latest_close, filings)
     print(json.dumps(out, indent=2, sort_keys=True))
+    if out["blocked"]:
+        print("SENTINEL BLOCKED: too many lookups failed — do not report this "
+              "run as quiet", file=sys.stderr)
+        return 1
     return 0
 
 

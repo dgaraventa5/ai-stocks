@@ -1,4 +1,5 @@
 renderNav('performance.html');
+renderFooter();
 
 (async () => {
   try {

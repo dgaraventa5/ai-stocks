@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import forecast_store as store
-from forecast_resolvers import RESOLVERS
+from forecast_resolvers import GRACE_DAYS, RESOLVERS
 
 
 def yfinance_price_loader(ticker: str, start_date: dt.date) -> dict:
@@ -31,8 +31,15 @@ def yfinance_price_loader(ticker: str, start_date: dt.date) -> dict:
             for idx, row in hist.iterrows() if row["Close"] == row["Close"]}  # drop NaN
 
 
+def _today() -> dt.date:
+    return dt.date.today()
+
+
 def resolve_due(today: dt.date, price_loader, dry_run: bool,
-                path: Path = store.FORECASTS_PATH) -> list[dict]:
+                path: Path = store.FORECASTS_PATH,
+                ungraded: list | None = None) -> list[dict]:
+    """Grade due forecasts. Ids that could not be graded yet go in `ungraded`."""
+    ungraded = [] if ungraded is None else ungraded
     due = [f for f in store.open_forecasts(path)
            if dt.date.fromisoformat(f["resolution_date"]) <= today]
     results = []
@@ -40,10 +47,23 @@ def resolve_due(today: dt.date, price_loader, dry_run: bool,
         resolver = RESOLVERS.get(f["template"])
         if resolver is None:
             store.flag(f'{f["id"]}: no resolver for template {f["template"]}')
+            ungraded.append(f["id"])
             continue
-        res = resolver(f, price_loader=price_loader, today=today)
-        if res.status == "open":
-            continue   # not gradable yet (insufficient bars within grace)
+        try:
+            res = resolver(f, price_loader=price_loader, today=today)
+        except Exception as e:   # yfinance raises on a 429, unlike a failed lookup
+            store.flag(f'{f["id"]}: price lookup failed ({type(e).__name__})')
+            ungraded.append(f["id"])
+            continue
+        grace_end = (dt.date.fromisoformat(f["resolution_date"])
+                     + dt.timedelta(days=GRACE_DAYS))
+        degraded = (res.status == "needs_review"
+                    and (res.evidence or "").startswith("cohort degraded"))
+        if res.status == "open" or (degraded and today <= grace_end):
+            # Not gradable yet. A brief Yahoo throttle on the peers must not
+            # write a permanent needs_review to the append-only log.
+            ungraded.append(f["id"])
+            continue
         snap = dict(f, status=res.status, outcome=res.outcome,
                     resolved_date=res.resolved_date,
                     resolution_evidence=res.evidence,
@@ -57,17 +77,23 @@ def resolve_due(today: dt.date, price_loader, dry_run: bool,
     return results
 
 
-def main() -> None:
+def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
-    today = dt.date.today()
-    results = resolve_due(today, yfinance_price_loader, args.dry_run)
+    ungraded: list = []
+    results = resolve_due(_today(), yfinance_price_loader, args.dry_run,
+                          ungraded=ungraded)
     resolved = sum(1 for r in results if r["status"] == "resolved")
     review = sum(1 for r in results if r["status"] == "needs_review")
-    print(f'\n{resolved} resolved, {review} need review'
+    print(f'\n{resolved} resolved, {review} need review, '
+          f'{len(ungraded)} could not be graded'
           + (' (dry run — nothing written)' if args.dry_run else ''))
+    if ungraded or review:
+        print('Some due forecasts got no grade: treat this as a failed run, not a quiet one.')
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

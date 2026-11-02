@@ -58,16 +58,34 @@ class RateLimiter:
 
 sec_limiter = RateLimiter()
 
+SEC_ATTEMPTS = 3
+SEC_RETRY_DELAY = 1.0     # seconds; doubles after each failed attempt
+SEC_RETRY_STATUS = {429, 500, 502, 503, 504}
+
 
 def sec_get(url: str, *, host_data_sec: bool = False, **kwargs) -> "requests.Response":
-    """GET against sec.gov / data.sec.gov with the right UA + throttle."""
+    """GET against sec.gov / data.sec.gov with the right UA + throttle.
+
+    Retries network errors, 429 and 5xx up to SEC_ATTEMPTS calls in all. Any
+    other status (404 included) is an answer, so it raises on the first call.
+    """
     import requests  # lazy: keeps common importable in the network-free deploy CI
-    sec_limiter.wait()
     headers = DATA_SEC_HEADERS if host_data_sec else SEC_HEADERS
     headers = {**headers, **kwargs.pop("headers", {})}
-    resp = requests.get(url, headers=headers, timeout=30, **kwargs)
-    resp.raise_for_status()
-    return resp
+    for attempt in range(SEC_ATTEMPTS):
+        last = attempt == SEC_ATTEMPTS - 1
+        sec_limiter.wait()
+        try:
+            resp = requests.get(url, headers=headers, timeout=30, **kwargs)
+        except (requests.ConnectionError, requests.Timeout,
+                requests.exceptions.ChunkedEncodingError):
+            if last:
+                raise
+        else:
+            if last or resp.status_code not in SEC_RETRY_STATUS:
+                resp.raise_for_status()
+                return resp
+        time.sleep(SEC_RETRY_DELAY * 2 ** attempt)
 
 
 def load_ticker_to_cik(force_refresh: bool = False) -> dict[str, str]:

@@ -45,6 +45,27 @@ function renderNav(active) {
   ).join('');
 }
 
+const STALE_AFTER_DAYS = 5;   // long weekend + one missed refresh is still normal
+
+async function renderFooter({ showScored = false } = {}) {
+  const footer = document.getElementById('footer');
+  if (!footer) return;
+  const base = '$10,000 notional base · not investment advice';
+  try {
+    const meta = await loadJSON('data/meta.json');
+    const age = Math.floor((Date.now() - new Date(`${meta.as_of}T00:00:00`)) / 86400000);
+    if (Number.isNaN(age)) throw new Error('bad as_of');
+    const stale = age > STALE_AFTER_DAYS
+      ? ` · <span class="stale-note">data is ${age} days old, the daily refresh may have stalled</span>`
+      : '';
+    const scored = showScored ? `${esc(meta.scored)} names scored · ` : '';
+    footer.innerHTML = `${scored}${base} · data as of ${esc(meta.as_of)}` +
+      ` · generated ${esc(meta.generated_at)}${stale}`;
+  } catch (e) {
+    footer.innerHTML = `${base} · <span class="stale-note">data date unavailable</span>`;
+  }
+}
+
 const CHART_COLORS = { model: '#3fb950', SMH: '#58a6ff', QQQ: '#bc8cff', SPY: '#e3b341', EW: '#8b949e',
   EW_ROSTER: '#56d364', INVVOL_ROSTER: '#f778ba', BAND_TOP: '#1f6feb', BAND_NEXT: '#d29922', BAND_TAIL: '#f85149' };
 

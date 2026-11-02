@@ -1,0 +1,16 @@
+^00-master/
+^per-stock/
+^tracking/
+^templates/
+^launchd/
+^\.github/workflows/
+^docs/ops/
+^\.claude/settings
+^\.claude/commands/(capex-update|compare|daily-watch|deep-dive|earnings-update|rating-research|refresh-context|refresh-objective|rescore-quarterly|score-movers|score-stock|sensitivity|thirteenf-delta|update-dashboard|weekly-scan)\.md$
+^\.claude/(loop\.md|off-limits\.txt|site_smoke\.py|agents/evaluator\.md|commands/audit\.md)$
+^scripts/(execute_ticket|executor_cron|trade_ticket|generate_trade_ticket|robinhood_auth|reconcile_account|trading_calendar|scheduled_run|scheduled_ops)\.py$
+^scripts/(recalc_watchlist|rebuild_watchlist_formulas|cohort_percentile|cohort_membership|p1_cohort_scoring|batch_score|refresh_objective_inputs|refresh_reverse_dcf|reverse_dcf|roic|fiscal_calendar|adr_currency|momentum_50dma|yfinance_fundamentals|xbrl_periods|price_source)\.py$
+^scripts/(refresh_targets|portfolio_sizing|position_sizing|portfolio_model|entry_gate|score_history|track_performance|migrate_[a-z_0-9]+)\.py$
+^scripts/(export_site_data|check_site|generated_data_pr)\.py$
+^site/_worker\.js$
+^tests/test_(privacy|export_site_data|targets_reweight_gate|portfolio_sizing)
