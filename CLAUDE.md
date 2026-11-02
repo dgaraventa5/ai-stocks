@@ -1195,3 +1195,48 @@ What I AM trying to optimize for:
 - **Read the actual 10-K** rather than relying on yfinance summaries.
 - **Ask before destructive operations.** Deleting files, overwriting whole sections of thesis.md, rebuilding spreadsheets — confirm first.
 - **Default to skepticism** about consensus narratives. The thesis is that most investors are pricing this wrong; act accordingly.
+
+## Self-improvement loop
+
+Everything from here to the end of this file applies ONLY to the improvement loop
+(`/audit`, `/loop`, the evaluator). It does not change any rule above, and scheduled
+research runs ignore it.
+
+### Goals
+Improve the system's plumbing so it can run for years without Dom watching it.
+- **Pipeline reliability:** scheduled runs, data refreshes, the site and its alerts must not fail silently or report "quiet" when they could not look.
+- **Research quality:** better tooling for catching thesis breaks, stale inputs and missing evidence. Tooling only: the loop never decides what a score or rating should be.
+- Audience: Dom, and the friends who read the site.
+
+### Off-limits
+The loop must never change any of these. `.claude/off-limits.txt` is the checkable list of paths; if a change needs one, record it as a note for Dom and leave it undone.
+- **Scoring and methodology:** bands, weights, cohorts, rubric, ratings, rulings, holds, the code that computes scores or positions, the workbooks, and tracking data.
+- **Order path:** ticket generation, the executor, broker login, reconciliation, launchd jobs, `tracking/live/`, and the permission rules in `.claude/settings.json`.
+- **Privacy gates:** the site exporter, the privacy tests and sanitizers, and the site password worker.
+- **Rules:** existing CLAUDE.md text. The loop may only add one-line rules under "Loop rules" below.
+- **Tests:** add them freely, but never delete, skip or loosen an existing one.
+- **The repository is public.** Never read `tracking/live/`, and never call a Robinhood tool. Never write real dollars, share counts or account details into any file, IMPROVEMENTS.md included.
+
+### Commands
+Run from the worktree root. All verified 2026-11-01.
+- Install: `pip install -r requirements.txt pytest`
+- Test: `python3 -m pytest tests -q` (about 10 seconds)
+- Syntax check: `python3 -m compileall -q scripts`
+- Build the site data: `python3 scripts/export_site_data.py && python3 scripts/check_site.py`
+- Site check at 375px and 1280px: `/Users/dom/Hermes/projects/ai-stocks/.venv/bin/python .claude/site_smoke.py`
+- Off-limits check, must print nothing: `git status --porcelain -uall | cut -c4- | grep -E -f .claude/off-limits.txt`
+- Dev server: `python3 -m http.server 8788 --directory site`, then http://localhost:8788
+- Not set up: no linter, no type-checker. `site/_worker.js` (the password gate) does not run on the local server.
+
+`tests/test_targets_reweight_gate.py` can go red on its own when an exit clock or entry hold comes due. That is rule 25 asking Dom's pipeline to act, not a defect. Leave it red and do NOT run `refresh_targets.py` to clear it.
+
+### Self-improvement workflow
+- Backlog lives in IMPROVEMENTS.md (Open / Done / Rejected).
+- /audit refills the backlog. The evaluator subagent verifies work before it is checked off.
+- Work happens on the `improvements` branch only, in `/Users/dom/Hermes/projects/ai-stocks-worktrees/improvements`, never in the main checkout (scheduled runs refuse to start unless it is a clean `main`). Never push. Never commit to main.
+- Stage files by explicit path (`git add -A` and `git add .` are denied).
+- Never delete a file. Record the proposal under the item and leave the decision to Dom.
+- Never run a script that writes project data: `refresh_*`, `recalc_watchlist.py --sync`, `track_performance.py`, `earnings_sentinel.py`, `scheduled_run.py`, or anything under Off-limits.
+- When a mistake happens twice, add a one-line rule under "Loop rules" below.
+
+### Loop rules
