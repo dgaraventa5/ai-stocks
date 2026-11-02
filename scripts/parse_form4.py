@@ -65,8 +65,9 @@ def _float(node, xpath: str, default: float = 0.0) -> float:
 
 
 def _is_10b5_1(doc_root) -> bool:
-    # Multiple ways filings flag a 10b5-1 plan
-    flag_nodes = doc_root.xpath("//rule10b5_1Flag/value")
+    # Multiple ways filings flag a 10b5-1 plan. aff10b5One is the form's own
+    # checkbox and is the authoritative one.
+    flag_nodes = doc_root.xpath("//aff10b5One | //rule10b5_1Flag/value")
     for n in flag_nodes:
         if (n.text or "").strip() in ("1", "true", "TRUE"):
             return True
@@ -164,10 +165,15 @@ def summarize(ticker: str, since: str | None = None) -> None:
 
     print(f"\n{'=' * 60}")
     print("M3 SIGNAL (per rubric):")
+    if parse_errors:
+        print(f"  UNCHECKED: {parse_errors} of {len(files)} Form 4 files could "
+              f"not be parsed, so the counts below are incomplete.")
     print(f"  Open-market PURCHASES (code P): {len(open_market_buys)}")
     if open_market_buys:
         for r in open_market_buys:
             print(f"    {r['date']} {r['reporter']}: {r['shares']:,.0f} sh @ ${r['price']:.2f}")
+    elif parse_errors:
+        print("    (none in the files that parsed — not a signal)")
     else:
         print("    (none — absence of buying is itself the signal)")
     print(f"  Discretionary open-market SALES (S, not 10b5-1): {len(open_market_sales)}")
