@@ -16,11 +16,32 @@ notify with the problems and stop.
 
 ## 2. Detect
 
+Run these three separately and note each exit code. Run together, only the
+last code would be seen.
+
 ```bash
-python3 scripts/earnings_sentinel.py                       # briefing_due / rescore_due / flagged
+python3 scripts/earnings_sentinel.py                       # briefing_due / rescore_due / flagged / blocked
+```
+
+```bash
 python3 scripts/scheduled_run.py scan-filings --scope watch --days 4 --out "$TMPDIR/filings.json"
+```
+
+```bash
 python3 scripts/refresh_targets.py --check                 # exit 1 = a model event is pending
 ```
+
+`earnings_sentinel.py` exit 1 (`blocked: true`) means too many Yahoo or SEC
+lookups failed — report the earnings check as UNCHECKED, never as quiet, and
+skip step 4 this run (nothing gets marked, so the re-score stays due).
+
+Every name in `flagged` is one the sentinel could not clear. Report a failed
+or missing lookup; do not guess. A flag naming an Item 2.02 8-K is an earnings
+report the calendar missed: brief it in step 3 with the filing date as
+`report_date` unless a briefing already covers it, and re-score it in step 4
+once a close after that date exists. Those marks clear the flag.
+`not_cross_checkable` lists filers with no 8-Ks to compare; that is normal and
+is not a flag.
 
 `scan-filings` exit 1 means SEC lookups failed — report the window as
 UNCHECKED, never as quiet. Drop filings already recorded in the name's
@@ -37,14 +58,17 @@ acquisition or divestiture, large financing, a regulator or court action, an
 auditor or going-concern change, a credible competitive or product shock.
 Price moves, analyst targets, dividends and conference appearances are not.
 
-**Quiet day** = nothing due, nothing material, `--check` green. Branch, then
+**Quiet day** = nothing due, nothing material, `--check` green, `flagged`
+empty, and the sentinel and `scan-filings` both exit 0. Branch, then
 `python3 scripts/scheduled_run.py log --text "quiet (scope N, filings F); <any
 not-material or could-not-verify items, one clause each>"`, then `land` and
 `merge` per the protocol, release the lock, and stop. No Notion page, no
 notification. Most days end here.
 
 On every other day, log one line the same way before landing (what reported,
-what moved, what needs Dom).
+what moved, what needs Dom, every flagged or UNCHECKED item). A day that is
+not quiet only because of a flag or failed lookup still gets the Notion page
+and notification: lead with what could not be checked.
 
 ## 3. Earnings — briefing phase (`briefing_due`, at most 8 names, highest rank first)
 
@@ -119,4 +143,4 @@ Per the protocol. Notion page `Daily Watch — {date}`:
 - **News** — one line per material item with its source link.
 - **Model** — events, exit clocks, entry holds added; and any buys the data check left off a ticket.
 - **Needs you** — rating proposals (yes/no each), EPS rulings, held ticket.
-- **Could not verify** — anything unchecked or undated.
+- **Could not verify** — anything unchecked or undated, and every `flagged` name with its reason.
