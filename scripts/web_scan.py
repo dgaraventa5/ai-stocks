@@ -2,7 +2,7 @@
 
 WHY THIS EXISTS
 ---------------
-The primary weekly-scan path (`weekly_scan_runner.py`) pulls
+The primary weekly-scan path (`scheduled_run.py scan-filings`) pulls
 `data.sec.gov/submissions/CIK{cik}.json` per ticker — a deterministic, dated list
 of every filing in the window. When SEC EDGAR egress is blocked (as it has been on
 every cloud session since 2026-06-12), the fallback is web search. Done ad-hoc, that
@@ -62,8 +62,8 @@ PORTFOLIO_PATH = ROOT / "00-master" / "portfolio.xlsx"
 PRIMARY_DOMAINS = ["sec.gov", "businesswire.com", "globenewswire.com", "prnewswire.com"]
 FILING_MIRROR_DOMAINS = ["stocktitan.net", "sec.gov"]
 
-# Foreign ADRs that don't file 8-Ks with EDGAR (home-market disclosure only). Kept in
-# sync with weekly_scan_runner.KNOWN_FOREIGN_NO_EDGAR; these still get a news query.
+# Foreign ADRs that don't file 8-Ks with EDGAR (home-market disclosure only). These
+# still get a news query.
 KNOWN_FOREIGN_NO_EDGAR = {"SBGSY", "TOELY", "BESIY", "ABBNY", "HTHIY", "SBGSY",
                           "5347.TWO", "HHUSF", "0981.HK"}
 

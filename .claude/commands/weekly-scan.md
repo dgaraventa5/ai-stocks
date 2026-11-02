@@ -58,7 +58,7 @@ with `--job weekly-scan`. Differences from an attended run:
    - Going concern or auditor changes
    - Legal/regulatory actions
 
-5. **Also check** for new 13F-HR filings from tracked funds in the past 7 days. If found, note them — these can be followed up with `/thirteenf-delta`.
+5. **Also check** for new 13F-HR filings in the past 7 days from the funds listed in `.claude/commands/thirteenf-delta.md` (tracked and watch-only). If found, note them — these can be followed up with `/thirteenf-delta`.
 
 6. **Earnings-triggered objective refresh (Rule #9).** For any ticker where the 8-K scan surfaced quarterly earnings results (Item 2.02 "Results of Operations and Financial Condition"):
 

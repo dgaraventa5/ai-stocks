@@ -8,8 +8,6 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 ## Needs Dom
 <!-- Findings the loop must not act on: they touch Off-limits paths, need a deletion, or need something only Dom can do. The loop never works these. Approved items are done in an attended session; declined items move to Rejected. -->
 
-- [ ] Retire nine finished one-off scripts — they have no remaining job and most can overwrite live workbooks; six hardcode the main checkout's path, so running one from a worktree still writes to main (`add_50dma_metric`, `apply_compzone_rerate`, `apply_ep_moat_fix`, `apply_layer1_rerate`, `apply_layer1_rerate_batch2`, `batch_robotics_20260802`, `build_workbooks`, `remove_ctra`, `reweight_and_add_peg`). Decision: delete them? They stay in git history.
-- [ ] Retire `scripts/weekly_scan_runner.py` — frozen on a September window, turns SEC errors into "no filings", and the README still calls it primary (`:37-38`, `:108-109`). Move its six 13F fund CIKs somewhere tracked first. Decision: delete it?
 - [ ] Upgrade local packages — certifi, urllib3 and soupsieve on this Mac carry published advisories, reachability unchecked. The executor runs on Homebrew Python, so pinning `requirements.txt` does not reach it. Action: Dom upgrades Homebrew Python packages.
 - [ ] Get a CourtListener token — the litigation check returns 401 for every name without one. Action: Dom creates a free account; the code side is done.
 - [ ] Track hyperscaler capex and thesis-break triggers — `tracking/hyperscaler-capex.xlsx` has no inputs filled, `/capex-update` has no caller, and 11 of 17 portfolio names have a placeholder break trigger. Decision: who writes the triggers, and should a read-only `scripts/thesis_watch.py` be wired into `/weekly-scan`?
@@ -22,6 +20,7 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 
 ## Done
 
+- [x] Retire the ten finished scripts — the nine one-offs and `weekly_scan_runner.py` are deleted, approved by Dom 2026-11-02, and stay in git history. The six watch-only 13F funds now live in `.claude/commands/thirteenf-delta.md`, and `/weekly-scan` reads them there.
 - [x] Pin the CI test tools — every workflow now installs from pinned files (`requirements-test.txt` holds pytest and openpyxl), and a test fails any unpinned `pip install` line. Attended fix, approved by Dom 2026-11-02.
 - [x] Stop failed lookups counting as a quiet day — `/daily-watch` now runs its three detect commands separately, and a quiet day needs an empty `flagged` plus a clean exit from the sentinel and `scan-filings`. A blocked run skips the re-score, and a flagged 8-K gets briefed and re-scored so the flag clears. Attended fix, approved by Dom 2026-11-02. A normal day's `flagged` was not measured because a live sentinel run was refused, so a name that stays flagged would send a report every day until it clears.
 - [x] Run health check: detect missed runs and sort failed workflows — `scripts/run_health.py` lists 10-21 and 10-22 as missed and 10-25 as late, labels failed runs by-design or real, and writes nothing (`5b12ac93`). Dom chose to commit after a fourth evaluation failed on test gaps only; those gaps were closed afterwards and no evaluator has reviewed the closing tests.

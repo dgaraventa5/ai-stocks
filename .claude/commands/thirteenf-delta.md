@@ -10,6 +10,21 @@ Check for new 13F-HR filings from tracked funds. Refer to CLAUDE.md.
 
 (Add more funds here over time as instructed.)
 
+## Watch-only funds
+
+`/weekly-scan` checks whether these filed a new 13F. Their holdings are not processed here.
+
+| Fund | CIK |
+|---|---|
+| Berkshire Hathaway | 0001067983 |
+| Baillie Gifford | 0001088875 |
+| Tiger Global | 0001167483 |
+| Coatue Management | 0001135730 |
+| Whale Rock Capital | 0001387322 |
+| Lone Pine Capital | 0001061165 |
+
+Baillie Gifford, Coatue and Whale Rock were checked against EDGAR's submissions JSON on 2026-09-18, after wrong CIKs returned plausible data for other filers. Check a fund's name on EDGAR before adding it.
+
 **This command is designed for `/goal` mode.**
 
 ## Completion criteria
