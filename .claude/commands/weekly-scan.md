@@ -107,7 +107,7 @@ with `--job weekly-scan`. Differences from an attended run:
    python3 scripts/audit_rating_integrity.py --summary
    python3 scripts/audit_rating_integrity.py   # full, if the summary shows any violations
    ```
-   Report GATE violations (names carrying AI ratings with no thesis and no research briefing — their ratings are unbacked and should not be trusted) and STALE names (>90d since last research-backed review). These don't block the scan, but a GATE violation in a *portfolio holding* is a flag to surface prominently. The biweekly scheduled refresh routine handles the rotation; this step is the weekly check that it's keeping up.
+   Report GATE violations (names carrying AI ratings with no thesis and no research briefing, or held / top-25 names whose only briefing is over 90 days old — their ratings are unbacked and should not be trusted; an UNCHECKED line means the held / top-25 lookup failed, so report it as unchecked, never as clean) and STALE names (>90d since last research-backed review). These don't block the scan, but a GATE violation in a *portfolio holding* is a flag to surface prominently. The biweekly scheduled refresh routine handles the rotation; this step is the weekly check that it's keeping up.
 
 9. **Resolve due forecasts (calibration loop, Rule #17, added 2026-06-26).** Grade any forecasts whose `resolution_date` has arrived:
    ```bash

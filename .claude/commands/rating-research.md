@@ -18,7 +18,8 @@ python3 scripts/audit_rating_integrity.py --stalest 12
 ```
 
 Order of priority:
-1. any GATE violation (rated with no thesis and no briefing) — holdings first;
+1. any GATE violation (rated with no thesis and no briefing, or a held or
+   top-25 name whose only briefing is over 90 days old) — holdings first;
 2. current holdings and top-25 names whose newest briefing is over 30 days old
    (these are the names the rule-35 entry gate would defer);
 3. the stalest remaining names, rotating layers so one layer does not take
