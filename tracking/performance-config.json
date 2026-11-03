@@ -1626,6 +1626,21 @@
           "LRCX",
           "APH"
         ]
+      },
+      {
+        "date": "2026-11-02",
+        "roster": [
+          "STX",
+          "META",
+          "GMED",
+          "APP",
+          "RDDT",
+          "NVT",
+          "RMBS",
+          "LRCX",
+          "APH",
+          "GOOGL"
+        ]
       }
     ],
     "BAND_TAIL": [
@@ -1927,6 +1942,26 @@
           "POWL",
           "AAON",
           "ARM"
+        ]
+      },
+      {
+        "date": "2026-11-02",
+        "roster": [
+          "AMZN",
+          "TER",
+          "ORCL",
+          "SNPS",
+          "KLAC",
+          "TT",
+          "ONTO",
+          "BE",
+          "FN",
+          "PWR",
+          "NXT",
+          "CGNX",
+          "POWL",
+          "ARM",
+          "AAON"
         ]
       }
     ],

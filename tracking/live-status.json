@@ -1,20 +1,11 @@
 {
-  "as_of": "2026-10-30",
-  "halted": true,
-  "positions": 18,
+  "as_of": "2026-11-02",
+  "halted": false,
+  "positions": 17,
   "open_orders": 0,
   "drift_flags": [
-    "ALAB",
-    "ANET",
-    "CRDO",
-    "EME",
-    "FIX",
-    "GMED",
-    "LRCX",
-    "META",
-    "PLTR",
-    "RDDT",
-    "SNDK"
+    "MSFT",
+    "PLTR"
   ],
   "regen_needed": [],
   "anomaly_count": 0,
