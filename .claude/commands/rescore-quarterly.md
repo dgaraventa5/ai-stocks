@@ -14,7 +14,9 @@ sequence and limits exactly, with `--job quarterly-rescore`. Differences from an
 attended run:
 
 - **Before step 0**, run `python3 scripts/audit_rating_integrity.py --summary`.
-  A GATE violation goes at the top of the report as a failure, and the rescore
+  A GATE violation (including a held or top-25 name whose only briefing is
+  over 90 days old) goes at the top of the report as a failure; an UNCHECKED
+  line goes there as "could not check", never as clean. The rescore
   continues for every other name (rule 12). Rating changes are proposals in
   `tracking/rating-proposals.md`, never applied.
 - **Step 0** is bounded: `/refresh-context` for at most 8 names, holdings first,
