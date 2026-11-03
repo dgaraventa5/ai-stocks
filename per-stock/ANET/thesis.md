@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17 [STALE - revisit: Q1 2026 earnings reported 2026-05-05; full thesis build-out needed]
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** Meta or Microsoft (42% of FY2025 revenue) drops below 10% of annual revenue after moving AI networks to a rival, OR Arista cuts its $3.5B AI-fabric target tied to lost deals. (draft, awaiting Dom's review)
+**Thesis-break trigger:** Meta or Microsoft (42% of FY2025 revenue) drops below 10% of annual revenue after moving AI networks to a rival, OR Arista cuts its $3.5B AI-fabric target tied to lost deals.
 
 ---
 

@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** Backlog ($17.81B at Q3 2026) falls two straight quarters, OR gross margin falls below 23.6%, the nine-month 2025 level, for two straight quarters. (draft, awaiting Dom's review)
+**Thesis-break trigger:** Backlog ($17.81B at Q3 2026) falls two straight quarters, OR gross margin falls below 23.6%, the nine-month 2025 level, for two straight quarters.
 
 ---
 

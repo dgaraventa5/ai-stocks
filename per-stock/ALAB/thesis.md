@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17 [STALE - revisit: Q1 2026 earnings reported May 5; Scorpio pivot accelerating, margin guide declining, 2027 pipeline significantly de-risked]
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** The lead Scorpio X customer moves its racks to a rival switch, OR revenue falls two straight quarters with no second Scorpio X customer shipping in volume. (draft, awaiting Dom's review)
+**Thesis-break trigger:** The lead Scorpio X customer moves its racks to a rival switch, OR revenue falls two straight quarters with no second Scorpio X customer shipping in volume.
 
 ---
 

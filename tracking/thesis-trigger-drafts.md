@@ -8,7 +8,7 @@ MSFT, SNDK and TSM have weak support in their newest briefing, so look at those 
 
 ## Review, 2026-11-02 (Dom asked Claude to review)
 
-A second pass checked every number against its cited briefing: all match, and no trigger is met today. Five were changed in `thesis.md`; the sections below are the original drafts and their notes. All 11 stay marked as drafts until Dom approves.
+A second pass checked every number against its cited briefing: all match, and no trigger is met today. Five were changed in `thesis.md`; the sections below are the original drafts and their notes. Dom approved all 11 on 2026-11-02, and the draft markers were removed.
 
 - **TSM:** names NVIDIA or AMD and the main compute die. The generic "a top AI-chip customer moves a flagship chip" could already count Microsoft's Maia 2 on Intel 18A (context-2026-06-12 §3 item 5). An I/O-die-only move does not count.
 - **SNDK:** adds a third route, a customer defaulting on, cancelling or cutting a long-term supply contract (NBM). Backlog is cited as the 10-K's $59.8B (context-2026-10-18 §2), not the call's $93.9B, which only secondary summaries carry.

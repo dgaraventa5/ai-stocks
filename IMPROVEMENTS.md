@@ -10,12 +10,12 @@ Format: - [ ] Title — why it matters (evidence). Done when: <checkable conditi
 
 - [ ] Upgrade local packages — certifi, urllib3 and soupsieve on this Mac carry published advisories, reachability unchecked. The executor runs on Homebrew Python, so pinning `requirements.txt` does not reach it. Action: Dom upgrades Homebrew Python packages.
 - [ ] Get a CourtListener token — the litigation check returns 401 for every name without one. Action: Dom creates a free account; the code side is done.
-- [ ] Approve the 11 drafted thesis-break triggers — reviewed 2026-11-02: every number matches its briefing, none is met today, and TSM, SNDK, PLTR, MSFT and CRDO were edited (changes in `tracking/thesis-trigger-drafts.md`). MSFT's OpenAI route is still weakly sourced. Action: Dom approves, then the draft markers come off.
 - [ ] Decide whether to track hyperscaler capex — `tracking/hyperscaler-capex.xlsx` has no inputs filled and `/capex-update` has no caller. Decision: schedule it, or retire the tracker?
 - [ ] Pre-approve the new read-only scripts — `run_health.py`, `input_currency.py` and `thesis_watch.py` are not in `.claude/settings.json`, nor is `portfolio_theses.py`, which already runs. Scheduled runs may still allow them, and the 2026-11-07 weekly scan will be the first real test. Action: Dom adds them if that run is blocked.
 
 ## Done
 
+- [x] Approved the 11 thesis-break triggers — Dom approved them 2026-11-02 after the review pass, and the draft markers are off. MSFT's OpenAI route is still weakly sourced, and ALAB, ANET, PLTR, NVDA and CRDO baselines need updating after this month's reports. Only the Saturday scan checks triggers; Dom declined a daily-watch check for now.
 - [x] Expired research fails the gate for held and top-25 names — a held or top-25 name whose only research is a briefing past 90 days now fails `audit_rating_integrity.py`, `--stalest` puts it first, and a failed holdings lookup exits nonzero as UNCHECKED. Other expired names are reported only. Rule 12 amended. Approved by Dom 2026-11-02. On 2026-11-02 it found 0 such names (123 expired, all outside held and top 25), so nothing goes red today.
 - [x] Removed the retired trade-hold step — the daily watch, weekly scan and rating research prompts were updated in the app, and `/daily-watch`, `/weekly-scan` and `docs/ops/scheduled-runs.md` now say model-event tickets trade at the next 06:35 run. Approved by Dom 2026-11-02. The 2026-11-02 daily watch ran on the old prompt.
 - [x] Add the thesis-break watch — `scripts/thesis_watch.py` prints every portfolio trigger, and `/weekly-scan` compares the week's news to them. Approved by Dom 2026-11-02. Drafts stay marked until Dom reviews them (Needs Dom).

@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** GAAP gross margin falls below 75% for two straight quarters (85.0% in Q1 FY27), OR datacenter revenue ($4.8B in Q1 FY27) falls two straight quarters, OR a customer defaults on, cancels, or cuts the volume or floor price of a long-term supply contract (NBM; $59.8B contracted backlog at FY26 year-end). (draft, awaiting Dom's review)
+**Thesis-break trigger:** GAAP gross margin falls below 75% for two straight quarters (85.0% in Q1 FY27), OR datacenter revenue ($4.8B in Q1 FY27) falls two straight quarters, OR a customer defaults on, cancels, or cuts the volume or floor price of a long-term supply contract (NBM; $59.8B contracted backlog at FY26 year-end).
 
 ---
 
