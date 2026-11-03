@@ -76,6 +76,8 @@ with `--job weekly-scan`. Differences from an attended run:
 
    e. **Which quarter scores rest on.** After the refreshes, run `python3 scripts/input_currency.py --scope all`. It lists names whose newest earnings 8-K is on a later quarter than Yahoo's statements, so Last Updated moved but the inputs did not. Report them as behind, list every COULD NOT CHECK name and any US-listed NOT CHECKABLE name, since its statements were never compared, and treat exit 1 as could-not-check, never as all clear. BEHIND is a prompt to look: the 8-K can be a preliminary release or a presentation.
 
+   f. **Hyperscaler capex.** Run `python3 scripts/hyperscaler_capex.py --write` every week. It fills `tracking/hyperscaler-capex.xlsx` with each of MSFT, GOOGL, AMZN, META and ORCL's quarterly capex from SEC filings and writes nothing when no new quarter has been filed. It prints the combined total for the latest complete quarters. Exit 1 means a company could not be read, or is two or more quarters behind the others (most likely a changed XBRL tag); name it. For any of the five that reported this week, follow `/capex-update {T}` for the guidance part.
+
    **Why this exists:** During the 2026-05-26 MU review, 2-month-stale objective inputs after Q2 earnings caused a 14-point scoring error and a full tier miss (#23 → #4). The weekly scan already touches every name's 8-Ks; catching earnings and refreshing inputs in the same pass prevents this class of miss. If `/earnings-update` was already run on a name during the week, skip the refresh — don't duplicate work.
 
 7. **Portfolio pipeline + weekly mark (added 2026-06-09).** After any score refreshes from Step 6:
@@ -138,6 +140,7 @@ Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
 - **🧨 Thesis-break triggers** (any that fired this week, with source, and any name with no trigger; only if any)
 - **🗓️ Inputs behind** (names from Step 6e whose scores rest on an old quarter, and any it could not check; only if any)
+- **🏗️ Hyperscaler capex** (Step 6f: new quarters filed, combined total vs a year earlier, any guidance change over 5%, any company it could not read; only if any)
 - **🎯 Calibration** (newly resolved forecasts + needs_review items from Step 9; only if any)
 - **🩺 Run health** (missed runs in the last 14 days, real workflow failures, any check that could not look; only if any)
 - **🔴 Live pipeline** (halt flag contents if raised; stale heartbeats; drift/regen flags from Step 10; only in attended runs)

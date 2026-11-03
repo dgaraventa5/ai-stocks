@@ -8,34 +8,24 @@ $ARGUMENTS must be one of: MSFT, GOOGL, AMZN, META, ORCL.
 
 ## Steps
 
-1. **Pull the latest 10-Q** for $ARGUMENTS from SEC EDGAR.
-
-2. **Extract capex** from the cash flow statement. The line item is typically:
+1. **Actuals.** Run `python3 scripts/hyperscaler_capex.py --write`. It reads every company's cash-flow capex line from SEC filings, splits the year-to-date figures into single quarters, and writes them to the "Capex by quarter" sheet in USD millions, with each value cited in the "Sources" sheet (a computed quarter, such as Q4 = full year − 9 months, names both filings). Lines used:
    - MSFT: "Additions to property and equipment"
-   - GOOGL: "Purchases of property and equipment"
-   - AMZN: "Purchases of property and equipment, including internal-use software and website development, net"
-   - META: "Purchases of property and equipment"
+   - GOOGL, META: "Purchases of property and equipment"
+   - AMZN: "Purchases of property and equipment, including internal-use software and website development"
    - ORCL: "Capital expenditures"
 
-3. **Find the earnings call transcript** for the corresponding quarter. Search for "capital expenditure," "capex," or "capacity" — pull forward capex guide (next quarter, full year). If the company has shifted from FY guide to longer-term guide (e.g., AMZN sometimes), capture both.
+   A quarter sits under the calendar quarter it ends in (Oracle's August quarter is Q3). If the 10-Q is not filed yet, the press-release figure goes in the report, not the sheet; the next run picks up the filing. Exit 1 means a company could not be read, or is two or more quarters behind the others (most likely a changed XBRL tag): say so, never fill it by hand.
 
-4. **Update the spreadsheet** for $ARGUMENTS row:
-   - Latest quarterly capex actual
-   - TTM capex (sum trailing 4 quarters)
-   - YoY growth %
-   - Forward guide (next quarter and/or full year)
-   - Delta vs. prior guide
-   - Date of update
+2. **Guidance.** Read the earnings call transcript for the quarter. Search for "capital expenditure", "capex" or "capacity" and pull the forward guide (next quarter, full year, and any longer-term guide).
 
-5. **Recalculate combined metrics** in the summary section:
-   - Combined hyperscaler TTM capex (sum across all 5)
-   - Combined YoY %
-   - Trend direction (accelerating / steady / decelerating)
+3. **Record it** in the "Guidance & commentary" sheet: one row per data point with date, ticker, source (link or filing), the quote or figure, and its implication. Note the change against the prior guide.
 
-6. **Flag** any guide revision >5% in either direction. These are thesis-relevant for everyone in the supply chain.
+4. **Combined trend.** The script prints the combined total for the two latest quarters all five have filed, with the change on a year earlier (the sheet's TOTAL and YoY % rows are formulas that compute the same once opened). Say whether combined spending is accelerating, steady or decelerating.
+
+5. **Flag** any guide revision over 5% in either direction. These matter for everyone in the supply chain.
 
 ## Report
 
-- $ARGUMENTS-specific changes
+- $ARGUMENTS: latest quarter's capex, change on a year earlier, and the new guide
 - Combined hyperscaler trend after this update
-- Anything thesis-relevant for my supply chain watchlist (e.g., "MSFT raised FY capex guide by 8% — bullish for VRT, GEV, BE")
+- Anything thesis-relevant for the supply chain watchlist (e.g., "MSFT raised FY capex guide by 8% — bullish for VRT, GEV, BE")

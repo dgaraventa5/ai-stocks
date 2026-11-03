@@ -79,6 +79,8 @@ dimensions look affected. Append one line to `news-log.md`. Mark with
 `python3 scripts/earnings_sentinel.py --mark briefed {T} {report_date}`.
 A revenue or EPS surprise beyond ±15%, or gross margin moving more than
 500bps sequentially, is a rule-9 immediate flag — lead the report with it.
+If the name is MSFT, GOOGL, AMZN, META or ORCL, also follow `/capex-update {T}`:
+their spending is the demand behind every other name.
 
 ## 4. Earnings — re-score phase (`rescore_due`, once for the whole set)
 
