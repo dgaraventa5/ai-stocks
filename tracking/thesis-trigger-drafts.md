@@ -6,6 +6,19 @@ A trigger is a prompt for review. It changes no rating and trades nothing.
 
 MSFT, SNDK and TSM have weak support in their newest briefing, so look at those first.
 
+## Review, 2026-11-02 (Dom asked Claude to review)
+
+A second pass checked every number against its cited briefing: all match, and no trigger is met today. Five were changed in `thesis.md`; the sections below are the original drafts and their notes. All 11 stay marked as drafts until Dom approves.
+
+- **TSM:** names NVIDIA or AMD and the main compute die. The generic "a top AI-chip customer moves a flagship chip" could already count Microsoft's Maia 2 on Intel 18A (context-2026-06-12 §3 item 5). An I/O-die-only move does not count.
+- **SNDK:** adds a third route, a customer defaulting on, cancelling or cutting a long-term supply contract (NBM). Backlog is cited as the 10-K's $59.8B (context-2026-10-18 §2), not the call's $93.9B, which only secondary summaries carry.
+- **PLTR:** re-baselined to Q3: US commercial +148% (context-2026-11-02, 8-K). Q3 net dollar retention is not out yet, so 157% stays the Q2 figure. A possible third route, US commercial remaining deal value (growth fell from +124% to +79%), was left out.
+- **MSFT:** the OpenAI route now also counts a deferral or a move off Azure. It is still weakly sourced: the commitment is quoted only through a call recap (context-2026-10-18 §3 item 2).
+- **CRDO:** names the 10-Q's end customers D and C, because the order shifted last quarter.
+- **ASML, ANET, ALAB, EME, FIX, NVDA:** kept. ASML's 2026 sales guide and ANET's $3.5B FY2026 target need replacing when next year's figures are set.
+
+Baselines going stale: ALAB and ANET report 2026-11-03, PLTR's call and 10-Q follow, NVDA reports about 11-17 and CRDO about 11-30.
+
 ## MSFT (weak support)
 
 **Trigger:** Azure growth (48% in FQ1 FY27) falls below 30% for two straight quarters while capex keeps rising, OR Microsoft discloses that OpenAI has reduced its contracted Azure commitment.

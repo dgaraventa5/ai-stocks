@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-25
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** A top-two end customer (33% and 28% of Q1 FY27 revenue) stays below 10% for two straight quarters, OR Credo cuts its FY27 growth outlook of above 85% tied to a lost AEC program. (draft, awaiting Dom's review)
+**Thesis-break trigger:** Customer D or C (33% and 28% of Q1 FY27 revenue in the 10-Q's end-customer table) stays below 10% for two straight quarters, OR Credo cuts its FY27 growth outlook of above 85% because of a lost AEC program. (draft, awaiting Dom's review)
 
 ---
 

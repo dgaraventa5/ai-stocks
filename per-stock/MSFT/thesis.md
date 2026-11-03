@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** Azure growth (48% in FQ1 FY27) falls below 30% for two straight quarters while capex keeps rising, OR Microsoft discloses that OpenAI has reduced its contracted Azure commitment. (draft, awaiting Dom's review)
+**Thesis-break trigger:** Azure growth (48% in FQ1 FY27) falls below 30% for two straight quarters while capex keeps rising, OR Microsoft discloses that OpenAI has reduced, deferred or moved off Azure part of its contracted commitment. (draft, awaiting Dom's review)
 
 ---
 
