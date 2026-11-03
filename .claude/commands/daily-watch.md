@@ -134,7 +134,7 @@ dates or status notes.
 Report exactly what the model did: entered, exited, clock started (and the
 date it can confirm), deferred by the entry gate, or nothing.
 
-## 7. Hold, test, land, report
+## 7. Test, land, report
 
 Per the protocol. Notion page `Daily Watch — {date}`:
 
@@ -142,5 +142,5 @@ Per the protocol. Notion page `Daily Watch — {date}`:
 - **Earnings** — table: ticker, result vs consensus, score and rank before → after.
 - **News** — one line per material item with its source link.
 - **Model** — events, exit clocks, entry holds added; and any buys the data check left off a ticket.
-- **Needs you** — rating proposals (yes/no each), EPS rulings, held ticket.
+- **Needs you** — rating proposals (yes/no each), EPS rulings, buys the data check left off a ticket.
 - **Could not verify** — anything unchecked or undated, and every `flagged` name with its reason.

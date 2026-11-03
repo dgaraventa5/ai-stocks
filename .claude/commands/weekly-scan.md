@@ -21,7 +21,9 @@ with `--job weekly-scan`. Differences from an attended run:
   `python3 scripts/momentum_50dma.py`, `python3 scripts/refresh_reverse_dcf.py`
   and `python3 scripts/recalc_watchlist.py --sync`.
 - **Step 7** — `recalc --sync` already ran the portfolio step; do not run
-  `refresh_targets.py` a second time. Any ticket is held, not released.
+  `refresh_targets.py` a second time. A model event's ticket trades at the
+  next 06:35 executor run (rule 37, 2026-11-01); report what it will do and
+  any buys the data check left off it.
   Then run `python3 scripts/portfolio_theses.py` and write a rule-39 thesis
   for any name it lists.
 - **Step 8** — rating changes are proposals in `tracking/rating-proposals.md`,

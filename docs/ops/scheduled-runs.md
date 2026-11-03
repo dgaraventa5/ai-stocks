@@ -17,7 +17,7 @@ Claude desktop app must be open and the Mac awake; a missed run fires at the
 next launch. Machine-local state (`tracking/earnings-sentinel-state.json`,
 `tracking/live/`, `.cache/`) is why a worktree is not used.
 
-## Autonomy (Dom, 2026-10-12): "rescore, hold trades"
+## Autonomy (Dom, 2026-10-12; trading amended 2026-11-01)
 
 A scheduled run MAY, without asking:
 - write briefings (`per-stock/{T}/context-{date}.md`), news-log lines, cached filings;
@@ -103,12 +103,16 @@ this check.
 
 Plain English, decision first. Every number cites its source (rule 1). A gap
 is stated as a gap (rule 3). Each report ends with **"Needs you"**: rating
-proposals awaiting a yes/no, EPS rulings, held tickets, expiring entry holds.
+proposals awaiting a yes/no, EPS rulings, buys the data check left off a
+ticket, expiring entry holds.
 
-## Releasing a held trade
+## Buys the data check left off
 
-In an attended session: say "release the held ticket". Held tickets go stale
-(2-trading-day expiry, 3% quote drift), so release means regenerating from a
-fresh reconciliation with `python3 scripts/generate_trade_ticket.py`. That
-writes a live `ticket-*`, so it sends at the next 06:35 run, or sooner if Dom
-runs `python3 scripts/execute_ticket.py --ticket <path> --confirm` himself.
+A buy that `ticket_data_check.py` flags waits for the next ticket; the rest of
+the ticket still trades. To place it sooner, fix or rule on the flagged data in
+an attended session, then regenerate from a fresh reconciliation with
+`python3 scripts/generate_trade_ticket.py`. A manual run does not repeat the
+data check (only a model event's ticket does), so look at the flag before
+regenerating. The ticket sends at the next 06:35 run, or
+sooner if Dom runs `python3 scripts/execute_ticket.py --ticket <path> --confirm`
+himself.
