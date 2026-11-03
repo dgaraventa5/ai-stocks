@@ -58,6 +58,46 @@ def test_degraded_cohort_needs_review():
     assert res.status == "needs_review" and "degraded" in res.evidence
 
 
+def test_thinned_cohort_waits_out_grace_then_grades_on_the_same_rule():
+    peers = ("NVDA", "MU", "AMD", "TSM", "ASML")
+    table = {"AVGO": _ramp(100, 0.05), "NVDA": _ramp(100, 0.01), "MU": _ramp(100, 0.01),
+             "AMD": _ramp(100, 0.01), "TSM": _ramp(100, 0.01), "ASML": {}}   # 1 of 5 missing
+    f = _forecast(constituents=peers)
+    loader = _loader(table)
+    last_grace_day = dt.date(2026, 9, 29) + dt.timedelta(days=r.GRACE_DAYS)
+
+    held = r.resolve_rel_strength_1q(f, price_loader=loader, today=last_grace_day)
+    assert held.status == "open" and held.outcome is None
+
+    graded = r.resolve_rel_strength_1q(
+        f, price_loader=loader, today=last_grace_day + dt.timedelta(days=1))
+    assert graded.status == "resolved" and graded.outcome == 1
+    assert "(4 names)" in graded.evidence
+
+
+def test_the_tolerance_boundary_is_unchanged():
+    after_grace = dt.date(2026, 9, 29) + dt.timedelta(days=r.GRACE_DAYS + 1)
+    fast, slow = _ramp(100, 0.05), _ramp(100, 0.01)
+
+    quarter_missing = {"AVGO": fast, "NVDA": slow, "MU": slow, "AMD": slow, "TSM": {}}
+    res = r.resolve_rel_strength_1q(_forecast(constituents=("NVDA", "MU", "AMD", "TSM")),
+                                    price_loader=_loader(quarter_missing), today=after_grace)
+    assert res.status == "resolved"
+
+    over = {"AVGO": fast, "NVDA": slow, "MU": slow, "AMD": slow, "TSM": {}, "ASML": {}}
+    res = r.resolve_rel_strength_1q(
+        _forecast(constituents=("NVDA", "MU", "AMD", "TSM", "ASML")),
+        price_loader=_loader(over), today=after_grace)
+    assert res.status == "needs_review"
+
+
+def test_full_cohort_grades_without_waiting():
+    table = {"AVGO": _ramp(100, 0.05), "NVDA": _ramp(100, 0.01), "MU": _ramp(100, 0.01)}
+    res = r.resolve_rel_strength_1q(_forecast(), price_loader=_loader(table),
+                                    today=dt.date(2026, 9, 29))
+    assert res.status == "resolved"
+
+
 def test_resolution_date_for_weekday_math():
     # 3 weekdays forward from Fri 2026-06-26 -> Wed 2026-07-01, +7 buffer -> 2026-07-08
     assert r.resolution_date_for(dt.date(2026, 6, 26), 3) == dt.date(2026, 7, 8)

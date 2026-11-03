@@ -29,3 +29,10 @@ def test_only_the_shared_footer_writes_to_the_footer():
 def test_footer_states_the_disclaimer_and_data_date():
     common = (SITE / "js" / "common.js").read_text()
     assert "not investment advice" in common and "data as of" in common
+    assert ("meta.scores_as_of ? ` · scores as of ${esc(meta.scores_as_of)}` : ''"
+            in common)
+    assert "data as of ${esc(meta.as_of)}${scoresDate}" in common
+
+
+def test_dashboard_survives_a_missing_scores_date():
+    assert "meta.scores_as_of ?? 'n/a'" in (SITE / "js" / "dashboard.js").read_text()

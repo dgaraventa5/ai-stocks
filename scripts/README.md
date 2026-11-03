@@ -19,12 +19,10 @@ pip install -r ../requirements.txt
 | Script | Purpose |
 |---|---|
 | `common.py` | Shared User-Agent, rate limiter, ticker→CIK cache, project paths. Import, don't run. |
-| `build_workbooks.py` | One-shot: generate `00-master/portfolio.xlsx`, `tracking/13f-tracking.xlsx`, `tracking/hyperscaler-capex.xlsx`. Re-running overwrites — don't run after entering data. |
 | `sec_edgar.py` | Fetch SEC filings (10-K / 10-Q / 8-K / etc.) into `per-stock/{TICKER}/filings/`. |
 | `yfinance_fundamentals.py` | Pull fundamentals + statements into `per-stock/{TICKER}/financials.xlsx` with derived ratios as formulas. |
 | `parse_13f.py` | Resolve a fund's latest 13F-HR (or a specific accession), parse the information table, print top holdings. |
 | `new_ticker.py` | Scaffold `per-stock/{TICKER}/` from templates. Optional flags to chain `yfinance_fundamentals.py` and `sec_edgar.py`. |
-| `weekly_scan_runner.py` | Primary weekly scan: pull each ticker's 8-Ks/6-Ks from EDGAR for the window, classify material vs. routine, check tracked-fund 13Fs. Exits to `web_scan.py` if EDGAR egress is blocked. |
 | `web_scan.py` | Date-verified, source-filtered web fallback for the weekly scan when EDGAR is blocked. `--plan` emits the full-watchlist query plan (holdings/✓✓ names get filing+press+news queries, the tail gets a filing query, all domain-filtered to SEC/wire sources); `--verify hits.json` date-filters harvested hits to the window, flags undated ones UNVERIFIED, and classifies materiality by keyword. |
 
 ## Weekly scan fallback (EDGAR blocked)

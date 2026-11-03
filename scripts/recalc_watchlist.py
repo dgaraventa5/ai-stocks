@@ -10,6 +10,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 import cohort_percentile
+from layer_cohorts import is_layer9_capacity
 import reverse_dcf
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -83,12 +84,6 @@ def score_ev_mw(v):
 
 def is_layer10(layer):
     return bool(layer) and str(layer).strip().startswith('10')
-
-def is_layer9_capacity(layer):
-    if not layer or not str(layer).strip().startswith('09'):
-        return False
-    l = str(layer).lower()
-    return 'bitcoin' in l or 'neocloud' in l
 
 def score_ev_col(v, layer):
     """Layer-conditional col F: EV/EBITDA standard, EV/FCF for Layer 10,

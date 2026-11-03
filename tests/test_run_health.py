@@ -319,3 +319,23 @@ def test_nothing_is_written(tmp_path, monkeypatch):
     assert rh.main([]) == 1
     assert rh.main(["--no-github"]) == 1
     assert {p.name: p.read_text() for p in tmp_path.iterdir()} == before
+
+
+def test_only_recent_misses_fail_the_check():
+    # silent from 10-20: the 10-21 slot is 14 days back, the 10-20 slot is 15
+    runs = {"daily-watch": {D(2026, 10, 19), D(2026, 11, 3)},
+            "weekly-scan": {D(2026, 11, 1)}, "rating-research": {D(2026, 11, 2)}}
+    lines, problem = rh.report_schedule(runs, D(2026, 11, 4))
+    text = "\n".join(lines)
+    assert problem
+    assert "MISSED: 2026-10-21" in text and "MISSED: 2026-10-20" not in text
+    assert "1 missed before that" in text
+
+
+def test_an_old_miss_stops_failing_once_it_ages_out():
+    ran = {D(2026, 10, 16)} | {D(2026, 10, 20) + dt.timedelta(days=i) for i in range(25)}
+    runs = {"daily-watch": ran, "weekly-scan": {D(2026, 11, 7)},
+            "rating-research": {D(2026, 11, 8)}}
+    lines, problem = rh.report_schedule(runs, D(2026, 11, 9))
+    assert not problem
+    assert any("0 missed in the last 14 days, 1 missed before that" in l for l in lines)

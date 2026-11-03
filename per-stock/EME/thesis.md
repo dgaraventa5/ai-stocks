@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** {what single development would force exit}
+**Thesis-break trigger:** Network-and-communications revenue (about $2.03B in Q3 2026) falls year over year for two straight quarters, OR total RPO ($18.57B in Q3 2026) falls sequentially for two straight quarters.
 
 ---
 

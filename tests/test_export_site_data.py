@@ -229,6 +229,8 @@ def test_methodology_weights_live_from_sheet(repo):
 
 
 def test_main_writes_all_files(repo):
+    (repo / 'tracking' / 'score-history.csv').write_text(
+        'date,ticker\n2026-11-02,AAA\n')
     ex.main(repo)
     names = {p.name for p in (repo / 'site' / 'data').glob('*.json')}
     assert names == {'positions.json', 'performance.json', 'changes.json',
@@ -239,6 +241,7 @@ def test_main_writes_all_files(repo):
     assert meta['last_rebalance'] == '2026-06-10'
     assert meta['holdings'] == 2
     assert meta['scored'] == 2   # canonical recalc fixture scores both names
+    assert meta['scores_as_of'] == '2026-11-02'
 
 
 def test_privacy_no_real_dollars_anywhere(repo):
@@ -298,3 +301,27 @@ def test_positions_without_holdings_block_still_export(repo, capsys):
     pos = json.loads((repo / 'site' / 'data' / 'positions.json').read_text())
     assert all(p['ret'] is None for p in pos)
     assert 'no holdings block' in capsys.readouterr().err
+
+
+def test_scores_as_of_is_the_newest_panel_date(tmp_path):
+    (tmp_path / 'tracking').mkdir()
+    (tmp_path / 'tracking' / 'score-history.csv').write_text(
+        'date,ticker,total_score,rank,tier\n'
+        '2026-10-30,AAA,80,1,x\n2026-11-02,AAA,81,1,x\n2026-10-31,BBB,70,2,x\n')
+    assert ex.scores_as_of(tmp_path) == '2026-11-02'
+
+
+def test_scores_as_of_is_empty_without_a_panel(tmp_path):
+    assert ex.scores_as_of(tmp_path) is None
+    (tmp_path / 'tracking').mkdir()
+    (tmp_path / 'tracking' / 'score-history.csv').write_text('date,ticker\n')
+    assert ex.scores_as_of(tmp_path) is None
+
+
+def test_scores_as_of_exports_only_a_date(tmp_path):
+    (tmp_path / 'tracking').mkdir()
+    (tmp_path / 'tracking' / 'score-history.csv').write_text(
+        'date,ticker\n2026-11-02,AAA\n>>>>>>> some-branch\nNVDA,1,2\ndate,ticker\n'
+        '2026-99-99,BBB\n2026-13-45,CCC\n٢٠٢٧-٠١-٠١,DDD\n2026-12-31<script>,EEE\n'
+        '20270101,FFF\n2027-W01-1,GGG\n')
+    assert ex.scores_as_of(tmp_path) == '2026-11-02'

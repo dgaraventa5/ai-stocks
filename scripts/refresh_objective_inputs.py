@@ -27,21 +27,16 @@ except ModuleNotFoundError:          # pure + yfinance-free either way
 # keeping this module and its tests importable without yfinance.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from layer_cohorts import is_layer9_capacity as _is_layer9_capacity
+
 ROOT = Path(__file__).resolve().parent.parent
 SCORING_PATH = ROOT / "00-master" / "ai_supply_chain_scoring.xlsx"
 PORTFOLIO_PATH = ROOT / "00-master" / "portfolio.xlsx"
 
 # Mirrored from batch_score so mw_staleness_flag doesn't import batch_score
 # (which pulls yfinance, absent in the site-deploy pytest env). Keep in sync
-# with batch_score._is_layer9_capacity / _CAPACITY_JSON.
+# with batch_score._CAPACITY_JSON.
 _CAPACITY_JSON = ROOT / "00-master" / "capacity-mw.json"
-
-
-def _is_layer9_capacity(layer):
-    if not layer or not str(layer).strip().startswith("09"):
-        return False
-    l = str(layer).lower()
-    return "bitcoin" in l or "neocloud" in l
 
 
 def _watchlist_tickers(scoring_path) -> list[str]:

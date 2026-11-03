@@ -74,6 +74,9 @@ def resolve_rel_strength_1q(forecast: dict, *, price_loader, today: dt.date | No
         return Resolution("needs_review", None, None,
                           f"cohort degraded: {len(missing)}/{len(constituents)} constituents missing data",
                           None)
+    if missing and today <= res_date + dt.timedelta(days=GRACE_DAYS):
+        # Grades are permanent, so give a throttled peer's prices time to return.
+        return Resolution("open", None, None, None, None)
     r_bench = sum(rets) / len(rets)
     outcome = 1 if r_self > r_bench else 0
     evidence = (f"{ticker} {r_self * 100:+.1f}% vs {rule['benchmark']} ({len(rets)} names) "

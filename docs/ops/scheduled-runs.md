@@ -1,6 +1,6 @@
 # Scheduled runs — shared protocol (CLAUDE.md rule 37)
 
-Three unattended jobs keep research and scores current. Each is a project
+Four unattended jobs keep research and scores current. Each is a project
 skill; the desktop scheduler only holds a thin prompt that invokes it.
 
 | Job (`--job`) | Skill | Schedule (Pacific) | What it does |
@@ -8,6 +8,7 @@ skill; the desktop scheduler only holds a thin prompt that invokes it.
 | `daily-watch` | `/daily-watch` | Mon–Fri 15:45 | Earnings sentinel (briefing, then mechanical re-score) + news and filing watch on holdings ∪ top 25 |
 | `weekly-scan` | `/weekly-scan` | Sat 08:00 | Full-watchlist filing scan, objective refresh, portfolio pipeline, weekly mark |
 | `rating-research` | `/rating-research` | Sun 08:00 | Fresh briefings for the stalest rated names, with rating proposals |
+| `quarterly-rescore` | `/rescore-quarterly` | 22nd of Feb, May, Aug, Nov at 12:00 | Refreshes rows over 90 days old, re-baselines the EW benchmark, writes the rescore and calibration reports |
 
 **Where they run: this Mac, in the main checkout — never a cloud session.**
 Cloud sandboxes block Yahoo and SEC at the network proxy (every cloud scan from
@@ -16,7 +17,7 @@ Claude desktop app must be open and the Mac awake; a missed run fires at the
 next launch. Machine-local state (`tracking/earnings-sentinel-state.json`,
 `tracking/live/`, `.cache/`) is why a worktree is not used.
 
-## Autonomy (Dom, 2026-10-12): "rescore, hold trades"
+## Autonomy (Dom, 2026-10-12; trading amended 2026-11-01)
 
 A scheduled run MAY, without asking:
 - write briefings (`per-stock/{T}/context-{date}.md`), news-log lines, cached filings;
@@ -83,7 +84,7 @@ this check.
   (`notion-search`, `notion-fetch`, `notion-create-pages`; load with
   ToolSearch). Search for the exact title first and update rather than
   duplicate. Titles: `Daily Watch — {date}`, `Weekly News Scan — {date}`,
-  `Rating Research — {date}`. No real dollars, share counts or account
+  `Rating Research — {date}`, `Quarterly Rescore — {date}`. No real dollars, share counts or account
   numbers (rule 29). Only the weekly scan appends to
   `tracking/notion-scan-links.json`.
 - **Notification:** `python3 scripts/scheduled_run.py notify --message "<line>"`
@@ -102,12 +103,16 @@ this check.
 
 Plain English, decision first. Every number cites its source (rule 1). A gap
 is stated as a gap (rule 3). Each report ends with **"Needs you"**: rating
-proposals awaiting a yes/no, EPS rulings, held tickets, expiring entry holds.
+proposals awaiting a yes/no, EPS rulings, buys the data check left off a
+ticket, expiring entry holds.
 
-## Releasing a held trade
+## Buys the data check left off
 
-In an attended session: say "release the held ticket". Held tickets go stale
-(2-trading-day expiry, 3% quote drift), so release means regenerating from a
-fresh reconciliation with `python3 scripts/generate_trade_ticket.py`. That
-writes a live `ticket-*`, so it sends at the next 06:35 run, or sooner if Dom
-runs `python3 scripts/execute_ticket.py --ticket <path> --confirm` himself.
+A buy that `ticket_data_check.py` flags waits for the next ticket; the rest of
+the ticket still trades. To place it sooner, fix or rule on the flagged data in
+an attended session, then regenerate from a fresh reconciliation with
+`python3 scripts/generate_trade_ticket.py`. A manual run does not repeat the
+data check (only a model event's ticket does), so look at the flag before
+regenerating. The ticket sends at the next 06:35 run, or
+sooner if Dom runs `python3 scripts/execute_ticket.py --ticket <path> --confirm`
+himself.

@@ -133,15 +133,49 @@ def test_summary_prints_the_split(repo, groups, monkeypatch, capsys):
     repo.add("AAA", "BBB", "CCC")
     for t in ("AAA", "BBB", "CCC"):
         _briefing(repo, t, 100)
-    assert _run(monkeypatch, "--summary") == 0
+    assert _run(monkeypatch, "--summary") == 1      # AAA, BBB fail the gate
     assert "3 EXPIRED (held 1, top 25 1, rest 1)" in capsys.readouterr().out
 
 
-def test_expired_alone_does_not_change_the_exit_code(repo, groups, monkeypatch):
-    repo.add("AAA")
-    _briefing(repo, "AAA", 100)
+def test_expired_outside_held_and_top_does_not_change_the_exit_code(
+        repo, groups, monkeypatch):
+    repo.add("CCC")
+    _briefing(repo, "CCC", 100)
     assert _run(monkeypatch, "--summary") == 0
     assert _run(monkeypatch) == 0
+
+
+@pytest.mark.parametrize("ticker", ["AAA", "BBB"])     # held, top 25
+def test_expired_held_or_top_25_fails_the_gate(repo, groups, monkeypatch,
+                                               capsys, ticker):
+    repo.add(ticker)
+    _briefing(repo, ticker, 91)
+    assert _run(monkeypatch, "--summary") == 1
+    assert "0 UNGATED (no research) | 1 EXPIRED held/top 25 (gate)" in \
+        capsys.readouterr().out
+    assert _run(monkeypatch) == 1
+    assert f"{ticker}   01  EXPIRED brief 91d" in capsys.readouterr().out
+
+
+def test_held_name_inside_the_window_passes(repo, groups, monkeypatch):
+    repo.add("AAA")
+    _briefing(repo, "AAA", 90)
+    assert _run(monkeypatch, "--summary") == 0
+
+
+def test_held_name_with_a_thesis_never_expires(repo, groups, monkeypatch):
+    repo.add("AAA")
+    _thesis(repo, "AAA", BASELINE + 400)
+    _briefing(repo, "AAA", 200)
+    assert _run(monkeypatch, "--summary") == 0
+
+
+def test_stalest_puts_expired_held_names_first(repo, groups, monkeypatch, capsys):
+    repo.add("CCC", "AAA")
+    _briefing(repo, "CCC", 300)          # older, but not held or top 25
+    _briefing(repo, "AAA", 100)
+    assert _run(monkeypatch, "--stalest", "1") == 0
+    assert capsys.readouterr().out.split() == ["AAA"]
 
 
 def test_gate_violation_still_exits_nonzero(repo, groups, monkeypatch):
@@ -150,12 +184,16 @@ def test_gate_violation_still_exits_nonzero(repo, groups, monkeypatch):
     assert _run(monkeypatch) == 1
 
 
-def test_unreadable_groups_keep_the_count_and_the_exit_code(repo, monkeypatch, capsys):
+def test_unreadable_groups_keep_the_count_and_fail_as_unchecked(
+        repo, monkeypatch, capsys):
     def boom():
         raise OSError("no workbook")
 
     monkeypatch.setattr(ari, "_held_and_top", boom)
     repo.add("AAA")
     _briefing(repo, "AAA", 100)
-    assert _run(monkeypatch, "--summary") == 0
-    assert "1 EXPIRED (split unavailable: OSError)" in capsys.readouterr().out
+    assert _run(monkeypatch, "--summary") == 1
+    out = capsys.readouterr().out
+    assert "1 EXPIRED (split unavailable: OSError)" in out
+    assert "UNCHECKED" in out
+    assert _run(monkeypatch) == 1

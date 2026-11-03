@@ -59,7 +59,8 @@ async function renderFooter({ showScored = false } = {}) {
       ? ` · <span class="stale-note">data is ${age} days old, the daily refresh may have stalled</span>`
       : '';
     const scored = showScored ? `${esc(meta.scored)} names scored · ` : '';
-    footer.innerHTML = `${scored}${base} · data as of ${esc(meta.as_of)}` +
+    const scoresDate = meta.scores_as_of ? ` · scores as of ${esc(meta.scores_as_of)}` : '';
+    footer.innerHTML = `${scored}${base} · data as of ${esc(meta.as_of)}${scoresDate}` +
       ` · generated ${esc(meta.generated_at)}${stale}`;
   } catch (e) {
     footer.innerHTML = `${base} · <span class="stale-note">data date unavailable</span>`;

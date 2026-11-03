@@ -21,7 +21,9 @@ with `--job weekly-scan`. Differences from an attended run:
   `python3 scripts/momentum_50dma.py`, `python3 scripts/refresh_reverse_dcf.py`
   and `python3 scripts/recalc_watchlist.py --sync`.
 - **Step 7** — `recalc --sync` already ran the portfolio step; do not run
-  `refresh_targets.py` a second time. Any ticket is held, not released.
+  `refresh_targets.py` a second time. A model event's ticket trades at the
+  next 06:35 executor run (rule 37, 2026-11-01); report what it will do and
+  any buys the data check left off it.
   Then run `python3 scripts/portfolio_theses.py` and write a rule-39 thesis
   for any name it lists.
 - **Step 8** — rating changes are proposals in `tracking/rating-proposals.md`,
@@ -58,7 +60,9 @@ with `--job weekly-scan`. Differences from an attended run:
    - Going concern or auditor changes
    - Legal/regulatory actions
 
-5. **Also check** for new 13F-HR filings from tracked funds in the past 7 days. If found, note them — these can be followed up with `/thirteenf-delta`.
+   **Thesis-break check.** Run `python3 scripts/thesis_watch.py` and compare the week's filings and news to each printed trigger. Lead the report with any trigger that fired, citing the source. A firing changes no rating and trades nothing: it says the reason for owning the name needs Dom's review. Exit 1 means a portfolio name has no trigger, so list it.
+
+5. **Also check** for new 13F-HR filings in the past 7 days from the funds listed in `.claude/commands/thirteenf-delta.md` (tracked and watch-only). If found, note them — these can be followed up with `/thirteenf-delta`.
 
 6. **Earnings-triggered objective refresh (Rule #9).** For any ticker where the 8-K scan surfaced quarterly earnings results (Item 2.02 "Results of Operations and Financial Condition"):
 
@@ -69,6 +73,10 @@ with `--job weekly-scan`. Differences from an attended run:
    c. **TTM check:** If yfinance TTM gross margin or FCF margin is >10 score points below the MRQ value (i.e., the most recent quarter is dramatically better than the trailing average), note the MRQ values in the output so the TTM limitation is visible.
 
    d. Compute the before/after Total Score for refreshed names. If any name's score moves by >5 points or crosses a tier boundary, flag with ⚠️ — this is a potential portfolio-level signal.
+
+   e. **Which quarter scores rest on.** After the refreshes, run `python3 scripts/input_currency.py --scope all`. It lists names whose newest earnings 8-K is on a later quarter than Yahoo's statements, so Last Updated moved but the inputs did not. Report them as behind, list every COULD NOT CHECK name and any US-listed NOT CHECKABLE name, since its statements were never compared, and treat exit 1 as could-not-check, never as all clear. BEHIND is a prompt to look: the 8-K can be a preliminary release or a presentation.
+
+   f. **Hyperscaler capex.** Run `python3 scripts/hyperscaler_capex.py --write` every week. It fills `tracking/hyperscaler-capex.xlsx` with each of MSFT, GOOGL, AMZN, META and ORCL's quarterly capex from SEC filings and writes nothing when no new quarter has been filed. It prints the combined total for the latest complete quarters. Exit 1 means a company could not be read, or is two or more quarters behind the others (most likely a changed XBRL tag); name it. For any of the five that reported this week, follow `/capex-update {T}` for the guidance part.
 
    **Why this exists:** During the 2026-05-26 MU review, 2-month-stale objective inputs after Q2 earnings caused a 14-point scoring error and a full tier miss (#23 → #4). The weekly scan already touches every name's 8-Ks; catching earnings and refreshing inputs in the same pass prevents this class of miss. If `/earnings-update` was already run on a name during the week, skip the refresh — don't duplicate work.
 
@@ -103,7 +111,7 @@ with `--job weekly-scan`. Differences from an attended run:
    python3 scripts/audit_rating_integrity.py --summary
    python3 scripts/audit_rating_integrity.py   # full, if the summary shows any violations
    ```
-   Report GATE violations (names carrying AI ratings with no thesis and no research briefing — their ratings are unbacked and should not be trusted) and STALE names (>90d since last research-backed review). These don't block the scan, but a GATE violation in a *portfolio holding* is a flag to surface prominently. The biweekly scheduled refresh routine handles the rotation; this step is the weekly check that it's keeping up.
+   Report GATE violations (names carrying AI ratings with no thesis and no research briefing, or held / top-25 names whose only briefing is over 90 days old — their ratings are unbacked and should not be trusted; an UNCHECKED line means the held / top-25 lookup failed, so report it as unchecked, never as clean) and STALE names (>90d since last research-backed review). These don't block the scan, but a GATE violation in a *portfolio holding* is a flag to surface prominently. The biweekly scheduled refresh routine handles the rotation; this step is the weekly check that it's keeping up.
 
 9. **Resolve due forecasts (calibration loop, Rule #17, added 2026-06-26).** Grade any forecasts whose `resolution_date` has arrived:
    ```bash
@@ -120,6 +128,8 @@ with `--job weekly-scan`. Differences from an attended run:
 
    c. Never call MCP order tools in this or any step. Execution is `execute_ticket.py`, run by Dom or his launchd schedule only.
 
+11. **Run health.** `python3 scripts/run_health.py` compares the run log to the schedule and sorts failed `daily-refresh.yml` runs into by-design and real. Exit 1 goes in the report, and never stops the scan.
+
 ## Output
 
 Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
@@ -128,7 +138,11 @@ Save to `/tracking/weekly-news-scan-{YYYY-MM-DD}.md` with these sections:
 - **💼 Portfolio pipeline** (ENTER/EXIT/pending/blocked changes; tier-change reallocations for existing holdings with old→new Target %; weekly mark vs benchmarks; any concentration flags)
 - **🩸 Capitulation flags** (Step 7d firings on exit-side names + forecasts logged; only if any)
 - **🔬 Rating integrity** (gate violations + stale names from Step 8; only if any exist)
+- **🧨 Thesis-break triggers** (any that fired this week, with source, and any name with no trigger; only if any)
+- **🗓️ Inputs behind** (names from Step 6e whose scores rest on an old quarter, and any it could not check; only if any)
+- **🏗️ Hyperscaler capex** (Step 6f: new quarters filed, combined total vs a year earlier, any guidance change over 5%, any company it could not read; only if any)
 - **🎯 Calibration** (newly resolved forecasts + needs_review items from Step 9; only if any)
+- **🩺 Run health** (missed runs in the last 14 days, real workflow failures, any check that could not look; only if any)
 - **🔴 Live pipeline** (halt flag contents if raised; stale heartbeats; drift/regen flags from Step 10; only in attended runs)
 - **Routine filings** (one-line each: ticker, filing type, generic descriptor)
 - **New 13F activity** (only if any)

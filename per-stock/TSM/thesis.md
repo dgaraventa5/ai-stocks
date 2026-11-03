@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** {what single development would force exit}
+**Thesis-break trigger:** A conflict, blockade or export ban stops TSMC shipping from its Taiwan fabs, OR NVIDIA or AMD confirms that the main compute die of a flagship AI accelerator will be made at another foundry.
 
 ---
 

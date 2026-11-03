@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-26
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** {what single development would force exit}
+**Thesis-break trigger:** NVIDIA cuts its roughly 70% FY28 growth outlook on weaker demand, OR Hyperscale data-center revenue ($48.7B in Q2 FY27) falls two straight quarters.
 
 > **STATUS NOTE (2026-05-26):** This thesis is a blank template — not yet populated. Q1 FY2027 earnings (2026-05-20) have been processed; transcript at `transcripts/Q1-FY2027.md`, delta at `transcripts/Q1-FY2027-delta.md`. Sections below are flagged [STALE - revisit] where Q1 FY2027 data materially affects what a completed thesis should say. Populate the thesis before the next earnings cycle (Q2 FY2027, ~August 2026).
 

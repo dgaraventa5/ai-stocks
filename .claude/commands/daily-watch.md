@@ -79,6 +79,8 @@ dimensions look affected. Append one line to `news-log.md`. Mark with
 `python3 scripts/earnings_sentinel.py --mark briefed {T} {report_date}`.
 A revenue or EPS surprise beyond ±15%, or gross margin moving more than
 500bps sequentially, is a rule-9 immediate flag — lead the report with it.
+If the name is MSFT, GOOGL, AMZN, META or ORCL, also follow `/capex-update {T}`:
+their spending is the demand behind every other name.
 
 ## 4. Earnings — re-score phase (`rescore_due`, once for the whole set)
 
@@ -134,7 +136,7 @@ dates or status notes.
 Report exactly what the model did: entered, exited, clock started (and the
 date it can confirm), deferred by the entry gate, or nothing.
 
-## 7. Hold, test, land, report
+## 7. Test, land, report
 
 Per the protocol. Notion page `Daily Watch — {date}`:
 
@@ -142,5 +144,5 @@ Per the protocol. Notion page `Daily Watch — {date}`:
 - **Earnings** — table: ticker, result vs consensus, score and rank before → after.
 - **News** — one line per material item with its source link.
 - **Model** — events, exit clocks, entry holds added; and any buys the data check left off a ticket.
-- **Needs you** — rating proposals (yes/no each), EPS rulings, held ticket.
+- **Needs you** — rating proposals (yes/no each), EPS rulings, buys the data check left off a ticket.
 - **Could not verify** — anything unchecked or undated, and every `flagged` name with its reason.

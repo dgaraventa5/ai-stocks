@@ -4,7 +4,7 @@
 **Last reviewed:** 2026-05-17
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** {what single development would force exit}
+**Thesis-break trigger:** Net dollar retention (157% in Q2 2026) falls below 120%, OR US commercial revenue growth (+148% in Q3 2026) falls below 50% for two straight quarters.
 
 > **[STALE - revisit]** This thesis file is still the blank template. Q1 2026 earnings (May 4, 2026) delivered $1.633B revenue (+85% YoY), 60% adjusted operating margin, 150% NRR, and raised FY26 guidance to $7.65-7.66B. A full thesis write-up is needed. See `transcripts/Q1-2026.md` and `transcripts/Q1-2026-delta.md` for the complete earnings data.
 

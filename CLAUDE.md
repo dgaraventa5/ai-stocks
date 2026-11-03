@@ -204,6 +204,8 @@ For fast-ramp names where TTM averages understate the current business (e.g., 4 
 
 **The gate (hard):** A watchlist name may not be trusted to carry subjective AI/Momentum/Risk ratings unless it is research-backed — defined as a populated `thesis.md` **or** a `context-{YYYY-MM-DD}.md` briefing within the staleness window. Enforced by `scripts/audit_rating_integrity.py`, which exits nonzero on any gate violation. Run it before trusting a scoring pass; `/score-stock` and batch scoring should treat a gate violation as "research first, then rate."
 
+**Amendment 2026-11-02 (Dom-approved): the window is enforced where the model trades.** The script had accepted a briefing of any age. A held or top-25 name whose only research is a briefing past 90 days now fails the gate; every other expired name is reported as EXPIRED without failing it, and `--stalest` puts the failing names first. If the held / top-25 lookup fails, `--summary` and the full report exit nonzero as UNCHECKED (`--stalest` just loses the ordering).
+
 **Refresh triggers (subjective ratings):**
 1. **On earnings** — when a rated name reports, re-examine its D-dimensions in the same pass as the rule-9 objective refresh. A beat/miss or a new customer/PPA/contract often moves D1/D2/D5.
 2. **Rolling staleness** — no rated name should go >90 days without a research-backed review. `audit_rating_integrity.py` flags STALE names; the scheduled routine (below) feeds the stalest into `/refresh-context` on rotation.
@@ -1045,10 +1047,11 @@ that, every cloud-session scan from 2026-06-12 fell back to web search because
 the cloud sandbox blocks Yahoo and SEC at its network proxy — so scans ran,
 found news, and re-scored nothing.
 
-**Rule:** three local desktop scheduled tasks, each a thin prompt that invokes
+**Rule:** four local desktop scheduled tasks, each a thin prompt that invokes
 a project skill: `/daily-watch` (Mon–Fri 15:45 PT — the rule-31 sentinel plus a
-news and filing watch on holdings ∪ top 25), `/weekly-scan` (Sat 08:00 PT) and
-`/rating-research` (Sun 08:00 PT, the rule-12 rotation). Shared protocol:
+news and filing watch on holdings ∪ top 25), `/weekly-scan` (Sat 08:00 PT),
+`/rating-research` (Sun 08:00 PT, the rule-12 rotation) and `/rescore-quarterly`
+(the 22nd of Feb, May, Aug and Nov at 12:00 PT, added 2026-11-02, Dom). Shared protocol:
 `docs/ops/scheduled-runs.md`. They run in the main checkout on this Mac, never
 in a cloud session.
 
@@ -1219,7 +1222,7 @@ The loop must never change any of these. `.claude/off-limits.txt` is the checkab
 
 ### Commands
 Run from the worktree root. All verified 2026-11-01.
-- Install: `pip install -r requirements.txt pytest`
+- Install: `pip install -r requirements.txt -r requirements-test.txt`
 - Test: `python3 -m pytest tests -q` (about 10 seconds)
 - Syntax check: `python3 -m compileall -q scripts`
 - Build the site data: `python3 scripts/export_site_data.py && python3 scripts/check_site.py`

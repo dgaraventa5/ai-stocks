@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install test dependencies
-        run: pip install -r requirements.txt pytest
+        run: pip install -r requirements.txt -r requirements-test.txt
       # The rule-25 gate stays on for every PR except the automated
       # performance-series PR, which only changes that one generated file.
       - name: Run full test suite

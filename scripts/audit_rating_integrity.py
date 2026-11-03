@@ -13,11 +13,13 @@ Three classes:
                   Exit code is nonzero if any exist, so this can gate scoring.
   STALE (soft) -- name is rated + thesis populated, but its most recent Rating
                   Audit entry is older than --stale-days (default 90).
-  EXPIRED (report) -- no populated thesis, and the newest briefing is past that
-                  same window. Rule 12 says a briefing only counts inside it,
-                  but the gate accepts any age, so these pass the gate. Reported
-                  split by held / top 25 / rest; whether it should block is
-                  Dom's call, so it never changes the exit code.
+  EXPIRED -- no populated thesis, and the newest briefing is past that same
+                  window (rule 12: a briefing only counts inside it). Split by
+                  held / top 25 / rest. Held and top-25 names fail the gate
+                  (Dom, 2026-11-02): they are the names the model trades. The
+                  rest are reported only. If the held / top-25 lookup fails,
+                  the exit code is nonzero, because "could not check" must not
+                  read as clean.
 
 A thesis is "populated" if it has >MIN_ADDED bytes of content beyond the
 template baseline (read live from templates/per-stock-template.md so the
@@ -148,11 +150,22 @@ def expired_line(rows) -> tuple[str, dict[str, list[str]] | None]:
     count = sum(1 for x in rows if x.get('expired'))
     try:
         held, top = _held_and_top()
-    except Exception as e:     # the split is a report; never change the exit code
+    except Exception as e:     # main() fails the exit code on a None split
         return f"{count} EXPIRED (split unavailable: {type(e).__name__})", None
     groups = split_expired(rows, held, top)
     return (f"{count} EXPIRED (held {len(groups['held'])}, top 25 "
             f"{len(groups['top'])}, rest {len(groups['rest'])})"), groups
+
+
+def block_expired(rows, groups) -> list[str]:
+    """Expired held and top-25 names fail the gate; mark them so --stalest
+    puts them first. Returns the names marked."""
+    names = set(groups['held']) | set(groups['top']) if groups else set()
+    for x in rows:
+        if x['tkr'] in names:
+            x['gate'] = True
+            x['backing'] = f"EXPIRED {x['backing']}"
+    return sorted(names)
 
 
 def main():
@@ -165,8 +178,12 @@ def main():
     args = ap.parse_args()
 
     rows = audit(args.layer, args.stale_days)
+    expired_text, expired_groups = expired_line(rows)
+    blocked = block_expired(rows, expired_groups)
     gates = [x for x in rows if x['gate']]
     stales = [x for x in rows if x['stale']]
+    unchecked = expired_groups is None
+    failing = bool(gates) or unchecked
 
     if args.stalest:
         # Priority for the refresh rotation: unbacked names (gate violations,
@@ -183,21 +200,25 @@ def main():
         return 0
 
     scope = f"layer {args.layer}" if args.layer else "all layers"
-    expired_text, expired_groups = expired_line(rows)
     if args.summary:
         print(f"rating-integrity ({scope}): {len(rows)} rated names | "
-              f"{len(gates)} UNGATED (no thesis) | {len(stales)} stale "
+              f"{len(gates) - len(blocked)} UNGATED (no research) | "
+              f"{len(blocked)} EXPIRED held/top 25 (gate) | {len(stales)} stale "
               f"(>{args.stale_days}d) | {expired_text}")
-        return 1 if gates else 0
+        if unchecked:
+            print("UNCHECKED: could not read holdings and the top 25, so "
+                  "expired research there was not checked")
+        return 1 if failing else 0
 
     print(f"=== Subjective-rating integrity audit — {scope} "
           f"({len(rows)} rated names) ===\n")
-    print(f"GATE violations — rated with NO thesis and NO research briefing "
-          f"({len(gates)}):")
+    print(f"GATE violations — rated with no thesis and no research briefing, "
+          f"or a held / top-25 name whose only briefing is past "
+          f"{args.stale_days}d ({len(gates)}):")
     if gates:
-        print(f"  {'Tkr':<6}{'Lyr':<4}{'backing':<10}{'last rated':<12}")
+        print(f"  {'Tkr':<6}{'Lyr':<4}{'backing':<20}{'last rated':<12}")
         for x in sorted(gates, key=lambda x: x['layer']):
-            print(f"  {x['tkr']:<6}{x['layer']:<4}{x['backing']:<10}"
+            print(f"  {x['tkr']:<6}{x['layer']:<4}{x['backing']:<20}"
                   f"{x['last'] or '—':<12}")
     else:
         print("  none")
@@ -218,10 +239,14 @@ def main():
             if expired_groups[key]:
                 print(f"  {label}: {' '.join(expired_groups[key])}")
 
-    print(f"\nGATE blocks scoring. Run /refresh-context on UNGATED names before "
+    if unchecked:
+        print("  UNCHECKED: could not read holdings and the top 25, so expired "
+              "research there was not checked")
+
+    print(f"\nGATE blocks scoring. Run /refresh-context on gate names before "
           f"trusting their AI ratings. Exit nonzero = {len(gates)} gate "
-          f"violation(s).")
-    return 1 if gates else 0
+          f"violation(s){' or an unchecked lookup' if unchecked else ''}.")
+    return 1 if failing else 0
 
 
 if __name__ == '__main__':

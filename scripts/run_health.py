@@ -9,11 +9,11 @@ and writes nothing.
   python3 scripts/run_health.py                # all checks
   python3 scripts/run_health.py --no-github    # skip the workflow check
 
-Exits nonzero if anything was missed, a run failed for a real reason, the
-calibration report is missing, or a check could not look. A log date covers its
-job; a slot with no run is LATE if one landed before the next slot, otherwise
-MISSED. Late alone does not fail the run. The log is append-only, so a past miss
-keeps the exit nonzero for good: read the report before alerting on the code.
+Exits nonzero if a run was missed in the last RECENT_DAYS days, a run failed for
+a real reason, the calibration report is missing, or a check could not look. A
+log date covers its job; a slot with no run is LATE if one landed before the next
+slot, otherwise MISSED. Late alone does not fail the run. Older misses are counted
+but do not fail it, because the log is append-only and they can never clear.
 """
 from __future__ import annotations
 
@@ -31,6 +31,7 @@ CALIBRATION_REPORT = ROOT / "tracking" / "calibration-report.md"
 WORKFLOW = "daily-refresh.yml"
 GATE_TEST = "tests/test_targets_reweight_gate.py"
 CLEAN_CONCLUSIONS = {"success", "skipped", "neutral"}
+RECENT_DAYS = 14
 
 # Weekdays each job is scheduled on (docs/ops/scheduled-runs.md), Monday = 0.
 SCHEDULE = {"daily-watch": {0, 1, 2, 3, 4}, "weekly-scan": {5}, "rating-research": {6}}
@@ -123,13 +124,17 @@ def report_schedule(runs: dict[str, set[dt.date]], today: dt.date) -> tuple[list
             lines.append(f"  {job}: no runs logged")
             problem = True
             continue
+        cutoff = today - dt.timedelta(days=RECENT_DAYS)
+        recent = [slot for slot in result["missed"] if slot >= cutoff]
+        older = len(result["missed"]) - len(recent)
         lines.append(f"  {job}: {result['on_time']} on time, "
-                     f"{len(result['late'])} late, {len(result['missed'])} missed")
+                     f"{len(result['late'])} late, {len(recent)} missed in the last "
+                     f"{RECENT_DAYS} days, {older} missed before that")
         for slot, landed in result["late"]:
             lines.append(f"    late: {slot} (ran {landed})")
-        for slot in result["missed"]:
+        for slot in recent:
             lines.append(f"    MISSED: {slot}")
-        problem = problem or bool(result["missed"])
+        problem = problem or bool(recent)
     return lines, problem
 
 

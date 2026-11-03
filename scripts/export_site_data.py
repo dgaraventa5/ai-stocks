@@ -35,6 +35,25 @@ TARGETS_HEADERS = ['Ticker', 'Layer', 'TOTAL', 'Tier', 'Rank', 'Status',
                    'Include?', 'Override', 'Target %', 'Notes']
 
 
+def _is_iso_date(text: str) -> bool:
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', text, re.ASCII):
+        return False
+    try:
+        dt.date.fromisoformat(text)
+    except ValueError:
+        return False
+    return True
+
+
+def scores_as_of(root: Path) -> str | None:
+    """Newest date in the score panel. Performance moves daily; scores don't."""
+    path = root / 'tracking' / 'score-history.csv'
+    if not path.exists():
+        return None
+    dates = (r.split(',', 1)[0] for r in path.read_text().splitlines())
+    return max((d for d in dates if _is_iso_date(d)), default=None)
+
+
 def fail(msg: str) -> NoReturn:
     print(f'EXPORT ERROR: {msg}', file=sys.stderr)
     raise SystemExit(1)
@@ -417,6 +436,7 @@ def main(root: Path | None = None) -> None:
         'generated_at': dt.datetime.now(dt.timezone.utc).isoformat(
             timespec='seconds'),
         'as_of': performance['as_of'],
+        'scores_as_of': scores_as_of(root),
         'last_rebalance': cfg['events'][-1]['date'],
         'holdings': len(positions),
         'scored': sum(1 for r in watchlist if r['score'] is not None),
