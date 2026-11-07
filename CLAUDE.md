@@ -1060,6 +1060,11 @@ in a cloud session.
   in and no earlier run's PR is open. A failure notifies and stops; a run never
   degrades to a partial report or a web-search stand-in. `scan-filings` exits
   nonzero when lookups fail — "could not look" must never read as "quiet".
+  **Amendment 2026-11-06 (Dom-approved):** preflight first finishes an
+  earlier run that committed its work but was cut off before merging (the
+  2026-11-04 push died when the Mac slept and blocked the next two runs). It
+  lands only what `land` already committed, and only on green CI. Uncommitted
+  work, a draft (`land --hold`), closed or red PR still refuses.
 - **Autonomy = "rescore, hold trades".** A run may write research, refresh
   objective inputs, run the scoring chain and a model event, add a rule-35
   entry hold, and merge its own PR once CI passes so the site stays current.
