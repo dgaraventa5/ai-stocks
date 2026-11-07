@@ -9,3 +9,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 
 - **2026-10-17** (weekly scan, SEC EDGAR) — 8-Ks 2026-10-13/14: closed EPC Power acquisition for $4.4B cash, funded by $3.3B + $1.1B 364-day loans (due 2027-10-13); joins the Axiom Solutions International spin-off planned for 1Q 2027; Amazon warrant amended to convert into Spinco warrants.
 - **2026-10-28** (weekly scan, 8-K, acc. 0000866374-26-000039) — FQ2 revenue $8.5B +25%; FY raised to $34.9-35.9B, adj EPS $4.84-5.16; EPC Power acquired; planned spin-off named Axiom.
+
+- **2026-11-05** (weekly scan 2026-11-07, SEC EDGAR) — 8-K 5.07: shareholders approved spin-off of the cloud/power infrastructure business as Axiom Solutions International. Source: https://www.sec.gov/Archives/edgar/data/866374/000086637426000045/flex-20261102.htm

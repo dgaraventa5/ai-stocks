@@ -19,3 +19,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-10-17** (weekly scan, SEC EDGAR) — 8-K 2026-10-15: CFO David Weigand ceased serving; Mark Long (ex-WDC CFO 2016-19) appointed CFO effective 2026-10-14; filing gives no reason for the departure.
 
 - **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-20 (Ex.99.1, preliminary): Q1 FY27 revenue est. $18.5-19.5B vs $14.5-15.5B guide (~26% above midpoint), GM 12.0-12.5% vs 10.4-10.8% guide; full results 2026-11-03. Rule-9 immediate bar once finals land.
+
+- **2026-11-03** (weekly scan 2026-11-07, SEC EDGAR) — FQ1 FY27 EX-99.1: revenue $19.9B vs $5.0B YoY; GM 12.7% vs 17.5% QoQ (−480bps, just under the rule-9 500bps line); FY27 revenue guide $72–82B; operating cash flow −$434M. EPS YoY override STALE (+847% GAAP withheld). Source: https://www.sec.gov/Archives/edgar/data/1375365/000137536526000026/smci-20261103.htm

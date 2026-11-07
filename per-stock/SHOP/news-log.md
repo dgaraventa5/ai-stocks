@@ -14,3 +14,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-09-15 | CourtListener 3:26-xr-91497 (N.D. Cal.) | Grand-jury subpoena duces tecum to Shopify (USA) in an 18 U.S.C. § 1956 investigation; Shopify is recipient, target unidentified. |
 | 2026-09-22 | [Fool](https://www.fool.com/investing/breakfast-news/2026/09/22/breakfast-news-shopify-just-became-ais-checkout/) | Meta's Muse agent completes purchases on Shopify stores via Shop Pay; SHOP +7%. |
 | 2026-10-12 | [StocksToTrade](https://stockstotrade.com/news/shopify-inc-shop-news-2026_10_12/) | JPMorgan PT $185→$200; stock ~$177 after Sept–Oct agentic-commerce rally. |
+
+- **2026-11-03** (weekly scan 2026-11-07, SEC EDGAR) — Q3 EX-99.1: revenue $3.742B (+32%); GAAP includes $122M equity mark-to-market losses; EPS YoY override STALE (+75% GAAP withheld). Source: https://www.sec.gov/Archives/edgar/data/1594805/000159480526000067/shop-20261103.htm

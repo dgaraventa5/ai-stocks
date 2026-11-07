@@ -10,3 +10,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-06-22** — Starboard activist (2/18): urges faster AI/HPC pivot, claims 1.7 GW → >$1.6B EBITDA / $9–21B EV upside; calls AMD "proof of concept," demands investment-grade tenants. CoinDesk/Bloomberg/The Block.
 - **2026-06-22** — 8-K (event 6/9 AGM, filed 6/15): stockholders approved +15,000,000 share addition to 2019 Equity Plan (dilution). 8-K (event 4/21): Second Amended & Restated Credit Agreement w/ Coinbase Credit (BTC-collateralized).
 - **2026-06-22** — /refresh-context briefing written: per-stock/RIOT/context-2026-06-22.md (research only, no rating/xlsx change).
+
+- **2026-11-04** (weekly scan 2026-11-07, SEC EDGAR, EX-99.1) — Q3: 15-year 910 MW Corsicana lease with a frontier AI lab (~$28B contract value); 1,151 MW leased for ~$38B total; no equity raise planned. Source: https://www.sec.gov/Archives/edgar/data/1167419/000110465926122368/riot-20261029x8k.htm
