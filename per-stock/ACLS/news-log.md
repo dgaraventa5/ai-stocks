@@ -9,3 +9,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-03-12 | CFO transition 8-K / TipRanks / Barchart | CFO James Coogan departing (through ~Apr 24) for a public-co CFO role in another industry; David Ryzhik (SVP IR & Corp Strategy) named Interim CFO; external CFO search launched — governance change mid-Veeco-merger. |
 | 2026-09-08 | ION Analytics / VECO 425s | Veeco merger: all approvals secured except China SAMR (US HSR, Ireland/Germany/UK FDI done; Sweden waived); SAMR under simplified procedure since 2026-01-23 but review turned "careful/cautious" with reported third-party complaints; H2 2026 close reiterated. |
 | 2026-10-27 | weekly scan, 8-K (acc. 0001104659-26-118986) | Jeroen Delsman named CFO effective Nov 12; interim CFO Ryzhik moves to SVP Corp Dev/IR, leading the Veeco merger integration. |
+
+- **2026-11-02** (weekly scan 2026-11-07, SEC EDGAR) — 8-K: Veeco merger close slipped to end of Q1 2027; China SAMR approval pending, new HSR filing required. Source: https://www.sec.gov/Archives/edgar/data/1113232/000110465926120939/tm2628711d1_8k.htm

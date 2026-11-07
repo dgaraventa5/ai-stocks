@@ -14,3 +14,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-10-16 | context-2026-10-16.md (10-Q p.2, p.58) | Briefing correction: not net cash (~$1.36B converts vs $816M cash+securities); DOJ EDNY CID (FCA/AKS, since 2024) and four Illinois GIPA class actions disclosed. |
 
 - **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-23 (Item 8.01): data-licensing deals with Bristol-Myers Squibb ($137.5M fixed through 2031) and Pathos AI (up to $55M) — $192.5M over ~5 years.
+
+- **2026-11-02** (weekly scan 2026-11-07, SEC EDGAR) — Q3 EX-99.1: revenue $411.5M (+23%); net loss includes $42.8M unrealized securities gains; FY26 revenue guide raised to $1.60–1.605B. Source: https://www.sec.gov/Archives/edgar/data/1717115/000119312526442619/tem-20261102.htm

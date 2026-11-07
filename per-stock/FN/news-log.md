@@ -10,3 +10,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-05-04 | Earnings call | Minority investment in Raytech Semiconductor (~$32M for ~14%) for CPO capabilities; shipping CPO to 3 customers; revenue "largely in front of us" |
 | 2026-05-04 | Earnings call | Q4 guidance: revenue $1.25-1.29B (~40% YoY); non-GAAP EPS $3.72-3.87; gross margin expected similar to Q3 (low 12% range) |
 | 2026-05-04 | Earnings call | HPC $150M/quarter milestone pushed out ~1 quarter to Q2 FY2027 due to customer tech transition, but total opportunity expanding beyond $150M level |
+
+- **2026-11-02** (weekly scan 2026-11-07, SEC EDGAR) — FQ1 FY27 EX-99.1: revenue $1.474B (+51%); GAAP EPS $2.86 depressed by Pillar Two tax and equity revaluation (non-GAAP $4.34, +49%) — rule-15 candidate. Source: https://www.sec.gov/Archives/edgar/data/1408710/000140871026000034/fn-20261102.htm

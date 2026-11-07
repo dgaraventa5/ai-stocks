@@ -14,3 +14,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-10-17** (weekly scan, SEC EDGAR) — 8-Ks 2026-10-13/14/16: Barber Lake AI-lab lease amended to 20 yrs / $9.1B (+$5.2B); contracted HPC revenue $16.6B (+46% QoQ), 700 MW gross contracted HPC, ~3.4 GW pipeline, new Apollo site up to 900 MW (2028). Issued $850M 0.00% converts due 2032 (conv ~$15.31, capped call $28.35) + ~40.7M shares in a 2030-note exchange. capacity-mw.json MW figure needs a human refresh (rule 13).
 
 - **2026-10-24** (weekly scan, SEC EDGAR) — 8-K 2026-10-16 (Item 1.01): $850M 0.00% converts due 2032 (conversion ~$15.31, capped call $28.35) plus ~40.7M shares in a 2030-note exchange (already noted 2026-10-17 from the earlier 8-Ks).
+
+- **2026-11-02** (weekly scan 2026-11-07, SEC EDGAR, EX-99.1) — Q3: Barber Lake lease extended to 20 years (second 10-year term directly with an AI lab), site ~$9.1B; first HPC revenue $5.9M; GAAP includes +$127M warrant fair-value gain. Source: https://www.sec.gov/Archives/edgar/data/1819989/000181998926000047/cifr-20261102.htm
