@@ -7,7 +7,11 @@ to judgment lives here instead:
   preflight      prove the run can work BEFORE it starts — SEC and Yahoo are
                  reachable, the checkout is a clean, current `main`, GitHub is
                  logged in, no earlier scheduled run is still open — and take
-                 a lock. Any failure exits 1 with a plain reason. A run that
+                 a lock. Before the checks it finishes an earlier run that
+                 committed its work but was cut off before merging (pushes,
+                 opens the PR, merges on green CI, returns to main) — one
+                 interrupted run must not block every run after it.
+                 Any failure exits 1 with a plain reason. A run that
                  cannot reach its data sources stops; it never degrades to a
                  partial report (the 2026-06..09 cloud scans did, for months).
   scan-filings   list recent 8-K / 6-K filings from SEC EDGAR for the watch
@@ -21,7 +25,9 @@ to judgment lives here instead:
                  a missing date.
   land           stage ONLY research/score paths, refuse if anything else (or
                  anything under tracking/live/) is staged, commit, push the
-                 run's own branch, open the PR.
+                 run's own branch (with retries), open the PR. Re-running it
+                 after a failed push resumes from the existing commit.
+                 `--hold` (tests failed) opens a draft PR that nothing merges.
   merge          wait for CI on that PR, squash-merge it, sync local main.
   notify         show one macOS notification (Dom, 2026-10-13: the in-app push
                  was skipped because the run's own window counted as active).
@@ -163,6 +169,82 @@ def run_log_line(lock: dict | None, text: str) -> str | None:
     return f"- **{str(lock['started'])[:10]}** ({lock['job']}) — {flat}"
 
 
+# Interrupted landings (2026-11-06). The 2026-11-04 run's push was cut off when
+# the Mac slept; `land` could not be re-run once its commit existed, the
+# checkout stayed on the run branch, and the next two runs refused at
+# preflight. Now `land` resumes, pushes retry, and preflight finishes a
+# stranded run's landing before it checks anything else.
+HOLD_TRAILER = "Scheduled-run: hold"   # a run that chose not to merge (test failure)
+PUSH_TIMEOUT = 300
+PUSH_RETRY_DELAYS = (15, 60)
+
+
+def land_action(staged: list[str], ahead: int) -> str:
+    """'commit' new work; 'resume' an earlier land whose commit exists but
+    never reached its PR; 'nothing' when there is no work at all."""
+    if staged:
+        return "commit"
+    return "resume" if ahead > 0 else "nothing"
+
+
+def retry(attempt, delays=PUSH_RETRY_DELAYS, sleep=time.sleep) -> tuple[int, str]:
+    """Call attempt() until it returns rc 0, sleeping each delay in turn
+    between tries. Returns the last (rc, output)."""
+    rc, out = attempt()
+    for delay in delays:
+        if rc == 0:
+            break
+        sleep(delay)
+        rc, out = attempt()
+    return rc, out
+
+
+def ci_state(checks: str) -> str:
+    """'fail', 'pass' or 'pending' from `gh pr checks` output."""
+    if "fail" in checks:
+        return "fail"
+    if "pass" in checks and "pending" not in checks:
+        return "pass"
+    return "pending"
+
+
+def is_held(message: str) -> bool:
+    return HOLD_TRAILER in str(message)
+
+
+def stranded_plan(branch: str, modified: list[str], ahead: int,
+                  pr: dict | None, held: bool) -> tuple[str, str]:
+    """What preflight does with a checkout left on an earlier run's branch.
+
+    none    — not on a run branch; the ordinary checks decide.
+    open_pr — committed work never reached GitHub: push it and open its PR.
+    merge   — its PR is open: merge it once CI passes.
+    return  — nothing left to land: go back to main.
+    refuse  — a person has to look (the reason says why).
+    Only work `land` already committed and vetted is ever landed; uncommitted
+    work, a deliberate hold or a closed PR stays with Dom."""
+    if not branch.startswith(RUN_BRANCH_PREFIX):
+        return "none", ""
+    dirty = [m for m in modified if m not in MACHINE_WRITTEN]
+    if dirty:
+        return "refuse", (f"earlier run {branch} stopped with uncommitted work "
+                          f"({', '.join(dirty[:5])})")
+    if held:
+        return "refuse", f"earlier run {branch} was held on purpose (test failure)"
+    if pr:
+        state = str(pr.get("state", "")).upper()
+        if state == "MERGED":
+            return "return", f"#{pr.get('number')} already merged"
+        if state != "OPEN":
+            return "refuse", f"earlier run's PR #{pr.get('number')} was closed unmerged"
+        if pr.get("isDraft"):
+            return "refuse", f"earlier run's PR #{pr.get('number')} is held as a draft"
+        return "merge", f"#{pr.get('number')} open"
+    if ahead <= 0:
+        return "return", "run branch has no commits"
+    return "open_pr", f"{ahead} commit(s) never reached GitHub"
+
+
 # ── side-effecting shell ────────────────────────────────────────────────────
 
 def _run(cmd: list[str], timeout: int = 60) -> tuple[int, str]:
@@ -216,6 +298,11 @@ def preflight(job: str) -> int:
     if WORKBOOK_LOCK.exists():
         problems.append("the scoring workbook is open in Excel — close it")
 
+    recovered: list[str] = []
+    if not problems:              # never touch a branch a live run may own
+        recovered, stuck = recover_stranded()
+        problems += stuck
+
     _, branch = _run(["git", "rev-parse", "--abbrev-ref", "HEAD"])
     _, status = _run(["git", "status", "--porcelain", "--untracked-files=no"])
     modified = [ln.split(maxsplit=1)[1] for ln in status.splitlines()
@@ -247,8 +334,8 @@ def preflight(job: str) -> int:
             problems.append(f"could not fast-forward main ({out[:120]})")
 
     if problems:
-        print(json.dumps({"ok": False, "job": job, "problems": problems},
-                         indent=2, ensure_ascii=False))
+        print(json.dumps({"ok": False, "job": job, "problems": problems,
+                          "recovered": recovered}, indent=2, ensure_ascii=False))
         return 1
 
     LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -256,7 +343,8 @@ def preflight(job: str) -> int:
         "job": job, "started": now.isoformat(timespec="seconds")}, indent=2))
     print(json.dumps({"ok": True, "job": job,
                       "branch": f"{RUN_BRANCH_PREFIX}{job}-{now:%Y-%m-%d}",
-                      "date": f"{now:%Y-%m-%d}"}, indent=2))
+                      "date": f"{now:%Y-%m-%d}", "recovered": recovered},
+                     indent=2, ensure_ascii=False))
     return 0
 
 
@@ -359,7 +447,132 @@ def log(text: str) -> int:
     return 0
 
 
-def land(message: str, body_file: str | None) -> int:
+def _ahead_of_origin() -> int:
+    _, n = _run(["git", "rev-list", "--count", "origin/main..HEAD"])
+    return int(n) if n.isdigit() else 0
+
+
+def _push(name: str) -> tuple[int, str]:
+    """Push HEAD to the run's branch, retrying: a push cut off by sleep or a
+    network blip often lands seconds later, and re-pushing is idempotent."""
+    return retry(lambda: _run(["git", "push", "-u", "origin",
+                               f"HEAD:refs/heads/{name}"], timeout=PUSH_TIMEOUT))
+
+
+def _find_pr(name: str) -> dict | None:
+    """The newest PR for a run branch, in any state, or None."""
+    rc, out = _run(["gh", "pr", "list", "--head", name, "--state", "all",
+                    "--json", "number,state,isDraft", "--limit", "1"])
+    if rc:
+        return None
+    try:
+        prs = json.loads(out or "[]")
+    except ValueError:
+        return None
+    return prs[0] if prs else None
+
+
+def _open_pr(name: str, title: str, body: str | None, body_file: str | None,
+             draft: bool) -> tuple[int | None, str]:
+    """Reuse the branch's open PR or create one. Returns (number, problem)."""
+    pr = _find_pr(name)
+    if pr and str(pr.get("state", "")).upper() == "OPEN":
+        return pr.get("number"), ""
+    cmd = ["gh", "pr", "create", "--head", name, "--base", "main",
+           "--title", title[:120]]
+    cmd += ["--body-file", body_file] if body_file else ["--body", body or title]
+    if draft:
+        cmd.append("--draft")
+    rc, out = retry(lambda: _run(cmd, timeout=120))
+    if rc:
+        return None, f"PR not created: {out[:160]}"
+    pr = _find_pr(name)
+    return (pr or {}).get("number"), ""
+
+
+def _wait_ci(pr: int) -> str:
+    """'pass', 'fail' or 'pending' (CI still running at the deadline)."""
+    deadline = time.time() + CI_WAIT_SECONDS
+    while True:
+        _, checks = _run(["gh", "pr", "checks", str(pr)])
+        state = ci_state(checks)
+        if state != "pending" or time.time() > deadline:
+            return state
+        time.sleep(10)
+
+
+def _merge_pr(pr: int) -> str:
+    """Squash-merge once CI passes. Returns a problem, or '' on success."""
+    state = _wait_ci(pr)
+    if state == "fail":
+        return f"CI failed on PR #{pr} — left open"
+    if state != "pass":
+        return f"CI did not finish on PR #{pr} — left open"
+    rc, out = retry(lambda: _run(["gh", "pr", "merge", str(pr), "--squash",
+                                  "--delete-branch"], timeout=180))
+    return f"merge failed: {out[:160]}" if rc else ""
+
+
+def _return_to_main(name: str) -> str:
+    """Leave a landed run branch for an up-to-date main. Returns a problem or ''.
+    The executor's reconciliation files ride along (MACHINE_WRITTEN)."""
+    _run(["git", "fetch", "origin", "main"], timeout=120)
+    rc, _ = _run(["git", "merge-base", "--is-ancestor", "main", "origin/main"])
+    if rc:
+        return "local main has commits origin/main does not (unpushed work)"
+    rc, out = _run(["git", "checkout", "-B", "main", "origin/main"])
+    if rc:
+        return f"could not return to main: {out[:120]}"
+    _run(["git", "branch", "-D", name])
+    return ""
+
+
+def recover_stranded() -> tuple[list[str], list[str]]:
+    """Finish an earlier run that committed its work but was cut off before
+    it merged (sleep, network). Returns (what was done, problems)."""
+    done: list[str] = []
+    branch = _current_branch()
+    if not branch.startswith(RUN_BRANCH_PREFIX):
+        return done, []
+    _, status = _run(["git", "status", "--porcelain", "--untracked-files=no"])
+    modified = [ln.split(maxsplit=1)[1] for ln in status.splitlines()
+                if len(ln.split(maxsplit=1)) == 2]
+    rc, out = _run(["git", "fetch", "origin", "main"], timeout=120)
+    if rc:
+        return done, [f"git fetch failed ({out[:120]})"]
+    _, msg = _run(["git", "log", "-1", "--format=%B"])
+    pr = _find_pr(branch)
+    action, why = stranded_plan(branch, modified, _ahead_of_origin(), pr,
+                                is_held(msg))
+    if action == "refuse":
+        return done, [why]
+    number = (pr or {}).get("number")
+    if action == "open_pr":
+        rc, out = _push(branch)
+        if rc:
+            return done, [f"could not push earlier run {branch}: {out[:120]}"]
+        title = msg.strip().splitlines()[0] if msg.strip() else branch
+        body = (msg.strip() + "\n\nLanded by the next scheduled run's preflight: "
+                "the original run committed this work but was cut off before "
+                "it merged.")
+        number, problem = _open_pr(branch, title, body, None, draft=False)
+        if problem or not number:
+            return done, [problem or f"PR for {branch} not found after create"]
+        done.append(f"pushed {branch} and opened #{number}")
+        action = "merge"
+    if action == "merge":
+        problem = _merge_pr(number)
+        if problem:
+            return done, [f"earlier run {branch}: {problem}"]
+        done.append(f"merged #{number}")
+    problem = _return_to_main(branch)
+    if problem:
+        return done, [problem]
+    done.append(f"returned from {branch} to main")
+    return done, []
+
+
+def land(message: str, body_file: str | None, hold: bool = False) -> int:
     lock = _read_lock()
     name = run_branch(lock)
     if not name or _current_branch() != name:
@@ -371,25 +584,26 @@ def land(message: str, body_file: str | None) -> int:
     if bad:
         _run(["git", "reset", "-q"])
         return _fail("refusing to commit: " + ", ".join(bad[:8]))
-    if not paths:
+    action = land_action(paths, _ahead_of_origin())
+    if action == "nothing":
         return _fail("nothing to commit")
-    rc, out = _run(["git", "commit", "-q", "-m", message])
+    if action == "commit":
+        full = f"{message}\n\n{HOLD_TRAILER}" if hold else message
+        rc, out = _run(["git", "commit", "-q", "-m", full])
+        if rc:
+            return _fail(f"commit failed: {out[:160]}")
+    rc, out = _push(name)
     if rc:
-        return _fail(f"commit failed: {out[:160]}")
-    rc, out = _run(["git", "push", "-u", "origin", f"HEAD:refs/heads/{name}"],
-                   timeout=180)
-    if rc:
-        return _fail(f"push failed: {out[:160]}")
-    cmd = ["gh", "pr", "create", "--head", name, "--base", "main",
-           "--title", message.splitlines()[0][:120]]
-    cmd += ["--body-file", body_file] if body_file else ["--body", message]
-    rc, out = _run(cmd, timeout=120)
-    if rc:
-        return _fail(f"PR not created: {out[:160]}")
-    rc, num = _run(["gh", "pr", "view", name, "--json", "number", "-q", ".number"])
-    lock["pr"] = int(num) if num.isdigit() else None
+        return _fail(f"push failed after retries: {out[:160]} — re-run land; "
+                     f"it resumes from the existing commit")
+    number, problem = _open_pr(name, message.splitlines()[0], message, body_file,
+                               draft=hold)
+    if problem:
+        return _fail(problem)
+    lock["pr"] = number
     LOCK_PATH.write_text(json.dumps(lock, indent=2))
-    print(json.dumps({"ok": True, "pr": lock["pr"], "files": len(paths)}))
+    print(json.dumps({"ok": True, "pr": number, "files": len(paths),
+                      "resumed": action == "resume", "held": hold}))
     return 0
 
 
@@ -402,26 +616,12 @@ def merge() -> int:
                      "-q", ".headRefName"])
     if rc or head != name:
         return _fail(f"PR #{pr} is not this run's branch ({head!r} != {name!r})")
-    deadline = time.time() + CI_WAIT_SECONDS
-    while True:
-        _, checks = _run(["gh", "pr", "checks", str(pr)])
-        if "fail" in checks:
-            return _fail(f"CI failed on PR #{pr} — left open")
-        if "pass" in checks and "pending" not in checks:
-            break
-        if time.time() > deadline:
-            return _fail(f"CI did not finish on PR #{pr} — left open")
-        time.sleep(10)
-    rc, out = _run(["gh", "pr", "merge", str(pr), "--squash", "--delete-branch"],
-                   timeout=180)
-    if rc:
-        return _fail(f"merge failed: {out[:160]}")
-    _run(["git", "checkout", "main"])
-    _run(["git", "fetch", "origin", "main"], timeout=120)
-    rc, out = _run(["git", "merge", "--ff-only", "origin/main"])
-    if rc:
-        return _fail(f"merged, but local main did not fast-forward: {out[:120]}")
-    _run(["git", "branch", "-D", name])
+    problem = _merge_pr(pr)
+    if problem:
+        return _fail(problem)
+    problem = _return_to_main(name)
+    if problem:
+        return _fail(f"merged, but {problem}")
     print(json.dumps({"ok": True, "merged": pr}))
     return 0
 
@@ -471,6 +671,9 @@ def main(argv=None) -> int:
     ln = sub.add_parser("land")
     ln.add_argument("--message", required=True)
     ln.add_argument("--body-file")
+    ln.add_argument("--hold", action="store_true",
+                    help="tests failed: open the PR as a draft and do not merge; "
+                         "the next preflight refuses until Dom deals with it")
     sub.add_parser("merge")
     nt = sub.add_parser("notify")
     nt.add_argument("--message", required=True)
@@ -485,7 +688,7 @@ def main(argv=None) -> int:
     if a.cmd == "log":
         return log(a.text)
     if a.cmd == "land":
-        return land(a.message, a.body_file)
+        return land(a.message, a.body_file, a.hold)
     if a.cmd == "merge":
         return merge()
     if a.cmd == "notify":
