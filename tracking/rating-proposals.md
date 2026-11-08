@@ -196,3 +196,59 @@ Effect if approved: Total 69.11 → 69.86, rank 38 → 34; membership change: no
 Status: PROPOSED
 
 _All 2026-11-01 proposals together: MU 88.62→90.37 (rank 1), GOOGL 72.08→70.58 (26→30), SPCX 60.34→59.25 (101→110), POWL 69.11→63.61 (38→82). No membership change and no tier change for MU or GOOGL; no change to any top-20 rank. No change proposed: MU D1, D3, D4, D5, M1, M2, R2, R3, R5; GOOGL D1–D5, M3, R1–R5; SPCX D1–D4, M2, M3, R1–R3, R5; POWL D2, D3, R1, R4, R5. Flagged, not proposed: MU D2 4→5 (ASP +180% and supply allocation are real, but band 4 literally describes a three-supplier market, CXMT is growing, and the rubric warns against rating past pricing); MU R2 (the 2026-09-08 Taiwan strike trigger is literally met, band 1 is not: 11 officials struck 24 hours, no output impact reported); SPCX R1 stays 3 on a new basis (one compute customer at 34.5%; band 2 starts at 40%). POWL reports FQ4 about 2026-11-17 and its 10-K follows, which bears on D1, D4, D5 and R1. Rule-15 rulings are pending for GOOGL and SPCX._
+
+## 2026-11-08 — APP — D3 Moat 2 → 3  (confidence Med)
+Event: Q3 10-Q filed 2026-11-04, MD&A: net revenue per installation +55% with installs +2% (first YoY install growth of 2026); revenue $2,184.8M beat the guide and consensus (~$2.07B, stockanalysis.com); Q4 guide $2,365–2,395M vs ~$2.25B consensus (TIKR). The CEO calls the market "more competitive", and the Unity Vector / Edgewater evidence is not rebutted.
+Why: Band 2 "Weak moat. Losing share possible. Price-taker behavior" no longer fits a quarter of +55% yield per install. Band 3 "Share roughly stable but pricing is competitive" fits flat-to-up installs in a contested market. Dom's 2026-10-10 D3 call named this print as its revisit point. The case rests on reported fundamentals, not the post-print price bounce. Briefing: per-stock/APP/context-2026-11-08.md.
+Effect if approved: Total 70.50 → 71.50, rank 37 → 29; membership change: no (APP also carries a live entry hold to 2026-11-15). Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-08 — APP — M1 EPS Revisions 2 → 3  (confidence Low)
+Event: Yahoo eps_trend pulled 2026-11-08: FY2026 EPS $15.78 90 days ago → $16.25 now (+3%), current quarter $4.59 → $4.74; FY2027 $20.73 → $20.50 (−1%). Yahoo's revision counts still show more downs than ups over 30 days, which looks stale against the post-print rise in the current figures.
+Why: Band 3 "Stable estimates. Neutral revision trend." The 90-day window holds the August–October cuts and the post-print lift, so it nets to roughly flat. Band 4 needs net positive revisions, which the counts do not yet show. Re-check in two weeks.
+Effect if approved: Total 70.50 → 71.00, rank 37 → 34; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-08 — DLR — D1 AI Revenue 5 → 4  (confidence Low–Med)
+Event: Q3 10-Q (filed 2026-10-30) and Q3 call: DLR still discloses no AI share of revenue. The 2026-05-18 audit row that set D1=5 cites "21% of signings AI-oriented". AI drives new bookings (inference in 15+ markets, Q3 call), but the revenue base is mostly cloud and enterprise colocation.
+Why: Band 5 needs ">50% … clearly and reportedly AI-tied"; band 4 is "25-50% … major growth driver". The rubric names "counting data center revenue as AI revenue" as a failure mode. This is a literal band-fit correction, not a new event. Briefing: per-stock/DLR/context-2026-11-08.md.
+Effect if approved: Total 57.75 → 56.75, rank 145 → 151; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-08 — DLR — M1 EPS Revisions 2 → 4  (confidence Med)
+Event: Core FFO guidance raised three times in 2026: $8.00–8.10 → $8.15–8.20 → $8.30–8.35 (8-K Ex. 99.1, 2026-10-29). Post-print consensus is $8.33, inside the new range (Zacks via Finviz, 2026-10-29). Yahoo next-quarter revisions are 7 up / 2 down over 30 days (pulled 2026-11-08). Yahoo's GAAP-EPS trend is flat, but GAAP EPS is the wrong measure for a REIT.
+Why: Band 4 "Net positive revisions. Some up, few down." The 2 rested on net-negative revisions in May. Band 5 (beat-and-raise) is arguable, but dilution (diluted shares +8.7% YoY) and an implied Q4 below Q3 cap it at 4.
+Effect if approved: Total 57.75 → 58.75, rank 145 → 134; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-08 — DLR — M2 Relative Strength 4 → 2  (confidence Med)
+Event: Yahoo prices, 2026-05-08 → 2026-11-06: DLR −9.6%, XLRE +0.8% (XLRE is the benchmark per the 2026-05-18 precedent). Over 3 months: DLR −8.3%, XLRE −0.1%.
+Why: Band 2 "Underperforming sector by 5-20%". DLR trails by about 10 points over 6 months and 8 over 3. No company-specific cause found; heavy ATM issuance (about 8.6M shares at $191.69 average, 10-Q) is the likely overhang.
+Effect if approved: Total 57.75 → 56.75, rank 145 → 151; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-08 — KLAC — R3 Balance Sheet Risk 5 → 4  (confidence Med)
+Event: 10-Q filed 2026-10-29: $5.95B of senior notes (Note 7) against $4.74B cash and marketable securities at 2026-09-30, so net debt is about $1.2B (about 0.2x EBITDA, estimated). Maturities run 2029–2062; trailing FCF is $4.04B. KLA was also net debt at 2026-06-30.
+Why: Band 5 is "Net cash position. Strong FCF generation. No debt concerns"; band 4 is "Modest leverage. ND/EBITDA <2x. Maturities well-spread". This is a literal band-fit correction, not a new event. Holding at 5 is defensible if "no debt concerns" is read as the deciding test. Briefing: per-stock/KLAC/context-2026-11-08.md.
+Effect if approved: Total 71.59 → 70.84, rank 28 → 34; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-08 — LITE — M2 Relative Strength 5 → 1  (confidence Med)
+Event: Yahoo prices, 2026-05-08 → 2026-11-06: LITE −40.4%, SMH −18.1% (6 months); 3 months: −33.8% vs −18.5%. Causes: the sector selloff from 10-09 (Trefis, 2026-10-19), the all-stock Marvell deal at 4.500 MRVL per LITE (8-K 2026-11-02, LITE −18.6% that day), then MRVL's own slide (TIKR).
+Why: Band 1 "Lagging sector by >20%": LITE trails by 22 points over 6 months; over 3 months the 15-point gap would be band 2. The rubric's bias check applies: this is the price read, not a quality read. LITE now trades as a MRVL-linked merger-arbitrage position, so its price inputs mostly reflect MRVL and the odds the deal closes. Briefing: per-stock/LITE/context-2026-11-08.md.
+Effect if approved: Total 70.39 → 68.39, rank 38 → 50; tier ✓✓ → ✓ (incidental, not the reason); membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-08 — LITE — R1 Customer Concentration 4 → 3  (confidence High)
+Event: The FQ1 FY27 10-Q (filed 2026-11-03, segment note) shows the top end customer at 37% of revenue, up from 22% a year earlier; FY2026 10-K: 26.6%. Two 10%+ customers were 48% of the quarter.
+Why: Band 3 "Top customer 25-40% of revenue". Both the latest quarter and the full year fall in band 3.
+Effect if approved: Total 70.39 → 69.64, rank 38 → 43; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-08 — LITE — R4 Regulatory Risk 4 → 3  (confidence Med)
+Event: 10-Q Note 14 (filed 2026-11-03): a BIS/DOJ export-control inquiry opened in August 2024 is still pending. The 2026-06-22 briefing missed it. Antitrust review of the Marvell deal is deal risk, not counted here.
+Why: Band 3 "Some pending matters disclosed". This is not a new event; the rating predates the inquiry being found.
+Effect if approved: Total 70.39 → 69.64, rank 38 → 43; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+_All 2026-11-08 proposals together: APP 70.50→72.00 (rank 37→27), KLAC 71.59→70.84 (28→35), DLR 57.75→56.75 (145→151), LITE 70.39→66.89 (38→65, ✓✓→✓). No membership change; no tier change for APP, KLAC or DLR. No change proposed: APP D1, D2, D4, D5, M2 (6m −16.5% vs IGV +8.5%, still band 1), M3, R1–R5; DLR D2–D5, M3, R1–R5; KLAC D1–D5, M1 (FY EPS +6% over 90d, 20 up / 0 down), M2 (6m −25.7% vs SMH −18.1%, band 2), M3, R1, R2, R4, R5; LITE D1–D5, M1 (FY EPS +33% over 90d, 6 up / 0 down), M3, R2, R3, R5. Flagged, not proposed: KLAC D4 4→5 (factories expanding, $8.87B purchase commitments, but capex only about 4% of revenue); KLAC D5 (the supplier bands read literally give 2; only the semi-equipment anchor holds 4); KLAC R2 (re-check after the Commerce "Affiliates Rule" suspension ends 2026-11-09); LITE R2 (a strict two-leg reading could give 3); LITE rule 15 (FY26 GAAP EPS is dominated by a $7.76B loss on debt extinguishment; trailing EPS stays distorted until about August 2027; the latest quarter's YoY is operational). Rule-35 candidate: LITE (Marvell all-stock deal signed 2026-11-01, a transformative transaction since the last reported quarter); this run may not edit holds._
