@@ -12,3 +12,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-07-27/28** ⚠️ (weekly scan (BusinessWire / TipRanks)) — Signed a 15-year AMD colocation lease (~530MW, up to $14B potential revenue) — a major capacity/customer win; Q2 results also reported 7/28.
 
 - **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-10 (Item 7.01): ERCOT large-load status — Denton 297+74 MW, Pecos 300 MW base + 300 MW studied, Hunt 431 MW, all conditionally approved.
+
+- **2026-11-05** (weekly scan 2026-11-07, SEC EDGAR, EX-99.1) — Q3: 485 MW now billing; GAAP driven by warrant fair-value swings. Source: https://www.sec.gov/Archives/edgar/data/1839341/000183934126000028/core-20261105.htm

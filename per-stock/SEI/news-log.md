@@ -4,3 +4,5 @@
 
 - **2026-09-18** (weekly scan, SEC EDGAR): 8-K 2026-09-08: closed Omega Foundation Services acquisition (9/1) — ~$77M cash + 3.6M Class A shares.
 - **2026-10-29** (weekly scan, 8-K, acc. 0001193125-26-437755) — ~900 MW power deal with an unnamed investment-grade existing customer: 15 years plus a 15-year option, deployments 1H27 through 2028.
+
+- **2026-11-04** (weekly scan 2026-11-07, SEC EDGAR, EX-99.1) — Q3: new 15-year 900 MW power contract, contracted capacity 3.2 GW; guidance raised. Source: https://www.sec.gov/Archives/edgar/data/1697500/000162828026070286/sei-20261104.htm

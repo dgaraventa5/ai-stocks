@@ -13,3 +13,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 
 - **2026-07-03** (weekly scan, PR Newswire) — Majority-owned subsidiary American Bitcoin Corp (ABTC) announced a 1-for-15 reverse stock split (effective 7/2) to maintain Nasdaq minimum-bid compliance. HUT shares fell ~10% same day (7/1) — could not confirm whether the split, the broader Meta Compute sector selloff, or both drove the drop.
 - **2026-07-20** ⚠️ (weekly scan (Barchart / Quiverquant)) — Fully commercialized the 1GW Beacon Point campus with a 2nd 352MW lease, bringing base-term contract value to $19.6B; stock +10.4%. Separate reports of Nvidia lease commitments up to $50B tied to the 1GW TX site (unconfirmed against a primary source).
+
+- **2026-11-04** (weekly scan 2026-11-07, SEC EDGAR, EX-99.1) — Q3: second Beacon Point lease, 352 MW IT (~$9.8B); AI DC portfolio ~$26.6B contract value, 1,330 MW under construction; net income includes $414M mostly unrealized bitcoin gain. Source: https://www.sec.gov/Archives/edgar/data/1964789/000110465926122347/tm2628741d1_8k.htm

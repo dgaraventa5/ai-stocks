@@ -12,3 +12,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): Added +188% to 19.88M sh ($39M) — bigger % add than RIOT, missed by most 13F commentary (filed under Bitfarms CUSIP 09173B107).
 
 - **2026-07-03** (weekly scan) — Added to the Russell 3000 effective 6/29. Sharp selloff 7/1-7/2, down ~13.7% in a session (~$447M in equity value, roughly wiping out the ~$445.4M raised in the June 9 convert offering). Aggregator sources cite "delays/cost overruns on a transport project" and cash-burn concerns — **could not corroborate against a primary source; flagging as unverified sourcing**, though the price move itself is real.
+
+- **2026-11-05** (weekly scan 2026-11-07, SEC EDGAR, EX-99.1) — Q3: still no AI/HPC lease signed. Source: https://www.sec.gov/Archives/edgar/data/1812477/000181247726000041/keel-20261105.htm
