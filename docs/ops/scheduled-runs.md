@@ -52,6 +52,12 @@ this check.
    Exit 1 → do nothing else: send the notification with the printed
    problems and stop. Do not "work around" a failed check (no web-search
    substitute for a blocked SEC/Yahoo, no stash of someone's changes).
+   Preflight first finishes an earlier run that was cut off after `land`
+   committed (2026-11-06: one sleep-interrupted push blocked the next two
+   days): it pushes that run's branch, opens or reuses its PR, merges it once
+   CI passes and returns to main. It never lands uncommitted work, a held
+   (draft) PR, a closed PR or a red-CI PR — those still refuse. Anything it
+   did is listed under `recovered`; put it in this run's log line.
 2. **Branch.** `python3 scripts/scheduled_run.py branch` (creates
    `auto/<job>-<date>` from origin/main). Every run branches, quiet or not.
 3. **Do the job** per its skill. Use the real date (`date +%F`). Then log the
@@ -61,10 +67,10 @@ this check.
    and a missed run shows up as a missing date. Put not-material and
    could-not-verify items in the line, briefly.
 4. **Test.** `python3 -m pytest tests -q`. A quiet run whose only change is its log
-   line skips this step (CI still gates the merge). On a test failure still run step 5's `land`
-   (so the work is visible on a PR) but NOT `merge`; notify, release the lock,
-   stop. The next run's preflight refuses until that PR is dealt with — loud
-   by design.
+   line skips this step (CI still gates the merge). On a test failure run
+   `land --hold` (so the work is visible on a draft PR) but NOT `merge`;
+   notify, release the lock, stop. The next run's preflight refuses until
+   that PR is dealt with — loud by design.
 5. **Land.** `python3 scripts/scheduled_run.py land --message "<title>"
    [--body-file <path>]` then `python3 scripts/scheduled_run.py merge`.
    Do not run `git add`, `git commit`, `git push` or `gh pr merge` yourself —
@@ -72,6 +78,9 @@ this check.
    `00-master/` and `tracking/`, refuses if anything else or anything under
    `tracking/live/` is staged, and pushes only this run's branch; `merge`
    waits for CI, squash-merges only this run's PR and syncs local main.
+   Pushes retry on their own. If `land` still fails, re-run it once: it
+   resumes from the existing commit (it no longer says "nothing to commit").
+   If it fails again, leave the branch as it is — the next preflight lands it.
    Then confirm the site deploy: `gh run list --workflow deploy-site.yml --limit 1`.
 6. **Report.** Notion page (below), then one notification, then
    `python3 scripts/scheduled_run.py release`. Always release the lock, on
