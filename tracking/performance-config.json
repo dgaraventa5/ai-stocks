@@ -1656,6 +1656,21 @@
           "LRCX",
           "AMZN"
         ]
+      },
+      {
+        "date": "2026-11-09",
+        "roster": [
+          "STX",
+          "META",
+          "RDDT",
+          "NVT",
+          "RMBS",
+          "APH",
+          "GOOGL",
+          "LRCX",
+          "AMZN",
+          "KLAC"
+        ]
       }
     ],
     "BAND_TAIL": [
@@ -1994,6 +2009,26 @@
           "ONTO",
           "BE",
           "MKSI",
+          "PWR",
+          "TT",
+          "NXT"
+        ]
+      },
+      {
+        "date": "2026-11-09",
+        "roster": [
+          "TER",
+          "GMED",
+          "VST",
+          "ORCL",
+          "SNPS",
+          "CGNX",
+          "CMI",
+          "APP",
+          "LITE",
+          "ONTO",
+          "MKSI",
+          "BE",
           "PWR",
           "TT",
           "NXT"
