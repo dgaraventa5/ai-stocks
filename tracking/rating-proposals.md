@@ -77,13 +77,13 @@ Status: PROPOSED
 Event: yfinance adjusted closes, 126 trading days 2026-04-28 → 2026-10-27: NVDA +2.3% vs SMH +13.4% = −11.1pp; 63 days: +14.6% vs +10.5% = +4.1pp.
 Why: Band 2 'Underperforming sector by 5-20%' on the 6-month window the band names; band 1 needs a >20pp lag. The 3-month read (band 3) is better still, so 1 overstates the lag.
 Effect if approved: Total 83.87 → 84.37, rank 2 → 2; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: SUPERSEDED 2026-11-12 (re-computed on current data below)
 
 ## 2026-10-27 — NVDA — M1 EPS Revisions 4 → 5  (confidence Med)
 Event: yfinance eps_trend/eps_revisions pulled 2026-10-27: next-FY (+1y) EPS consensus $15.91 vs $12.81 90 days ago (+24%) and $15.68 30 days ago; 7 up / 0 down in 30 days on +1y, 2 up / 0 down on current FY. Q2 FY27 beat and Q3 guide of $108B above ~$104.2B consensus (8-K 2026-08-26; Webull recap). Current-quarter estimate had 1 down revision in 7 days.
 Why: Band 5 'Multiple upward revisions. Beat-and-raise pattern. Consensus moving higher.' The 2026-05-18 audit held 4 because +1y was up only 15% with 4 up / 0 down ('not loud'); today's +24% matches ALAB's band-5 precedent (+28%). Caveat: most of the move came 60–90 days ago, around the August print; the last 30 days are flatter.
 Effect if approved: Total 83.87 → 84.37, rank 2 → 2; membership change: no (with the M2 proposal too: 84.87, rank 2). Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: SUPERSEDED 2026-11-12 (re-computed on current data below)
 
 ## 2026-10-27 — ALAB — R2 Geographic Risk 5 → 3  (confidence Med)
 Event: 10-Q Q2 2026 (filed 2026-08-05) Note 2, revenue by billing location: China 38.9%, Singapore 29.0%, Taiwan 27.0%, US 1.4%. The 2026-05-18 audit basis for 5 was 'Mostly US, some Taiwan', which the filing contradicts.
@@ -255,3 +255,24 @@ _All 2026-11-08 proposals together: APP 70.50→72.00 (rank 37→27), KLAC 71.59
 
 ## 2026-11-09 — VST — no rating change proposed (daily watch)
 Re-scored after Q3 (8-K 2026-11-06): Total 72.70 → 71.22, rank 21 → 30, ✓✓ unchanged; not held, no membership change. Briefing: per-stock/VST/context-2026-11-09.md. _Flagged, not proposed:_ the Texas governor-elect's pledge to halt new data centers (2026-11-03 election; secondary sources only) is a pledge, not a proceeding, so it does not fit an R4 band; it bears on D1/D5 and the Texas thesis leg — Dom's call whether to research it. M1 has upward pressure (2026 EBITDA midpoint raised, 2027 initiated at $7.7–8.5B) but VST's M1 is already 4. Rule 15: EPS YoY cell is blank with no ruling in eps-yoy-overrides.json, and Q3 EPS (+85% YoY) includes $559M of unrealized hedge gains — needs a ruling.
+
+## 2026-11-12 — NVDA — R4 Regulatory Risk 3 → 2  (confidence Med)
+Event: CEO Jensen Huang resigned 2026-11-11 (8-K Item 5.02, acc 0001045810-26-000082). Around it: a board-commissioned Wachtell Lipton investigation into whether the CEO was targeted by a foreign intelligence operation (Fortune 2026-11-10); House committee chairs requesting testimony, with a Senate subpoena threat, on NVIDIA's export compliance (CNBC live 2026-11-12); US/Singapore probes of Megaspeed, its largest SE-Asian customer; and SDNY's Supermicro diversion probe. These sit on top of the existing DOJ Groq probe (the basis for 3 on 2026-10-06) and the unread Hu v. NVIDIA securities case, 5:26-cv-05496. Source: per-stock/NVDA/context-2026-11-12.md.
+Why: Band 2 'Material litigation or active regulatory investigations'. Several active investigations now bear on NVIDIA's own conduct and compliance, not just one deal's structure. Not band 1: no agency action names NVIDIA itself (no BIS penalty or DOJ subpoena to NVIDIA reported). Dom's 2026-05-18 standard (rate enforcement, not scrutiny) is why this is 2 and not 1.
+Effect if approved: Total 84.17 → 83.42, rank 3 → 4; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation, after today's objective refresh.
+Status: PROPOSED
+
+## 2026-11-12 — NVDA — M2 Relative Strength 1 → 2  (confidence Med)
+Event: yfinance adjusted closes, 126 trading days 2026-05-14 → 2026-11-12: NVDA −30.6% vs SMH −13.8% = −16.8pp. Over 63 days: −27.4% vs −15.1% = −12.2pp. The 11-12 bar may be intraday. Replaces the 2026-10-27 entry.
+Why: Band 2 'Underperforming sector by 5-20%' on the 6-month window; band 1 needs a lag over 20pp. The margin to band 1 is only ~3pp, so re-check after the 11-17 print before applying.
+Effect if approved: Total 84.17 → 84.67, rank 3 → 3; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-12 — NVDA — M1 EPS Revisions 4 → 5  (confidence Low)
+Event: Yahoo eps_trend/eps_revisions, 2026-11-12: +1y EPS $15.93 vs $12.82 90 days ago (+24%), $15.91 30 days ago; 7 up / 0 down in 30 days on +1y. Current quarter 1 down in 7 days. Replaces the 2026-10-27 entry.
+Why: On the data, band 5 'Multiple upward revisions ... consensus moving higher' fits the 90-day window. But the data predates this week's analyst target cuts and downgrade (Baird to Neutral; CNBC live 2026-11-12), and estimates will be re-cut after the 11-17 print. **Recommend deciding after the post-print refresh, not now.**
+Effect if approved: Total 84.17 → 84.67, rank 3 → 3; membership change: no. Scratch copy, single change in isolation.
+Status: PROPOSED
+
+_All three 2026-11-12 NVDA proposals together: 84.17 → 84.42, rank 3, ✓✓; no membership change. Holds: D1–D5, M3, R1, R2, R3, R5 (reasons in the briefing §6). Flagged, not proposed: the rubric has no key-person/leadership-transition dimension, so the CEO loss itself moves no rating; that is a rule-8 framework question for Dom._
+
