@@ -260,19 +260,19 @@ Re-scored after Q3 (8-K 2026-11-06): Total 72.70 → 71.22, rank 21 → 30, ✓�
 Event: CEO Jensen Huang resigned 2026-11-11 (8-K Item 5.02, acc 0001045810-26-000082). Around it: a board-commissioned Wachtell Lipton investigation into whether the CEO was targeted by a foreign intelligence operation (Fortune 2026-11-10); House committee chairs requesting testimony, with a Senate subpoena threat, on NVIDIA's export compliance (CNBC live 2026-11-12); US/Singapore probes of Megaspeed, its largest SE-Asian customer; and SDNY's Supermicro diversion probe. These sit on top of the existing DOJ Groq probe (the basis for 3 on 2026-10-06) and the unread Hu v. NVIDIA securities case, 5:26-cv-05496. Source: per-stock/NVDA/context-2026-11-12.md.
 Why: Band 2 'Material litigation or active regulatory investigations'. Several active investigations now bear on NVIDIA's own conduct and compliance, not just one deal's structure. Not band 1: no agency action names NVIDIA itself (no BIS penalty or DOJ subpoena to NVIDIA reported). Dom's 2026-05-18 standard (rate enforcement, not scrutiny) is why this is 2 and not 1.
 Effect if approved: Total 84.17 → 83.42, rank 3 → 4; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation, after today's objective refresh.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-12, applied
 
 ## 2026-11-12 — NVDA — M2 Relative Strength 1 → 2  (confidence Med)
 Event: yfinance adjusted closes, 126 trading days 2026-05-14 → 2026-11-12: NVDA −30.6% vs SMH −13.8% = −16.8pp. Over 63 days: −27.4% vs −15.1% = −12.2pp. The 11-12 bar may be intraday. Replaces the 2026-10-27 entry.
 Why: Band 2 'Underperforming sector by 5-20%' on the 6-month window; band 1 needs a lag over 20pp. The margin to band 1 is only ~3pp, so re-check after the 11-17 print before applying.
 Effect if approved: Total 84.17 → 84.67, rank 3 → 3; membership change: no. Scratch copy, single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-12, applied
 
 ## 2026-11-12 — NVDA — M1 EPS Revisions 4 → 5  (confidence Low)
 Event: Yahoo eps_trend/eps_revisions, 2026-11-12: +1y EPS $15.93 vs $12.82 90 days ago (+24%), $15.91 30 days ago; 7 up / 0 down in 30 days on +1y. Current quarter 1 down in 7 days. Replaces the 2026-10-27 entry.
 Why: On the data, band 5 'Multiple upward revisions ... consensus moving higher' fits the 90-day window. But the data predates this week's analyst target cuts and downgrade (Baird to Neutral; CNBC live 2026-11-12), and estimates will be re-cut after the 11-17 print. **Recommend deciding after the post-print refresh, not now.**
 Effect if approved: Total 84.17 → 84.67, rank 3 → 3; membership change: no. Scratch copy, single change in isolation.
-Status: PROPOSED
+Status: PROPOSED — held for the post-print review (2026-11-19), per this entry's own recommendation
 
 _All three 2026-11-12 NVDA proposals together: 84.17 → 84.42, rank 3, ✓✓; no membership change. Holds: D1–D5, M3, R1, R2, R3, R5 (reasons in the briefing §6). Flagged, not proposed: the rubric has no key-person/leadership-transition dimension, so the CEO loss itself moves no rating; that is a rule-8 framework question for Dom._
 
