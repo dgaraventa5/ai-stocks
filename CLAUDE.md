@@ -1107,6 +1107,15 @@ in a cloud session.
   `tracking/scheduled-run-log.md` (Dom, 2026-10-12), so a missed run is a
   missing date.
 
+**Amendment 2026-11-12 (Dom-approved): temporary special-situation watches.**
+When one name's story moves faster than the 90-day rotation (first case: NVDA
+after the CEO resignation), a temporary task runs `/special-situation {T}`: a
+biweekly briefing (only when the newest is 10+ days old), one-off reviews after
+key events, re-computed rating proposals, and an exit check. Same limits as
+`/rating-research`: research and proposals only, no scoring chain, no rating
+change. Dom retires a watch when its exit conditions (listed in the name's
+`catalysts-watchlist.md`) are met; a run never disables its own task.
+
 Rule 31's schedule and prompt are superseded by `/daily-watch`; its detection
 script, state file and two-phase design are unchanged. Rule 35 amendment: a
 scheduled run may ADD an entry hold (it only delays a buy); removing or

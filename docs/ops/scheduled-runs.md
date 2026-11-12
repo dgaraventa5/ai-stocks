@@ -1,6 +1,6 @@
 # Scheduled runs — shared protocol (CLAUDE.md rule 37)
 
-Four unattended jobs keep research and scores current. Each is a project
+Four unattended jobs keep research and scores current, plus temporary special-situation watches on single names. Each is a project
 skill; the desktop scheduler only holds a thin prompt that invokes it.
 
 | Job (`--job`) | Skill | Schedule (Pacific) | What it does |
@@ -9,6 +9,7 @@ skill; the desktop scheduler only holds a thin prompt that invokes it.
 | `weekly-scan` | `/weekly-scan` | Sat 08:00 | Full-watchlist filing scan, objective refresh, portfolio pipeline, weekly mark |
 | `rating-research` | `/rating-research` | Sun 08:00 | Fresh briefings for the stalest rated names, with rating proposals |
 | `quarterly-rescore` | `/rescore-quarterly` | 22nd of Feb, May, Aug, Nov at 12:00 | Refreshes rows over 90 days old, re-baselines the EW benchmark, writes the rescore and calibration reports |
+| `special-{t}` (temporary) | `/special-situation {T}` | Per watch; NVDA: Mon 07:00 biweekly check + one-off 2026-11-19 07:00 | Close watch on one name during a live situation: briefing when the newest is 10+ days old, re-computed proposals, exit check. Research only — no scoring chain. Active watches are listed in each name's `catalysts-watchlist.md` |
 
 **Where they run: this Mac, in the main checkout — never a cloud session.**
 Cloud sandboxes block Yahoo and SEC at the network proxy (every cloud scan from
