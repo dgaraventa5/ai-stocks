@@ -47,10 +47,19 @@ is not a flag.
 UNCHECKED, never as quiet. Drop filings already recorded in the name's
 `news-log.md` (the 4-day window overlaps on purpose so weekends are covered).
 
-Then the news watch: one WebSearch per scope name for the last 2 days
-("{company} {ticker} news {month year}"), plus one for each name with a live
-entry hold in `00-master/entry-holds.json`. Keep only items dated inside the
-window from a primary or wire source; an undated hit is unverified, not news.
+Then the news watch: `python3 scripts/news_watch.py --days 2 --out
+"$TMPDIR/news.json"`. It covers holdings ∪ top 25 ∪ every name with a live
+entry hold, one dated Google News query per name, and prints a one-line summary
+(`news FROM..TO: N names looked up, F failed, E empty; hinted: …`). Exit 1
+(BLOCKED or THIN) means the news window is **UNCHECKED, never quiet**. Read
+every `hint: true` item first, then skim the rest. A headline is a lead, not a
+source: before logging anything possibly material, confirm it from its
+publisher or a wire report (WebSearch in `extended` mode, or WebFetch).
+Plaintiff-firm "investors encouraged to contact" releases are solicitations,
+not news; a filed docket number is news. **Never use a `standard`-mode
+WebSearch with a date in the query as the news check** — from 2026-10-29 to
+11-12 that returned year-old and evergreen pages and logged NVDA's CEO story
+as "no dated in-window news" for two weeks.
 
 **Material** means it could change a thesis or a rating: customer win or loss,
 guidance change, capacity or capex announcement, CEO/CFO/CTO change,
@@ -59,14 +68,16 @@ auditor or going-concern change, a credible competitive or product shock.
 Price moves, analyst targets, dividends and conference appearances are not.
 
 **Quiet day** = nothing due, nothing material, `--check` green, `flagged`
-empty, and the sentinel and `scan-filings` both exit 0. Branch, then
-`python3 scripts/scheduled_run.py log --text "quiet (scope N, filings F); <any
+empty, the sentinel and `scan-filings` both exit 0, and `news_watch.py` exits
+0. Branch, then
+`python3 scripts/scheduled_run.py log --text "quiet (scope N, filings F, news I items / M names); <any
 not-material or could-not-verify items, one clause each>"`, then `land` and
 `merge` per the protocol, release the lock, and stop. No Notion page, no
 notification. Most days end here.
 
 On every other day, log one line the same way before landing (what reported,
-what moved, what needs Dom, every flagged or UNCHECKED item). A day that is
+what moved, what needs Dom, every flagged or UNCHECKED item, and the
+`news I items / M names` count). A day that is
 not quiet only because of a flag or failed lookup still gets the Notion page
 and notification: lead with what could not be checked.
 

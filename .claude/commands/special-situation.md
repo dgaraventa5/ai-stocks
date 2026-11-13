@@ -39,6 +39,10 @@ release the lock and stop. No Notion page and no notification on a skip.
 
 Run `/refresh-context {T}` in full: mental model first, filings, transcript,
 news, and the 2b/2c/2d/2e checks. It writes `per-stock/{T}/context-{date}.md`.
+For the news, start from `python3 scripts/news_watch.py --tickers {T} --from
+{date of the previous briefing} --to {today}`: a dated headline list for the
+whole gap. Confirm each material item from its publisher before using it.
+Exit 1 means the news side is UNCHECKED; say so in the briefing.
 Search specifically for every open item in the name's "Special-situation
 watch" list (e.g. for NVDA: permanent CEO named, the board investigation's
 findings, congressional testimony, any agency action naming the company,
