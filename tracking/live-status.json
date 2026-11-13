@@ -1,16 +1,16 @@
 {
-  "as_of": "2026-11-11",
+  "as_of": "2026-11-13",
   "halted": false,
   "positions": 17,
   "open_orders": 0,
   "drift_flags": [
     "ALAB",
     "ANET",
+    "ASML",
     "AVGO",
     "CRDO",
     "EME",
     "FIX",
-    "MSFT",
     "MU",
     "NVDA",
     "PLTR",
