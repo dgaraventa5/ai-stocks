@@ -333,6 +333,15 @@
       "live_since_deploy_pct": -19.81,
       "model_since_deploy_pct": -23.58,
       "shortfall_since_deploy_pct": 3.77
+    },
+    {
+      "date": "2026-11-13",
+      "live_pct": -20.06,
+      "model_pct": -16.99,
+      "shortfall_pct": -3.07,
+      "live_since_deploy_pct": -19.72,
+      "model_since_deploy_pct": -20.25,
+      "shortfall_since_deploy_pct": 0.53
     }
   ],
   "deployment_date": "2026-08-17"
