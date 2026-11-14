@@ -50,6 +50,13 @@ with `--job weekly-scan`. Differences from an attended run:
 
 3. **For each 8-K found**, read the filing and summarize what was disclosed in one sentence.
 
+   **News backstop (no filing needed).** Run `python3 scripts/news_watch.py --days 7`
+   (holdings ∪ top 25 ∪ entry-hold names). It catches stories no 8-K carries — NVDA's
+   CEO story ran for two weeks in Oct–Nov 2026 with no filing — and covers a missed
+   daily-watch run. Read every `hint: true` item, confirm anything possibly material from
+   its publisher before flagging it, and drop items already in the name's `news-log.md`.
+   Exit 1 means the news side is UNCHECKED; say so in the report.
+
 4. **Flag with ⚠️** anything that could plausibly change a thesis:
    - Customer wins or losses
    - Capacity announcements

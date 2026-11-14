@@ -27,3 +27,15 @@ def test_blocked_sentinel_is_unchecked_and_skips_the_rescore():
 
 def test_flags_reach_the_report():
     assert "every `flagged` name with its reason" in DOC
+
+
+def test_news_watch_is_the_dated_feed_and_gates_a_quiet_day():
+    # 2026-11-12: a standard-mode WebSearch with a date in the query logged
+    # NVDA's CEO story as "no dated in-window news" for two weeks.
+    text = " ".join(DETECT.split())
+    assert "python3 scripts/news_watch.py --days 2" in text
+    assert "**UNCHECKED, never quiet**" in text
+    assert "Never use a `standard`-mode WebSearch with a date in the query" in text
+    quiet = re.search(r"\*\*Quiet day\*\* = (.+?)\. Branch", DOC, re.S).group(1)
+    assert "`news_watch.py` exits 0" in " ".join(quiet.split())
+    assert "news I items / M names" in DOC
