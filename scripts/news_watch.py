@@ -23,7 +23,8 @@ never a judgment), and fails closed:
            feed or the query broke, not that the world went quiet
 
 Either exits 1 with "do not report as quiet". Free source, no key, stdlib
-only (CI minimal-env rule). Read-only: writes nothing but `--out`.
+only (CI minimal-env rule). Read-only: writes nothing but `--out`, which
+must be a .json file inside a temp directory (see `safe_out`).
 
 Replay a past window:
     python3 scripts/news_watch.py --tickers NVDA --from 2026-10-29 --to 2026-10-29
@@ -202,6 +203,29 @@ def run(tickers: list[str], start: dt.date, end: dt.date,
     return report
 
 
+def safe_out(path: str) -> Path:
+    """Resolve --out, allowing only a .json file inside a temp directory.
+
+    The scheduled runs' allow-list lets them call this script with any
+    arguments, so --out must not be a way to overwrite repo files (skills,
+    settings, workbook). The skills only ever write "$TMPDIR/news.json".
+    """
+    import os
+    import tempfile
+    roots = {Path(os.path.realpath(tempfile.gettempdir())),
+             Path(os.path.realpath("/tmp"))}
+    raw = Path(path)
+    if raw.suffix != ".json":
+        raise ValueError(f"--out must be a .json file: {path}")
+    if raw.is_symlink():
+        raise ValueError(f"--out must not be a symlink: {path}")
+    target = Path(os.path.realpath(raw))
+    if not any(target.is_relative_to(r) for r in roots):
+        raise ValueError(f"--out must be inside a temp directory "
+                         f"({', '.join(sorted(map(str, roots)))}): {path}")
+    return target
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--tickers", nargs="+",
@@ -213,6 +237,11 @@ def main(argv=None) -> int:
     p.add_argument("--to", dest="end", type=dt.date.fromisoformat)
     p.add_argument("--out", help="write the JSON report here")
     a = p.parse_args(argv)
+    if a.out:
+        try:
+            a.out = safe_out(a.out)
+        except ValueError as e:
+            p.error(str(e))
 
     end = a.end or dt.datetime.now(EASTERN).date()
     start = a.start or end - dt.timedelta(days=a.days)

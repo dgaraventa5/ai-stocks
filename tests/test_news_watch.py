@@ -155,3 +155,38 @@ def test_main_exits_zero_on_a_normal_window(monkeypatch, tmp_path):
     monkeypatch.setattr(nw.time, "sleep", lambda s: None)
     assert nw.main(["--tickers", "AAA", "--from", "2026-10-29", "--to",
                     "2026-10-29", "--out", str(tmp_path / "n.json")]) == 0
+
+
+# --out is reachable from an allow-listed command, so it must not write
+# outside a temp directory (2026-11-13 security review of #314).
+def test_out_allows_a_json_file_in_tmpdir(tmp_path, monkeypatch):
+    import tempfile
+    monkeypatch.setattr(tempfile, "tempdir", str(tmp_path))
+    assert nw.safe_out(str(tmp_path / "news.json")).name == "news.json"
+
+
+@pytest.mark.parametrize("bad", [
+    ".claude/settings.json",
+    "/etc/news.json",
+    "/tmp/../etc/news.json",
+    "/tmp/news.txt",
+])
+def test_out_refuses_paths_outside_tmp_or_not_json(bad):
+    with pytest.raises(ValueError):
+        nw.safe_out(bad)
+
+
+def test_out_refuses_a_symlink(tmp_path, monkeypatch):
+    import tempfile
+    monkeypatch.setattr(tempfile, "tempdir", str(tmp_path))
+    link = tmp_path / "news.json"
+    link.symlink_to(Path(__file__).resolve().parent.parent / ".claude" / "settings.json")
+    with pytest.raises(ValueError):
+        nw.safe_out(str(link))
+
+
+def test_main_rejects_bad_out_before_fetching(monkeypatch):
+    monkeypatch.setattr(nw, "_fetch", lambda *a, **k: pytest.fail("fetched"))
+    with pytest.raises(SystemExit) as e:
+        nw.main(["--tickers", "NVDA", "--out", "scripts/news_watch.json"])
+    assert e.value.code == 2
