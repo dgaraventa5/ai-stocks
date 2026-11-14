@@ -288,7 +288,13 @@ def export_watchlist(root: Path, held: set[str] | None = None) -> list[dict]:
     privacy boundary entirely — there are no real-dollar fields to leak.
     TOTAL/Tier are live Excel formulas with no cached value, so we recompute
     them in Python via recalc_watchlist (the project's canonical method).
+
+    Names the broker cannot trade (foreign local lines, unlisted OTC ADRs —
+    portfolio_sizing.is_tradable, rule 30) are left off the site. They stay
+    in the scoring Watchlist because they anchor the layer cohorts; only the
+    display drops them.
     """
+    from portfolio_sizing import is_tradable
     from recalc_watchlist import recalc
 
     held = held or set()
@@ -301,6 +307,8 @@ def export_watchlist(root: Path, held: set[str] | None = None) -> list[dict]:
 
     out = []
     for x in rows:
+        if not is_tradable(str(x['ticker'])):
+            continue
         layer_num = str(x['layer'] or '')[:2]
         out.append({
             'ticker': x['ticker'],

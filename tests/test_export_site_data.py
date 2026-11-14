@@ -213,6 +213,22 @@ def test_watchlist_fields_and_held_flags(repo):
     assert nvda['score'] == 91.2 and nvda['tier'] == '✓✓✓'
 
 
+def test_watchlist_hides_names_the_broker_cannot_trade(repo, monkeypatch):
+    """Foreign local lines (exchange-suffix dot) and broker-unlisted OTC ADRs
+    stay in the scoring Watchlist (rule 30 — cohorts) but are hidden from the
+    site, which only shows names that can actually be bought."""
+    blank = dict.fromkeys(
+        ('Value', 'Quality', 'Growth', 'AI', 'Momentum', 'Risk'))
+    monkeypatch.setattr(ex.recalc_watchlist, 'recalc', lambda xlsx: [
+        {'ticker': 'NVDA', 'layer': '06', 'TOTAL': 91.2, 'Tier': '✓✓✓', **blank},
+        {'ticker': '6861.T', 'layer': '11', 'TOTAL': 88.0, 'Tier': '✓✓✓', **blank},
+        {'ticker': 'SBGSY', 'layer': '02', 'TOTAL': 80.0, 'Tier': '✓✓', **blank},
+        {'ticker': 'TSM', 'layer': '05', 'TOTAL': 72.4, 'Tier': '✓✓', **blank},
+    ])
+    wl = ex.export_watchlist(repo)
+    assert [r['ticker'] for r in wl] == ['NVDA', 'TSM']
+
+
 def test_methodology_weights_live_from_sheet(repo):
     m = ex.export_methodology(repo)
     cats = {c['name']: c for c in m['categories']}
