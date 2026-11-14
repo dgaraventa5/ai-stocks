@@ -39,6 +39,7 @@
       "Bash(python3 scripts/hyperscaler_capex.py)",
       "Bash(python3 scripts/hyperscaler_capex.py *)",
       "Bash(python3 scripts/executor_cron.py --heartbeat-check)",
+      "Bash(python3 scripts/news_watch.py *)",
       "Bash(python3 -m pytest tests -q)",
       "Bash(date +%F)",
       "Bash(git status --short)",
