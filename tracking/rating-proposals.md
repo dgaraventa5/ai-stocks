@@ -301,13 +301,13 @@ _All three META proposals together: 73.38 → 71.12, tradable rank 17 → 27, �
 Event: Yahoo eps_trend/eps_revisions, 2026-11-14: next-year EPS €56.43 vs €51.09 90 days ago (+10.5%), current year €41.41 vs €38.05 (+8.8%); 22 up / 0 down (next year) and 20 up / 0 down (current year) in 30 days.
 Why: Band 5 "Multiple upward revisions … consensus moving higher". Near-mechanical.
 Effect if approved: Total 73.88 → 74.38, tradable rank 16 → 16; membership change: no (held). Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — ASML — M2 Relative Strength 2 → 4  (confidence Med)
 Event: yfinance closes to 2026-11-13: ASML −0.2% vs SMH −12.5% over 126 days (+12.3pp); −20.5% vs −18.1% over 63 days (−2.4pp).
 Why: Band 4 "Outperforming sector by 5-20%" on the 6-month window used as primary in earlier entries. The 3-month window reads band 3; the agent's draft proposed 3 on a blend — 4 is the consistent reading, 3 the conservative one.
 Effect if approved: Total 73.88 → 74.88, tradable rank 16 → 15; membership change: no (held). Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 _Both ASML proposals together: 73.88 → 75.38, tradable rank 16 → 12 (ASML slipped from 15 to 16 in the weekly-scan refresh when STX entered). Holds: D1–D5, M3, R1–R5. Flagged, not proposed: a filed securities class action that no ASML research file recorded — In re ASML Holding N.V. Securities Litigation, S.D.N.Y. 1:24-cv-08664 (filed 2024-11; motion to dismiss mostly denied 2026-03-27; in discovery; status from the plaintiff firm's page, docket not read). It supports R4 at 3 rather than the "3 or 4" left open 2026-05-18. R2 would go to 2 if the MATCH Act (H.R. 8170) is enacted. The daily-watch "guidance lift" headline (11-13) is refuted: no 6-K since 2026-10-14._
 
@@ -315,7 +315,7 @@ _Both ASML proposals together: 73.88 → 75.38, tradable rank 16 → 12 (ASML sl
 Event: yfinance closes to 2026-11-13: LRCX −20.5% vs SMH −12.5% over 126 days (−8.0pp); −34.2% vs −18.1% over 63 days (−16.2pp). Drops of −11.8% on 2026-10-22 (in-line December guide) and −16.4% on 2026-11-05 (memory-capex scare).
 Why: Band 2 "Underperforming sector by 5-20%" on both windows. Mechanical.
 Effect if approved: Total 71.93 → 70.93, tradable rank 23 → 29; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 _LRCX holds: D1–D5, M1 (FY27 EPS +17% over 90 days, 19 up / 8 down), M3, R1–R5. Flagged, not proposed: D1 3 could reach 4 only on an AI-revenue estimate (~25%, every input guessed); D4 5 sits above the rubric example for most semi-equipment (4) with capex ~3% of revenue — candidate for the next whole-layer pass. Unconfirmed: the reported Micron Taiwan plant suspension (one secondary source)._
 
@@ -323,7 +323,7 @@ _LRCX holds: D1–D5, M1 (FY27 EPS +17% over 90 days, 19 up / 8 down), M3, R1–
 Event: yfinance closes to 2026-11-13: KLAC −15.4% vs SMH −12.5% over 126 days (−2.9pp); −26.0% vs −18.1% over 63 days (−7.9pp). On 2026-11-08 the 6-month gap was −7.6pp (band 2).
 Why: Band 3 "In line with sector ±5%" on the 6-month window used as primary on 11-08. The research agent marked M2 "holds, borderline"; this proposal applies the same window convention as the 11-08 entry. Price-driven and could flip back.
 Effect if approved: Total 70.35 → 70.85, tradable rank 35 → 31; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 _KLAC holds: D1–D5, M1 (now backed by revision data: FY27 +5.9%, 20 up / 0 down), M3 (CEO sale 2026-11-10 under a 10b5-1 plan), R1, R2 (BIS Affiliates Rule suspension extended to 2027-01-10 — re-check then), R4, R5. The 2026-11-08 R3 5→4 proposal stands unchanged and is not repeated._
 
@@ -331,31 +331,31 @@ _KLAC holds: D1–D5, M1 (now backed by revision data: FY27 +5.9%, 20 up / 0 dow
 Event: 10-Q Q3 2026 (filed 2026-11-09): Meta PPA delivery partly from late 2026, full by year-end 2027; AWS Comanche Peak delivery from Q4 2027, full by 2032; no new hyperscaler contract since. At full delivery Meta ≈ $1.2–1.6B/yr and AWS ≈ $0.7–0.9B/yr against a $17.7B+ revenue base, i.e. ~5–8% (briefing arithmetic). Source: per-stock/VST/context-2026-11-14.md.
 Why: The supplier band 5 needs hyperscalers "combined >30% of revenue"; band 3 is "selling to hyperscalers but not concentrated (5-15% total)", and the rubric's own anchor puts "utilities with DC load" at 2–3. The 2026-05-18 rating of 5 rested on Meta + AWS being anchor customers, without the revenue test. D1 = 2 (5–10%) already reads the same evidence, so D1 2 / D5 5 cannot both stand on the band text.
 Effect if approved: Total 70.60 → 68.60, tradable rank 32 → 42, tier ✓✓ → ✓; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED — **recommend deciding as part of a Layer-1 D5 pass** (rule 12 absolute-lens test): CEG and NEE (5) and TLN (4) carry the same gap, and moving VST alone would make Layer 1 inconsistent.
+Status: DEFERRED by Dom 2026-11-14 to a Layer-1 D5 pass (CEG, NEE, TLN carry the same gap)
 
 ## 2026-11-14 — VST — M2 Relative Strength 1 → 2  (confidence Med)
 Event: yfinance closes to 2026-11-13: VST −4.5% vs XLU +1.8% over 126 days (−6.3pp); −8.8% vs +0.4% over 63 days (−9.2pp).
 Why: Band 2 "Underperforming sector by 5-20%"; band 1 needs a lag over 20pp. Sensitive to the post-election rebound.
 Effect if approved: Total 70.60 → 71.10, tradable rank 32 → 28; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — VST — M3 Insider Activity 3 → 4  (confidence High)
 Event: CEO Burke open-market purchases on 2026-08-24, 08-31 and 09-01 at ~$135, ~$1.17M in total, not under a 10b5-1 plan (Form 4 acc. 0001268406-26-000007 and 0001268406-26-000009). The only insider buy in 12 months; prior briefings missed it.
 Why: Rubric decision step 1: exactly one open-market buyer → 4. The single-buyer path to 5 needs "any single open-market buy >$1M"; the largest single trade was ~$0.60M, so 4, not 5 (Dom's call if the total should count).
 Effect if approved: Total 70.60 → 71.10, tradable rank 32 → 28; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — VST — R3 Balance Sheet Risk 4 → 3  (confidence Med)
 Event: Q3 call (2026-11-06): pro forma net debt / adj. EBITDA 2.8x after Cogentrix; investment grade at two agencies; FCF guided $4.3–5.1B.
 Why: Band 3 "ND/EBITDA 2-4x"; band 4 needs <2x. Top of band 3 given the IG ratings and FCF.
 Effect if approved: Total 70.60 → 69.85, tradable rank 32 → 36, tier ✓✓ → ✓; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — VST — R1 Customer Concentration 4 → 5  (confidence Low)
 Event: no customer disclosed above 10% of revenue; Meta at full delivery ≈ 7% of revenue (briefing arithmetic). Not yet checked against the FY2025 10-K concentration note.
 Why: Band 5 "Diversified. No customer >15% of revenue." Low confidence until the 10-K note is read.
 Effect if approved: Total 70.60 → 71.35, tradable rank 32 → 26; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: HELD 2026-11-14 pending a read of the FY2025 10-K customer-concentration note
 
 _All five VST proposals together: 70.60 → 69.60, tradable rank 32 → 38, ✓✓ → ✓; without D5: 70.60 → 71.60, tradable rank 32 → 25, ✓✓. No membership change either way. Holds: D1–D4, M1 (mixed: FY26 −3.7% over 90 days on noisy GAAP, FY27 up), R2, R4, R5. Texas: the governor-elect's moratorium pledge is now wire-verified (AP via Fox26/KSAT); it is a pledge, not a proceeding, so no R4 or hold. Rule 15: the Q3 EPS beat was hedge marks (unrealized hedging revenue $519M vs $162M); ex-marks EPS ≈ $1.97, below consensus — strengthens the open request for a ruling._
 
@@ -363,31 +363,31 @@ _All five VST proposals together: 70.60 → 69.60, tradable rank 32 → 38, ✓�
 Event: yfinance closes to 2026-11-13, 126 days: ORCL −34.6% vs IGV +10.3% (−44.8pp) and vs SPY +2.6% (−37pp, the benchmark in the prior audit row).
 Why: Band 1 "Lagging sector by >20%" on either benchmark.
 Effect if approved: Total 71.42 → 70.92, tradable rank 25 → 29; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — ORCL — M3 Insider Activity 3 → 5  (confidence Med-High)
 Event: Director Rusckowski open-market purchase of ~$3.5M at ~$139.35 on 2026-09-29 (Form 4 filed 2026-10-01, https://www.sec.gov/Archives/edgar/data/1341439/000134143926000099/form4.xml). Ellison cancelled his 10b5-1 sale plan 2026-09-12 with no shares sold (8-K 2026-09-14).
 Why: Band 5 single-buyer path, "any single open-market buy >$1M discretionary". Mechanical per decision step 1.
 Effect if approved: Total 71.42 → 72.42, tradable rank 25 → 22; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — ORCL — R4 Regulatory Risk 4 → 3  (confidence Med)
 Event: Securities class action Barrows v. Oracle, 1:26-cv-00127-JLH (D. Del.), filed 2026-02-03, amended 2026-07-14, alleging AI-capex/revenue misstatements; disclosed in the Q1 FY27 10-Q (Note 11); motion-to-dismiss briefing ends 2026-12-18. Missed by the 2026-05-18 rating. Netherlands privacy class action also pending.
 Why: Band 3 "Some pending matters disclosed but immaterial". Band 2 if the motion to dismiss is denied or a regulator opens an investigation.
 Effect if approved: Total 71.42 → 70.67, tradable rank 25 → 30; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — ORCL — R2 Geographic Risk 4 → 5  (confidence Low-Med)
 Event: Q1 FY27 10-Q: revenue 71% Americas, 19% EMEA, 10% APAC; minimal China; no data centers in a risk geography.
 Why: Band 5 "No legs … no single geographic or trade-policy shock plausibly impairs >10% of revenue". Named worst shock: an EU sovereignty/trade dispute touching part of the 19% EMEA. The current 4 predates the 2026-06-12 band revision.
 Effect if approved: Total 71.42 → 72.17, tradable rank 25 → 23; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — ORCL — R1 Customer Concentration 4 → 3  (confidence Low)
 Event: S&P (downgrade to BBB- 2026-07-09) estimates OpenAI at about half of the $638B backlog; Oracle has committed $288B of not-yet-commenced data-center leases (10-Q Q1 FY27 Note 6) against that book. On the briefing's arithmetic OpenAI would be ~27–35% of FY29–30 revenue.
 Why: Band 3 "Top customer 25-40%" on the forward book. **On reported revenue the literal reading is 5** (FY26 10-K: no customer ≥10%), so this proposal rests on reading R1 forward-looking — a judgment call for Dom, not a mechanical band fit.
 Effect if approved: Total 71.42 → 70.67, tradable rank 25 → 30; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: DECLINED by Dom 2026-11-14 (keep 4) — reading R1 off the forward backlog is a rubric-definition question, not a rating call; raise it separately
 
 _All five ORCL proposals together: 71.42 → 71.17, tradable rank 25 → 27; without R1: 71.92, tradable rank 24. No membership change. Holds: D1–D5 (D1 on the 3/4 line — re-check at the mid-December print), M1 (FY27 $8.05 → $8.15 over 90 days, stable), R3 2 (S&P BBB-, ~4.5x adjusted leverage, TTM FCF −$28.7B; →1 if cut to junk), R5. Watch: New Mexico force-majeure notice, Wisconsin transmission approval revoked, and the full use of the $20B Investor Day funding cap five days after it was set._
 
@@ -395,25 +395,25 @@ _All five ORCL proposals together: 71.42 → 71.17, tradable rank 25 → 27; wit
 Event: yfinance closes to 2026-11-13: CRWV −50.5% vs SMH −12.5% over 126 days (−38.0pp); −49.9% vs −18.1% over 63 days (−31.8pp). Unsecured yields ~15% and record five-year CDS (1,194.5bp) in mid-October.
 Why: Band 1 "Lagging sector by >20%". Mechanical.
 Effect if approved: Total 64.62 → 62.62, tradable rank 71 → 87; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — CRWV — R1 Customer Concentration 2 → 3  (confidence Med)
 Event: Q3 10-Q (acc. 0001769628-26-000465): Customer B 30% and Customer A 24% of Q3 revenue; C and D each <10%; nine months A 33% / B 26%. Customer B holds 33% of receivables. The filing warns letters may not map to the same customers across quarters.
 Why: Band 3 "Top customer 25-40%". The 2026-09-22 reason for holding 2 (top three ~72%) no longer holds.
 Effect if approved: Total 64.62 → 65.38, tradable rank 71 → 65; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — CRWV — R4 Regulatory Risk 4 → 3  (confidence Med)
 Event: Securities class action Masaitis v. CoreWeave, D.N.J. 2:26-cv-00355 (filed 2026-01-12, 10(b)/20(a)), plus four derivative suits (three in D.N.J., consolidated and stayed 2026-05-21; one in D. Del., filed 2026-05-12); loss not estimable (Q2 10-Q litigation note). Missed by the 2026-09-21 briefing; a correction, not a new event.
 Why: Band 3 "Some pending matters disclosed but immaterial"; band 2 is arguable.
 Effect if approved: Total 64.62 → 63.88, tradable rank 71 → 77; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — CRWV — M3 Insider Activity 2 → 3  (confidence Low — conditional)
 Event: October–November insider sales reported as 10b5-1 and tax-withholding, no buys (FourWeekMBA aggregation). EDGAR refused the agent's automated Form 4 requests, so transaction codes and % of holdings are unverified.
 Why: Rubric decision step 2: 10b5-1 sales default to 3 at any size. Approve only after the Form 4 codes are confirmed.
 Effect if approved: Total 64.62 → 65.12, tradable rank 71 → 67; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED — conditional on a Form 4 check
+Status: PROPOSED — still conditional on a Form 4 check
 
 _All four CRWV proposals together: 64.62 → 63.12, tradable rank 71 → 82, ✓. No membership change. Holds: D1–D5, M1 (FY27 −4.24 → −3.64 over 90 days, beat-and-raise), R2 (watch: >1.3 GW of contracted power is now outside the US), R3 1, R5. capacity-mw.json candidate (not edited): 4,600 MW contracted as of 2026-09-30 (Q3 release), basis unchanged. No thesis.md exists for CRWV (not a Targets name, so rule 39 does not require one)._
 
@@ -421,12 +421,12 @@ _All four CRWV proposals together: 64.62 → 63.12, tradable rank 71 → 82, ✓
 Event: yfinance closes to 2026-11-13: NBIS −47.3% vs SMH −12.5% over 126 days (−34.8pp); −56.9% vs −18.1% over 63 days (−38.8pp). Record close $286.69 on 2026-06-18; $115.88 on 2026-11-13; −16% on the Q3 print (2026-11-12).
 Why: Band 1 "Lagging sector by >20%". Mechanical.
 Effect if approved: Total 64.12 → 62.12, tradable rank 75 → 90; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 ## 2026-11-14 — NBIS — R3 Balance Sheet Risk 3 → 2  (confidence Med)
 Event: Q3 6-Ks (acc. 0001104659-26-126008 / -126238): debt $14.19B at 9/30 (from ~$8.4B at 3/31) plus a $3.5B Citi bridge due 2027-10-16; cash $7.43B; Q3 operating cash flow −$273M; TTM FCF ≈ −$12.4B; shares outstanding +15.4% in two quarters (converts, ATM, prefunded warrants).
 Why: Band 2 "FCF marginal. Maturity wall in next 2 years" — FCF is deeply negative and the bridge matures inside two years. Net debt / annualized Q3 adj. EBITDA ≈ 3.6x, but ≈ 12x excluding the $325M non-recurring partnership revenue. Not band 1: $7.4B cash, prepayment model, $38.7B RPO.
 Effect if approved: Total 64.12 → 63.38, tradable rank 75 → 80; membership change: no. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied
 
 _Both NBIS proposals together: 64.12 → 61.38, tradable rank 75 → 98, ✓. No membership change. Holds: D1–D5, M1, M3, R1 3 (flagged: the $38.7B backlog is probably concentrated in Microsoft and Meta, no breakdown disclosed — would argue 2), R2, R4, R5. Rule-35: guidance cut on 2026-11-12 (FY26 revenue to $3.0–3.2B from $3.0–3.4B; ARR target pushed to Feb 2027 and ARR guidance withdrawn) — entry hold added. capacity-mw.json candidate (not edited): ≥4,000 MW contracted power (Q3 letter, same definition as Q2)._
