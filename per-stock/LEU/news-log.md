@@ -11,3 +11,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-10-29** (weekly scan, 8-K, acc. 0001628280-26-068047) — First new centrifuge shipped from Oak Ridge to Ohio, ahead of the year-end target; first new capacity still 2029.
 
 - **2026-11-04** (weekly scan 2026-11-07, SEC EDGAR, EX-99.1) — Q3: DOE does not plan to exercise further options on the HALEU production contract; GAAP includes +$46M warrant gain (EPS YoY +710% withheld). Source: https://www.sec.gov/Archives/edgar/data/1065059/000162828026070229/leu-20261104.htm
+
+- **2026-11-12** (weekly scan 2026-11-14, 8-K Item 8.01) — Contract to supply HALEU to Oklo; value not disclosed. Source: https://www.sec.gov/Archives/edgar/data/1065059/000162828026073175/leu-20261112.htm
