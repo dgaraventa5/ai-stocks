@@ -281,19 +281,19 @@ _All three 2026-11-12 NVDA proposals together: 84.17 → 84.42, rank 3, ✓✓; 
 Event: yfinance adjusted closes to 2026-11-13: META +4.6% vs XLC −5.8% over 126 trading days (+10.5pp); +12.9% vs −1.6% over 63 days (+14.5pp). Source: per-stock/META/context-2026-11-14.md.
 Why: Band 4 "Outperforming sector by 5-20%". Band 5 needs >20pp over 6 months. Mechanical; window convention as in the 2026-11-08/11-12 entries (6-month primary).
 Effect if approved: Total 73.38 → 72.88, tradable rank 17 → 19; membership change: YES — META is held and 19 is past the exit line (18), so a rule-26 exit clock would start, confirming on the next real run if META is still below. Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied (exit clock started 2026-11-14)
 
 ## 2026-11-14 — META — R4 Regulatory Risk 2 → 1  (confidence Med)
 Event: New Mexico court imposed a $25B civil penalty on 2026-10-21 in the Attorney General's Unfair Practices Act case (jury found 43M+ violations 2026-09-25), with 15% post-judgment interest per press reports; Meta has accrued an undisclosed amount and will appeal (Q3 10-Q, acc. 0001628280-26-066773, Note 10; https://sourcenm.com/2026/10/21/new-mexico-judge-orders-meta-to-pay-state-25b/). Not in the 10-29 briefing or the news-log; the 10-23 briefing's statement that the AG settlement "resolves the largest case" was wrong. Also pending: D.C. AG ($1.7B sought), youth-harm trials, Ofcom Online Safety Act investigation, EU WhatsApp interim measure.
 Why: Band 1 "Major regulatory threat (… class action that could be material)". A $25B state judgment is an enforcement outcome, not scrutiny, so it meets Dom's 2026-05-18 "rate enforcement" standard. Counter-case for staying at 2: one state, under appeal, multistate cases settled.
 Effect if approved: Total 73.38 → 72.62, tradable rank 17 → 19; membership change: YES (exit clock, as above). Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied (exit clock started 2026-11-14)
 
 ## 2026-11-14 — META — M1 EPS Revisions 5 → 3  (confidence Med)
 Event: Yahoo eps_trend/eps_revisions, 2026-11-14: next-year (+1y) EPS $33.97 vs $33.95 90 days ago, 22 up / 22 down in 30 days. Current year (0y) $29.12 vs $31.79 (−8.4%), 7 up / 40 down — roughly the size of the Q3 legal charge, so mostly not operating.
 Why: Band 3 "Stable estimates" on the next-year line, which earlier entries used as primary (NVDA 2026-11-12). The current-year line alone would read band 2 "Net negative revisions"; band 5 "consensus moving higher" no longer fits either line.
 Effect if approved: Total 73.38 → 72.38, tradable rank 17 → 21; membership change: YES (exit clock). Scratch copy of the workbook after the 2026-11-14 weekly-scan refresh (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: APPROVED by Dom 2026-11-14, applied (exit clock started 2026-11-14)
 
 _All three META proposals together: 73.38 → 71.12, tradable rank 17 → 27, ✓✓ unchanged; META is held, so approving any one of them starts an exit clock (META sits 0.08 pts above RDDT at tradable rank 18 after the weekly-scan refresh). Holds: D1–D5, M3, R1, R2, R3, R5. Flagged, not proposed: R3 3 is a balance of band 4 debt metrics (~0.2x net debt/EBITDA pro forma) against band 2 cash flow (S&P outlook negative 2026-10-30, FCF forecast negative through 2028, ~$356B uncommenced leases, ~$66B raised in three weeks) — 3→2 becomes arguable if the Q4 call confirms 2027 capex near S&P's >$225B estimate. R1 4 is below its band-text reading (no customer >15% reads 5); original reason unknown. Rule 39: thesis.md section 1 is still accurate, but the rest of thesis.md is stale (header, weights, commitments)._
 

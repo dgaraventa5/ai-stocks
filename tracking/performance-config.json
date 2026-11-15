@@ -1116,7 +1116,9 @@
       "cash": -0.05
     }
   ],
-  "exit_pending": {},
+  "exit_pending": {
+    "META": "2026-11-14"
+  },
   "shadow_events": {
     "BAND_TOP": [
       {
@@ -1740,7 +1742,6 @@
         "date": "2026-11-14",
         "roster": [
           "ASML",
-          "META",
           "RDDT",
           "NVT",
           "APH",
@@ -1748,7 +1749,8 @@
           "GOOGL",
           "LRCX",
           "AMZN",
-          "ORCL"
+          "ORCL",
+          "ONTO"
         ]
       }
     ],
@@ -2116,8 +2118,8 @@
       {
         "date": "2026-11-14",
         "roster": [
-          "ONTO",
           "GMED",
+          "META",
           "SNPS",
           "TER",
           "AAON",
