@@ -10,3 +10,6 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-11-05 | TIKR (https://www.tikr.com/blog/applied-materials-sinks-12-lam-research-down-14-as-chip-stock-rout-deepens-after-midterms) | KLA −12% in a sector-wide chip-equipment rout after the midterms (AI-regulation and data-center-spend fears, weak Qualcomm guide); valuation-driven, no KLA-specific news. |
 | 2026-11-06 | 8-K 0001193125-26-451824 | Annual meeting (2026-11-04): all nine directors elected; director Jason Conley left the board; $0.23 dividend declared, payable 2026-12-01. |
 | 2026-11-08 | Federal Register 2025-19846 | Watch: the BIS Affiliates Rule (50% rule) suspension ends 2026-11-09 and the rule is reimposed 2026-11-10 unless extended; KLA's China exposure was 34.5% of Sep-Q revenue. |
+| 2026-11-09 | BIS final rule (FR 2026-22793) via Squire Patton Boggs / Thompson Hine | BIS extended the Affiliates Rule (50% rule) suspension to 2027-01-10; China-policy risk deferred, not removed; new watch date 2027-01-10. |
+| 2026-11-10 | Form 4 0001193125-26-458307 | CEO Wallace sold 72,014 shares at $149.02 under a 10b5-1 plan adopted 2025-11-19 (~10% of holdings incl. RSUs); routine. |
+| 2026-11-14 | yfinance eps_trend (rating research) | Post-print consensus up: FY27 EPS +5.9%, FY28 +8.4% vs 90 days ago; 20 up / 0 down revisions in 30 days. |

@@ -32,5 +32,12 @@
   "set": "2026-10-16",
   "expires": "2026-11-21",
   "review_event": "Q1 FY27 results (expected 2026-11-19, unconfirmed)"
+ },
+ "NBIS": {
+  "reason": "Guidance cut 2026-11-12 with Q3 results: FY26 revenue narrowed to $3.0-3.2B (from $3.0-3.4B) on third-party data-center delays (Vineland, NJ), year-end ARR target pushed to February 2027 and ARR guidance withdrawn; ~33% of Q3 revenue was non-recurring partnership revenue",
+  "source": "per-stock/NBIS/context-2026-11-14.md; 6-K acc. 0001104659-26-126008",
+  "set": "2026-11-14",
+  "expires": "2027-02-26",
+  "review_event": "Q4 2026 results (expected mid-February 2027, unconfirmed)"
  }
 }
