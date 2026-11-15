@@ -11,3 +11,7 @@
 - 2026-09-09 — FY26 10-K filed (accession 0000896878-26-000037); ~18,600 employees; debt $7.7B vs cash $7.2B
 - 2026-09-17 — Investor Day reaffirmed FY27 guide; LT framework business 10-15% / consumer 4-8% CAGR; Agent Studio — https://quartr.com/events/intuit-inc-intu-investor-day-2026_3sXlNN79
 - 2026-10-16 — Refresh-context briefing written (context-2026-10-16.md); dividend $1.38 paid
+- 2026-10-15 — Intuit agreed to acquire Sequence (Series A AI-native revenue-management platform), terms undisclosed; joins Mid-Market org — https://www.cpapracticeadvisor.com/2026/10/15/intuit-set-to-acquire-revenue-management-company-sequence/191771/
+- 2026-10-20 — Credit Karma Tax relaunched: free federal filing + $15 flat state fee at any complexity; RBC reads it as a bid to win back ~3 pts of lost DIY share — https://www.cpapracticeadvisor.com/2026/10/20/intuit-offers-free-federal-tax-filing-with-credit-karma-tax/192063/
+- 2026-10-29 — IR confirmed Q1 FY27 results on 2026-11-19 — https://investors.intuit.com/news-events/press-releases
+- 2026-11-15 — Refresh-context briefing written (context-2026-11-15.md); securities cases Baldwin/Bruce related in N.D. Cal., no lead-plaintiff order found (docket not checked directly)

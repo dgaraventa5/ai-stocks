@@ -430,3 +430,48 @@ Effect if approved: Total 64.12 → 63.38, tradable rank 75 → 80; membership c
 Status: APPROVED by Dom 2026-11-14, applied
 
 _Both NBIS proposals together: 64.12 → 61.38, tradable rank 75 → 98, ✓. No membership change. Holds: D1–D5, M1, M3, R1 3 (flagged: the $38.7B backlog is probably concentrated in Microsoft and Meta, no breakdown disclosed — would argue 2), R2, R4, R5. Rule-35: guidance cut on 2026-11-12 (FY26 revenue to $3.0–3.2B from $3.0–3.4B; ARR target pushed to Feb 2027 and ARR guidance withdrawn) — entry hold added. capacity-mw.json candidate (not edited): ≥4,000 MW contracted power (Q3 letter, same definition as Q2)._
+
+## 2026-11-15 — TSM — M2 Relative Strength 2 → 4  (confidence High)
+Event: yfinance adjusted closes to 2026-11-13: TSM −0.9% vs SMH −12.5% over 126 trading days (+11.6pp); −7.2% vs −18.1% over 63 days (+10.8pp); vs SOXX +10.9pp / +12.6pp (per-stock/TSM/context-2026-11-15.md).
+Why: Band 4 "Outperforming sector by 5-20%" on every window. Mechanical.
+Effect if approved: Total 82.58 → 83.58, tradable rank 5 → 3; membership change: no. Scratch copy of the workbook as of 2026-11-15 (recalc percentile mode), single change in isolation.
+Status: PROPOSED
+
+## 2026-11-15 — TSM — R1 Customer Concentration 3 → 4  (confidence Med)
+Event: Largest customer ~19% of FY2025 revenue (NVIDIA; Apple ~17%), FY2025 annual report as reported by TrendForce 2026-03-02 and MacRumors. The May rating of 3 rested on Apple's share of wafer allocation, not revenue share — a correction of basis, not a new event. 20-F customer note not read directly.
+Why: Band 4 "Top customer 15-25%".
+Effect if approved: Total 82.58 → 83.33, tradable rank 5 → 5; membership change: no. Scratch copy as above, single change in isolation.
+Status: PROPOSED
+
+_Both TSM proposals together: 82.58 → 84.33, tradable rank 5 → 3, tier unchanged (✓✓). Holds: D1–D5 (D1 5 inferred — HPC 68% of Q3 includes some non-AI), M1 5 (FY26 EPS +4.8%, FY27 +9.9% over 90 days), M3 5 (three insider buys in 12 months incl. director Splinter 2026-11-05, yfinance, Form 4 not checked), R2 2 (rubric anchor), R3 5 (net cash), R4 4, R5 5. FY26 growth guide raised to ~44% USD on the Q3 call; October revenue NT$586.89B, +59.7% YoY (6-K 2026-11-10)._
+
+## 2026-11-15 — ONTO — D4 Capacity/Execution 5 → 4  (confidence Med)
+Event: TTM capex ~$14M (yfinance cash flow, four quarters $1.6M/$3.7M/$3.6M/$5.1M); output growing via an "extended factory model" and a $424M inventory build, no funded multi-year capex program (Q3 10-Q, acc. 0001193125-26-453859). The original 5 was justified by demand (growth/backlog), not capacity.
+Why: Band 4 "Active expansion in progress. Capacity growing meaningfully YoY"; band 5 requires "Major buildout funded… Multi-year capex program".
+Effect if approved: Total 71.29 → 70.29, tradable rank 24 → 35; membership change: no. Scratch copy of the workbook as of 2026-11-15 (recalc percentile mode), single change in isolation.
+Status: PROPOSED
+
+## 2026-11-15 — ONTO — R3 Balance Sheet Risk 5 → 4  (confidence Med)
+Event: The 0% 2031 convert plus the ~$720M Rigaku stake purchase (closed 2026-08-10, 8-K) moved ONTO from net cash to small net debt: cash + securities $1.25B vs ~$1.47B debt (Q3 10-Q); ND/EBITDA ~0.56. Counterpoint: the listed Rigaku stake ($679M at 9/30) makes it net cash on an economic basis.
+Why: Band 4 "Modest leverage. ND/EBITDA <2x. Maturities well-spread"; band 5 requires "Net cash position".
+Effect if approved: Total 71.29 → 70.54, tradable rank 24 → 33; membership change: no. Scratch copy as above, single change in isolation.
+Status: PROPOSED
+
+_Both ONTO proposals together: 71.29 → 69.54, tradable rank 24 → 38, tier ✓✓ → ✓ — disclosed, not a reason for or against either proposal. Holds: D1 5 (AI share >50% is an estimate), D2 4, D3 4, D5 4, M1 5 (beat-and-raise; 2027 EPS $11.70 → $12.86), M2 2 (126d −12.6pp vs SMH; 63d −23.9pp would read 1 — re-check next pass), M3 3, R1 4 (top customer 16.8% of 9M revenue), R2 4 (42.7% of Q3 shipped to Taiwan), R4 4, R5 5. Q3 revenue $409.7M, +87.8% YoY; FY26 growth guide >45%. Rule-15 note (no ruling written): GAAP EPS YoY includes a $40.8M unrealized Rigaku loss — future quarters will swing with Rigaku's share price._
+
+## 2026-11-15 — INTU — no change
+All 13 ratings hold (per-stock/INTU/context-2026-11-15.md): D1 2, D2 3, D3 2, D4 3, D5 3, M1 2 (clean 60-day FY27 EPS $24.18 → $23.80; 19 cuts / 2 raises on next quarter), M2 1 (126d INTU −12.3% vs IGV +10.3%, −22.5pp), M3 4, R1 5, R2 5, R3 4, R4 2, R5 1 (Credit Karma Tax free federal filing relaunched 2026-10-20 — a further self-inflicted price cut). Entry hold (expires 2026-11-21): event unresolved (Baldwin/Bruce related in N.D. Cal., no lead-plaintiff order found), but Bruce passes 90 days today, so neither case meets the rule-35 "last 90 days" test after today; review event (Q1 FY27, confirmed 2026-11-19 by Intuit release 2026-10-29) lands before expiry. Renewal is Dom's call.
+
+## 2026-11-15 — GMED — M1 EPS Revisions 5 → 2  (confidence High)
+Event: After the 2026-11-05 revenue guidance cut (FY26 $3.18–3.22B → ~$3.09B; Ex-99.1, acc. 0001628280-26-071042), yfinance 30-day revisions were 8 down / 1 up on both FY26 and FY27; consensus FY26 $5.00 → $4.98, FY27 $5.40 → $5.34 (per-stock/GMED/context-2026-11-15.md).
+Why: Band 2 "Net negative revisions, some cuts" — the cuts are small, so not band 1.
+Effect if approved: Total 71.24 → 69.74, tradable rank 25 → 36, tier ✓✓ → ✓ (disclosed, not the reason); membership change: no. Scratch copy of the workbook as of 2026-11-15 (recalc percentile mode), single change in isolation.
+Status: PROPOSED
+
+## 2026-11-15 — GMED — M2 Relative Strength 2 → 1  (confidence Med-High)
+Event: yfinance closes to 2026-11-13 vs IHI (benchmark used in prior GMED briefings): 63 days GMED −16.0% vs IHI +4.2% (−20.2pp); 126 days −5.9% vs +20.1% (−26.0pp). Larger gaps vs XLV. Stock −18.4% over 11-05/11-06 on the print.
+Why: Band 1 "Lagging sector by >20%" (the 3-month gap is just over the line; the 6-month is clear).
+Effect if approved: Total 71.24 → 70.74, tradable rank 25 → 32; membership change: no. Scratch copy as above, single change in isolation.
+Status: PROPOSED
+
+_Both GMED proposals together: 71.24 → 69.24, tradable rank 25 → 40, ✓. Holds: D1 2 (most debatable — 9M robotics 3.8% of sales is band 1 by the letter; Q3 robotics $34.9M, +24.3%, 4.6% of sales, 10-Q Note 4), D2 2, D3 3 (watch: US spine +~2%), D4 4, D5 2, M3 3 (yfinance only, Form 4 not pulled), R1 5, R2 5, R3 5, R4 3 (FDA 2024 robot warning-letter closure from a secondary source only), R5 5. EPS YoY clean this quarter (GAAP $1.04 vs $0.88) — the existing June-quarter rule-15 entry will show STALE; needs a fresh ruling (none written). **Rule-35 candidate (not added — this job may not edit holds):** revenue guidance cut 2026-11-05; suggested expiry just after the Q4 report (~late Feb 2027). GMED is not held. Thesis break trigger half met: organic growth slowed to market rate, but robotics share did not stall._
