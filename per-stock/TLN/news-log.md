@@ -11,3 +11,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-05-05 | SEC 8-K ([StockTitan](https://www.stocktitan.net/news/TLN/talen-energy-reports-first-quarter-2026-results-reaffirms-2026-ifiux9jegmsw.html)) | Revenue $1.13B, EPS $1.33; $4B unsecured notes issued at ~6.25% blended to fund Cornerstone; secured debt ratio cut from 60% to 30%; net leverage 3.1x |
 
 - **2026-11-03** (weekly scan 2026-11-07, SEC EDGAR, EX-99.1) — Q3: guides 2027 adjusted EBITDA up ~26%. Source: https://www.sec.gov/Archives/edgar/data/1622536/000162253626000084/tln-20261103.htm
+
+- **2026-11-09** (weekly scan 2026-11-14, 8-K Item 8.01) — Sold PJM capacity to an unnamed investment-grade counterparty: Guernsey 750 MW UCAP for 2029/30-2035/36 (~$100M/yr) plus 588 MW for 2029/30, and all of Waterford for 2029/30-2031/32. Source: https://www.sec.gov/Archives/edgar/data/1622536/000162253626000088/tln-20261109.htm

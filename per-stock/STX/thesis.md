@@ -1,16 +1,16 @@
-# STX — {Company Name}
+# STX — Seagate Technology Holdings plc
 
-**Layer:** {e.g., Power Generation / IPPs}
+**Layer:** 08 — Servers, Systems & Storage infrastructure / nearline mass-capacity HDD
 **Last reviewed:** 2026-06-05
-**Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
+**Current conviction:** ✓✓ (Watchlist 74.40, rank 15, entered the Targets 2026-11-14)
 **Current position size:** {0% / X% of portfolio}
-**Thesis-break trigger:** {what single development would force exit}
+**Thesis-break trigger:** A major cloud customer cancels or declines to renew a long-term supply agreement, OR non-GAAP gross margin (57.8% in FQ1 FY27, 8-K 2026-10-27 Ex-99.1) falls for two straight quarters.
 
 ---
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> Seagate is one of two companies that make almost all of the high-capacity hard drives cloud data centers use to store AI data. It is owned because its HAMR drives raise capacity per drive without new factories, and that supply discipline has lifted gross margin for fourteen straight quarters while customers commit to multi-year demand. The main risk is the hard-drive cycle: if rivals add capacity or flash storage closes the cost-per-terabyte gap, pricing power could fade quickly.
 
 ---
 

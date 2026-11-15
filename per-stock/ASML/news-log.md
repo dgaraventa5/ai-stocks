@@ -12,3 +12,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-10-17** (weekly scan, SEC EDGAR) — 6-K 2026-10-14 (Ex. 99.2): Q3 2026 net sales €11.66B (+55% YoY), GM 57.5%, op margin 44.4%, net income €4.96B, EPS €12.95; Q4 guide €14.2-15.2B at ~57% GM; FY26 €44-45B at ~56% GM. Bookings not in the presentation (99.1 not read). Objective inputs refreshed; score 67.6 → 71.8 (✓ → ✓✓).
 
 - **2026-10-19** (daily-watch, 6-K 2026-10-14 Ex. 99.1/99.2) — Q3 EPS €12.95 vs ~€10.68 consensus (+21%, rule-9 flag; refresh done); revenue ~in line; Q4 guide €14.2-15.2B above ~€14.0-14.2B consensus; 2027-28 planned supply short of demand, customers asking for 2029-30 slots; China 14% → 23% of system sales. Briefing: context-2026-10-19.md.
+
+- **2026-11-10** (weekly scan 2026-11-14, CNV union statement) — Four Dutch unions walked out of social-plan talks on the ~1,700 job cuts after ASML set department go-live dates of 2026-12-07 and 2027-03-08; no strike called. Source: https://www.cnv.nl/industrie/metalektro/cao-metalektro/nieuws/vakbonden-stappen-gezamenlijk-uit-overleg-met-asml-vertrouwen-ernstig-geschaad-2026-11-10/
