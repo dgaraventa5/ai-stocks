@@ -400,6 +400,18 @@ def order_ref_id(ticket_id: str, order: dict) -> str:
                           f'{order["side"]}:{order["shares"]:.4f}'))
 
 
+def format_quantity(shares: float) -> str:
+    """Share count as the broker's string, never rounded UP. Positions
+    carry 6 decimals since dollar-amount buys (2026-10-11); formatting a
+    full-position exit to 4dp rounded the holding UP (e.g. 0.123457 ->
+    "0.1235") and the broker refused it as "Not enough shares to sell" (2026-11-16, three
+    times). Truncate at 6dp; keep the 4dp form when it is exact."""
+    micro = int(shares * 1_000_000 + 1e-6)    # floor at 6dp, float-safe
+    if micro % 100 == 0:
+        return f'{micro / 1_000_000:.4f}'
+    return f'{micro / 1_000_000:.6f}'
+
+
 def mcp_order_params(account_number: str, order: dict) -> dict:
     """Robinhood MCP place_equity_order arguments. Schema constraints
     (discovered 2026-08-11/12, both bounced the first live ticket):
@@ -429,7 +441,7 @@ def mcp_order_params(account_number: str, order: dict) -> dict:
     params = {
         'account_number': account_number,
         'symbol': order['ticker'], 'side': order['side'],
-        'quantity': f"{order['shares']:.4f}",
+        'quantity': format_quantity(order['shares']),
         'type': 'market' if fractional else 'limit',
         'time_in_force': 'gfd',
         'market_hours': 'regular_hours',
