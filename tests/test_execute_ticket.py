@@ -711,3 +711,17 @@ def test_dollar_sizing_is_buy_only():
     with pytest.raises(ValueError, match='buy-only'):
         ex.mcp_order_params('1', {'ticker': 'TSM', 'side': 'sell', 'shares': 0.2,
                                   'limit_price': 248.0, 'dollar_amount': 50.0})
+
+
+def test_quantity_never_rounds_up_past_holdings():
+    """2026-11-16: a full exit of a 6dp holding went out rounded UP to 4dp
+    and the broker refused it, three times: "Not enough
+    shares to sell". Six-decimal holdings must be sent exactly, never up."""
+    p = ex.mcp_order_params('1', {'ticker': 'XYZ', 'side': 'sell',
+                                  'shares': 0.123457, 'limit_price': 100.0,
+                                  'tif': 'day', 'notional_est': 12.35})
+    assert p['quantity'] == '0.123457'
+    assert float(p['quantity']) <= 0.123457
+    assert ex.format_quantity(0.1785) == '0.1785'     # exact 4dp unchanged
+    assert ex.format_quantity(3.0) == '3.0000'
+    assert ex.format_quantity(0.0599999999) == '0.059999'   # truncates

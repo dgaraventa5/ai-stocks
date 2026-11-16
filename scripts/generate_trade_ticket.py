@@ -114,11 +114,23 @@ def generate(target_weights: dict[str, float], event: dict, *,
 
     tdir = live_dir / 'tickets'
     tdir.mkdir(parents=True, exist_ok=True)
-    path = tdir / f"ticket-{ticket['ticket_id']}.json"
+    # Append-only: a regenerated ticket is a NEW file (B3) AND a new id. The
+    # executor's executed-once gate keys on receipt-{ticket_id}, so reusing
+    # the id of a ticket that already has a receipt (even a failed run) made
+    # every same-day regeneration unexecutable (2026-11-16). The checksum
+    # covers the orders only, so suffixing the id is safe.
+    base_id = ticket['ticket_id']
+    rdir = live_dir / 'receipts'
     n = 1
-    while path.exists():   # append-only: a regenerated ticket is a NEW file (B3)
+
+    def _id_taken(tid: str) -> bool:
+        return (any(tdir.glob(f'*ticket-{tid}.json'))
+                or (rdir / f'receipt-{tid}.json').exists())
+
+    while _id_taken(ticket['ticket_id']):
         n += 1
-        path = tdir / f"ticket-{ticket['ticket_id']}-{n}.json"
+        ticket['ticket_id'] = f'{base_id}-{n}'
+    path = tdir / f"ticket-{ticket['ticket_id']}.json"
     path.write_text(json.dumps(ticket, indent=2) + '\n')
     f = ticket.get('funding') or {}
     print(f'ticket written: {path} ({len(ticket["orders"])} orders, '

@@ -230,3 +230,26 @@ def test_superseding_twice_never_overwrites_an_earlier_superseded_file(tmp_path)
     gt.retire_superseded(tdir, rdir, keep=keep, now='2026-10-05T00:00:00Z')
     assert json.loads((tdir / 'superseded-ticket-a.json').read_text()) == {'first': True}
     assert (tdir / 'superseded-ticket-a.2.json').exists()
+
+
+def test_regenerated_ticket_after_receipt_gets_a_new_id(live_dir):
+    """2026-11-16: a ticket regenerated the same day as a receipted (failed)
+    run kept the old ticket_id, so the executor's executed-once gate
+    (receipt-{ticket_id}) refused it as already sent. Each new ticket must
+    carry an id no earlier ticket or receipt has used."""
+    p1 = gt.generate({'NVDA': 0.5}, EVENT, live_dir=live_dir,
+                     prices_fn=PRICES.get, now='2026-08-13T21:30:00Z')
+    t1 = json.loads(p1.read_text())
+    (live_dir / 'receipts').mkdir(exist_ok=True)
+    (live_dir / 'receipts' / f"receipt-{t1['ticket_id']}.json").write_text('{}')
+    p2 = gt.generate({'NVDA': 0.6}, EVENT, live_dir=live_dir,
+                     prices_fn=PRICES.get, now='2026-08-13T22:00:00Z')
+    t2 = json.loads(p2.read_text())
+    assert t2['ticket_id'] != t1['ticket_id']
+    assert p2.name == f"ticket-{t2['ticket_id']}.json"
+    assert not (live_dir / 'receipts' / f"receipt-{t2['ticket_id']}.json").exists()
+    # A superseded ticket's id is not reused either.
+    p3 = gt.generate({'NVDA': 0.7}, EVENT, live_dir=live_dir,
+                     prices_fn=PRICES.get, now='2026-08-13T22:30:00Z')
+    t3 = json.loads(p3.read_text())
+    assert t3['ticket_id'] not in (t1['ticket_id'], t2['ticket_id'])
