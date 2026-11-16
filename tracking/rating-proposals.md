@@ -475,3 +475,9 @@ Effect if approved: Total 71.24 → 70.74, tradable rank 25 → 32; membership c
 Status: PROPOSED
 
 _Both GMED proposals together: 71.24 → 69.24, tradable rank 25 → 40, ✓. Holds: D1 2 (most debatable — 9M robotics 3.8% of sales is band 1 by the letter; Q3 robotics $34.9M, +24.3%, 4.6% of sales, 10-Q Note 4), D2 2, D3 3 (watch: US spine +~2%), D4 4, D5 2, M3 3 (yfinance only, Form 4 not pulled), R1 5, R2 5, R3 5, R4 3 (FDA 2024 robot warning-letter closure from a secondary source only), R5 5. EPS YoY clean this quarter (GAAP $1.04 vs $0.88) — the existing June-quarter rule-15 entry will show STALE; needs a fresh ruling (none written). **Rule-35 candidate (not added — this job may not edit holds):** revenue guidance cut 2026-11-05; suggested expiry just after the Q4 report (~late Feb 2027). GMED is not held. Thesis break trigger half met: organic growth slowed to market rate, but robotics share did not stall._
+
+## 2026-11-16 — MU — R4 Regulatory/Litigation Risk 3 → 2  (confidence Med; update to the 2026-11-01 proposal, not a second change)
+Event: 2026-11-14, Judge Noël Wise (N.D. Cal.) denied the joint motion to dismiss the DRAM supply-conspiracy class action, *Garciaguirre v. Samsung Electronics*, No. 5:26-cv-06345; the case enters discovery (TechPowerUp, Wccftech, 2026-11-16).
+Why: Strengthens the band-2 reading ("Material litigation") in the 2026-11-01 proposal: the case survived the pleading stage and has a docket number. Still not band 1: private civil complaint, no liability finding, no government probe found.
+Effect if approved: Total 88.32 → 87.57, rank 1 → 1 (tradable); membership change: no. Scratch copy, single change in isolation, 2026-11-16 workbook.
+Status: PROPOSED
