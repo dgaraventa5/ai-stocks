@@ -31,7 +31,9 @@ attended run:
   series and rebuilds it on its next run.
 - **Step 6** runs as written. BSS at or below 0 is a finding for the report, and
   changes nothing.
-- Publish the Notion page `Quarterly Rescore — {date}`.
+- Before landing, record asks and run the protocol's inbox step (3b).
+- Publish the Notion page `Quarterly Rescore — {date}`, with the inbox
+  summary line and table link.
 
 ## Completion criteria
 
