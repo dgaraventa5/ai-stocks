@@ -272,7 +272,7 @@ Status: APPROVED by Dom 2026-11-12, applied
 Event: Yahoo eps_trend/eps_revisions, 2026-11-12: +1y EPS $15.93 vs $12.82 90 days ago (+24%), $15.91 30 days ago; 7 up / 0 down in 30 days on +1y. Current quarter 1 down in 7 days. Replaces the 2026-10-27 entry.
 Why: On the data, band 5 'Multiple upward revisions ... consensus moving higher' fits the 90-day window. But the data predates this week's analyst target cuts and downgrade (Baird to Neutral; CNBC live 2026-11-12), and estimates will be re-cut after the 11-17 print. **Recommend deciding after the post-print refresh, not now.**
 Effect if approved: Total 84.17 → 84.67, rank 3 → 3; membership change: no. Scratch copy, single change in isolation.
-Status: PROPOSED — held for the post-print review (2026-11-19), per this entry's own recommendation
+Status: SUPERSEDED 2026-11-19 (re-computed below)
 
 _All three 2026-11-12 NVDA proposals together: 84.17 → 84.42, rank 3, ✓✓; no membership change. Holds: D1–D5, M3, R1, R2, R3, R5 (reasons in the briefing §6). Flagged, not proposed: the rubric has no key-person/leadership-transition dimension, so the CEO loss itself moves no rating; that is a rule-8 framework question for Dom._
 
@@ -481,3 +481,17 @@ Event: 2026-11-14, Judge Noël Wise (N.D. Cal.) denied the joint motion to dismi
 Why: Strengthens the band-2 reading ("Material litigation") in the 2026-11-01 proposal: the case survived the pleading stage and has a docket number. Still not band 1: private civil complaint, no liability finding, no government probe found.
 Effect if approved: Total 88.32 → 87.57, rank 1 → 1 (tradable); membership change: no. Scratch copy, single change in isolation, 2026-11-16 workbook.
 Status: PROPOSED
+
+## 2026-11-19 — NVDA — M1 EPS Revisions 4 → 5  (confidence Med-High; re-computed post-print, replaces the 2026-11-12 entry)
+Event: Yahoo eps_trend/eps_revisions, 2026-11-19 (two days after the Q3 FY27 print, 8-K acc 0001045810-26-000088): next-year (+1y, FY28) EPS $16.61 vs $15.91 7 days ago (+4.4%) and $12.99 90 days ago (+27.7%); 7 up / 0 down in 30 days, 3 up in 7 days. Current year (0y, FY27) $9.64 vs $9.00 90 days ago (+7.1%), 2 up / 0 down. Next quarter $3.33 vs $2.88 90 days ago. Current quarter: 1 down in 30 days (the only cut). Company raised its FY28 growth outlook to ~75% from 70% (call transcript) after a beat-and-raise quarter (revenue +6.2% and EPS +8.1% vs consensus; Q4 guide +3.9% vs consensus). Source: per-stock/NVDA/context-2026-11-19.md.
+Why: Band 5 "Multiple upward revisions. Beat-and-raise pattern. Consensus moving higher." Every annual and next-quarter line is moving up, on the next-year line used as primary in earlier entries. The 11-12 objection (data predated analyst target cuts) is answered: the cuts were to price targets, not EPS, and post-print estimates rose. Residual caveat: the post-print revision wave may still be incomplete, but it can only add to band 5 unless cuts appear.
+Effect if approved: Total 83.85 → 84.35, tradable rank 3 → 3, ✓✓ unchanged; membership change: no. Scratch copy of the 2026-11-19 workbook (after the 2026-11-18 re-score), recalc percentile mode, single change in isolation.
+Status: PROPOSED
+
+## 2026-11-19 — NVDA — R4 Regulatory Risk: holds at 2, flagged (no change proposed)
+Event: Since the 11-12 approval (3 → 2): (a) WSJ reported 2026-11-17 that the SEC opened a civil probe into whether NVIDIA's disclosures misled investors — unconfirmed by the SEC or NVIDIA, no subpoena reported (TechCrunch/Bloomberg citing WSJ); (b) a proposed securities class action, *Kistenmacher v. NVIDIA Corp. and Jen-Hsun Huang* (N.D. Cal., class period 2025-10-09 → 2026-11-08), and a derivative suit, *Vanegas v. Huang et al.*, both filed ~week of 2026-11-09, case numbers not found; (c) House Energy & Commerce asked interim CEO Kress for an export-compliance briefing before 2026-12-02, and the general counsel agreed to a closed-door transcribed interview that day (The Hill). Source: per-stock/NVDA/context-2026-11-19.md §3.
+Why no change: Band 1 ("Major regulatory threat (e.g., DOJ antitrust ... class action that could be material)") is arguable on the rubric's text. Held at 2 because Dom's 2026-05-18 standard rates enforcement, not scrutiny: the SEC probe is a press report, the suits are fresh allegations of the kind filed after any sharp drawdown, and the META 2 → 1 precedent (2026-11-14) rested on a $25B court judgment. **Would become a proposal for 1 on:** NVIDIA confirming an SEC inquiry (e.g., in the coming 10-Q), a Wells notice or subpoena, any BIS/DOJ action naming NVIDIA, or a court sustaining the class action.
+Effect if Dom moved it anyway: Total 83.85 → 83.10, tradable rank 3 → 4, ✓✓ unchanged; membership change: no. Same scratch copy, single change in isolation.
+Status: FLAGGED — Dom's call
+
+_Both NVDA items together (M1 → 5 and R4 → 1): 83.85 → 83.60, rank 3, no membership change. Holds (reasons in context-2026-11-19.md §6): D1–D5 5, M2 2 (−13.7pp vs SMH over 126 days to the 11-18 close; −12.0pp over 63 days — band 2; the after-hours gain reversed), M3 3 (no Form 4 since 11-12), R1 4, R2 2, R3 5 (watch: AR +28% and inventory +26% q/q vs revenue +20%; DSO 64; TTM FCF conversion 66%), R5 5. Litigation docket script skipped (privacy guard); capitulation flag fires again (P/S 0.3rd pctile), forecast from 10-27 still open._
