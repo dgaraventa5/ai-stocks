@@ -17,3 +17,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-10-22 | 8-K Items 2.02/8.01 (acc. 0001104659-26-118156); context-2026-10-23.md | Q3 2026: revenue $3.77B (+54%, ~11% above consensus), EPS $13.91 (+69%, ~10% above), gross margin 24.8%, OCF $1.01B, backlog $17.81B (+$3.75B QoQ, +90% YoY); dividend raised to $1.00. |
 | 2026-10-22 | 8-K Items 5.02/7.01 (acc. 0001104659-26-118149) | CFO Bill George retires after the FY2026 10-K; Chief Accounting Officer Julie Shaeff (CAO since 2005) promoted to EVP & CFO — planned internal succession. |
 | 2026-10-28 | 8-K Item 7.01 (acc. 0001104659-26-119613) | Investor presentation furnished (Reg FD); no new financial event in the 8-K text. Not material. |
+| 2026-11-17 | 8-K Item 8.01 (acc. 0001104659-26-129104) | Board topped up the buyback to 1,000,000 shares available (679,520 added); 1,552,236 shares bought back 2026-01-01 → 11-16 for ~$1.89B. Not material. |
