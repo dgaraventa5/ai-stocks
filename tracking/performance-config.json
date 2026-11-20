@@ -1251,8 +1251,7 @@
     }
   ],
   "exit_pending": {
-    "AMZN": "2026-11-20",
-    "STX": "2026-11-20"
+    "AMZN": "2026-11-20"
   },
   "shadow_events": {
     "BAND_TOP": [
@@ -2421,18 +2420,18 @@
           "AAON",
           "ORCL",
           "LRCX",
-          "KLAC",
           "SNPS",
           "APH",
+          "KLAC",
           "KLIC",
           "KEYS",
           "LITE",
           "CMI",
+          "BE",
           "TT",
           "CGNX",
           "GMED",
-          "NTAP",
-          "GLW"
+          "NTAP"
         ]
       }
     ],
@@ -3057,7 +3056,7 @@
   },
   "methodology_seam": {
     "date": "2026-11-20",
-    "reason": "FCF from statements only (quarterly TTM, else annual; no Yahoo estimate) + 13 capacity figures refreshed (2026-11-20)"
+    "reason": "Loss quarters and negative EBITDA scored by stand-in instead of blank (Dom 2026-11-20)"
   },
   "methodology_seams_open": [
     {
