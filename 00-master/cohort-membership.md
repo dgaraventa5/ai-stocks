@@ -7,11 +7,11 @@ has >= 8 non-null); `abs` = absolute-band fallback. Layer 09 col-F
 (EV/*) is always `abs` (mixed EV/EBITDA + EV/MW).
 
 ## Layer 01 — 33 names
-metrics: ev_ebitda=pct(32)  fcf_yield=pct(33)  ps=pct(33)  roic=pct(33)  gm=pct(33)  fcf_mgn=pct(33)
+metrics: ev_ebitda=pct(33)  fcf_yield=pct(33)  ps=pct(33)  roic=pct(33)  gm=pct(33)  fcf_mgn=pct(33)
 members: AEP, AR, BE, BW, BWXT, CCJ, CEG, CMI, D, DUK, EQT, ETR, EXE, GNRC, LEU, NEE, NNE, NRG, NXT, OKLO, PLUG, PPL, PSIX, PUMP, RRC, SEI, SMR, SO, TE, TLN, UEC, VST, XEL
 
 ## Layer 02 — 10 names
-metrics: ev_ebitda=pct(10)  fcf_yield=pct(10)  ps=pct(10)  roic=pct(9)  gm=pct(10)  fcf_mgn=pct(10)
+metrics: ev_ebitda=pct(10)  fcf_yield=pct(10)  ps=pct(10)  roic=pct(10)  gm=pct(10)  fcf_mgn=pct(10)
 members: ABBNY, ETN, GEV, HTHIY, HUBB, MTZ, NVT, POWL, PWR, SBGSY
 
 ## Layer 03 — 11 names
@@ -23,11 +23,11 @@ metrics: ev_ebitda=pct(28)  fcf_yield=pct(28)  ps=pct(28)  roic=pct(28)  gm=pct(
 members: ACLS, AEIS, AIP, AMAT, AMKR, ARM, ASML, ASX, BESIY, CAMT, CDNS, CEVA, COHU, ENTG, FORM, KEYS, KLAC, KLIC, KN, LRCX, MKSI, ONTO, PLAB, SNPS, TER, TOELY, TTMI, UCTT
 
 ## Layer 05 — 8 names
-metrics: ev_ebitda=pct(8)  fcf_yield=pct(8)  ps=pct(8)  roic=abs(5)  gm=pct(8)  fcf_mgn=pct(8)
+metrics: ev_ebitda=pct(8)  fcf_yield=pct(8)  ps=pct(8)  roic=pct(8)  gm=pct(8)  fcf_mgn=pct(8)
 members: 0981.HK, 5347.TWO, GFS, HHUSF, INTC, TSEM, TSM, UMC
 
 ## Layer 06 — 22 names
-metrics: ev_ebitda=pct(22)  fcf_yield=pct(22)  ps=pct(22)  roic=pct(21)  gm=pct(22)  fcf_mgn=pct(22)
+metrics: ev_ebitda=pct(22)  fcf_yield=pct(22)  ps=pct(22)  roic=pct(22)  gm=pct(22)  fcf_mgn=pct(22)
 members: ADI, ALAB, ALGM, AMBA, AMD, AVGO, LSCC, MCHP, MELE.BR, MPWR, MRVL, MU, NVDA, NVTS, NXPI, ON, QCOM, RMBS, SNDK, STM, SWKS, TXN
 
 ## Layer 07 — 12 names
@@ -47,6 +47,6 @@ metrics: ev_ebitda=pct(25)  fcf_yield=pct(25)  ps=pct(25)  roic=pct(25)  gm=pct(
 members: AAPL, ADBE, ADSK, APP, CRM, CRWD, DDOG, FTNT, HOOD, INTU, LMND, MDB, NOW, PANW, PATH, PLTR, RDDT, SHOP, SNOW, SPCX, TEM, TSLA, UPST, WDAY, ZS
 
 ## Layer 11 — 39 names
-metrics: ev_ebitda=pct(36)  fcf_yield=pct(36)  ps=pct(39)  roic=pct(23)  gm=pct(39)  fcf_mgn=pct(36)
+metrics: ev_ebitda=pct(36)  fcf_yield=pct(36)  ps=pct(39)  roic=pct(39)  gm=pct(39)  fcf_mgn=pct(36)
 members: 2049.TW, 2252.HK, 2498.HK, 2590.HK, 6268.T, 6324.T, 6383.T, 6481.T, 6506.T, 6861.T, 6954.T, 9880.HK, AEVA, ALNT, AUTO.OL, AVAV, BSL.DE, CGNX, DRO.AX, GMED, HSAI, ISRG, KGX.DE, KTOS, MBLY, NOVT, ONDS, OUST, PDYN, PRCT, RCAT, RRX, SERV, SSII, SYM, TKR, TNC, UMAC, VPG
 
