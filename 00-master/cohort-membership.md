@@ -10,9 +10,9 @@ has >= 8 non-null); `abs` = absolute-band fallback. Layer 09 col-F
 metrics: ev_ebitda=pct(32)  fcf_yield=pct(33)  ps=pct(33)  roic=pct(33)  gm=pct(33)  fcf_mgn=pct(33)
 members: AEP, AR, BE, BW, BWXT, CCJ, CEG, CMI, D, DUK, EQT, ETR, EXE, GNRC, LEU, NEE, NNE, NRG, NXT, OKLO, PLUG, PPL, PSIX, PUMP, RRC, SEI, SMR, SO, TE, TLN, UEC, VST, XEL
 
-## Layer 02 — 11 names
-metrics: ev_ebitda=pct(11)  fcf_yield=pct(11)  ps=pct(11)  roic=pct(10)  gm=pct(11)  fcf_mgn=pct(11)
-members: ABBNY, ATKR, ETN, GEV, HTHIY, HUBB, MTZ, NVT, POWL, PWR, SBGSY
+## Layer 02 — 10 names
+metrics: ev_ebitda=pct(10)  fcf_yield=pct(10)  ps=pct(10)  roic=pct(9)  gm=pct(10)  fcf_mgn=pct(10)
+members: ABBNY, ETN, GEV, HTHIY, HUBB, MTZ, NVT, POWL, PWR, SBGSY
 
 ## Layer 03 — 11 names
 metrics: ev_ebitda=pct(11)  fcf_yield=pct(11)  ps=pct(11)  roic=pct(11)  gm=pct(11)  fcf_mgn=pct(11)

@@ -73,7 +73,7 @@ The transformer shortage is real. Lead times for large power transformers have s
 - **MasTec (MTZ)** — infrastructure construction
 - **Powell Industries (POWL)** — switchgear, electrical infrastructure
 - **nVent Electric (NVT)** — electrical connections & enclosures
-- **Atkore (ATKR)** — electrical conduit & cable
+- **Atkore (ATKR)** — electrical conduit & cable — *acquired by Prysmian (closed 2026-10-19, delisted); removed from the Watchlist 2026-11-20*
 
 ---
 
