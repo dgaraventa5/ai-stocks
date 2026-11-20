@@ -140,98 +140,57 @@ def test_guard_keeps_existing_on_fetched_none():
     assert any("roic" in f.lower() for f in flags)
 
 
-def test_guard_eps_yoy_unruled_blank_is_refilled():
-    # 2026-11-20: a blank with no rule-15 ruling used to be kept forever
-    # ("likely a documented one-off"); 57 cells sat blank with no reason.
-    # It is now re-checked and written like any other cell, and flagged.
+def _eps(fresh_eps, existing_eps, reason=None, note=None):
     info = {"financialCurrency": "USD"}
+    if note:
+        info["_eps_note"] = note
     fresh = {k: 10.0 for k in roi.OBJ_COLS}
-    fresh["eps_yoy"] = 50.0
+    fresh["eps_yoy"] = fresh_eps
+    if reason:
+        fresh["_eps_reason"] = reason
     existing = {k: 9.0 for k in roi.OBJ_COLS}
-    existing["eps_yoy"] = None
-    writes, flags = roi.apply_guards(info, fresh, existing)
+    existing["eps_yoy"] = existing_eps
+    return roi.apply_guards(info, fresh, existing)
+
+
+# Rule 15 amended 2026-11-20 (Dom): always write the reported number. These
+# replace the earlier keep-blank / 300%-withhold / keep-prior / override tests.
+
+def test_eps_yoy_writes_the_reported_number_over_a_blank():
+    writes, _ = _eps(50.0, None)
     assert writes["eps_yoy"] == 50.0
-    assert any("was blank with no ruling" in f for f in flags)
-    assert not any("preserved blank" in f.lower() for f in flags)
 
 
-def test_guard_eps_yoy_loss_base_blanks_with_reason_even_over_prior():
-    info = {"financialCurrency": "USD",
-            "_eps_note": "year-ago quarter 2025-09-30 net income -3,117M <= 0"}
-    fresh = {k: 10.0 for k in roi.OBJ_COLS}
-    fresh["eps_yoy"] = None
-    fresh["_eps_reason"] = "loss_base"
-    existing = {k: 9.0 for k in roi.OBJ_COLS}
-    existing["eps_yoy"] = 25.0          # described an older quarter
-    writes, flags = roi.apply_guards(info, fresh, existing)
+def test_eps_yoy_writes_extreme_numbers_no_withhold():
+    writes, flags = _eps(8478.6, 105.7)
+    assert writes["eps_yoy"] == 8478.6
+    assert not any("withheld" in f for f in flags)
+
+
+def test_eps_yoy_writes_normal_numbers():
+    writes, flags = _eps(80.0, 70.0)
+    assert writes["eps_yoy"] == 80.0 and flags == []
+
+
+def test_eps_yoy_loss_quarter_blanks_with_reason_even_over_prior():
+    writes, flags = _eps(None, 25.0, reason="loss",
+                         note="year-ago quarter 2025-09-30 net income -3,117M <= 0")
     assert "eps_yoy" in writes and writes["eps_yoy"] is None
     assert any("blank" in f and "-3,117M" in f for f in flags)
 
 
-def test_guard_eps_yoy_data_gap_blank_is_flagged_loudly():
-    info = {"financialCurrency": "USD"}
-    fresh = {k: 10.0 for k in roi.OBJ_COLS}
-    fresh["eps_yoy"] = None
-    fresh["_eps_reason"] = "no_data"
-    existing = {k: 9.0 for k in roi.OBJ_COLS}
-    existing["eps_yoy"] = None
-    writes, flags = roi.apply_guards(info, fresh, existing)
-    assert "eps_yoy" not in writes
+def test_eps_yoy_data_gap_blanks_and_is_flagged_loudly_never_keeps_prior():
+    # a prior value describes an older quarter: stale data, not kept
+    writes, flags = _eps(None, 80.0, reason="no_data")
+    assert "eps_yoy" in writes and writes["eps_yoy"] is None
     assert any("BLANK, data gap" in f for f in flags)
 
 
-def test_guard_eps_yoy_extreme_over_blank_says_it_stays_blank():
-    info = {"financialCurrency": "USD"}
-    fresh = {k: 10.0 for k in roi.OBJ_COLS}
-    fresh["eps_yoy"] = 863.0
-    existing = {k: 9.0 for k in roi.OBJ_COLS}
-    existing["eps_yoy"] = None
-    writes, flags = roi.apply_guards(info, fresh, existing)
-    assert "eps_yoy" not in writes
-    assert any("863" in f and "stays BLANK" in f for f in flags)
-
-
-def test_guard_eps_yoy_computed_value_is_written_and_noted():
-    info = {"financialCurrency": "USD",
-            "_eps_note": "Yahoo growth figure missing; computed from statement net income"}
-    fresh = {k: 10.0 for k in roi.OBJ_COLS}
-    fresh["eps_yoy"] = 12.5
-    fresh["_eps_reason"] = "computed"
-    existing = {k: 9.0 for k in roi.OBJ_COLS}
-    existing["eps_yoy"] = 11.0
-    writes, flags = roi.apply_guards(info, fresh, existing)
+def test_eps_yoy_computed_value_is_written_and_noted():
+    writes, flags = _eps(12.5, 11.0, reason="computed",
+                         note="Yahoo growth figure missing; computed from statement net income")
     assert writes["eps_yoy"] == 12.5
     assert any("computed from statement" in f for f in flags)
-
-
-def test_guard_eps_yoy_withholds_extreme():
-    info = {"financialCurrency": "USD"}
-    fresh = {k: 10.0 for k in roi.OBJ_COLS}
-    fresh["eps_yoy"] = 412.0
-    existing = {k: 9.0 for k in roi.OBJ_COLS}
-    writes, flags = roi.apply_guards(info, fresh, existing)
-    assert "eps_yoy" not in writes
-    assert any("412" in f or "extreme" in f.lower() for f in flags)
-
-
-def test_guard_eps_yoy_normal_writes():
-    info = {"financialCurrency": "USD"}
-    fresh = {k: 10.0 for k in roi.OBJ_COLS}
-    fresh["eps_yoy"] = 80.0
-    existing = {k: 9.0 for k in roi.OBJ_COLS}
-    writes, flags = roi.apply_guards(info, fresh, existing)
-    assert writes["eps_yoy"] == 80.0
-
-
-def test_guard_eps_yoy_keeps_existing_on_fetched_none():
-    info = {"financialCurrency": "USD"}
-    fresh = {k: 10.0 for k in roi.OBJ_COLS}
-    fresh["eps_yoy"] = None  # yfinance earningsQuarterlyGrowth frequently None
-    existing = {k: 9.0 for k in roi.OBJ_COLS}
-    existing["eps_yoy"] = 80.0  # previously-valid, must not be clobbered
-    writes, flags = roi.apply_guards(info, fresh, existing)
-    assert "eps_yoy" not in writes
-    assert any("eps_yoy" in f.lower() and ("kept" in f.lower() or "no data" in f.lower()) for f in flags)
 
 
 # ---------------------------------------------------------------------------
@@ -518,137 +477,3 @@ def test_format_row_lines_flags_no_change_explicitly(tmp_path):
     row_rep = {"ticker": "NVDA", "touched": [4, 5], "changes": [], "flags": []}
     text = "\n".join(roi.format_row_lines(row_rep, dry_run=True))
     assert "no value changes" in text.lower()
-
-
-# ---------------------------------------------------------------------------
-# Rule-15 EPS YoY override file (spec 2026-09-08-eps-yoy-override-design.md)
-# ---------------------------------------------------------------------------
-
-_Q_JUL26 = 1785456000  # yfinance mostRecentQuarter epoch for 2026-07-31 UTC
-
-
-def _override(quarter_end="2026-07-31", value=None, **extra):
-    e = {"quarter_end": quarter_end, "value": value,
-         "basis": "GAAP dominated by a $2.6B investment gain",
-         "source": "8-K Ex-99.1 filed 2026-08-26",
-         "ruled": "2026-09-07", "audit_row": "Rating Audit 2026-09-07 CRM"}
-    e.update(extra)
-    return e
-
-
-def _eps_case(fresh_eps=50.0, existing_eps=36.7, mrq=_Q_JUL26):
-    info = {"financialCurrency": "USD"}
-    if mrq is not None:
-        info["mostRecentQuarter"] = mrq
-    fresh = {k: 10.0 for k in roi.OBJ_COLS}; fresh["eps_yoy"] = fresh_eps
-    existing = {k: 9.0 for k in roi.OBJ_COLS}; existing["eps_yoy"] = existing_eps
-    return info, fresh, existing
-
-
-def test_override_matching_quarter_blank_writes_none_over_value():
-    info, fresh, existing = _eps_case(fresh_eps=86.9, existing_eps=36.7)
-    writes, flags = roi.apply_guards(info, fresh, existing, override=_override(value=None))
-    assert "eps_yoy" in writes and writes["eps_yoy"] is None
-    assert any("override applied" in f.lower() and "blank" in f.lower() for f in flags)
-
-
-def test_override_matching_quarter_value_beats_the_300pct_withhold():
-    info, fresh, existing = _eps_case(fresh_eps=1583.3, existing_eps=113.4)
-    writes, flags = roi.apply_guards(info, fresh, existing, override=_override(value=24.4))
-    assert writes["eps_yoy"] == 24.4
-    assert any("override applied" in f.lower() for f in flags)
-    assert not any("withheld" in f.lower() for f in flags)
-
-
-def test_override_older_quarter_is_stale_withholds_and_does_not_preserve_blank():
-    # Ruling was for the April quarter; yfinance now shows the July quarter.
-    info, fresh, existing = _eps_case(fresh_eps=50.0, existing_eps=None)
-    writes, flags = roi.apply_guards(info, fresh, existing,
-                                     override=_override(quarter_end="2026-04-30", value=None))
-    assert "eps_yoy" not in writes            # nothing written until re-ruled
-    assert any("stale" in f.lower() and "2026-04-30" in f and "50" in f for f in flags)
-    assert not any("preserved blank" in f.lower() for f in flags)
-
-
-def test_override_future_quarter_is_ignored_with_ahead_flag_and_guards_run():
-    info, fresh, existing = _eps_case(fresh_eps=80.0, existing_eps=36.7)
-    writes, flags = roi.apply_guards(info, fresh, existing,
-                                     override=_override(quarter_end="2026-10-31", value=None))
-    assert writes["eps_yoy"] == 80.0          # normal guard (d) wrote the fresh value
-    assert any("ahead" in f.lower() and "2026-10-31" in f for f in flags)
-
-
-def test_override_without_most_recent_quarter_is_ignored_with_flag():
-    info, fresh, existing = _eps_case(fresh_eps=80.0, existing_eps=36.7, mrq=None)
-    writes, flags = roi.apply_guards(info, fresh, existing, override=_override(value=None))
-    assert writes["eps_yoy"] == 80.0
-    assert any("mostrecentquarter" in f.lower() for f in flags)
-
-
-def test_override_loader_rejects_entry_missing_citation(tmp_path):
-    p = tmp_path / "eps-yoy-overrides.json"
-    bad = _override(value=None); del bad["source"]
-    p.write_text(json.dumps({"_meta": {"updated": "2026-09-08"}, "CRM": bad}))
-    try:
-        roi.load_eps_overrides(p)
-    except ValueError as e:
-        assert "CRM" in str(e) and "source" in str(e)
-    else:
-        raise AssertionError("malformed entry must raise")
-
-
-def test_override_loader_reads_entries_and_skips_meta(tmp_path):
-    p = tmp_path / "eps-yoy-overrides.json"
-    p.write_text(json.dumps({"_meta": {"updated": "2026-09-08"}, "CRM": _override(value=None)}))
-    ov = roi.load_eps_overrides(p)
-    assert set(ov) == {"CRM"} and ov["CRM"]["value"] is None
-
-
-def test_override_loader_missing_file_is_empty(tmp_path):
-    assert roi.load_eps_overrides(tmp_path / "nope.json") == {}
-
-
-def _scoring_with(tmp_path, ticker, eps_yoy):
-    wb = Workbook(); ws = wb.active; ws.title = "Watchlist"
-    ws.append(["Ticker", "Company", "Layer", "Last Updated"] + [None] * 34)
-    row = [ticker, "X", "10 Models, Software & Applications", "2026-07-16"] + [None] * 34
-    row[17] = eps_yoy
-    ws.append(row)
-    sp = tmp_path / "scoring.xlsx"; wb.save(sp)
-    return sp
-
-
-def test_refresh_applies_override_file_live(tmp_path):
-    sp = _scoring_with(tmp_path, "CRM", 36.7)
-    op = tmp_path / "eps-yoy-overrides.json"
-    op.write_text(json.dumps({"CRM": _override(value=None)}))
-
-    def fake_fetch(ticker, layer):
-        info = {"financialCurrency": "USD", "mostRecentQuarter": _Q_JUL26}
-        fresh = {k: 10.0 for k in roi.OBJ_COLS}; fresh["eps_yoy"] = 86.9
-        return info, fresh
-
-    rep = roi.refresh(["CRM"], dry_run=False, scoring_path=sp, fetcher=fake_fetch,
-                      dma_fetcher=lambda t: 70.0, today=dt.date(2026, 9, 8),
-                      overrides_path=op)
-    ws2 = load_workbook(sp)["Watchlist"]
-    assert ws2.cell(row=2, column=18).value is None
-    assert any("CRM" in f and "override applied" in f.lower() for f in rep["flags"])
-
-
-def test_refresh_dry_run_reports_override_but_leaves_cell(tmp_path):
-    sp = _scoring_with(tmp_path, "CRM", 36.7)
-    op = tmp_path / "eps-yoy-overrides.json"
-    op.write_text(json.dumps({"CRM": _override(value=None)}))
-
-    def fake_fetch(ticker, layer):
-        info = {"financialCurrency": "USD", "mostRecentQuarter": _Q_JUL26}
-        fresh = {k: 10.0 for k in roi.OBJ_COLS}; fresh["eps_yoy"] = 86.9
-        return info, fresh
-
-    rep = roi.refresh(["CRM"], dry_run=True, scoring_path=sp, fetcher=fake_fetch,
-                      dma_fetcher=lambda t: 70.0, today=dt.date(2026, 9, 8),
-                      overrides_path=op)
-    assert load_workbook(sp)["Watchlist"].cell(row=2, column=18).value == 36.7
-    assert any("override applied" in f.lower() for f in rep["flags"])
-    assert any(c["field"] == "eps_yoy" and c["new"] is None for c in rep["rows"][0]["changes"])

@@ -3,19 +3,20 @@
 Pure and stdlib-only so it can be tested in CI's minimal environment;
 batch_score.compute_inputs converts the pandas row to a {date: value} dict.
 
-Yahoo's earningsQuarterlyGrowth is net income attributable to common, latest
-quarter vs the same quarter a year earlier (HUT Q3-26 131M vs Q3-25 50M ->
-+162%). Yahoo returns nothing when the year-ago quarter was a loss (QCOM after
-its -3.1B Q3-25), and sometimes returns nothing for no visible reason.
+Yahoo's earningsQuarterlyGrowth is net income, latest quarter vs the same
+quarter a year earlier (HUT Q3-26 131M vs Q3-25 50M -> +162%). Yahoo returns
+nothing when either quarter was a loss (QCOM after its -3.1B Q3-25; IREN's
+-263M Q3-26), and sometimes returns nothing for no visible reason.
 
 Before 2026-11-20 a missing figure left the cell blank and the refresh script
 then kept that blank forever, with no recorded reason (57 names). This module
 says WHY the figure is missing, and fills it from the statements when both
 quarters are present and profitable:
 
-- "loss_base": the year-ago quarter's net income is <= 0. Growth from a loss
-  is not meaningful; the cell is blank on purpose and says so.
-- "computed": both quarters present and the base positive; value computed from
+- "loss": either quarter's net income is <= 0. Growth from or to a loss is not
+  meaningful (and is how Yahoo and past rulings treat it); the cell is blank
+  on purpose and says so.
+- "computed": both quarters present and profitable; value computed from
   statement net income, the same measure Yahoo uses.
 - "no_data": the statements cannot answer (statement lags the latest reported
   quarter, or a quarter is missing). The blank is a data gap and is flagged.
@@ -27,7 +28,7 @@ import math
 
 QUARTER_TOLERANCE_DAYS = 20   # statement columns are month-end normalized
 
-LOSS_BASE, COMPUTED, NO_DATA = "loss_base", "computed", "no_data"
+LOSS, COMPUTED, NO_DATA = "loss", "computed", "no_data"
 
 
 def _as_date(k) -> dt.date:
@@ -87,12 +88,16 @@ def eps_yoy_fallback(net_income: dict, latest_quarter: dt.date | None
         return None, NO_DATA, f"no year-ago quarter (near {_years_back(cur_d, 1)}) in Yahoo statements"
     base = float(cols[base_d])
     if base <= 0:
-        return None, LOSS_BASE, (
+        return None, LOSS, (
             f"year-ago quarter {base_d} net income {base / 1e6:,.0f}M <= 0 — "
             "growth from a loss is not meaningful")
     if _blank(cols[cur_d]):
         return None, NO_DATA, f"quarter {cur_d} net income blank in Yahoo statements"
     cur = float(cols[cur_d])
+    if cur <= 0:
+        return None, LOSS, (
+            f"quarter {cur_d} net income {cur / 1e6:,.0f}M <= 0 (vs "
+            f"{base / 1e6:,.0f}M a year earlier) — growth to a loss is not meaningful")
     value = round((cur / base - 1) * 100, 2)
     return value, COMPUTED, (
         f"Yahoo growth figure missing; computed from statement net income "

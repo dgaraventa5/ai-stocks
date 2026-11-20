@@ -54,9 +54,9 @@ Apply the absolute rubric, not relative ranking. Never propose a move in order
 to cross a tier or rank threshold. For a hold about to expire, state whether
 the event behind it has resolved (Dom decides whether to renew).
 
-A rule-35 hold candidate this job may not add, a rule-15 ruling it may not
-write, or any other question for Dom goes in the inbox in the same pass:
-`python3 scripts/dom_inbox.py ask --kind hold_candidate|eps_ruling|question ...`.
+A rule-35 hold candidate this job may not add, or any other question for Dom,
+goes in the inbox in the same pass:
+`python3 scripts/dom_inbox.py ask --kind hold_candidate|question ...`.
 
 ## 5. Land and report
 

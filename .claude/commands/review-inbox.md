@@ -39,7 +39,7 @@ because they trade at the next 06:35 executor run.
 | Kind | Approve | Decline | Discuss |
 |---|---|---|---|
 | `rating` | Write the new value to the Watchlist (D1–D5 cols 20–24, M1–M3 cols 26–28, R1–R4 cols 31–34, R5 col 38; `cell.value = x`, never `ws.cell(..., value=)`). Append a Rating Audit row: Date, Ticker, Dimension, Rating, Rationale ("{old}->{new} (Dom-approved via inbox {date}). {Why}"), Source (the proposal's Event source + `tracking/rating-proposals.md ({date})`), Confidence, Type `Update`. Set the proposal's Status to `APPROVED by Dom {date} via inbox, applied`. | Status `DECLINED by Dom {date} via inbox — {Note}`. | Leave it; raise it in this session. |
-| `eps_ruling` | The ruling is in the Note (blank, or an ex-item value with its basis). Add it to `00-master/eps-yoy-overrides.json` per rule 15 (quarter_end, value, basis, source, ruled, audit_row) and append the Rating Audit row. No Note means no ruling: ask. | Dom says no ruling is needed: `close` the ask with his reason. | Raise it. |
+| `eps_ruling` (legacy) | None needed: rule 15 writes the reported number since 2026-11-20. `close` the ask with that reason. | `close`. | `close`. |
 | `hold` | Renew: set a new `expires` (from the Note, or ask) and update `review_event`. | Let it lapse: leave the entry as it is and `close` nothing (the row drops off 30 days after expiry); say so in the commit. | Raise it. |
 | `hold_candidate` | Add the hold to `00-master/entry-holds.json` (`reason`, `source`, `set`, `expires`, `review_event`), then `close` the ask. | `close` the ask with the reason. | Raise it. |
 | `data_fix` | Make the fix in this session (cite the source, rule 1), then `close` the ask. | `close` with the reason. | Raise it. |
