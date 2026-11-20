@@ -43,6 +43,7 @@ warnings.filterwarnings("ignore")
 import yfinance as yf
 
 import adr_currency
+import revenue_cagr
 from openpyxl import load_workbook
 
 from common import ROOT, flag, per_stock_dir
@@ -283,17 +284,15 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
     try:
         is_a = t.income_stmt
         if is_a is not None and not is_a.empty and "Total Revenue" in is_a.index:
+            # Years by date, not position; a blank newest fiscal year (Yahoo
+            # placeholder before the 10-K) is filled from TTM only when the
+            # TTM ends at that year end (revenue_cagr.py, 2026-11-19 AMAT fix).
             rev_row = is_a.loc["Total Revenue"]
-            cols = list(rev_row.index)
-            if len(cols) >= 4:
-                r_now = float(rev_row.iloc[0])
-                r_3y = float(rev_row.iloc[3])
-                if r_3y > 0 and r_now > 0:
-                    inp["rev_3y_cagr"] = round((((r_now / r_3y) ** (1 / 3)) - 1) * 100, 2)
-                else:
-                    gaps.append("Rev 3y CAGR: non-positive base or current value")
-            else:
-                gaps.append(f"Rev 3y CAGR: only {len(cols)} years of data")
+            cagr, cagr_gaps = revenue_cagr.rev_3y_cagr(
+                {k: rev_row[k] for k in rev_row.index}, info)
+            gaps.extend(cagr_gaps)
+            if cagr is not None:
+                inp["rev_3y_cagr"] = cagr
         else:
             gaps.append("Rev 3y CAGR: income statement missing or no Total Revenue row")
     except Exception as e:
