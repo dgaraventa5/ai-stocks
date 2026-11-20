@@ -177,11 +177,12 @@ def test_eps_yoy_writes_normal_numbers():
     assert writes["eps_yoy"] == 80.0 and flags == []
 
 
-def test_eps_yoy_loss_quarter_blanks_with_reason_even_over_prior():
-    writes, flags = _eps(None, 25.0, reason="loss",
-                         note="year-ago quarter 2025-09-30 net income -3,117M <= 0")
-    assert "eps_yoy" in writes and writes["eps_yoy"] is None
-    assert any("blank" in f and "-3,117M" in f for f in flags)
+def test_eps_yoy_loss_quarter_writes_the_stand_in_with_reason():
+    # 2026-11-20 (Dom): a loss quarter scores bottom band instead of blank
+    writes, flags = _eps(-100.0, 25.0, reason="loss_now",
+                         note="quarter 2026-09-30 net income -263M <= 0 — a loss quarter")
+    assert writes["eps_yoy"] == -100.0
+    assert any("-263M" in f for f in flags)
 
 
 def test_eps_yoy_data_gap_blanks_and_is_flagged_loudly_never_keeps_prior():
@@ -479,3 +480,15 @@ def test_format_row_lines_flags_no_change_explicitly(tmp_path):
     row_rep = {"ticker": "NVDA", "touched": [4, 5], "changes": [], "flags": []}
     text = "\n".join(roi.format_row_lines(row_rep, dry_run=True))
     assert "no value changes" in text.lower()
+
+
+def test_negative_ebitda_stand_in_flags_are_surfaced():
+    # batch_score writes 99 (net debt) / 0 (net cash) when EBITDA <= 0
+    info = {"financialCurrency": "USD",
+            "_nd_flags": ["ND/EBITDA: EBITDA non-positive — scored as net debt (99, worst band)"]}
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["nd_ebitda"] = 99.0
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+    existing["nd_ebitda"] = None
+    writes, _ = roi.apply_guards(info, fresh, existing)
+    assert writes["nd_ebitda"] == 99.0

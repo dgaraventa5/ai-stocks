@@ -13,9 +13,12 @@ then kept that blank forever, with no recorded reason (57 names). This module
 says WHY the figure is missing, and fills it from the statements when both
 quarters are present and profitable:
 
-- "loss": either quarter's net income is <= 0. Growth from or to a loss is not
-  meaningful (and is how Yahoo and past rulings treat it); the cell is blank
-  on purpose and says so.
+- "loss_now": this quarter's net income is <= 0. Growth from or to a loss has
+  no meaningful %, so the cell holds the stand-in LOSS_NOW_VALUE (-100,
+  bottom band): a loss this quarter scores as the worst EPS growth (Dom,
+  2026-11-20; a blank dropped the metric and flattered the name).
+- "to_profit": year-ago quarter a loss, this quarter a profit: stand-in
+  TO_PROFIT_VALUE (+100, top band); turning profitable is real growth.
 - "computed": both quarters present and profitable; value computed from
   statement net income, the same measure Yahoo uses.
 - "no_data": the statements cannot answer (statement lags the latest reported
@@ -28,7 +31,8 @@ import math
 
 QUARTER_TOLERANCE_DAYS = 20   # statement columns are month-end normalized
 
-LOSS, COMPUTED, NO_DATA = "loss", "computed", "no_data"
+LOSS_NOW, TO_PROFIT, COMPUTED, NO_DATA = "loss_now", "to_profit", "computed", "no_data"
+LOSS_NOW_VALUE, TO_PROFIT_VALUE = -100.0, 100.0
 
 
 def _as_date(k) -> dt.date:
@@ -84,20 +88,22 @@ def eps_yoy_fallback(net_income: dict, latest_quarter: dt.date | None
     else:
         cur_d = newest
     base_d = _near(cols, _years_back(cur_d, 1))
-    if base_d is None or _blank(cols[base_d]):
-        return None, NO_DATA, f"no year-ago quarter (near {_years_back(cur_d, 1)}) in Yahoo statements"
-    base = float(cols[base_d])
-    if base <= 0:
-        return None, LOSS, (
-            f"year-ago quarter {base_d} net income {base / 1e6:,.0f}M <= 0 — "
-            "growth from a loss is not meaningful")
     if _blank(cols[cur_d]):
         return None, NO_DATA, f"quarter {cur_d} net income blank in Yahoo statements"
     cur = float(cols[cur_d])
     if cur <= 0:
-        return None, LOSS, (
-            f"quarter {cur_d} net income {cur / 1e6:,.0f}M <= 0 (vs "
-            f"{base / 1e6:,.0f}M a year earlier) — growth to a loss is not meaningful")
+        base_txt = ("" if base_d is None or _blank(cols[base_d])
+                    else f" (vs {float(cols[base_d]) / 1e6:,.0f}M a year earlier)")
+        return LOSS_NOW_VALUE, LOSS_NOW, (
+            f"quarter {cur_d} net income {cur / 1e6:,.0f}M <= 0{base_txt} — "
+            f"a loss quarter, scored as {LOSS_NOW_VALUE:+.0f} (bottom band)")
+    if base_d is None or _blank(cols[base_d]):
+        return None, NO_DATA, f"no year-ago quarter (near {_years_back(cur_d, 1)}) in Yahoo statements"
+    base = float(cols[base_d])
+    if base <= 0:
+        return TO_PROFIT_VALUE, TO_PROFIT, (
+            f"year-ago quarter {base_d} net income {base / 1e6:,.0f}M <= 0, now "
+            f"{cur / 1e6:,.0f}M — loss to profit, scored as {TO_PROFIT_VALUE:+.0f} (top band)")
     value = round((cur / base - 1) * 100, 2)
     return value, COMPUTED, (
         f"Yahoo growth figure missing; computed from statement net income "

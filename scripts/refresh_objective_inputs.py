@@ -147,18 +147,17 @@ def apply_guards(info, fresh, existing):
         if key == "eps_yoy":
             # Rule 15 (amended 2026-11-20, Dom): always the reported number.
             # No ruling, no withhold, no keep-prior: the cell always describes
-            # the latest reported quarter. Blank only when there is no number:
-            # a loss in either quarter (growth from or to a loss has no
-            # meaningful %; Yahoo gives none) or a data gap, flagged loudly.
+            # the latest reported quarter. A loss quarter gets a stand-in
+            # (eps_growth: -100 loss now, +100 loss to profit). Blank only on
+            # a data gap, flagged loudly.
             v = fresh.get(key)
             reason = fresh.get("_eps_reason")
             note = info.get("_eps_note") or "no figure from Yahoo"
             writes[key] = v
-            if v is None and reason == eps_growth.LOSS:
-                flags.append(f"EPS YoY: blank — {note}.")
-            elif v is None:
+            if v is None:
                 flags.append(f"EPS YoY: BLANK, data gap — {note}. Check the filing.")
-            elif reason == eps_growth.COMPUTED:
+            elif reason in (eps_growth.COMPUTED, eps_growth.LOSS_NOW,
+                            eps_growth.TO_PROFIT):
                 flags.append(f"EPS YoY: {note}.")
             continue
 
@@ -326,6 +325,7 @@ def _default_fetcher(ticker, layer):
     info = dict(info)
     info["_roic_flags"] = [g for g in gaps if g.startswith("roic:")]
     info["_pe_flags"] = [g for g in gaps if g.startswith("fwd_pe:")]
+    info["_nd_flags"] = [g for g in gaps if g.startswith("ND/EBITDA: EBITDA non-positive")]
     info["_fcf_note"] = next((g[len("FCF: "):] for g in gaps
                               if g.startswith("FCF: ")), None)
     info["_eps_note"] = next((g[len("EPS YoY: "):] for g in gaps
@@ -401,6 +401,7 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
         flags.extend(info.get("_pe_flags") or [])   # rule 36: kept-raw reasons
         if info.get("_fcf_note"):                   # annual fallback or no FCF
             flags.append(f"FCF: {info['_fcf_note']}")
+        flags.extend(info.get("_nd_flags") or [])  # negative-EBITDA stand-ins
 
         try:
             dma_value = dma_fetcher(ticker)

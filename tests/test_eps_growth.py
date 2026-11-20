@@ -14,12 +14,19 @@ NAN = float("nan")
 D = dt.date
 
 
-def test_loss_base_is_blank_with_reason():
-    # QCOM: Q3-25 had a -3.1B tax charge; Yahoo returns no growth figure
+def test_profit_now_after_a_loss_year_ago_scores_top_band():
+    # QCOM: Q3-25 was a -3.1B tax-charge loss, Q3-26 a profit (Dom 2026-11-20)
     qcom = {D(2026, 9, 30): 1251e6, D(2026, 6, 30): 2002e6, D(2026, 3, 31): 7370e6,
             D(2025, 12, 31): 3004e6, D(2025, 9, 30): -3117e6}
     v, code, note = eg.eps_yoy_fallback(qcom, D(2026, 9, 27))
-    assert v is None and code == eg.LOSS and "-3,117M" in note
+    assert v == eg.TO_PROFIT_VALUE == 100.0 and code == eg.TO_PROFIT
+    assert "-3,117M" in note
+
+
+def test_loss_in_both_quarters_scores_bottom_band():
+    rows = {D(2026, 9, 30): -15e6, D(2025, 9, 30): -80e6}
+    v, code, _ = eg.eps_yoy_fallback(rows, D(2026, 9, 30))
+    assert v == eg.LOSS_NOW_VALUE == -100.0 and code == eg.LOSS_NOW
 
 
 def test_both_quarters_profitable_is_computed_like_yahoo():
@@ -67,8 +74,13 @@ def test_accepts_datetime_and_string_keys():
     assert v == 20.0
 
 
-def test_profit_to_loss_is_blank_with_reason():
-    # IREN Q3-26: -263M vs 385M; Yahoo gives no figure, past rulings blank it
+def test_profit_to_loss_scores_bottom_band():
+    # IREN Q3-26: -263M vs 385M; Yahoo gives no figure
     rows = {D(2026, 9, 30): -263e6, D(2025, 9, 30): 385e6}
     v, code, note = eg.eps_yoy_fallback(rows, D(2026, 9, 30))
-    assert v is None and code == eg.LOSS and "-263M" in note
+    assert v == -100.0 and code == eg.LOSS_NOW and "-263M" in note and "385M" in note
+
+
+def test_loss_now_needs_no_year_ago_quarter():
+    v, code, _ = eg.eps_yoy_fallback({D(2026, 9, 30): -5e6}, D(2026, 9, 30))
+    assert v == -100.0 and code == eg.LOSS_NOW
