@@ -161,6 +161,8 @@ def _is_layer10(layer: str | None) -> bool:
 
 
 ROIC_SKIP_FOREIGN = True   # rule 34; see compute_inputs
+# Negative-EBITDA leverage stand-ins (2026-11-20), see compute_inputs
+ND_EBITDA_NET_DEBT, ND_EBITDA_NET_CASH = 99.0, 0.0
 
 
 def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
@@ -280,7 +282,19 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
             and not any(_is_missing(x) for x in (debt, cash, ebitda)) and ebitda > 0):
         inp["nd_ebitda"] = round((debt - cash) / ebitda, 2)
     elif ebitda is not None and not _is_missing(ebitda) and ebitda <= 0:
-        gaps.append("ND/EBITDA: EBITDA non-positive — ratio would be misleading; left blank")
+        # The ratio is meaningless on negative EBITDA, but the risk is not:
+        # score it by whether there is net debt (Dom, 2026-11-20). Stand-in
+        # values in the cell: 99 = net debt and no earnings to service it
+        # (worst band), 0 = net cash (best band, as for profitable net-cash
+        # names). A blank used to drop the metric, which flattered the name.
+        if (debt is not None and cash is not None
+                and not _is_missing(debt) and not _is_missing(cash)):
+            net = debt - cash
+            inp["nd_ebitda"] = ND_EBITDA_NET_DEBT if net > 0 else ND_EBITDA_NET_CASH
+            gaps.append(f"ND/EBITDA: EBITDA non-positive — scored as "
+                        f"{'net debt (99, worst band)' if net > 0 else 'net cash (0, best band)'}")
+        else:
+            gaps.append("ND/EBITDA: EBITDA non-positive and debt/cash missing — left blank")
     else:
         gaps.append("ND/EBITDA: missing totalDebt/totalCash/ebitda")
 

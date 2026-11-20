@@ -267,6 +267,17 @@ is kept as history; nothing reads it. A one-off that distorts a name near the
 portfolio line belongs in that name's briefing, not in a held-back cell. The
 first paragraph's "blank when one-time-dominated" no longer applies.
 
+**Amendment 2026-11-20, later the same day (Dom): loss quarters and negative
+EBITDA are scored, not blanked.** A blank drops the metric from its
+category's average, which flattered weak companies (their worst metric
+disappeared). Stand-in values, written by the refresh and flagged:
+- EPS YoY: a loss this quarter → -100 (bottom band); a loss a year ago and a
+  profit now → +100 (top band). From `scripts/eps_growth.py`.
+- ND/EBITDA with EBITDA ≤ 0: net debt → 99 (worst band); net cash → 0 (best
+  band, as for profitable net-cash names). From `batch_score.compute_inputs`.
+These replace the negative-EBITDA blanking convention. Blank now means only
+a data gap (Yahoo has no figure), which is flagged.
+
 ### 16. Risk: R5 Disruption Risk dimension (added 2026-06-17, approved by Dom)
 
 **Context:** R1–R4 (customer concentration, geography, balance sheet, regulatory) measure whether earnings are *safe now*, not whether the *revenue model survives*. This let beaten-down application-SaaS names (down 40–67% on genuine agentic-AI disruption fears) still score ✓✓ — Value rises as price falls (20% weight) while the disruption thesis had nowhere to land (moat is only 1 of 5 AI-Thesis dims → ≤1.6pt swing). Surfaced in the 2026-06-17 QQQ-coverage batch (WDAY): a value-quality screen rewards a falling quality name *because* it is falling. R5 gives terminal-value/business-model durability a home.
