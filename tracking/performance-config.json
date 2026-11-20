@@ -1200,9 +1200,57 @@
         "AMZN": "\u2713\u2713"
       },
       "cash": -0.03
+    },
+    {
+      "date": "2026-11-20",
+      "reason": "membership: +NVT; tier: SNDK \u2713\u2713\u2192\u2713\u2713\u2713",
+      "kind": "membership",
+      "allocations": {
+        "AVGO": 401.65,
+        "EME": 401.65,
+        "VRT": 401.65,
+        "AMZN": 401.65,
+        "CRDO": 401.65,
+        "SNDK": 401.65,
+        "ASML": 401.65,
+        "MSFT": 401.65,
+        "ALAB": 401.65,
+        "ANET": 401.65,
+        "NVDA": 401.65,
+        "MU": 401.65,
+        "PLTR": 401.65,
+        "WDC": 401.65,
+        "TSM": 401.65,
+        "FIX": 401.65,
+        "STX": 401.65,
+        "NVT": 401.65
+      },
+      "tiers": {
+        "AVGO": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "VRT": "\u2713\u2713",
+        "AMZN": "\u2713\u2713",
+        "CRDO": "\u2713\u2713",
+        "SNDK": "\u2713\u2713\u2713",
+        "ASML": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "ALAB": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "NVDA": "\u2713\u2713",
+        "MU": "\u2713\u2713\u2713",
+        "PLTR": "\u2713\u2713",
+        "WDC": "\u2713\u2713",
+        "TSM": "\u2713\u2713",
+        "FIX": "\u2713\u2713",
+        "STX": "\u2713\u2713",
+        "NVT": "\u2713\u2713"
+      },
+      "cash": -0.09
     }
   ],
-  "exit_pending": {},
+  "exit_pending": {
+    "STX": "2026-11-20"
+  },
   "shadow_events": {
     "BAND_TOP": [
       {
@@ -1543,6 +1591,26 @@
           "ALAB",
           "VRT",
           "WDC"
+        ]
+      },
+      {
+        "date": "2026-11-20",
+        "roster": [
+          "MU",
+          "SNDK",
+          "TSM",
+          "FIX",
+          "NVDA",
+          "CRDO",
+          "MSFT",
+          "ANET",
+          "AVGO",
+          "PLTR",
+          "VRT",
+          "ASML",
+          "EME",
+          "NVT",
+          "ALAB"
         ]
       }
     ],
@@ -1905,6 +1973,21 @@
           "VST",
           "APP",
           "ORCL"
+        ]
+      },
+      {
+        "date": "2026-11-20",
+        "roster": [
+          "AMZN",
+          "WDC",
+          "POWL",
+          "STX",
+          "RDDT",
+          "RMBS",
+          "APH",
+          "VST",
+          "GEV",
+          "APP"
         ]
       }
     ],
@@ -2327,6 +2410,26 @@
           "MKSI",
           "TT",
           "NTAP"
+        ]
+      },
+      {
+        "date": "2026-11-20",
+        "roster": [
+          "TER",
+          "ORCL",
+          "META",
+          "LRCX",
+          "GOOGL",
+          "KLAC",
+          "AAON",
+          "SNPS",
+          "KEYS",
+          "CMI",
+          "GMED",
+          "NTAP",
+          "CGNX",
+          "HOOD",
+          "ONTO"
         ]
       }
     ],
@@ -2897,6 +3000,49 @@
           "TSM": 0.072846,
           "VRT": 0.041212,
           "WDC": 0.043261
+        }
+      },
+      {
+        "date": "2026-11-20",
+        "roster": [
+          "ALAB",
+          "AMZN",
+          "ANET",
+          "ASML",
+          "AVGO",
+          "CRDO",
+          "EME",
+          "FIX",
+          "MSFT",
+          "MU",
+          "NVDA",
+          "NVT",
+          "PLTR",
+          "SNDK",
+          "STX",
+          "TSM",
+          "VRT",
+          "WDC"
+        ],
+        "weights": {
+          "ALAB": 0.030954,
+          "AMZN": 0.093271,
+          "ANET": 0.049316,
+          "ASML": 0.06548,
+          "AVGO": 0.059183,
+          "CRDO": 0.030124,
+          "EME": 0.069602,
+          "FIX": 0.042749,
+          "MSFT": 0.112322,
+          "MU": 0.042663,
+          "NVDA": 0.076748,
+          "NVT": 0.044821,
+          "PLTR": 0.063481,
+          "SNDK": 0.032964,
+          "STX": 0.039758,
+          "TSM": 0.067376,
+          "VRT": 0.038974,
+          "WDC": 0.040216
         }
       }
     ]
