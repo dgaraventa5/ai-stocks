@@ -44,6 +44,7 @@ import yfinance as yf
 
 import adr_currency
 import eps_growth
+import fcf_source
 import revenue_cagr
 from openpyxl import load_workbook
 
@@ -117,24 +118,29 @@ def _is_missing(v) -> bool:
     return False
 
 
-def statement_fcf(t: yf.Ticker) -> float | None:
-    """TTM FCF from the cash-flow statement: sum of last 4 quarters OCF - |capex|.
+def _rows(df) -> dict:
+    """pandas statement -> {row name: {date: value}} for fcf_source."""
+    if df is None or getattr(df, "empty", True):
+        return {}
+    return {name: {k: df.loc[name][k] for k in df.loc[name].index}
+            for name in df.index}
 
-    Added 2026-06-12: yfinance info.freeCashflow is Yahoo's *levered* FCF
-    estimate and does not reconcile to the statements (it printed NVDA's 47%
-    TTM FCF margin as 18% and MOD's positive FCF as negative). Statement-based
-    is the source of truth; callers fall back to info.freeCashflow only when
-    fewer than 4 quarters are available, and must flag the fallback.
-    """
+
+def statement_fcf_detail(t: yf.Ticker) -> tuple[float | None, str]:
+    """(FCF, note) from the statements via fcf_source (2026-11-20): trailing
+    four consecutive quarters, else the latest fiscal year (flagged), else
+    None. Never Yahoo's info.freeCashflow, a levered estimate that does not
+    reconcile (printed NVDA's 47% TTM FCF margin as 18%, and DLR's negative
+    FCF as positive)."""
     try:
-        cf = t.quarterly_cashflow
-        ocf = cf.loc["Operating Cash Flow"].dropna()
-        capex = cf.loc["Capital Expenditure"].dropna()
-        if len(ocf) >= 4 and len(capex) >= 4:
-            return float(ocf.iloc[:4].sum()) - abs(float(capex.iloc[:4].sum()))
-    except Exception:
-        pass
-    return None
+        return fcf_source.fcf_from_statements(_rows(t.quarterly_cashflow),
+                                              _rows(t.cashflow))
+    except Exception as e:
+        return None, f"cash-flow statement error {e}"
+
+
+def statement_fcf(t: yf.Ticker) -> float | None:
+    return statement_fcf_detail(t)[0]
 
 
 _CAPACITY_JSON = Path(__file__).resolve().parent.parent / "00-master" / "capacity-mw.json"
@@ -210,7 +216,9 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
     #   everything else: EV/EBITDA
     inp["ev_ebitda"] = info.get("enterpriseToEbitda")
     mcap = info.get("marketCap")
-    fcf = statement_fcf(t)
+    fcf, fcf_note = statement_fcf_detail(t)
+    if fcf is None or not fcf_note.startswith("quarterly TTM"):
+        gaps.append(f"FCF: {fcf_note}")
     ev = info.get("enterpriseValue")
     if ev is None and mcap:
         ev = mcap + (info.get("totalDebt") or 0) - (info.get("totalCash") or 0)
@@ -228,15 +236,10 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
             inp["ev_ebitda"] = None
             gaps.append(f"EV/MW (L9 capacity): no secured_gross_mw for {ticker} in "
                         "capacity-mw.json — add it (rule 13) or score stays blank")
-    if fcf is None:
-        fcf = info.get("freeCashflow")
-        if fcf is not None:
-            gaps.append("FCF: statement TTM unavailable (<4 quarters) — fell back to "
-                        "yfinance info.freeCashflow (levered estimate, known to diverge)")
     if fcf is not None and mcap and not _is_missing(fcf) and not _is_missing(mcap):
         inp["fcf_yield"] = round(fcf / mcap * 100, 2)
     else:
-        gaps.append("FCF Yield: missing freeCashflow or marketCap")
+        gaps.append("FCF Yield: no statement FCF or market cap — left blank")
     inp["ps"] = info.get("priceToSalesTrailing12Months")
 
     # Foreign filer whose price currency differs from its financial-reporting

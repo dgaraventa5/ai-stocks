@@ -90,9 +90,9 @@ OBJ_COLS = {"fwd_pe": 5, "ev_ebitda": 6, "fcf_yield": 7, "ps": 8,
 DMA_COL = 29
 LAST_UPDATED_COL = 4
 _ADR_BLANK_KEYS = ("ps", "ev_ebitda", "fcf_yield")
-# Keys where a fresh None must blank the cell (guard-2/3/4 deliberate blanks must
-# win over guard-5's keep-prior behaviour).  For all other keys, guard-5 protects
-# existing values from a transient yfinance "no data" return.
+# Keys whose None means a deliberate blank (non-positive EBITDA, missing
+# EV/FCF or EV/MW denominator). Since 2026-11-20 every key blanks on None;
+# this set only picks the flag's wording.
 _BLANK_THROUGH_ON_NONE = frozenset({"ev_ebitda", "nd_ebitda"})
 
 def _blank(v):
@@ -162,34 +162,25 @@ def apply_guards(info, fresh, existing):
                 flags.append(f"EPS YoY: {note}.")
             continue
 
-        # Guard 4/5: every other key.
-        # For most keys: if fresh is None and existing is non-blank, keep existing
-        # (guard 5 — protects curated values like ROIC from a transient fetch gap).
-        # Exception: ev_ebitda and nd_ebitda blank-through on a fresh None so that
-        # guard-2 (non-positive EBITDA) and guard-3/4 (L10 EV/FCF / L9 EV/MW
-        # missing denominator) blanks win over keep-prior (_BLANK_THROUGH_ON_NONE).
+        # Guard 4/5: every other key. A fresh None is written as a blank
+        # (2026-11-20, Dom: scores should just update). Keeping the prior value
+        # left old-quarter numbers in live scores with nothing to say so
+        # (KGX.DE's FCF yield sat at 25.7% after Yahoo's statements stopped
+        # supporting it). A whole-name fetch failure is handled earlier and
+        # leaves the row untouched; this covers one missing field.
         v = fresh.get(key)
-        if v is None and key not in _BLANK_THROUGH_ON_NONE and not _blank(existing.get(key)):
+        if v is None and not _blank(existing.get(key)):
+            why = ""
             if key == "roic":
-                # Since rule 34 (2026-09-08) ROIC IS computed (TTM, from the
-                # statements). A None here is therefore a REAL gap — foreign
-                # listing, <4 quarters, or non-positive capital employed — not
-                # the old "never fetched" no-op. Say which, and keep the prior
-                # value rather than blanking a good number on a transient miss.
-                why = "; ".join(info.get("_roic_flags") or []) or "no reason reported"
-                flags.append(
-                    f"roic: not computable this pass ({why}) — kept "
-                    f"{existing.get(key)}."
-                )
-            else:
-                flags.append(
-                    f"{key}: fetch returned no data — kept prior value {existing.get(key)}."
-                )
-            continue
-        if v is None and key in _BLANK_THROUGH_ON_NONE and not _blank(existing.get(key)):
+                why = "; ".join(info.get("_roic_flags") or [])
+            elif key in ("fcf_yield", "fcf_mgn"):
+                why = info.get("_fcf_note") or ""
+            elif key in _BLANK_THROUGH_ON_NONE:
+                why = "non-positive EBITDA / missing denominator"
             flags.append(
-                f"{key}: no computable value (e.g. non-positive EBITDA / missing denominator)"
-                f" — blanked (was {existing.get(key)})."
+                f"{key}: BLANK, data gap — no current value"
+                + (f" ({why})" if why else "")
+                + f"; was {existing.get(key)}."
             )
         writes[key] = v
 
@@ -335,6 +326,8 @@ def _default_fetcher(ticker, layer):
     info = dict(info)
     info["_roic_flags"] = [g for g in gaps if g.startswith("roic:")]
     info["_pe_flags"] = [g for g in gaps if g.startswith("fwd_pe:")]
+    info["_fcf_note"] = next((g[len("FCF: "):] for g in gaps
+                              if g.startswith("FCF: ")), None)
     info["_eps_note"] = next((g[len("EPS YoY: "):] for g in gaps
                               if g.startswith("EPS YoY: ")), None)
     return info, fresh
@@ -406,6 +399,8 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
         if mwf:
             flags.append(mwf)
         flags.extend(info.get("_pe_flags") or [])   # rule 36: kept-raw reasons
+        if info.get("_fcf_note"):                   # annual fallback or no FCF
+            flags.append(f"FCF: {info['_fcf_note']}")
 
         try:
             dma_value = dma_fetcher(ticker)

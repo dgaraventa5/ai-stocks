@@ -128,16 +128,21 @@ def test_guard_same_currency_foreign_not_blanked():
     assert writes["ev_ebitda"] == 25.6 and writes["ps"] == 7.56 and writes["fcf_yield"] == -5.97
 
 
-def test_guard_keeps_existing_on_fetched_none():
-    info = {"financialCurrency": "USD"}
+def test_guard_blanks_and_flags_a_missing_value_never_keeps_the_old_one():
+    # 2026-11-20: a missing field is written blank and flagged, so an
+    # old-quarter value never sits in a live score (was: kept prior)
+    info = {"financialCurrency": "USD", "_fcf_note": "no statement FCF: ..."}
     fresh = {k: None for k in roi.OBJ_COLS}
     fresh["fwd_pe"] = 40.0
     existing = _blank_existing()
-    existing["roic"] = 18.5  # human-curated
+    existing["roic"] = 18.5
+    existing["fcf_yield"] = 25.66
     writes, flags = roi.apply_guards(info, fresh, existing)
-    assert "roic" not in writes  # untouched, not clobbered with None
+    assert writes["roic"] is None and writes["fcf_yield"] is None
     assert writes["fwd_pe"] == 40.0
-    assert any("roic" in f.lower() for f in flags)
+    assert any(f.startswith("fcf_yield: BLANK, data gap") and "25.66" in f
+               and "no statement FCF" in f for f in flags)
+    assert any(f.startswith("roic: BLANK, data gap") for f in flags)
 
 
 def _eps(fresh_eps, existing_eps, reason=None, note=None):
@@ -276,8 +281,8 @@ def test_refresh_live_writes_and_bumps_last_updated(tmp_path):
 
 
 def test_guard_ev_ebitda_nd_ebitda_blank_through_on_none():
-    """ev_ebitda and nd_ebitda must blank-through on fresh None (guard-2/3/4 wins over guard-5).
-    Contrast: roic fresh None over non-blank existing → kept prior (guard-5 still applies)."""
+    """ev_ebitda and nd_ebitda blank on fresh None, with the deliberate-blank
+    reason in the flag. Since 2026-11-20 every key blanks on None (roic too)."""
     info = {"financialCurrency": "USD"}
     # Fresh: ev_ebitda + nd_ebitda are None (e.g. non-positive EBITDA); all others have values
     fresh = {k: 10.0 for k in roi.OBJ_COLS}
@@ -302,10 +307,7 @@ def test_guard_ev_ebitda_nd_ebitda_blank_through_on_none():
         for f in flags
     ), f"Expected a blanked flag for ev_ebitda/nd_ebitda in: {flags}"
 
-    # Contrast: roic fresh None over non-blank existing → key ABSENT from writes (kept prior)
-    assert "roic" not in writes, (
-        "roic fresh None over non-blank existing must keep prior (guard-5), not blank-through"
-    )
+    assert "roic" in writes and writes["roic"] is None
 
 
 def test_refresh_isolates_per_ticker_fetch_error(tmp_path):

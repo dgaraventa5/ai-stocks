@@ -14,12 +14,12 @@ with `--job weekly-scan`. Differences from an attended run:
   --days 8 --out "$TMPDIR/filings.json"` (exit 1 = SEC lookups failed: report
   the window as UNCHECKED and stop the scan — do NOT fall back to web search
   and call it a scan). Read the material filings with parallel subagents.
-- **Step 6** refreshes with `python3 scripts/refresh_objective_inputs.py
-  {TICKERS}` (dry-run first) for every name in the scan's `earnings` list
-  whose Last Updated predates its filing — the daily watch will already have
-  handled holdings and top-25 names; don't redo those. Then
-  `python3 scripts/momentum_50dma.py`, `python3 scripts/refresh_reverse_dcf.py`
-  and `python3 scripts/recalc_watchlist.py --sync`.
+- **Step 6** refreshes EVERY name, every week (2026-11-20):
+  `python3 scripts/refresh_objective_inputs.py all` (dry-run first), then
+  `python3 scripts/refresh_reverse_dcf.py` and
+  `python3 scripts/recalc_watchlist.py --sync`. About five minutes. Report
+  every "BLANK, data gap", "no statement FCF" and "EV/MW ... stale" flag by
+  name at the top of the report (missing data is a finding, never routine).
 - **Step 7** — `recalc --sync` already ran the portfolio step; do not run
   `refresh_targets.py` a second time. A model event's ticket trades at the
   next 06:35 executor run (rule 37, 2026-11-01); report what it will do and
@@ -73,9 +73,11 @@ with `--job weekly-scan`. Differences from an attended run:
 
 5. **Also check** for new 13F-HR filings in the past 7 days from the funds listed in `.claude/commands/thirteenf-delta.md` (tracked and watch-only). If found, note them — these can be followed up with `/thirteenf-delta`.
 
-6. **Earnings-triggered objective refresh (Rule #9).** For any ticker where the 8-K scan surfaced quarterly earnings results (Item 2.02 "Results of Operations and Financial Condition"):
+6. **Weekly objective refresh of every name (Rule #9; changed 2026-11-20).** Run `python3 scripts/refresh_objective_inputs.py all`, not only the names the 8-K scan flagged.
 
-   a. Pull fresh yfinance data and update the Watchlist row's objective inputs (Fwd P/E, EV/EBITDA, FCF Yield, P/S, ROIC, Gross Margin, FCF Margin, ND/EBITDA, Rev 3yr CAGR, Rev YoY, EPS YoY). Update "Last Updated" to today.
+   **Why every name:** refreshing only names with an earnings 8-K (Item 2.02) left about 30 names on an old quarter by 2026-11-20. Foreign filers report on 6-K (ARM, NBIS, BTDR, HSAI, CAMT, TSEM), local foreign listings file nothing with the SEC (6481.T, 0981.HK), some US companies do not file results under 2.02 (OKLO, WYFI, ALNT), and a refresh run days after a print often caught Yahoo before it loaded the quarter, with nothing re-checking later. The scan listed these as "NOT CHECKABLE" and stopped there. A full weekly refresh covers all of them and lets a Yahoo lag heal by itself the next week. The 8-K list still drives briefings and the triage below.
+
+   a. The full refresh updates every Watchlist row's objective inputs (Fwd P/E, EV/EBITDA, FCF Yield, P/S, ROIC, Gross Margin, FCF Margin, ND/EBITDA, Rev 3yr CAGR, Rev YoY, EPS YoY) and Last Updated.
 
    b. **Priority triage:** If the earnings beat/miss revenue or EPS estimates by >15%, or gross margin moved >500bps sequentially, flag with 📊 in the output — these are the names where stale inputs cost the most. Consider recommending a full `/earnings-update` for these names.
 
