@@ -23,6 +23,22 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 LIVE_DIR = _REPO_ROOT / 'tracking' / 'live'
 
 
+PCONFIG = _REPO_ROOT / 'tracking' / 'portfolio-config.json'
+
+
+def auto_tickets_on(path=PCONFIG) -> bool:
+    """`execution.auto_tickets` in tracking/portfolio-config.json (Dom
+    2026-11-20: off while data issues are sorted out). When off, no ticket is
+    written for a model event or the monthly rebalance; a manual ticket
+    (`python3 scripts/generate_trade_ticket.py`) still works. Missing key →
+    on (prior behavior); unreadable config → off (fail closed)."""
+    try:
+        cfg = json.loads(Path(path).read_text())
+    except (OSError, ValueError):
+        return False
+    return bool((cfg.get('execution') or {}).get('auto_tickets', True))
+
+
 def _flag(msg: str) -> None:
     print(f'FLAG: {msg}', file=sys.stderr)
 
@@ -179,10 +195,18 @@ def retire_superseded(tdir: Path, rdir: Path, *, keep: Path, now: str) -> list:
 
 
 def on_model_event(event: dict, weights: dict[str, float],
-                   **kwargs) -> Path | None:
+                   auto_tickets: bool | None = None, **kwargs) -> Path | None:
     """B1 hook target: refresh_targets calls this on every real fired event.
     Rule 37: the ticket trades at the next 06:35 run, minus any buy the data
-    check flags."""
+    check flags. Writes nothing while automatic tickets are off."""
+    if auto_tickets is None:
+        auto_tickets = auto_tickets_on()
+    if not auto_tickets:
+        _flag(f"automatic tickets are OFF (portfolio-config execution."
+              f"auto_tickets) — no ticket for the {event.get('date')} "
+              f"{event.get('kind', 'membership')} event. For a trade, generate "
+              f"a manual ticket in an attended session.")
+        return None
     import ticket_data_check
     return generate(weights, event, buy_check=ticket_data_check.check_buys,
                     **kwargs)

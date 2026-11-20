@@ -1120,6 +1120,15 @@ in a cloud session.
   ≥100% on revenue under 30% with no ruling) are removed with the rule-15
   change to "always write the reported number". A blank EPS cell now means a
   loss quarter, and there are no rulings to wait for.
+  **Amendment 2026-11-20 (Dom): automatic tickets are OFF.** A switch,
+  `execution.auto_tickets` in `tracking/portfolio-config.json`, now gates every
+  automatic ticket: model events (`on_model_event`, in any session), the
+  executor's 06:35 ticket step, and the first-of-month rebalance (skipped
+  without stamping, so it catches up once turned back on). Set to false "until
+  the data issues are sorted out": the EPS rule change, stale refreshes and
+  FCF/capacity gaps moved many scores in one day. Manual tickets (Dom asks in
+  an attended session) and the execute step are unchanged. Turning it back on
+  is Dom's call.
 - **Reporting:** a Notion page plus one notification when there is something
   to report. Every run, quiet or not, lands and merges one line in
   `tracking/scheduled-run-log.md` (Dom, 2026-10-12), so a missed run is a

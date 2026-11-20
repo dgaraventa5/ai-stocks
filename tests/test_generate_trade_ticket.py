@@ -53,8 +53,9 @@ def test_generate_writes_ticket_from_snapshot_actuals(live_dir):
 
 def test_model_event_ticket_is_live_when_the_check_is_clean(live_dir, monkeypatch):
     monkeypatch.setattr(gt, '_skipped_buys', lambda check, orders: {})
-    p = gt.on_model_event(EVENT, {'NVDA': 0.5, 'TSM': 0.4}, live_dir=live_dir,
-                          prices_fn=PRICES.get, now='2026-08-13T21:30:00Z')
+    p = gt.on_model_event(EVENT, {'NVDA': 0.5, 'TSM': 0.4}, auto_tickets=True,
+                          live_dir=live_dir, prices_fn=PRICES.get,
+                          now='2026-08-13T21:30:00Z')
     assert p.name == 'ticket-2026-08-13-membership.json'
     assert 'skipped_buys' not in json.loads(p.read_text())
 
@@ -253,3 +254,24 @@ def test_regenerated_ticket_after_receipt_gets_a_new_id(live_dir):
                      prices_fn=PRICES.get, now='2026-08-13T22:30:00Z')
     t3 = json.loads(p3.read_text())
     assert t3['ticket_id'] not in (t1['ticket_id'], t2['ticket_id'])
+
+
+def test_no_model_event_ticket_while_automatic_tickets_are_off(live_dir):
+    # Dom 2026-11-20: execution.auto_tickets false -> nothing is written
+    p = gt.on_model_event(EVENT, {'NVDA': 0.5, 'TSM': 0.4}, auto_tickets=False,
+                          live_dir=live_dir, prices_fn=PRICES.get,
+                          now='2026-08-13T21:30:00Z')
+    assert p is None
+    assert not list(live_dir.glob('ticket-*.json'))
+
+
+def test_auto_tickets_switch_reads_config_and_fails_closed(tmp_path):
+    cfg = tmp_path / 'portfolio-config.json'
+    cfg.write_text(json.dumps({'execution': {'auto_tickets': False}}))
+    assert gt.auto_tickets_on(cfg) is False
+    cfg.write_text(json.dumps({'sizing': {}}))
+    assert gt.auto_tickets_on(cfg) is True        # missing key: prior behavior
+    cfg.write_text('{not json')
+    assert gt.auto_tickets_on(cfg) is False       # unreadable: fail closed
+    assert gt.auto_tickets_on(tmp_path / 'missing.json') is False
+
