@@ -101,7 +101,7 @@
   },
   "hold:APP:2026-11-15": {
     "page": "41cb69da11c081ee9f00d0a25532b29d",
-    "priority": 1
+    "priority": 3
   },
   "hold:GOOGL:2026-11-05": {
     "page": "41cb69da11c08132b5eef25c0d1522cd",
@@ -109,7 +109,7 @@
   },
   "hold:INTU:2026-11-21": {
     "page": "41cb69da11c081df8c37cee4ad6f4a58",
-    "priority": 3
+    "priority": 1
   },
   "hold:SPCX:2026-11-10": {
     "page": "41cb69da11c081f78b65d1a0ff6a20b0",
@@ -219,10 +219,6 @@
     "page": "41cb69da11c081c8a84df69cfb0f542f",
     "priority": 3
   },
-  "rating:2026-11-12:NVDA:M1": {
-    "page": "41cb69da11c08183816adb324c883266",
-    "priority": 2
-  },
   "rating:2026-11-14:CRWV:M3": {
     "page": "41cb69da11c08129ba5ef8632fa1ba72",
     "priority": 3
@@ -253,6 +249,14 @@
   },
   "rating:2026-11-16:MU:R4": {
     "page": "41cb69da11c081d5ad6bf478fcb8406c",
+    "priority": 2
+  },
+  "rating:2026-11-19:NVDA:M1": {
+    "page": "41eb69da11c0811996e6c0ab535c6d8a",
+    "priority": 2
+  },
+  "rating:2026-11-19:NVDA:R4": {
+    "page": "41eb69da11c081f9955adab33137a609",
     "priority": 2
   }
 }
