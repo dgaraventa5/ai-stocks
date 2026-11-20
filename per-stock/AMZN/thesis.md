@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> The AI story is AWS, attached to a much larger retail and ads business: AWS grew +36.8% to $42.2B in Q2 2026 (fifth straight accelerating quarter) at a 39.4% operating margin, and holds a $496B contracted backlog — though roughly half of that comes from OpenAI and Anthropic, two customers Amazon has itself put about $68B of cash into. The tension is funding: ~$220B of 2026 capex has turned trailing free cash flow negative (−$7.6B) and doubled long-term debt to $133B in six months, so the bet is that contracted demand converts to cash before the financing gets uncomfortable.
+> Amazon runs AWS, the largest cloud platform, which rents AI compute on NVIDIA GPUs and its own Trainium chips alongside a much larger retail and advertising business. It is owned because AWS growth is accelerating (+39% in the latest quarter, the fastest in about five years) on a large contracted backlog, and that growth now carries the company's operating profit. The main risk is funding: roughly $220B a year of capex has pushed free cash flow deeply negative, and much of the backlog comes from OpenAI and Anthropic, two customers Amazon has itself invested in.
 
 ---
 
