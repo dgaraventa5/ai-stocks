@@ -89,112 +89,23 @@ OBJ_COLS = {"fwd_pe": 5, "ev_ebitda": 6, "fcf_yield": 7, "ps": 8,
             "rev_3y_cagr": 16, "rev_yoy": 17, "eps_yoy": 18}
 DMA_COL = 29
 LAST_UPDATED_COL = 4
-EPS_YOY_EXTREME = 300.0
 _ADR_BLANK_KEYS = ("ps", "ev_ebitda", "fcf_yield")
 # Keys where a fresh None must blank the cell (guard-2/3/4 deliberate blanks must
 # win over guard-5's keep-prior behaviour).  For all other keys, guard-5 protects
 # existing values from a transient yfinance "no data" return.
 _BLANK_THROUGH_ON_NONE = frozenset({"ev_ebitda", "nd_ebitda"})
 
-# Rule-15 EPS YoY rulings (spec 2026-09-08-eps-yoy-override-design.md): one
-# entry per ticker, keyed to the fiscal quarter it was made for. Applied while
-# yfinance mostRecentQuarter matches; re-raised as STALE once the next print
-# lands. Human-written (same standing as capacity-mw.json); never auto-edited.
-EPS_OVERRIDES_JSON = ROOT / "00-master" / "eps-yoy-overrides.json"
-_OVERRIDE_REQUIRED = ("quarter_end", "value", "basis", "source", "ruled", "audit_row")
-
-
-def load_eps_overrides(path=EPS_OVERRIDES_JSON) -> dict:
-    """Read the rule-15 override file → {ticker: entry}. Missing file → {}.
-
-    A malformed entry (missing a required field, unparseable quarter_end, or a
-    non-numeric value) raises ValueError so a bad edit fails the run loudly
-    rather than being skipped (rule 3: a ruling without its citation is a guess).
-    """
-    path = Path(path)
-    if not path.exists():
-        return {}
-    data = json.loads(path.read_text())
-    out = {}
-    for tkr, entry in data.items():
-        if tkr.startswith("_"):
-            continue
-        if not isinstance(entry, dict):
-            raise ValueError(f"eps-yoy-overrides.json: {tkr}: entry must be an object")
-        missing = [k for k in _OVERRIDE_REQUIRED if k not in entry]
-        if missing:
-            raise ValueError(f"eps-yoy-overrides.json: {tkr}: missing {', '.join(missing)}")
-        try:
-            dt.date.fromisoformat(entry["quarter_end"])
-        except (TypeError, ValueError):
-            raise ValueError(f"eps-yoy-overrides.json: {tkr}: quarter_end {entry['quarter_end']!r} is not an ISO date")
-        v = entry["value"]
-        if v is not None and not isinstance(v, (int, float)):
-            raise ValueError(f"eps-yoy-overrides.json: {tkr}: value must be a number or null")
-        out[str(tkr).strip().upper()] = entry
-    return out
-
-
-def _most_recent_quarter(info):
-    """yfinance info['mostRecentQuarter'] (epoch seconds, UTC) → date, or None."""
-    v = info.get("mostRecentQuarter")
-    if v is None:
-        return None
-    try:
-        if isinstance(v, str):
-            return dt.date.fromisoformat(v[:10])
-        return dt.datetime.fromtimestamp(int(v), dt.timezone.utc).date()
-    except (TypeError, ValueError, OverflowError, OSError):
-        return None
-
-
-def _apply_eps_override(info, fresh, override, flags):
-    """Rule-15 override step. Returns (handled, value): handled=True means the
-    EPS YoY decision is final (value written, or withheld on None-with-handled);
-    handled=False means fall through to the ordinary guards."""
-    mrq = _most_recent_quarter(info)
-    q = dt.date.fromisoformat(override["quarter_end"])
-    v = fresh.get("eps_yoy")
-    if mrq is None:
-        flags.append(
-            "EPS YoY: override present but yfinance has no mostRecentQuarter — "
-            "applied nothing; hand-check."
-        )
-        return False, None
-    if q == mrq:
-        what = "blank" if override["value"] is None else f"{override['value']}"
-        flags.append(
-            f"EPS YoY: rule-15 override applied ({what}) for q/e {q.isoformat()}, "
-            f"ruled {override['ruled']}, {override['source']}."
-        )
-        return True, override["value"]
-    if q < mrq:
-        fv = "None" if v is None else f"{v:+.1f}%"
-        flags.append(
-            f"EPS YoY: override for q/e {q.isoformat()} is STALE (latest quarter "
-            f"{mrq.isoformat()}) — fresh GAAP {fv}; withheld. Re-rule (write, blank, "
-            f"or ex-item) and update eps-yoy-overrides.json."
-        )
-        return True, "__withhold__"
-    flags.append(
-        f"EPS YoY: override q/e {q.isoformat()} is AHEAD of yfinance mostRecentQuarter "
-        f"{mrq.isoformat()} — check the date; ignored this run."
-    )
-    return False, None
-
-
 def _blank(v):
     return v is None or v == ""
 
 
-def apply_guards(info, fresh, existing, override=None):
+def apply_guards(info, fresh, existing):
     """Apply smart blank-handling guards to produce safe write set.
 
     Args:
         info: yfinance info dict (needs 'financialCurrency').
         fresh: compute_inputs output dict (input-key → value).
         existing: current Watchlist cell values (input-key → value or None/"" if blank).
-        override: this ticker's entry from eps-yoy-overrides.json, or None.
 
     Returns:
         (writes, flags): writes maps input-key → value for keys to write (absent = leave
@@ -234,64 +145,21 @@ def apply_guards(info, fresh, existing, override=None):
             continue
 
         if key == "eps_yoy":
-            # (0) rule-15 override file — a dated human ruling beats every guard
-            # below while its quarter matches; STALE withholds; AHEAD/undated
-            # fall through to (a)-(d) unchanged.
-            if override is not None:
-                handled, ov = _apply_eps_override(info, fresh, override, flags)
-                if handled:
-                    if ov != "__withhold__":
-                        writes[key] = ov
-                    continue
-            # No ruling covers this cell, so it is re-checked on every refresh.
-            # (Before 2026-11-20 an existing blank was kept forever as a
-            # "likely documented one-off" — 57 cells had no ruling behind
-            # them, 21 with a usable figure. A blank is now kept only with a
-            # stated reason, and a data-gap blank is flagged loudly.)
+            # Rule 15 (amended 2026-11-20, Dom): always the reported number.
+            # No ruling, no withhold, no keep-prior: the cell always describes
+            # the latest reported quarter. Blank only when there is no number:
+            # a loss in either quarter (growth from or to a loss has no
+            # meaningful %; Yahoo gives none) or a data gap, flagged loudly.
             v = fresh.get(key)
-            was_blank = _blank(existing.get(key))
             reason = fresh.get("_eps_reason")
             note = info.get("_eps_note") or "no figure from Yahoo"
-            # (a) fresh value extreme → withhold for a rule-15 ruling
-            if v is not None and abs(v) >= EPS_YOY_EXTREME:
-                stays = ("cell stays BLANK until ruled" if was_blank
-                         else f"kept prior {existing.get(key)} until ruled")
-                flags.append(
-                    f"EPS YoY: fresh {v:+.0f}% ≥ {EPS_YOY_EXTREME:.0f}% "
-                    f"→ withheld as possible one-off (rule 15); {stays}. "
-                    "Confirm blank or write, and record the ruling."
-                )
-                continue
-            # (b) the year-ago quarter was a loss → blank on purpose, even
-            # over a prior value (that value described an older quarter)
-            if v is None and reason == eps_growth.LOSS_BASE:
-                writes[key] = None
+            writes[key] = v
+            if v is None and reason == eps_growth.LOSS:
                 flags.append(f"EPS YoY: blank — {note}.")
-                continue
-            # (c) no figure and none computable → a data gap, never silent.
-            # A prior value is kept (transient Yahoo gaps are common).
-            if v is None:
-                if was_blank:
-                    flags.append(
-                        f"EPS YoY: BLANK, data gap — {note}. Check the filing; "
-                        "no ruling recorded."
-                    )
-                else:
-                    flags.append(
-                        f"eps_yoy: fetch returned no data ({note}) — kept prior "
-                        f"value {existing.get(key)}."
-                    )
-                continue
-            if was_blank:
-                flags.append(
-                    f"EPS YoY: was blank with no ruling — now {v:+.1f}%"
-                    + (f" ({note})" if reason == eps_growth.COMPUTED else "")
-                    + "."
-                )
+            elif v is None:
+                flags.append(f"EPS YoY: BLANK, data gap — {note}. Check the filing.")
             elif reason == eps_growth.COMPUTED:
                 flags.append(f"EPS YoY: {note}.")
-            # (d) normal — write
-            writes[key] = v
             continue
 
         # Guard 4/5: every other key.
@@ -478,7 +346,7 @@ def _layer_of(ws, row):
 
 
 def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
-            dma_fetcher=None, today=None, overrides_path=None):
+            dma_fetcher=None, today=None):
     """Orchestrate fetch → guards → (write|stage) for each target ticker.
 
     Args:
@@ -491,8 +359,6 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
                      pct_days_above_50dma. Injectable for tests.
         today: date object for Last Updated and staleness checks. Defaults
                to dt.date.today().
-        overrides_path: rule-15 EPS YoY override file (default
-               00-master/eps-yoy-overrides.json). Injectable for tests.
 
     Returns:
         dict with keys: mode_count, rows, flags, wrote.
@@ -502,8 +368,6 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
         from momentum_50dma import pct_days_above_50dma
         dma_fetcher = pct_days_above_50dma
     today = today or dt.date.today()
-    overrides = load_eps_overrides(
-        EPS_OVERRIDES_JSON if overrides_path is None else overrides_path)
 
     wb = load_workbook(scoring_path, data_only=False)
     ws = wb["Watchlist"]
@@ -536,8 +400,7 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
                 time.sleep(0.3)
             continue
         existing = read_existing(ws, row)
-        writes, flags = apply_guards(info, fresh, existing,
-                                     override=overrides.get(ticker))
+        writes, flags = apply_guards(info, fresh, existing)
 
         mwf = mw_staleness_flag(ticker, layer, today)
         if mwf:

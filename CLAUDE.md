@@ -251,6 +251,22 @@ investment gain). A STALE flag means "re-rule", never "keep". The 300%
 withhold stays as the safety net for names with no entry. PEG follows the
 cell automatically. Spec: `docs/superpowers/specs/2026-09-08-eps-yoy-override-design.md`.
 
+**Amendment 2026-11-20 (Dom-approved): always write the reported number; this
+replaces the rulings above.** The refresh writes Yahoo's reported EPS growth
+for the latest quarter every time: no 300% withhold, no rulings, no
+keep-prior. A cell is blank only when there is no number: a loss in either
+quarter (growth from or to a loss has no meaningful %, and Yahoo gives none)
+or a data gap, flagged "BLANK, data gap". When Yahoo's figure is missing,
+`scripts/eps_growth.py` computes it from statement net income (Yahoo's own
+measure) if both quarters are present. Why: the score bands cap at +40%, so an
+extreme figure scores the same as a normal strong one, and a wrong one-off
+moves a total score 2-4 points for one quarter. The safeguard cost more: it
+left old-quarter values and unexplained blanks in live scores (57 cells with
+no ruling on 2026-11-20) and a queue of rulings for Dom. `eps-yoy-overrides.json`
+is kept as history; nothing reads it. A one-off that distorts a name near the
+portfolio line belongs in that name's briefing, not in a held-back cell. The
+first paragraph's "blank when one-time-dominated" no longer applies.
+
 ### 16. Risk: R5 Disruption Risk dimension (added 2026-06-17, approved by Dom)
 
 **Context:** R1–R4 (customer concentration, geography, balance sheet, regulatory) measure whether earnings are *safe now*, not whether the *revenue model survives*. This let beaten-down application-SaaS names (down 40–67% on genuine agentic-AI disruption fears) still score ✓✓ — Value rises as price falls (20% weight) while the disruption thesis had nowhere to land (moat is only 1 of 5 AI-Thesis dims → ≤1.6pt swing). Surfaced in the 2026-06-17 QQQ-coverage batch (WDAY): a value-quality screen rewards a falling quality name *because* it is falling. R5 gives terminal-value/business-model durability a home.
@@ -1093,15 +1109,17 @@ in a cloud session.
   with a data check; this replaces the 2026-10-30 hold.** `on_model_event` writes
   a live `ticket-*` in every session, the next 06:35 run trades it, and
   `hold-tickets` is gone. `scripts/ticket_data_check.py` leaves a buy off the
-  ticket, and the executor notifies Dom, when: EPS YoY is blank, or is ≥100% in
-  size on revenue growth under 30%, with no rule-15 ruling for the current
-  quarter; revenue growth is blank; the score moved ≥5 pts in 7 days; the name
+  ticket, and the executor notifies Dom, when: revenue growth is blank; the score moved ≥5 pts in 7 days; the name
   fell ≥15% in 5 sessions; or a lookup failed. Sells and other buys still go, a
   held-back buy waits for the next ticket, and a broken check lets no buy
   through. Replayed on six past tickets it flagged the META, WDC and RDDT cases.
   It checks buys only, so an exit caused by a bad score still trades, and the
   monthly rebalance does not run it. The session stays read-only toward the
   broker, and rule 29's one order writer is unchanged.
+  **Amendment 2026-11-20 (Dom-approved):** the two EPS conditions (blank EPS;
+  ≥100% on revenue under 30% with no ruling) are removed with the rule-15
+  change to "always write the reported number". A blank EPS cell now means a
+  loss quarter, and there are no rulings to wait for.
 - **Reporting:** a Notion page plus one notification when there is something
   to report. Every run, quiet or not, lands and merges one line in
   `tracking/scheduled-run-log.md` (Dom, 2026-10-12), so a missed run is a

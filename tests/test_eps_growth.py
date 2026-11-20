@@ -19,7 +19,7 @@ def test_loss_base_is_blank_with_reason():
     qcom = {D(2026, 9, 30): 1251e6, D(2026, 6, 30): 2002e6, D(2026, 3, 31): 7370e6,
             D(2025, 12, 31): 3004e6, D(2025, 9, 30): -3117e6}
     v, code, note = eg.eps_yoy_fallback(qcom, D(2026, 9, 27))
-    assert v is None and code == eg.LOSS_BASE and "-3,117M" in note
+    assert v is None and code == eg.LOSS and "-3,117M" in note
 
 
 def test_both_quarters_profitable_is_computed_like_yahoo():
@@ -65,3 +65,10 @@ def test_accepts_datetime_and_string_keys():
     rows = {dt.datetime(2026, 9, 30): 120e6, "2025-09-30": 100e6}
     v, _, _ = eg.eps_yoy_fallback(rows, D(2026, 9, 30))
     assert v == 20.0
+
+
+def test_profit_to_loss_is_blank_with_reason():
+    # IREN Q3-26: -263M vs 385M; Yahoo gives no figure, past rulings blank it
+    rows = {D(2026, 9, 30): -263e6, D(2025, 9, 30): 385e6}
+    v, code, note = eg.eps_yoy_fallback(rows, D(2026, 9, 30))
+    assert v is None and code == eg.LOSS and "-263M" in note

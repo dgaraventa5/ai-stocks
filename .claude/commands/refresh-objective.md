@@ -19,12 +19,10 @@ half of rule 9 (earnings-triggered objective refresh).
    `python3 scripts/refresh_objective_inputs.py <target> --dry-run`
 2. Resolve the JUDGMENT FLAGS with Dom — these are the only cells needing
    judgment:
-   - **EPS YoY withheld/preserved/STALE** (rule 15): confirm blank vs write per
-     filing evidence, then record the ruling in `00-master/eps-yoy-overrides.json`
-     (ticker → `quarter_end`, `value` null|ex-item %, `basis`, `source`, `ruled`,
-     `audit_row`) as well as the Rating Audit. The script applies a ruling on every
-     refresh while yfinance's most-recent quarter matches and flags it STALE after
-     the next print — a STALE flag means "re-rule this quarter", never "keep".
+   - **EPS YoY** needs no judgment (rule 15, amended 2026-11-20): the reported
+     number is always written. A cell is blank only when a quarter was a loss
+     (flagged with the reason) or Yahoo has no data ("BLANK, data gap" — name it
+     in the report and check whether it is a bug).
    - **MW stale/missing** (rule 13): refresh `capacity-mw.json` if a filing supports it.
 3. On approval, run live:
    `python3 scripts/refresh_objective_inputs.py <target>`
@@ -35,5 +33,6 @@ half of rule 9 (earnings-triggered objective refresh).
 
 - Foreign-ADR currency mismatch → P/S, EV/EBITDA, FCF-Yield auto-blanked.
 - A failed fetch never clobbers an existing value (protects ROIC etc.).
-- Extreme/blank EPS YoY is flagged, never auto-written.
+- EPS YoY is always the reported number for the latest quarter; blank only on a
+  loss quarter or a flagged data gap, never a value from an older quarter.
 - No structural row change → `rebuild_watchlist_formulas.py` not needed.

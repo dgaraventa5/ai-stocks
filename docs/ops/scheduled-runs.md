@@ -32,7 +32,6 @@ A scheduled run MAY, without asking:
 A scheduled run MUST NOT:
 - change any subjective rating (D1–D5, M1–M3, R1–R5) or append to the Rating
   Audit — it writes a proposal to `tracking/rating-proposals.md` instead;
-- write a rule-15 EPS ruling (withheld cells stay withheld; list them);
 - remove, shorten or extend an entry hold; edit CLAUDE.md, the rubric,
   methodology bands, cohort membership or `capacity-mw.json`;
 - place a trade. Never call a Robinhood order/write tool, never run
@@ -126,16 +125,15 @@ prose. Sources (`scripts/dom_inbox.py` reads all three):
 - **Everything else** — record it as an ask, in the same run that finds it:
 
   ```bash
-  python3 scripts/dom_inbox.py ask --kind eps_ruling --ticker NRG --text "+269% written with no ruling" --source "weekly-news-scan-2026-11-14.md"
   python3 scripts/dom_inbox.py ask --kind hold_candidate --ticker LITE --text "Marvell deal signed 11-01 (transformative)" --source "..."
   python3 scripts/dom_inbox.py ask --kind data_fix --ticker AMAT --key rev-cagr --text "3-yr CAGR 3.23% looks wrong" --source "..."
   python3 scripts/dom_inbox.py ask --kind question --ticker AVGO --key r3-backstop --text "..." --source "..."
   ```
 
   Asking again for the same name and kind updates the open ask, never a
-  duplicate. An `eps_ruling` ask closes itself once
-  `00-master/eps-yoy-overrides.json` holds a ruling dated on or after it. A
-  run never closes any other ask (`close` is for the session that resolves it).
+  duplicate. A run never closes an ask (`close` is for the session that
+  resolves it). There are no EPS ruling asks any more: rule 15 writes the
+  reported number (amended 2026-11-20).
 
 Step 3b, in order:
 

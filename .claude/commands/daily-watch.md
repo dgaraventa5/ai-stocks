@@ -105,11 +105,11 @@ python3 scripts/recalc_watchlist.py --sync
 python3 scripts/earnings_sentinel.py --mark rescored {T} {report_date}   # each ticker
 ```
 
-Record before/after Total Score and rank for each. Flag, do not fix: withheld
-or STALE EPS YoY cells (rule 15 — needs Dom's ruling), Layer-9 MW denominators
-(rule 13), TTM-vs-MRQ gaps over 10 points (rule 9). Record each EPS ruling and
-MW gap in Dom's inbox (`dom_inbox.py ask --kind eps_ruling` / `--kind data_fix`)
-so it is not left only in the report.
+Record before/after Total Score and rank for each. Flag, do not fix:
+"BLANK, data gap" EPS YoY cells (rule 15 writes the reported number; a data-gap
+blank is a Yahoo problem worth naming), Layer-9 MW denominators (rule 13),
+TTM-vs-MRQ gaps over 10 points (rule 9). Record each MW gap in Dom's inbox
+(`dom_inbox.py ask --kind data_fix`) so it is not left only in the report.
 
 ## 5. Material news (at most 3 names per run; holdings first)
 
