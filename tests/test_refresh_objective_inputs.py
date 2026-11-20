@@ -140,15 +140,68 @@ def test_guard_keeps_existing_on_fetched_none():
     assert any("roic" in f.lower() for f in flags)
 
 
-def test_guard_eps_yoy_preserves_blank():
+def test_guard_eps_yoy_unruled_blank_is_refilled():
+    # 2026-11-20: a blank with no rule-15 ruling used to be kept forever
+    # ("likely a documented one-off"); 57 cells sat blank with no reason.
+    # It is now re-checked and written like any other cell, and flagged.
     info = {"financialCurrency": "USD"}
     fresh = {k: 10.0 for k in roi.OBJ_COLS}
     fresh["eps_yoy"] = 50.0
     existing = {k: 9.0 for k in roi.OBJ_COLS}
-    existing["eps_yoy"] = None  # deliberately blank (GEV-style)
+    existing["eps_yoy"] = None
+    writes, flags = roi.apply_guards(info, fresh, existing)
+    assert writes["eps_yoy"] == 50.0
+    assert any("was blank with no ruling" in f for f in flags)
+    assert not any("preserved blank" in f.lower() for f in flags)
+
+
+def test_guard_eps_yoy_loss_base_blanks_with_reason_even_over_prior():
+    info = {"financialCurrency": "USD",
+            "_eps_note": "year-ago quarter 2025-09-30 net income -3,117M <= 0"}
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["eps_yoy"] = None
+    fresh["_eps_reason"] = "loss_base"
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+    existing["eps_yoy"] = 25.0          # described an older quarter
+    writes, flags = roi.apply_guards(info, fresh, existing)
+    assert "eps_yoy" in writes and writes["eps_yoy"] is None
+    assert any("blank" in f and "-3,117M" in f for f in flags)
+
+
+def test_guard_eps_yoy_data_gap_blank_is_flagged_loudly():
+    info = {"financialCurrency": "USD"}
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["eps_yoy"] = None
+    fresh["_eps_reason"] = "no_data"
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+    existing["eps_yoy"] = None
     writes, flags = roi.apply_guards(info, fresh, existing)
     assert "eps_yoy" not in writes
-    assert any("eps yoy" in f.lower() and "blank" in f.lower() for f in flags)
+    assert any("BLANK, data gap" in f for f in flags)
+
+
+def test_guard_eps_yoy_extreme_over_blank_says_it_stays_blank():
+    info = {"financialCurrency": "USD"}
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["eps_yoy"] = 863.0
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+    existing["eps_yoy"] = None
+    writes, flags = roi.apply_guards(info, fresh, existing)
+    assert "eps_yoy" not in writes
+    assert any("863" in f and "stays BLANK" in f for f in flags)
+
+
+def test_guard_eps_yoy_computed_value_is_written_and_noted():
+    info = {"financialCurrency": "USD",
+            "_eps_note": "Yahoo growth figure missing; computed from statement net income"}
+    fresh = {k: 10.0 for k in roi.OBJ_COLS}
+    fresh["eps_yoy"] = 12.5
+    fresh["_eps_reason"] = "computed"
+    existing = {k: 9.0 for k in roi.OBJ_COLS}
+    existing["eps_yoy"] = 11.0
+    writes, flags = roi.apply_guards(info, fresh, existing)
+    assert writes["eps_yoy"] == 12.5
+    assert any("computed from statement" in f for f in flags)
 
 
 def test_guard_eps_yoy_withholds_extreme():

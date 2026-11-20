@@ -1,7 +1,7 @@
-# NVT — {Company Name}
+# NVT — nVent Electric plc
 
-**Layer:** {e.g., Power Generation / IPPs}
-**Last reviewed:** 2026-05-17
+**Layer:** 02 Grid & Power Equipment (electrical enclosures, protection, data-center liquid cooling)
+**Last reviewed:** 2026-11-20 (section 1 written on portfolio entry, rule 39; from context-2026-10-30.md and context-2026-06-22.md)
 **Current conviction:** {✗ / ? / ✓ / ✓✓ / ✓✓✓}
 **Current position size:** {0% / X% of portfolio}
 **Thesis-break trigger:** {what single development would force exit}
@@ -10,7 +10,7 @@
 
 ## 1. One-line thesis
 
-> {Single sentence: why does this stock exist in the portfolio, and what is the AI-specific exposure?}
+> nVent makes electrical enclosures, connection and protection products, and liquid-cooling and power-distribution gear, and data-center infrastructure has become its biggest and fastest-growing business at nearly 60% of sales. It is owned because AI data-center demand has pushed organic growth above 30% with a backlog that runs more than a year out, and management has raised full-year guidance several times. The main risk is that growth is slowing from its peak just as the Maverick acquisition adds debt and lower-margin sales, while the stock already trades at a premium multiple.
 
 ---
 

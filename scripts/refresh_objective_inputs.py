@@ -27,6 +27,7 @@ except ModuleNotFoundError:          # pure + yfinance-free either way
 # keeping this module and its tests importable without yfinance.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import eps_growth  # noqa: E402  (pure, stdlib-only)
 from layer_cohorts import is_layer9_capacity as _is_layer9_capacity
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -242,30 +243,54 @@ def apply_guards(info, fresh, existing, override=None):
                     if ov != "__withhold__":
                         writes[key] = ov
                     continue
-            # (a) existing blank → preserve, do not write
-            if _blank(existing.get(key)):
-                flags.append(
-                    "EPS YoY: cell currently blank (likely a documented one-off) "
-                    "— preserved blank, not refilled."
-                )
-                continue
-            # (b) fresh value extreme → withhold
+            # No ruling covers this cell, so it is re-checked on every refresh.
+            # (Before 2026-11-20 an existing blank was kept forever as a
+            # "likely documented one-off" — 57 cells had no ruling behind
+            # them, 21 with a usable figure. A blank is now kept only with a
+            # stated reason, and a data-gap blank is flagged loudly.)
             v = fresh.get(key)
+            was_blank = _blank(existing.get(key))
+            reason = fresh.get("_eps_reason")
+            note = info.get("_eps_note") or "no figure from Yahoo"
+            # (a) fresh value extreme → withhold for a rule-15 ruling
             if v is not None and abs(v) >= EPS_YOY_EXTREME:
+                stays = ("cell stays BLANK until ruled" if was_blank
+                         else f"kept prior {existing.get(key)} until ruled")
                 flags.append(
                     f"EPS YoY: fresh {v:+.0f}% ≥ {EPS_YOY_EXTREME:.0f}% "
-                    f"→ withheld as possible one-off (rule 15). Confirm blank or write."
+                    f"→ withheld as possible one-off (rule 15); {stays}. "
+                    "Confirm blank or write, and record the ruling."
                 )
                 continue
-            # (c) fresh None over a non-blank existing → keep existing (don't clobber).
-            # yfinance earningsQuarterlyGrowth is frequently None; same protection
-            # the generic-key path applies (guard 4).
-            if v is None and not _blank(existing.get(key)):
+            # (b) the year-ago quarter was a loss → blank on purpose, even
+            # over a prior value (that value described an older quarter)
+            if v is None and reason == eps_growth.LOSS_BASE:
+                writes[key] = None
+                flags.append(f"EPS YoY: blank — {note}.")
+                continue
+            # (c) no figure and none computable → a data gap, never silent.
+            # A prior value is kept (transient Yahoo gaps are common).
+            if v is None:
+                if was_blank:
+                    flags.append(
+                        f"EPS YoY: BLANK, data gap — {note}. Check the filing; "
+                        "no ruling recorded."
+                    )
+                else:
+                    flags.append(
+                        f"eps_yoy: fetch returned no data ({note}) — kept prior "
+                        f"value {existing.get(key)}."
+                    )
+                continue
+            if was_blank:
                 flags.append(
-                    f"eps_yoy: fetch returned no data — kept prior value {existing.get(key)}."
+                    f"EPS YoY: was blank with no ruling — now {v:+.1f}%"
+                    + (f" ({note})" if reason == eps_growth.COMPUTED else "")
+                    + "."
                 )
-                continue
-            # (d) normal — write (may be None when existing is also blank)
+            elif reason == eps_growth.COMPUTED:
+                flags.append(f"EPS YoY: {note}.")
+            # (d) normal — write
             writes[key] = v
             continue
 
@@ -442,6 +467,8 @@ def _default_fetcher(ticker, layer):
     info = dict(info)
     info["_roic_flags"] = [g for g in gaps if g.startswith("roic:")]
     info["_pe_flags"] = [g for g in gaps if g.startswith("fwd_pe:")]
+    info["_eps_note"] = next((g[len("EPS YoY: "):] for g in gaps
+                              if g.startswith("EPS YoY: ")), None)
     return info, fresh
 
 
