@@ -51,6 +51,7 @@ AI-Supply-Chain/
 
 1. **SEC EDGAR** (https://data.sec.gov, https://www.sec.gov/edgar) — primary source of truth for filings. Use User-Agent header `Dom Researcher dom@example.com` (replace with real email). Rate limit: 10 req/sec max, throttle with `time.sleep(0.1)`.
 2. **yfinance Python library** — fundamentals, market data. Install if missing: `pip install yfinance`. Has occasional rate limits and incomplete data on small-caps. **Known trap (fixed 2026-06-12):** `info.freeCashflow` is Yahoo's *levered* FCF estimate and does not reconcile to the cash-flow statements (printed NVDA's 47% TTM FCF margin as 18%). All FCF inputs must use statement-based TTM OCF − |capex| via `batch_score.statement_fcf()`. **Amended 2026-11-20:** one calculation (`scripts/fcf_source.py`) feeds FCF yield, FCF margin and EV/FCF: four consecutive quarters, else the latest fiscal year (flagged), else blank (flagged). The info field is no longer used at all (DLR's "positive" FCF yield was that estimate; its statement FCF is negative). A missing objective input is now written blank and flagged, never kept from an older refresh.
+   **SEC fallback (2026-11-20):** when Yahoo's quarterly statements lag `info['mostRecentQuarter']` or miss an input, `scripts/sec_statements.py` runs the same calculation (ROIC, FCF yield/margin, EV/FCF, EPS YoY gap, missing debt/cash, rev 3y CAGR) on SEC companyfacts, Q4 derived as FY − 9M. SEC is used only when its period is newer than Yahoo's (or Yahoo has none) AND it reproduces Yahoo's figure for Yahoo's own period: companyfacts omits company-specific concepts (SHAZ's GPU capex), so an unreconciled newer number is refused, flagged, and Yahoo kept. Every SEC value is a `SEC:` line in the refresh flags. us-gaap 10-Q/10-K filers only; IFRS, 6-K and foreign local listings stay on Yahoo. SEC ROIC uses GAAP operating income (Yahoo's line adds back special charges), within the reconciliation tolerance.
 3. **Company IR pages** — earnings calls, investor presentations. Fall back to motleyfool.com if IR doesn't publish transcripts.
 4. **FRED** (https://fred.stlouisfed.org) — macro/rates/electricity data.
 5. **EIA** (https://www.eia.gov) — energy and electricity data.
@@ -410,6 +411,27 @@ names whose multiple implies more growth than their recent revenue trend.
 **Known limitation:** revenue-3yr-CAGR is a noisy grounded-growth proxy for
 commodity/cyclical names (nat-gas E&P AR/RRC get dinged on a depressed revenue
 trend) — a candidate refinement, documented not hidden.
+
+**Amendment 2026-11-20 (Dom: "i don't want blanked metrics"): stand-ins, not
+blanks.** A metric that is undefined because the business fails its test now
+scores a band; only a true data gap stays blank (flagged). Same rule as the
+rule-15 EPS and negative-EBITDA ND/EBITDA stand-ins. A blank drops out of its
+category average, which flattered exactly the weak names (AMZN's TTM FCF went
+negative and its Value rose 58 → 69).
+- **P2 reverse-DCF:** FCF ≤ 0 (sheet FCF yield ≤ 0) → bottom band (15); EV ≤ 0
+  on positive FCF → top (100); no 3-yr CAGR → current rev YoY is the grounded
+  growth (`reverse_dcf.value_term`).
+- **PEG:** EPS growth ≤ 0 or forward P/E < 0 → 99 (bottom band), in the
+  Watchlist formula and `recalc` alike.
+- **Revenue growth (CAGR and YoY):** from zero revenue → +100, to zero → −100,
+  zero both → 0; a young company's whole history (≥ 1 yr) is annualized,
+  flagged SHORT HISTORY; YoY is computed from the statement when Yahoo's is
+  missing.
+- **ND/EBITDA:** net cash with EBITDA missing → 0 (best band) whatever EBITDA is.
+- **EV/EBITDA:** computed from EV and EBITDA when Yahoo omits the ratio.
+- **ROIC:** foreign local listings are no longer skipped (`ROIC_SKIP_FOREIGN =
+  False`; the metric is currency-neutral), and a name without four quarters
+  uses its latest fiscal year, flagged ANNUAL.
 
 ### 22. Subjective floor removed: AI Thesis / Risk use (mean−1)×25 (added 2026-07-02, approved by Dom)
 
@@ -959,12 +981,12 @@ APRIL and looked normal. `roic.statement_roic` compares against
 `info['mostRecentQuarter']` and flags **STALE** (9 names did on deploy day). A
 stale ROIC still beats a frozen one, but it must be visible (rule 3). Upgrade
 path if it bites: SEC XBRL companyfacts, deriving Q4 = FY − 9M (Q4 is never
-tagged standalone).
+tagged standalone). *Built 2026-11-20: `sec_statements.py`, see Data sources §2.*
 
 **Scope:** foreign LOCAL listings are excluded (`batch_score.ROIC_SKIP_FOREIGN`)
 by Dom's choice 2026-09-08 — **not** an FX limitation. ROIC is currency-neutral
 (numerator and denominator share the reporting currency), unlike the rule-19
-price-based ratios. Flip the constant to cover them.
+price-based ratios. Flip the constant to cover them. *Flipped 2026-11-20 (no blanked metrics, see rule 21 amendment).*
 
 **Deploy impact (2026-09-08):** 191 of 195 non-foreign names computed (63 blanks
 filled, 126 values corrected; the 4 gaps are ADRs without quarterly statements).

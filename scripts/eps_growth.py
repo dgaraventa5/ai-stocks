@@ -68,28 +68,30 @@ def _near(cols: dict, target: dt.date):
     return best
 
 
-def eps_yoy_fallback(net_income: dict, latest_quarter: dt.date | None
+def eps_yoy_fallback(net_income: dict, latest_quarter: dt.date | None,
+                     source: str = "Yahoo statements"
                      ) -> tuple[float | None, str, str]:
     """(value % or None, reason code, human note) from {quarter date: net income}.
 
     latest_quarter is info['mostRecentQuarter'] as a date; None means unknown,
-    in which case the newest statement column is used.
+    in which case the newest statement column is used. `source` names where
+    the net income came from in the notes (sec_statements passes SEC facts).
     """
     cols = {_as_date(k): v for k, v in net_income.items()}
     if not cols:
-        return None, NO_DATA, "no quarterly net income in Yahoo statements"
+        return None, NO_DATA, f"no quarterly net income in {source}"
     newest = max(cols)
     if latest_quarter is not None:
         cur_d = _near(cols, latest_quarter)
         if cur_d is None:
             return None, NO_DATA, (
-                f"Yahoo statements end {newest}, behind the latest reported "
+                f"{source} end {newest}, behind the latest reported "
                 f"quarter {latest_quarter} — cannot compute")
     else:
         cur_d = newest
     base_d = _near(cols, _years_back(cur_d, 1))
     if _blank(cols[cur_d]):
-        return None, NO_DATA, f"quarter {cur_d} net income blank in Yahoo statements"
+        return None, NO_DATA, f"quarter {cur_d} net income blank in {source}"
     cur = float(cols[cur_d])
     if cur <= 0:
         base_txt = ("" if base_d is None or _blank(cols[base_d])
@@ -98,7 +100,7 @@ def eps_yoy_fallback(net_income: dict, latest_quarter: dt.date | None
             f"quarter {cur_d} net income {cur / 1e6:,.0f}M <= 0{base_txt} — "
             f"a loss quarter, scored as {LOSS_NOW_VALUE:+.0f} (bottom band)")
     if base_d is None or _blank(cols[base_d]):
-        return None, NO_DATA, f"no year-ago quarter (near {_years_back(cur_d, 1)}) in Yahoo statements"
+        return None, NO_DATA, f"no year-ago quarter (near {_years_back(cur_d, 1)}) in {source}"
     base = float(cols[base_d])
     if base <= 0:
         return TO_PROFIT_VALUE, TO_PROFIT, (
@@ -106,5 +108,5 @@ def eps_yoy_fallback(net_income: dict, latest_quarter: dt.date | None
             f"{cur / 1e6:,.0f}M — loss to profit, scored as {TO_PROFIT_VALUE:+.0f} (top band)")
     value = round((cur / base - 1) * 100, 2)
     return value, COMPUTED, (
-        f"Yahoo growth figure missing; computed from statement net income "
+        f"Yahoo growth figure missing; computed from {source} net income "
         f"{cur_d} vs {base_d} ({cur / 1e6:,.0f}M vs {base / 1e6:,.0f}M)")

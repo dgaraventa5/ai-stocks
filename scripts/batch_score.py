@@ -46,6 +46,7 @@ import adr_currency
 import eps_growth
 import fcf_source
 import revenue_cagr
+import sec_statements
 from openpyxl import load_workbook
 
 from common import ROOT, flag, per_stock_dir
@@ -126,17 +127,79 @@ def _rows(df) -> dict:
             for name in df.index}
 
 
-def statement_fcf_detail(t: yf.Ticker) -> tuple[float | None, str]:
+def _mrq_date(info: dict) -> dt.date | None:
+    mrq = (info or {}).get("mostRecentQuarter")
+    try:
+        return dt.datetime.fromtimestamp(float(mrq), dt.timezone.utc).date()
+    except (TypeError, ValueError, OverflowError, OSError):
+        return None
+
+
+def _newest_with_data(df, rows) -> dt.date | None:
+    """Newest statement column holding a value in the first row present.
+    A column alone proves nothing: Yahoo posts EPS-only columns days before
+    the statements fill in (NVDA 2026-10-31 on 2026-11-20)."""
+    if df is None or getattr(df, "empty", True):
+        return None
+    for r in rows:
+        if r in df.index:
+            s = df.loc[r].dropna()
+            if len(s):
+                return fcf_source._as_date(max(s.index))
+    return None
+
+
+def _sec_context(ticker: str, info: dict, sec_fallback: bool):
+    if not sec_fallback or "." in (ticker or ""):
+        return None
+    return sec_statements.SecContext(ticker, (info or {}).get("financialCurrency"))
+
+
+def _fcf_choice(t, info: dict, sec) -> dict:
+    """FCF with the SEC fallback. Keys: fcf, note, rev (revenue over the same
+    period when SEC supplied it, else None), sec (bool), lag (note or None)."""
+    try:
+        y_fcf, y_note, y_end, y_kind = fcf_source.fcf_detail(
+            _rows(t.quarterly_cashflow), _rows(t.cashflow))
+    except Exception as e:
+        y_fcf, y_note, y_end, y_kind = None, f"cash-flow statement error {e}", None, None
+    out = {"fcf": y_fcf, "note": y_note, "rev": None, "sec": False, "lag": None}
+    if sec is None:
+        return out
+    mrq = _mrq_date(info)
+    behind = sec_statements.lagging(y_end, mrq)
+    if not (y_fcf is None or y_kind != fcf_source.QUARTERLY or behind or sec.fetched):
+        return out
+    st = sec.get()
+    d = sec_statements.choose_fcf(y_fcf, y_end, y_kind, st) if st else None
+    if d and d["use"]:
+        out.update(fcf=d["value"], rev=d["rev"], sec=True,
+                   note=f"{d['note']}; Yahoo: {y_note}")
+    elif d and "NOT used" in d["note"]:
+        out["rejected"] = d["note"]
+    elif behind:
+        out["lag"] = f"Yahoo cash flow ends {y_end}"
+    return out
+
+
+def statement_fcf_detail(t: yf.Ticker, info: dict | None = None,
+                         sec=None, sec_fallback: bool = True
+                         ) -> tuple[float | None, str]:
     """(FCF, note) from the statements via fcf_source (2026-11-20): trailing
     four consecutive quarters, else the latest fiscal year (flagged), else
     None. Never Yahoo's info.freeCashflow, a levered estimate that does not
     reconcile (printed NVDA's 47% TTM FCF margin as 18%, and DLR's negative
-    FCF as positive)."""
-    try:
-        return fcf_source.fcf_from_statements(_rows(t.quarterly_cashflow),
-                                              _rows(t.cashflow))
-    except Exception as e:
-        return None, f"cash-flow statement error {e}"
+    FCF as positive). When Yahoo's statement lags the company's latest
+    reported quarter or has no FCF, SEC companyfacts fills in
+    (sec_statements.py), flagged in the note."""
+    if sec is None and sec_fallback:
+        try:
+            info = info if info is not None else (t.info or {})
+            sec = _sec_context(getattr(t, "ticker", ""), info, True)
+        except Exception:
+            sec = None
+    c = _fcf_choice(t, info or {}, sec)
+    return c["fcf"], c["note"]
 
 
 def statement_fcf(t: yf.Ticker) -> float | None:
@@ -160,15 +223,27 @@ def _is_layer10(layer: str | None) -> bool:
     return bool(layer) and str(layer).strip().startswith("10")
 
 
-ROIC_SKIP_FOREIGN = True   # rule 34; see compute_inputs
+# rule 34. Flipped to False 2026-11-20 (Dom: "i don't want blanked metrics"):
+# ROIC is currency-neutral, and the exclusion left 19 benchmark names blank.
+ROIC_SKIP_FOREIGN = False
 # Negative-EBITDA leverage stand-ins (2026-11-20), see compute_inputs
 ND_EBITDA_NET_DEBT, ND_EBITDA_NET_CASH = 99.0, 0.0
 
 
 def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
-                   layer: str | None = None) -> tuple[dict, list[str]]:
-    """Return the 11 objective inputs + a list of gap messages for the log."""
+                   layer: str | None = None,
+                   sec_fallback: bool = True) -> tuple[dict, list[str]]:
+    """Return the 11 objective inputs + a list of gap messages for the log.
+
+    sec_fallback (2026-11-20): where Yahoo's statements lag the latest
+    reported quarter or miss an input, the same calculation runs on SEC
+    companyfacts (sec_statements.py). Every SEC value adds a "SEC: " gap line.
+    False reproduces the Yahoo-only inputs (used to measure the impact).
+    """
     gaps: list[str] = []
+    mrq = _mrq_date(info)
+    sec = _sec_context(ticker, info, sec_fallback)
+    lag_notes: list[str] = []
     inp: dict[str, float | None] = {
         "fwd_pe": None, "ev_ebitda": None, "fcf_yield": None, "ps": None,
         "roic": None, "gross_mgn": None, "fcf_mgn": None, "nd_ebitda": None,
@@ -188,6 +263,20 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
     else:
         from roic import statement_roic
         inp["roic"], _rflags = statement_roic(t)
+        if sec is not None:
+            y_end = _newest_with_data(t.quarterly_income_stmt,
+                                      ("Operating Income", "EBIT", "Total Revenue"))
+            behind = sec_statements.lagging(y_end, mrq)
+            st = sec.get() if (inp["roic"] is None or behind) else None
+            d = sec_statements.choose_roic(inp["roic"], y_end, st) if st else None
+            if d and d["use"]:
+                gaps.append(f"SEC: roic {d['value']} replaces Yahoo {inp['roic']} "
+                            f"(Yahoo statements end {y_end}) — {d['note']}")
+                inp["roic"], _rflags = d["value"], [d["note"]]
+            elif d and "NOT used" in d["note"]:
+                gaps.append(f"SEC: {d['note']}")
+            elif behind:
+                lag_notes.append(f"Yahoo income statement ends {y_end}")
         gaps.extend(f"roic: {f}" for f in _rflags)
 
     # ----- Value -----
@@ -218,18 +307,49 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
     #   everything else: EV/EBITDA
     inp["ev_ebitda"] = info.get("enterpriseToEbitda")
     mcap = info.get("marketCap")
-    fcf, fcf_note = statement_fcf_detail(t)
-    if fcf is None or not fcf_note.startswith("quarterly TTM"):
+    fc = _fcf_choice(t, info, sec)
+    fcf, fcf_note = fc["fcf"], fc["note"]
+    if fc["sec"]:
+        gaps.append(f"SEC: FCF {fcf / 1e6:,.0f}M — {fcf_note}")
+    if fc["lag"]:
+        lag_notes.append(fc["lag"])
+    if fc.get("rejected"):
+        gaps.append(f"SEC: {fc['rejected']}")
+    if not fc["sec"] and (fcf is None or not fcf_note.startswith("quarterly TTM")):
         gaps.append(f"FCF: {fcf_note}")
+    # Debt and cash: Yahoo's info fields, with SEC's latest balance sheet
+    # filling a missing one (AR had no cash figure on 2026-11-20).
+    debt, cash = info.get("totalDebt"), info.get("totalCash")
+    if sec is not None and (_is_missing(debt) or _is_missing(cash)) and sec.get():
+        s_debt, s_cash, s_asof, s_note = sec_statements.sec_debt_cash(sec.get())
+        stale = (" — a quarter or more behind the latest reported quarter"
+                 if sec_statements.lagging(s_asof, mrq) else "")
+        if _is_missing(debt) and s_debt is not None:
+            debt = s_debt
+            gaps.append(f"SEC: totalDebt missing in Yahoo; {s_debt / 1e6:,.0f}M from {s_note}{stale}")
+        if _is_missing(cash) and s_cash is not None:
+            cash = s_cash
+            gaps.append(f"SEC: totalCash missing in Yahoo; {s_cash / 1e6:,.0f}M from {s_note}{stale}")
     ev = info.get("enterpriseValue")
     if ev is None and mcap:
-        ev = mcap + (info.get("totalDebt") or 0) - (info.get("totalCash") or 0)
+        ev = mcap + (debt or 0) - (cash or 0)
     if _is_layer10(layer):
         if ev and fcf:
             inp["ev_ebitda"] = round(ev / fcf, 1)
         else:
             inp["ev_ebitda"] = None
             gaps.append("EV/FCF (L10): missing EV or statement FCF — left blank")
+    elif inp["ev_ebitda"] is None and not _is_layer9_capacity(layer):
+        # Yahoo leaves enterpriseToEbitda out for some names (AR on
+        # 2026-11-20); compute it. Negative EBITDA gives a negative multiple,
+        # which scores the bottom band (no blanks, 2026-11-20).
+        _eb = info.get("ebitda")
+        if ev and _eb and not _is_missing(_eb):
+            inp["ev_ebitda"] = round(ev / _eb, 1)
+            gaps.append(f"EV/EBITDA: Yahoo ratio missing; computed {inp['ev_ebitda']} "
+                        "from EV and EBITDA")
+        else:
+            gaps.append("EV/EBITDA: Yahoo ratio, EV or EBITDA missing — BLANK, data gap")
     elif _is_layer9_capacity(layer):
         mw = _secured_mw(ticker)
         if ev and mw:
@@ -262,7 +382,7 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
             rate = adr_currency.fx_rate(trading, financial)
             fixed = adr_currency.ratios_via_fx(
                 mcap, rate, info.get("totalRevenue"), info.get("ebitda"),
-                info.get("totalDebt"), info.get("totalCash"), fcf)
+                debt, cash, fcf)
             src = f"FX {trading}->{financial}"
         inp["ev_ebitda"], inp["ps"], inp["fcf_yield"] = (
             fixed["ev_ebitda"], fixed["ps"], fixed["fcf_yield"])
@@ -274,10 +394,12 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
     gm = info.get("grossMargins")
     if gm is not None and not _is_missing(gm):
         inp["gross_mgn"] = round(gm * 100, 2)
-    rev = info.get("totalRevenue")
+    # Revenue over the same period as the FCF when SEC supplied the FCF
+    # (Yahoo's TTM revenue may already include a quarter the FCF does not).
+    rev = fc["rev"] if fc["rev"] else info.get("totalRevenue")
     if fcf is not None and rev and not _is_missing(fcf) and not _is_missing(rev):
         inp["fcf_mgn"] = round(fcf / rev * 100, 2)
-    debt = info.get("totalDebt"); cash = info.get("totalCash"); ebitda = info.get("ebitda")
+    ebitda = info.get("ebitda")
     if (debt is not None and cash is not None and ebitda
             and not any(_is_missing(x) for x in (debt, cash, ebitda)) and ebitda > 0):
         inp["nd_ebitda"] = round((debt - cash) / ebitda, 2)
@@ -295,8 +417,15 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
                         f"{'net debt (99, worst band)' if net > 0 else 'net cash (0, best band)'}")
         else:
             gaps.append("ND/EBITDA: EBITDA non-positive and debt/cash missing — left blank")
+    elif (_is_missing(ebitda) and debt is not None and cash is not None
+          and not _is_missing(debt) and not _is_missing(cash) and debt - cash <= 0):
+        # Net cash scores the best band whatever EBITDA is (ratio <= 0 when
+        # EBITDA > 0, the net-cash stand-in when <= 0), so a missing EBITDA
+        # (HOOD, financial template) need not blank it (2026-11-20).
+        inp["nd_ebitda"] = ND_EBITDA_NET_CASH
+        gaps.append("ND/EBITDA: EBITDA missing but net cash — scored as net cash (0, best band)")
     else:
-        gaps.append("ND/EBITDA: missing totalDebt/totalCash/ebitda")
+        gaps.append("ND/EBITDA: missing totalDebt/totalCash/ebitda — BLANK, data gap")
 
     # ----- Growth -----
     try:
@@ -315,10 +444,45 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
             gaps.append("Rev 3y CAGR: income statement missing or no Total Revenue row")
     except Exception as e:
         gaps.append(f"Rev 3y CAGR: error {e}")
+    # SEC: a 10-K Yahoo has not loaded yet (or no Yahoo figure at all).
+    if sec is not None:
+        try:
+            ra = t.income_stmt.loc["Total Revenue"]
+            y_rev = {k: ra[k] for k in ra.index}
+        except Exception:
+            y_rev = {}
+        y_fy = _newest_with_data(getattr(t, "income_stmt", None), ("Total Revenue",))
+        y_blank_newest = bool(y_rev) and fcf_source._as_date(max(y_rev)) != y_fy
+        if (inp["rev_3y_cagr"] is None or y_blank_newest or sec.fetched) and sec.get():
+            d = sec_statements.choose_rev_cagr(inp["rev_3y_cagr"], y_rev, sec.get())
+            if d["use"] and d["value"] != inp["rev_3y_cagr"]:
+                gaps.append(f"SEC: rev_3y_cagr {d['value']} replaces Yahoo "
+                            f"{inp['rev_3y_cagr']} — {d['note']}")
+                inp["rev_3y_cagr"] = d["value"]
+            elif "NOT used" in d["note"]:
+                gaps.append(f"SEC: {d['note']}")
 
     rg = info.get("revenueGrowth")
     if rg is not None and not _is_missing(rg):
         inp["rev_yoy"] = round(rg * 100, 2)
+    else:
+        # Yahoo gives no growth when the year-ago quarter had no revenue;
+        # compute it, with the from/to-zero stand-ins (no blanks, 2026-11-20).
+        try:
+            qa = t.quarterly_income_stmt.loc["Total Revenue"]
+            qrev = {k: qa[k] for k in qa.index}
+        except Exception:
+            qrev = {}
+        v, why = revenue_cagr.rev_yoy_fallback(qrev, mrq)
+        if v is None and sec is not None and sec.get():
+            sv, swhy = revenue_cagr.rev_yoy_fallback(
+                sec.get()["q"].get("revenue") or {}, mrq)
+            if sv is not None:
+                v, why = sv, f"SEC 10-Q/10-K: {swhy}"
+                gaps.append(f"SEC: rev_yoy {sv} — {swhy}")
+        inp["rev_yoy"] = v
+        gaps.append(f"Rev YoY: Yahoo figure missing; "
+                    + (f"{v} — {why}" if v is not None else f"BLANK, data gap — {why}"))
     eg = info.get("earningsQuarterlyGrowth")
     if eg is not None and not _is_missing(eg):
         inp["eps_yoy"] = round(eg * 100, 2)
@@ -331,16 +495,32 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
             name = next((n for n in ("Net Income Common Stockholders", "Net Income")
                          if q is not None and n in q.index), None)
             ni = {k: q.loc[name][k] for k in q.loc[name].index} if name else {}
-            mrq = info.get("mostRecentQuarter")
-            latest = (dt.datetime.fromtimestamp(float(mrq), dt.timezone.utc).date()
-                      if mrq and not _is_missing(mrq) else None)
+            latest = mrq
             v, code, note = eps_growth.eps_yoy_fallback(ni, latest)
         except Exception as e:
+            ni, latest = {}, mrq
             v, code, note = None, eps_growth.NO_DATA, f"statement error {e}"
+        if code == eps_growth.NO_DATA and sec is not None and sec.get():
+            d = sec_statements.choose_eps_yoy(ni, latest, sec.get())
+            if d["use"]:
+                gaps.append(f"SEC: eps_yoy {d['value']} — {d['note']} (Yahoo: {note})")
+                v, code, note = d["value"], d["code"], d["note"]
+            elif "NOT used" in d["note"]:
+                gaps.append(f"SEC: {d['note']}")
         inp["eps_yoy"] = v
         inp["_eps_reason"] = code
         gaps.append(f"EPS YoY: {note}")
 
+    if lag_notes and sec is not None:
+        newest = sec.newest_quarter()
+        if newest:
+            why = f"SEC's newest quarter is {newest}, nothing newer than Yahoo"
+        elif sec.get():
+            why = "SEC has no quarterly facts (annual filer)"
+        else:
+            why = f"SEC unusable ({sec.note})"
+        gaps.append(f"SEC: {'; '.join(dict.fromkeys(lag_notes))}, latest reported "
+                    f"quarter {mrq}; {why} — kept Yahoo")
     return inp, gaps
 
 

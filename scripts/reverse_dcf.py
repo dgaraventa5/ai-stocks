@@ -171,6 +171,34 @@ def grounded_estimate(grounded_growth_pct: float, rev_yoy_pct: Number = None,
     return max(floor, min(cap, grounded_growth_pct))
 
 
+NEG_FCF_SCORE = 15.0     # = gap_to_score's floor: the bottom band
+NEG_EV_SCORE = 100.0     # EV <= 0 on positive FCF: paid to own the cash flow
+
+
+def value_term(ev_over_fcf, fcf_yield_pct, grounded_growth_pct,
+               rev_yoy_pct: Number = None) -> Number:
+    """The P2 Value term with stand-ins instead of blanks (Dom, 2026-11-20:
+    "i don't want blanked metrics"). reverse-dcf.json holds no EV/FCF when FCF
+    is not positive, and a blank dropped out of the Value average, which
+    flattered cash-burning names (AMZN's TTM FCF turned negative and its Value
+    rose 58 -> 69). The sheet's FCF yield says why the multiple is missing:
+      - FCF yield <= 0 (FCF <= 0, no positive base to grow): NEG_FCF_SCORE.
+      - FCF yield > 0 but EV/FCF <= 0 (EV <= 0): NEG_EV_SCORE.
+      - no grounded 3-yr CAGR (short history): current rev YoY stands in.
+    Blank only when neither the multiple nor the FCF yield exists (no data)."""
+    if ev_over_fcf is None or ev_over_fcf <= 0:
+        if fcf_yield_pct is None:
+            return None
+        if fcf_yield_pct <= 0:
+            return NEG_FCF_SCORE
+        if ev_over_fcf is not None:          # positive FCF, EV <= 0
+            return NEG_EV_SCORE
+        return None
+    if grounded_growth_pct is None:
+        grounded_growth_pct = rev_yoy_pct
+    return reverse_dcf_score(ev_over_fcf, grounded_growth_pct, rev_yoy_pct=rev_yoy_pct)
+
+
 def reverse_dcf_score(ev_over_fcf, grounded_growth_pct, wacc: float = 0.10,
                       years: int = 10, terminal_growth: float = 0.03,
                       grounded_floor: float = GROUNDED_FLOOR_PCT,

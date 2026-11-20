@@ -492,3 +492,22 @@ def test_negative_ebitda_stand_in_flags_are_surfaced():
     existing["nd_ebitda"] = None
     writes, _ = roi.apply_guards(info, fresh, existing)
     assert writes["nd_ebitda"] == 99.0
+
+
+def test_refresh_reports_sec_fallback_flags(tmp_path):
+    """SEC companyfacts fallback (2026-11-20): which inputs came from SEC, and
+    lagging names SEC could not help, reach the operator's flag list."""
+    wb = Workbook(); ws = wb.active; ws.title = "Watchlist"
+    ws.append(["Ticker", "Company", "Layer", "Last Updated"] + [None]*34)
+    ws.append(["TER", "Teradyne", "04 Semi Equipment", "2026-01-01"] + [None]*34)
+    sp = tmp_path / "scoring.xlsx"; wb.save(sp)
+    sec_line = "SEC: roic 33.78 replaces Yahoo 31.27 (Yahoo statements end 2026-06-30)"
+
+    def fake_fetch(ticker, layer):
+        return ({"financialCurrency": "USD", "_sec_flags": [sec_line]},
+                {k: 10.0 for k in roi.OBJ_COLS})
+
+    rep = roi.refresh(["TER"], dry_run=True, scoring_path=sp,
+                      fetcher=fake_fetch, dma_fetcher=lambda t: 70.0,
+                      today=dt.date(2026, 11, 20))
+    assert f"TER: {sec_line}" in rep["flags"]
