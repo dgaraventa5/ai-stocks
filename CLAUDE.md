@@ -778,6 +778,16 @@ Watchlist membership, scoring, cohorts and the score panel still include
 these names. No seam was stamped: a tradability constraint cannot start an
 exit clock, and a seam would have damped unrelated data-driven clocks.
 
+**Amendment 2026-11-20 (Dom): untradeable names are benchmarks only.** They
+stay on the Watchlist because the percentile cohorts need them: deleting the
+25 would drop Layer 2 to 7 names and Layer 5 to 5, under the 8-name minimum,
+so those layers would fall back to absolute bands (simulated: ETN +5.4, PWR
+and MTZ +4.1, POWL into the top 15) with no change in the companies. Their
+objective data refreshes with everyone else's. They get no research: the
+rating-integrity audit (and so the research rotation and its gate) skips
+them, because their ratings move only their own score, which never trades.
+Reports list their data gaps on one separate line.
+
 ### 31. Earnings sentinel: event-driven refresh for portfolio-relevant names (added 2026-08-13, approved by Dom)
 
 Spec: `docs/superpowers/specs/2026-08-13-earnings-sentinel-design.md`. A

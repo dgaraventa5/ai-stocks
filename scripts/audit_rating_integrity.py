@@ -41,6 +41,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 from common import ROOT
+from portfolio_sizing import is_tradable
 
 XLSX = ROOT / '00-master' / 'ai_supply_chain_scoring.xlsx'
 TEMPLATE = ROOT / 'templates' / 'per-stock-template.md'
@@ -109,6 +110,12 @@ def audit(layer_filter=None, stale_days=90):
             continue
         rated = any(ws.cell(row=r, column=c).value not in (None, '') for c in AI_COLS)
         if not rated:
+            continue
+        # Untradeable names are benchmarks only (rule 30 amendment
+        # 2026-11-20, Dom): their objective data ranks the tradable peers,
+        # but their own ratings move only their own score, which never
+        # trades. No research rotation, no gate, no stale flag for them.
+        if not is_tradable(tkr):
             continue
         has_thesis = thesis_populated(tkr, baseline)
         brief_age = newest_briefing_age(tkr, today)
