@@ -20,6 +20,9 @@ with `--job weekly-scan`. Differences from an attended run:
   `python3 scripts/recalc_watchlist.py --sync`. About five minutes. Report
   every "BLANK, data gap", "no statement FCF" and "EV/MW ... stale" flag by
   name at the top of the report (missing data is a finding, never routine).
+  Untradeable names (rule 30 benchmarks: foreign local listings and the
+  broker-untradeable OTC ADRs) get one separate line listing their gaps;
+  they are benchmarks only and need no other follow-up.
 - **Step 7** — `recalc --sync` already ran the portfolio step; do not run
   `refresh_targets.py` a second time. A model event's ticket trades at the
   next 06:35 executor run (rule 37, 2026-11-01); report what it will do and
