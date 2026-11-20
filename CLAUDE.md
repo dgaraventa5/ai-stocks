@@ -50,7 +50,7 @@ AI-Supply-Chain/
 ## Data sources (in priority order)
 
 1. **SEC EDGAR** (https://data.sec.gov, https://www.sec.gov/edgar) — primary source of truth for filings. Use User-Agent header `Dom Researcher dom@example.com` (replace with real email). Rate limit: 10 req/sec max, throttle with `time.sleep(0.1)`.
-2. **yfinance Python library** — fundamentals, market data. Install if missing: `pip install yfinance`. Has occasional rate limits and incomplete data on small-caps. **Known trap (fixed 2026-06-12):** `info.freeCashflow` is Yahoo's *levered* FCF estimate and does not reconcile to the cash-flow statements (printed NVDA's 47% TTM FCF margin as 18%). All FCF inputs must use statement-based TTM OCF − |capex| via `batch_score.statement_fcf()`; the info field is fallback-only and must be flagged.
+2. **yfinance Python library** — fundamentals, market data. Install if missing: `pip install yfinance`. Has occasional rate limits and incomplete data on small-caps. **Known trap (fixed 2026-06-12):** `info.freeCashflow` is Yahoo's *levered* FCF estimate and does not reconcile to the cash-flow statements (printed NVDA's 47% TTM FCF margin as 18%). All FCF inputs must use statement-based TTM OCF − |capex| via `batch_score.statement_fcf()`. **Amended 2026-11-20:** one calculation (`scripts/fcf_source.py`) feeds FCF yield, FCF margin and EV/FCF: four consecutive quarters, else the latest fiscal year (flagged), else blank (flagged). The info field is no longer used at all (DLR's "positive" FCF yield was that estimate; its statement FCF is negative). A missing objective input is now written blank and flagged, never kept from an older refresh.
 3. **Company IR pages** — earnings calls, investor presentations. Fall back to motleyfool.com if IR doesn't publish transcripts.
 4. **FRED** (https://fred.stlouisfed.org) — macro/rates/electricity data.
 5. **EIA** (https://www.eia.gov) — energy and electricity data.
@@ -159,7 +159,7 @@ The scoring band thresholds in `ai_supply_chain_scoring.xlsx` Methodology tab ar
 
 **Primary enforcement:** The `/weekly-scan` skill (Step 6) now includes earnings-triggered refresh as a built-in step. Any 8-K with Item 2.02 (quarterly results) triggers an objective input refresh in the same pass. This is the expected catch-all — `/earnings-update` handles deep single-name processing, but the weekly scan ensures nothing slips through even if `/earnings-update` wasn't run.
 
-**How to refresh:** Pull yfinance data and update the Watchlist row. For a scripted objective-only refresh of a set of names, use `/refresh-objective
+**How to refresh:** The weekly scan refreshes every Watchlist name every week (2026-11-20; the 8-K Item 2.02 trigger alone left ~30 names on an old quarter: 6-K filers, foreign local listings, companies not filing results under 2.02, and Yahoo lag at refresh time). Between scans, pull yfinance data and update the Watchlist row. For a scripted objective-only refresh of a set of names, use `/refresh-objective
 <portfolio|all|TICKERS>` (dry-run first) — it refreshes every objective input,
 guards the deliberate-blank conventions, and leaves subjective ratings untouched.
 For fast-ramp names where TTM averages understate the current business (e.g., 4 quarters spanning a margin ramp), note the MRQ values in the context briefing so the TTM limitation is visible.

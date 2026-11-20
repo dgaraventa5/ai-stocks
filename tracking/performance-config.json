@@ -1987,10 +1987,10 @@
           "STX",
           "RDDT",
           "RMBS",
-          "APH",
-          "VST",
+          "APP",
           "GEV",
-          "APP"
+          "TER",
+          "VST"
         ]
       }
     ],
@@ -2418,21 +2418,21 @@
       {
         "date": "2026-11-20",
         "roster": [
-          "TER",
+          "AAON",
           "ORCL",
           "LRCX",
           "KLAC",
-          "AAON",
           "SNPS",
+          "APH",
           "KLIC",
           "KEYS",
           "LITE",
           "CMI",
-          "AMZN",
+          "TT",
+          "CGNX",
           "GMED",
           "NTAP",
-          "CGNX",
-          "GOOGL"
+          "GLW"
         ]
       }
     ],
@@ -3057,7 +3057,7 @@
   },
   "methodology_seam": {
     "date": "2026-11-20",
-    "reason": "Rule 15 amended: EPS YoY always the reported number (Dom 2026-11-20)"
+    "reason": "FCF from statements only (quarterly TTM, else annual; no Yahoo estimate) + 13 capacity figures refreshed (2026-11-20)"
   },
   "methodology_seams_open": [
     {
