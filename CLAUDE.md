@@ -1116,6 +1116,20 @@ key events, re-computed rating proposals, and an exit check. Same limits as
 change. Dom retires a watch when its exit conditions (listed in the name's
 `catalysts-watchlist.md`) are met; a run never disables its own task.
 
+**Amendment 2026-11-17 (Dom-approved): one inbox for everything that needs
+Dom.** Open items were reaching Dom only as counts: 47 rating proposals sat up
+to a month in `tracking/rating-proposals.md`, and EPS rulings, hold expiries and
+data fixes lived only in report prose. Every run now ends with the inbox step
+(`docs/ops/scheduled-runs.md`, step 3b): `scripts/dom_inbox.py` collects open
+proposals, holds lapsed or expiring within 10 days, and asks recorded with
+`dom_inbox.py ask` (`tracking/dom-asks.json`), ranks them (portfolio-changing
+and held-name items first), writes `tracking/needs-dom.md` and syncs the Notion
+table "Dom inbox", where Dom ticks Approve / Decline / Discuss. `/review-inbox`
+(attended) applies the ticks. Proposals expire: M1 and M2 after 14 days, the rest
+after 45, and an older duplicate is superseded. Expiry rewrites only the Status
+line, and `/rating-research` re-checks expired proposals on held and top-25
+names. Runs still never apply a decision.
+
 Rule 31's schedule and prompt are superseded by `/daily-watch`; its detection
 script, state file and two-phase design are unchanged. Rule 35 amendment: a
 scheduled run may ADD an entry hold (it only delays a buy); removing or

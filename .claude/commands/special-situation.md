@@ -80,7 +80,8 @@ the catalysts file. Never disable or delete a scheduled task from a run.
 
 ## 6. Land and report
 
-Per the protocol: test, `land`, `merge`, confirm the deploy. Then publish a
+Per the protocol: the inbox step (3b), test, `land`, `merge`, confirm the
+deploy. Then publish a
 Notion page `{T} Special Situation — {date}` under the protocol's parent page.
 Open with what changed since the last briefing, in plain English with sources.
 Then the proposals (ticker, dimension, current → proposed, one-line reason,

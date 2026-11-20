@@ -67,6 +67,10 @@ this check.
    2026-10-12): nothing a run finds is left only in a chat or on this Mac,
    and a missed run shows up as a missing date. Put not-material and
    could-not-verify items in the line, briefly.
+3b. **Inbox** (every run, quiet or not — see "Dom's inbox" below). Record
+   each new ask, retire stale proposals, rebuild `tracking/needs-dom.md` and
+   sync the Notion table. The summary line it prints goes in the log line and
+   the notification.
 4. **Test.** `python3 -m pytest tests -q`. A quiet run whose only change is its log
    line skips this step (CI still gates the merge). On a test failure run
    `land --hold` (so the work is visible on a draft PR) but NOT `merge`;
@@ -98,7 +102,8 @@ this check.
   numbers (rule 29). Only the weekly scan appends to
   `tracking/notion-scan-links.json`.
 - **Notification:** `python3 scripts/scheduled_run.py notify --message "<line>"`
-  — a plain macOS notification, one line under 200 characters, leading with
+  — a plain macOS notification, one line under 200 characters, ending with
+  the inbox summary line (`dom_inbox.py summary`), leading with
   what needs Dom ("PLTR re-scored 74→77, enters at rank 14; ticket trades at the next 06:35 run"). Do
   not use the in-app PushNotification tool: it skips delivery when the run's
   own window counts as active (2026-10-13).
@@ -109,12 +114,70 @@ this check.
 - If Notion is not connected, still land the work, say so in the
   notification, and put the report in the PR body.
 
+## Dom's inbox (Dom, 2026-11-17)
+
+Everything a run needs Dom for lands in ONE place. Before this, 47 rating
+proposals sat a month in `tracking/rating-proposals.md` while reports carried
+only a count, and EPS rulings, hold expiries and data fixes lived only in report
+prose. Sources (`scripts/dom_inbox.py` reads all three):
+
+- **Rating proposals** — `tracking/rating-proposals.md`, as before.
+- **Entry holds** — read from `00-master/entry-holds.json` automatically.
+- **Everything else** — record it as an ask, in the same run that finds it:
+
+  ```bash
+  python3 scripts/dom_inbox.py ask --kind eps_ruling --ticker NRG --text "+269% written with no ruling" --source "weekly-news-scan-2026-11-14.md"
+  python3 scripts/dom_inbox.py ask --kind hold_candidate --ticker LITE --text "Marvell deal signed 11-01 (transformative)" --source "..."
+  python3 scripts/dom_inbox.py ask --kind data_fix --ticker AMAT --key rev-cagr --text "3-yr CAGR 3.23% looks wrong" --source "..."
+  python3 scripts/dom_inbox.py ask --kind question --ticker AVGO --key r3-backstop --text "..." --source "..."
+  ```
+
+  Asking again for the same name and kind updates the open ask, never a
+  duplicate. An `eps_ruling` ask closes itself once
+  `00-master/eps-yoy-overrides.json` holds a ruling dated on or after it. A
+  run never closes any other ask (`close` is for the session that resolves it).
+
+Step 3b, in order:
+
+```bash
+python3 scripts/dom_inbox.py expire      # M1/M2 proposals past 14 days, others past 45, and superseded duplicates
+python3 scripts/dom_inbox.py build       # writes tracking/needs-dom.md, prints the summary line
+python3 scripts/dom_inbox.py notion-plan # JSON: rows to create / re-prioritise / close
+```
+
+Then sync the Notion table **Dom inbox**
+(https://app.notion.com/p/41cb69da11c0817284b1cb6eb543c7f0, data source
+`41cb69da-11c0-8108-b90f-000b01ecac83`):
+- `create` → one `notion-create-pages` call, parent `{"data_source_id": ...}`,
+  each row's `properties` exactly as printed.
+- `update` → `notion-update-page` setting `Priority` to the printed value.
+- `close` → `notion-update-page` setting `State` to `Closed`, unless Dom's
+  `Decision` is set (then the applying session sets `Applied`).
+- Then `python3 scripts/dom_inbox.py notion-record --created ID=PAGE ... --closed ID ...`
+  so the next run knows what exists.
+
+Also count rows where `Decision` is set and `State` is `Open` (decided but not
+yet applied) and say so in the notification: "3 of your decisions are waiting
+— run /review-inbox". A run never applies a decision; rule 37 keeps ratings,
+rulings and holds with an attended session.
+
+If Notion is unreachable, still build `needs-dom.md`, land it, and say "inbox
+not synced to Notion" in the notification. Do not record pages that were not
+created.
+
+**In the report**, the "Needs you" section lists only what THIS run added,
+then the summary line and the table link. Do not restate the whole inbox.
+`expire` is the only automatic change to a proposal: it rewrites the Status
+line, never a rating, and `/rating-research` re-checks expired proposals on
+held and top-25 names.
+
 ## Written for Dom
 
 Plain English, decision first. Every number cites its source (rule 1). A gap
-is stated as a gap (rule 3). Each report ends with **"Needs you"**: rating
-proposals awaiting a yes/no, EPS rulings, buys the data check left off a
-ticket, expiring entry holds.
+is stated as a gap (rule 3). Each report ends with **"Needs you"**: what this
+run added to Dom's inbox (rating proposals, EPS rulings, buys the data check
+left off a ticket, hold candidates, data fixes), then the inbox summary line
+and a link to the Notion table.
 
 ## Buys the data check left off
 

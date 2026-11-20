@@ -28,6 +28,11 @@ Order of priority:
 Also list entry holds in `00-master/entry-holds.json` expiring within 10 days;
 a name on that list takes a slot, because its hold lapsing makes it buyable.
 
+Expired proposals come back here: `python3 scripts/dom_inbox.py expire --dry-run`
+and the `EXPIRED` Status lines from the last 14 days. A held or top-25 name
+whose proposal expired unanswered ranks with group 2 above; re-propose on
+fresh data or say the reading no longer holds.
+
 ## 3. Research each name — one at a time, per ticker, no sector shortcuts
 
 Run `/refresh-context {T}` in full for each (mental model first, then filings,
@@ -49,11 +54,15 @@ Apply the absolute rubric, not relative ranking. Never propose a move in order
 to cross a tier or rank threshold. For a hold about to expire, state whether
 the event behind it has resolved (Dom decides whether to renew).
 
+A rule-35 hold candidate this job may not add, a rule-15 ruling it may not
+write, or any other question for Dom goes in the inbox in the same pass:
+`python3 scripts/dom_inbox.py ask --kind hold_candidate|eps_ruling|question ...`.
+
 ## 5. Land and report
 
-Per the protocol (briefings and proposals are committed; no scores move, so no
-model event is expected — run `python3 scripts/refresh_targets.py --check` and
-report if it is red). Notion page `Rating Research — {date}`:
+Per the protocol, including the inbox step (3b) before landing (briefings and
+proposals are committed; no scores move, so no model event is expected — run
+`python3 scripts/refresh_targets.py --check` and report if it is red). Notion page `Rating Research — {date}`:
 
 - **What I looked at** — the names and why each was picked.
 - Per name: what changed since the last briefing, in three or four sentences,
@@ -62,3 +71,4 @@ report if it is red). Notion page `Rating Research — {date}`:
   one-line reason, effect on score and rank, membership change yes/no.
 - **Holds expiring** — and whether each still looks warranted.
 - **Queue** — how many names remain over 90 days stale.
+- **Inbox** — the `dom_inbox.py summary` line and the Dom inbox table link.

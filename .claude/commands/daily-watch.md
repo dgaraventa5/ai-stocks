@@ -71,7 +71,8 @@ Price moves, analyst targets, dividends and conference appearances are not.
 empty, the sentinel and `scan-filings` both exit 0, and `news_watch.py` exits
 0. Branch, then
 `python3 scripts/scheduled_run.py log --text "quiet (scope N, filings F, news I items / M names); <any
-not-material or could-not-verify items, one clause each>"`, then `land` and
+not-material or could-not-verify items, one clause each>"`, then the protocol's
+inbox step (3b), then `land` and
 `merge` per the protocol, release the lock, and stop. No Notion page, no
 notification. Most days end here.
 
@@ -106,7 +107,9 @@ python3 scripts/earnings_sentinel.py --mark rescored {T} {report_date}   # each 
 
 Record before/after Total Score and rank for each. Flag, do not fix: withheld
 or STALE EPS YoY cells (rule 15 — needs Dom's ruling), Layer-9 MW denominators
-(rule 13), TTM-vs-MRQ gaps over 10 points (rule 9).
+(rule 13), TTM-vs-MRQ gaps over 10 points (rule 9). Record each EPS ruling and
+MW gap in Dom's inbox (`dom_inbox.py ask --kind eps_ruling` / `--kind data_fix`)
+so it is not left only in the report.
 
 ## 5. Material news (at most 3 names per run; holdings first)
 
@@ -149,11 +152,11 @@ date it can confirm), deferred by the entry gate, or nothing.
 
 ## 7. Test, land, report
 
-Per the protocol. Notion page `Daily Watch — {date}`:
+Per the protocol, including the inbox step (3b) before landing. Notion page `Daily Watch — {date}`:
 
 - **What happened** — two or three sentences.
 - **Earnings** — table: ticker, result vs consensus, score and rank before → after.
 - **News** — one line per material item with its source link.
 - **Model** — events, exit clocks, entry holds added; and any buys the data check left off a ticket.
-- **Needs you** — rating proposals (yes/no each), EPS rulings, buys the data check left off a ticket.
+- **Needs you** — only what this run added to Dom's inbox (proposals, EPS rulings, buys the data check left off a ticket), then the `dom_inbox.py summary` line and the Dom inbox table link.
 - **Could not verify** — anything unchecked or undated, and every `flagged` name with its reason.

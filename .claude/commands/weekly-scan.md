@@ -27,8 +27,10 @@ with `--job weekly-scan`. Differences from an attended run:
   Then run `python3 scripts/portfolio_theses.py` and write a rule-39 thesis
   for any name it lists.
 - **Step 8** — rating changes are proposals in `tracking/rating-proposals.md`,
-  never applied. Also list open proposals still awaiting Dom, and entry holds
-  expiring in the next 10 days.
+  never applied. Record every other ask (EPS rulings, data fixes, hold
+  candidates, questions) with `dom_inbox.py ask`, then run the protocol's
+  inbox step (3b). The report's "Needs Dom" section gives this week's new
+  items, the summary line and the table link — not the whole backlog.
 - **Step 10** — heartbeat check only (10a). Skip reconciliation.
 - Report how many daily-watch runs happened this week
   (the week's `daily-watch` lines in `tracking/scheduled-run-log.md`; a missing

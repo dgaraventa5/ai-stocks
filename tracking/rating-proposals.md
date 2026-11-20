@@ -21,13 +21,13 @@ Status: PROPOSED
 Event: yfinance adjusted closes, 126 trading days 2026-04-17 → 2026-10-16: ANET +7.8% vs SMH +16.3% = −8.5pp (the 2026-10-06 audit basis). The 3-month read (from 2026-07-20) is +7.9pp, which would be band 4.
 Why: Band 2 'Underperforming sector by 5-20%' on the ~6-month basis the 2026-10-06 mechanical re-measure used. Medium confidence because the two windows the rubric allows disagree.
 Effect if approved: Total 79.40 → 78.90, rank 8 → 8; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: EXPIRED 2026-11-17 — 30 days old, past the 14-day limit for M2; /rating-research re-checks it if the name is held or top 25 (dom_inbox expire)
 
 ## 2026-10-18 — FIX — M2 Relative Strength 4 → 2  (confidence High)
 Event: yfinance adjusted closes, 126 trading days 2026-04-17 → 2026-10-16: FIX −12.7% vs XLI −2.8% = −9.9pp; 3-month −15.9% vs −5.6% = −10.3pp. FIX fell ~13% from 9/30 ($1,654) to 10/16 ($1,439) with no company news found (GuruFocus 10/15; Erste downgrade to Hold per stockanalysis.com).
 Why: Band 2 'Underperforming sector by 5-20%' on both windows. Q3 results land 2026-10-22, so this reading may move within the week.
 Effect if approved: Total 81.44 → 80.44, rank 5 → 5; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: EXPIRED 2026-11-17 — 30 days old, past the 14-day limit for M2; /rating-research re-checks it if the name is held or top 25 (dom_inbox expire)
 
 ## 2026-10-18 — SNDK — D1 AI Revenue % 3 → 4  (confidence Med)
 Event: FY26 10-K (2026-08-17) Item 7: datacenter $5,153M of $20,248M revenue = 25.4%; FQ4 8-K (2026-08-05) Ex.99.1: datacenter $2,977M of $8,965M = 33.2%. MD&A attributes the growth to AI infrastructure.
@@ -51,7 +51,7 @@ Status: PROPOSED
 Event: yfinance adjusted closes, 126 trading days 2026-04-17 → 2026-10-16: MSFT +25.6% vs SPY +8.0% = +17.6pp (SPY is the benchmark named in the 2026-10-06 audit row, which read +24.8pp).
 Why: Band 4 'Outperforming sector by 5-20%'. The 3-month read is far stronger (+29.7pp vs QQQ), mostly the 7/30 post-earnings gap.
 Effect if approved: Total 79.79 → 79.29, rank 6 → 8; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: EXPIRED 2026-11-17 — 30 days old, past the 14-day limit for M2; /rating-research re-checks it if the name is held or top 25 (dom_inbox expire)
 
 ## 2026-10-18 — MSFT — M3 Insider Activity 4 → 5  (confidence High)
 Event: EDGAR Form 4, accession 0000789019-26-000028 (filed 2026-02-18): director John W. Stanton, code P, 5,000 shares @ $397.35 ≈ $1.99M. Officer sales in Sept 2026 were 10b5-1 (routine).
@@ -65,13 +65,13 @@ _All nine 2026-10-18 proposals together: ANET 79.40→78.65 (rank 8→9), FIX 81
 Event: yfinance adjusted closes, 126 trading days 2026-04-28 → 2026-10-27: CRDO +0.2% vs SMH +13.4% = −13.2pp; 63 days (from 2026-07-29): −6.4% vs +10.5% = −16.9pp. Two drawdowns: −20.0% on 2026-09-02 after Q1 FY27 (GAAP EPS and FCF light; TIKR 2026-10-20) and −21.6% in the week of Oct 12–16 during a semis selloff (TIKR). Briefing: per-stock/CRDO/context-2026-10-27.md.
 Why: Band 2 'Underperforming sector by 5-20%' on both windows. The 5 dates from before both drawdowns.
 Effect if approved: Total 81.58 → 80.08, rank 5 → 5; membership change: no. Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: EXPIRED 2026-11-17 — 21 days old, past the 14-day limit for M2; /rating-research re-checks it if the name is held or top 25 (dom_inbox expire)
 
 ## 2026-10-27 — GOOGL — M2 Relative Strength 4 → 2  (confidence High)
 Event: yfinance adjusted closes, 126 trading days 2026-04-28 → 2026-10-27: GOOGL −7.9% vs QQQ +9.9% = −17.8pp (vs SPY +8.6%: −16.5pp); 63 days: −4.4% vs QQQ +9.0% = −13.4pp.
 Why: Band 2 'Underperforming sector by 5-20%' on both windows and either benchmark. Q3 results land 2026-10-28 after the close, so this reading may move within days.
 Effect if approved: Total 71.58 → 70.58, rank 26 → 29 (tradable); membership change: no (GOOGL is not held and sits under an entry hold to 2026-11-05). Computed on a scratch copy of the workbook (recalc percentile mode), single change in isolation.
-Status: PROPOSED
+Status: SUPERSEDED 2026-11-17 by the 2026-11-01 proposal (dom_inbox expire)
 
 ## 2026-10-27 — NVDA — M2 Relative Strength 1 → 2  (confidence High)
 Event: yfinance adjusted closes, 126 trading days 2026-04-28 → 2026-10-27: NVDA +2.3% vs SMH +13.4% = −11.1pp; 63 days: +14.6% vs +10.5% = +4.1pp.
@@ -115,19 +115,19 @@ Status: PROPOSED
 Event: 10-K filed 2026-10-09, contingencies note: DRAM price-fixing class action against Micron, Samsung and SK hynix (N.D. Cal., filed 2026-06-25; a similar Hawaii complaint 2026-07-17) seeking treble damages for a period from 2022-10-26; YMTC patent suits in several countries, with a Munich order against accused 3D NAND in Germany under appeal (briefing, Section 2). All allegations; no loss estimate. Offsets: Netlist settled, the securities case is closed.
 Why: Band 2 'Material litigation or active regulatory investigations.' The antitrust case targets the price rise behind FY26 results and the patent suits pertain to substantially all products, which no longer reads as band 3 'immaterial'. Band 1 not reached: private complaint at the pleading stage, no government probe found. litigation_check.py was skipped (HTTP 401).
 Effect if approved: Total 88.62 → 87.87, rank 1 → 1; membership change: no. Scratch copy, single change in isolation.
-Status: PROPOSED
+Status: SUPERSEDED 2026-11-17 by the 2026-11-16 proposal (dom_inbox expire)
 
 ## 2026-11-01 — GOOGL — M2 Relative Strength 4 → 2  (confidence High on XLC; benchmark is Dom's call)
 Event: Yahoo adjusted closes to 2026-10-30, after the −12.6% fall on 2026-10-29: 126 days −27.4% vs XLC −13.9% = −13.4pp; 63 days −25.0% vs −10.0% = −15.1pp. On QQQ: −30.0pp and −23.8pp. Replaces the numbers in the 2026-10-27 proposal, same band.
 Why: Band 2 'Underperforming sector by 5-20%' on XLC, the basis Dom held 2026-10-10. On QQQ it is band 1. XLC is itself heavy in Alphabet and Meta, so it flatters GOOGL; the rubric names no benchmark for this name. Briefing: per-stock/GOOGL/context-2026-11-01.md.
 Effect if approved: Total 72.08 → 71.08, rank 26 → 30 (tradable); membership change: no (not held). At 1 instead (QQQ basis) the fall would be 1.5 points. Scratch copy, single change in isolation.
-Status: PROPOSED
+Status: EXPIRED 2026-11-17 — 16 days old, past the 14-day limit for M2; /rating-research re-checks it if the name is held or top 25 (dom_inbox expire)
 
 ## 2026-11-01 — GOOGL — M1 EPS Revisions 4 → 3  (confidence Low)
 Event: Yahoo EPS trend 2026-11-01: Q4 $3.35 → $3.21 (−4.0%) and Q1 2027 $3.44 → $3.34 (−2.7%) over 30 days; FY2027 $14.95 → $14.84 (−0.8%), still +0.5% over 90 days. The FY2026 drop of $0.89 equals the Q3 miss, so it is the print replacing an estimate, not a forward cut. 30-day counts still lean up, mostly before the print.
 Why: Band 3 'Stable estimates. Neutral revision trend.' Levels point to band 2, counts to band 4. Low confidence: post-print revisions may not be fully in the data yet.
 Effect if approved: Total 72.08 → 71.58, rank 26 → 26; membership change: no. With M2 too: 70.58, rank 30. Scratch copy, single change in isolation.
-Status: PROPOSED
+Status: EXPIRED 2026-11-17 — 16 days old, past the 14-day limit for M1; /rating-research re-checks it if the name is held or top 25 (dom_inbox expire)
 
 ## 2026-11-01 — SPCX — D5 AI Adoption 5 → 4  (confidence Med)
 Event: Q3 10-Q (filed 2026-10-22): Customer B, in the SI segment, is 34.5% of revenue, up from under 10% a year ago; Cursor added $608M from acquisition; Grok Bot has 800,000 paid weekly users with no revenue figure.
@@ -139,7 +139,7 @@ Status: PROPOSED
 Event: Yahoo EPS trend 2026-11-01: next-year EPS $0.57 → $4.03 over 90 days and $1.86 → $4.03 over 30, with 4 up and 0 down in 30 days. Q3 EPS $0.35 vs $0.16 estimate. About $1.49B of Q3 net income was one-time (10-Q Notes 7, 8, 15).
 Why: Band 5 'Multiple upward revisions. Beat-and-raise pattern. Consensus moving higher.' Against: few analysts, and the current-quarter estimate slipped $0.46 → $0.38 in 7 days.
 Effect if approved: Total 60.34 → 61.00, rank 101 → 100; membership change: no. Scratch copy, single change in isolation.
-Status: PROPOSED
+Status: EXPIRED 2026-11-17 — 16 days old, past the 14-day limit for M1; /rating-research re-checks it if the name is held or top 25 (dom_inbox expire)
 
 ## 2026-11-01 — SPCX — R4 Regulatory/Litigation Risk 3 → 2  (confidence Med)
 Event: Q3 10-Q, legal note: Virginia AG notice of violation 2026-10-19 (contemplating suit over Grok images); NAACP Clean Air Act case with a pending injunction motion against the Colossus II turbines; $350M accrued current and $399M other liabilities for litigation losses at 2026-09-30. California AG investigation (Bloomberg, 2026-01-14).
@@ -151,13 +151,13 @@ Status: PROPOSED
 Event: Yahoo adjusted closes to 2026-10-30: 126 days −43.2% vs XLI −2.7% = −40.5pp; 63 days −28.9% vs −8.4% = −20.5pp.
 Why: Band 1 'Lagging sector by >20%' on both windows. The 5 dates from 2026-05-18. Briefing: per-stock/POWL/context-2026-11-01.md.
 Effect if approved: Total 69.11 → 67.11, rank 38 → 52; membership change: no. Scratch copy, single change in isolation.
-Status: PROPOSED
+Status: EXPIRED 2026-11-17 — 16 days old, past the 14-day limit for M2; /rating-research re-checks it if the name is held or top 25 (dom_inbox expire)
 
 ## 2026-11-01 — POWL — M1 EPS Revisions 4 → 3  (confidence High)
 Event: Yahoo EPS trend 2026-11-01: 90 days FY $5.45 → $5.37, current quarter $1.60 → $1.56, next quarter $1.21 → $1.27, next year $6.66 → $6.82. 30-day counts FY 2 up / 2 down.
 Why: Band 3 'Stable estimates. Neutral revision trend.' Moves offset.
 Effect if approved: Total 69.11 → 68.61, rank 38 → 38; membership change: no. Scratch copy, single change in isolation.
-Status: PROPOSED
+Status: EXPIRED 2026-11-17 — 16 days old, past the 14-day limit for M1; /rating-research re-checks it if the name is held or top 25 (dom_inbox expire)
 
 ## 2026-11-01 — POWL — M3 Insider Activity 3 → 2  (confidence Med)
 Event: Form 4 XML, 2025-12 to 2026-10: no open-market buys. Second-tier officers (including VP R&D W. Mauney) sold 27–54% of their stakes outside plans, about $5.8M together. CEO and CFO sold under plans only. The parser's $58.2M "discretionary" figure is overstated: $35.0M is T. Powell exchange-fund transfers.
