@@ -166,9 +166,9 @@ def statement_roic(t, ticker=None) -> tuple[float | None, list[str]]:
     4-quarter sum returned the year ending in APRIL and looked perfectly normal.
     info['mostRecentQuarter'] knew the true quarter, so we compare the two and
     flag STALE. A stale ROIC is still far better than a frozen hand-typed one,
-    but it must be visible, never assumed current (rule 3). Upgrade path if this
-    proves annoying: SEC XBRL companyfacts with Q4 derived as FY - 9M (Q4 is
-    never tagged as a standalone period).
+    but it must be visible, never assumed current (rule 3). Built 2026-11-20:
+    batch_score.compute_inputs replaces a STALE value with sec_statements.py's
+    SEC companyfacts ROIC (Q4 = FY - 9M) when it reconciles with this one.
     """
     flags: list[str] = []
     try:

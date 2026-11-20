@@ -330,6 +330,10 @@ def _default_fetcher(ticker, layer):
                               if g.startswith("FCF: ")), None)
     info["_eps_note"] = next((g[len("EPS YoY: "):] for g in gaps
                               if g.startswith("EPS YoY: ")), None)
+    # SEC companyfacts fallback (sec_statements.py, 2026-11-20): which inputs
+    # came from SEC, which SEC values were refused, and lagging names SEC
+    # could not help yet.
+    info["_sec_flags"] = [g for g in gaps if g.startswith("SEC: ")]
     return info, fresh
 
 
@@ -402,6 +406,7 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
         if info.get("_fcf_note"):                   # annual fallback or no FCF
             flags.append(f"FCF: {info['_fcf_note']}")
         flags.extend(info.get("_nd_flags") or [])  # negative-EBITDA stand-ins
+        flags.extend(info.get("_sec_flags") or [])  # SEC fallback source flags
 
         try:
             dma_value = dma_fetcher(ticker)

@@ -51,6 +51,7 @@ AI-Supply-Chain/
 
 1. **SEC EDGAR** (https://data.sec.gov, https://www.sec.gov/edgar) — primary source of truth for filings. Use User-Agent header `Dom Researcher dom@example.com` (replace with real email). Rate limit: 10 req/sec max, throttle with `time.sleep(0.1)`.
 2. **yfinance Python library** — fundamentals, market data. Install if missing: `pip install yfinance`. Has occasional rate limits and incomplete data on small-caps. **Known trap (fixed 2026-06-12):** `info.freeCashflow` is Yahoo's *levered* FCF estimate and does not reconcile to the cash-flow statements (printed NVDA's 47% TTM FCF margin as 18%). All FCF inputs must use statement-based TTM OCF − |capex| via `batch_score.statement_fcf()`. **Amended 2026-11-20:** one calculation (`scripts/fcf_source.py`) feeds FCF yield, FCF margin and EV/FCF: four consecutive quarters, else the latest fiscal year (flagged), else blank (flagged). The info field is no longer used at all (DLR's "positive" FCF yield was that estimate; its statement FCF is negative). A missing objective input is now written blank and flagged, never kept from an older refresh.
+   **SEC fallback (2026-11-20):** when Yahoo's quarterly statements lag `info['mostRecentQuarter']` or miss an input, `scripts/sec_statements.py` runs the same calculation (ROIC, FCF yield/margin, EV/FCF, EPS YoY gap, missing debt/cash, rev 3y CAGR) on SEC companyfacts, Q4 derived as FY − 9M. SEC is used only when its period is newer than Yahoo's (or Yahoo has none) AND it reproduces Yahoo's figure for Yahoo's own period: companyfacts omits company-specific concepts (SHAZ's GPU capex), so an unreconciled newer number is refused, flagged, and Yahoo kept. Every SEC value is a `SEC:` line in the refresh flags. us-gaap 10-Q/10-K filers only; IFRS, 6-K and foreign local listings stay on Yahoo. SEC ROIC uses GAAP operating income (Yahoo's line adds back special charges), within the reconciliation tolerance.
 3. **Company IR pages** — earnings calls, investor presentations. Fall back to motleyfool.com if IR doesn't publish transcripts.
 4. **FRED** (https://fred.stlouisfed.org) — macro/rates/electricity data.
 5. **EIA** (https://www.eia.gov) — energy and electricity data.
@@ -959,7 +960,7 @@ APRIL and looked normal. `roic.statement_roic` compares against
 `info['mostRecentQuarter']` and flags **STALE** (9 names did on deploy day). A
 stale ROIC still beats a frozen one, but it must be visible (rule 3). Upgrade
 path if it bites: SEC XBRL companyfacts, deriving Q4 = FY − 9M (Q4 is never
-tagged standalone).
+tagged standalone). *Built 2026-11-20: `sec_statements.py`, see Data sources §2.*
 
 **Scope:** foreign LOCAL listings are excluded (`batch_score.ROIC_SKIP_FOREIGN`)
 by Dom's choice 2026-09-08 — **not** an FX limitation. ROIC is currency-neutral

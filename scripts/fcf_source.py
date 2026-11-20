@@ -69,6 +69,20 @@ def _capex(stmt: dict, dates) -> tuple[dict, str] | tuple[None, None]:
 def fcf_from_statements(quarterly: dict, annual: dict
                         ) -> tuple[float | None, str]:
     """(FCF or None, note). quarterly/annual: {row name: {date: value}}."""
+    fcf, note, _end, _kind = fcf_detail(quarterly, annual)
+    return fcf, note
+
+
+QUARTERLY, ANNUAL = "quarterly", "annual"
+
+
+def fcf_detail(quarterly: dict, annual: dict
+               ) -> tuple[float | None, str, dt.date | None, str | None]:
+    """(FCF or None, note, period end, QUARTERLY|ANNUAL|None).
+
+    The period end and kind let a caller compare two sources (Yahoo vs SEC
+    companyfacts, sec_statements.py) on which describes the newer period.
+    """
     q_ocf = _clean(quarterly.get(OCF))
     newest = sorted(q_ocf, reverse=True)[:4]
     if len(newest) == 4:
@@ -78,7 +92,7 @@ def fcf_from_statements(quarterly: dict, annual: dict
             fcf = sum(q_ocf[d] for d in newest) - abs(sum(cap[d] for d in newest))
             note = (f"quarterly TTM to {newest[0]}" if name == CAPEX_ROWS[0]
                     else f"quarterly TTM to {newest[0]} (capex from '{name}')")
-            return fcf, note
+            return fcf, note, newest[0], QUARTERLY
 
     a_ocf = _clean(annual.get(OCF))
     for d in sorted(a_ocf, reverse=True):
@@ -87,6 +101,6 @@ def fcf_from_statements(quarterly: dict, annual: dict
             fcf = a_ocf[d] - abs(cap[d])
             extra = "" if name == CAPEX_ROWS[0] else f", capex from '{name}'"
             return fcf, (f"ANNUAL fiscal year {d} (no four consecutive quarters "
-                         f"with capex in Yahoo's quarterly statement{extra})")
+                         f"with capex in the quarterly statement{extra})"), d, ANNUAL
     return None, ("no statement FCF: neither four consecutive quarters nor a "
-                  "fiscal year with both operating cash flow and capex")
+                  "fiscal year with both operating cash flow and capex"), None, None
