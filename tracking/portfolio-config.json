@@ -18,5 +18,9 @@
     "top": 15,
     "next": 25,
     "tail": 40
+  },
+  "execution": {
+    "auto_tickets": false,
+    "_why": "Dom 2026-11-20: off while scoring-data issues are sorted out (EPS rule change, stale refreshes, FCF and capacity gaps moved scores a lot in one day). No ticket for model events or the monthly rebalance; manual tickets still work. Set true to turn back on."
   }
 }

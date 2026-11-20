@@ -426,7 +426,11 @@ def main(mode: str = 'auto') -> int:
             raise RuntimeError('execution refused or transport error (see log)')
 
     def ticket_step():
-        from generate_trade_ticket import on_model_event, _targets_weights
+        from generate_trade_ticket import (on_model_event, _targets_weights,
+                                           auto_tickets_on)
+        if not auto_tickets_on():
+            print('ticket_gen: automatic tickets are OFF — skipped')
+            return
         ticket_gen_if_stale(
             LIVE_DIR, last_event(),
             gen=lambda ev: on_model_event(ev, _targets_weights()[0]))
@@ -435,7 +439,13 @@ def main(mode: str = 'auto') -> int:
         _reconcile_via_transport(transport, macos_notify)
 
     def rebalance_step():
-        from generate_trade_ticket import generate, _targets_weights
+        from generate_trade_ticket import (generate, _targets_weights,
+                                           auto_tickets_on)
+        if not auto_tickets_on():
+            # no stamp: the month stays un-rebalanced, so it is caught up
+            # on the first trading-day run after tickets are turned back on
+            print('rebalance: automatic tickets are OFF — skipped')
+            return
         monthly_rebalance(
             LIVE_DIR,
             recon=lambda: _reconcile_via_transport(transport, macos_notify),
