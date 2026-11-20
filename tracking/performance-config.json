@@ -1982,14 +1982,14 @@
         "roster": [
           "ALAB",
           "WDC",
-          "POWL",
           "STX",
+          "POWL",
           "RDDT",
+          "TER",
           "RMBS",
           "APP",
-          "GEV",
-          "TER",
-          "VST"
+          "APH",
+          "KLIC"
         ]
       }
     ],
@@ -2417,21 +2417,21 @@
       {
         "date": "2026-11-20",
         "roster": [
-          "AAON",
-          "ORCL",
+          "VST",
+          "GEV",
+          "KLAC",
           "LRCX",
           "SNPS",
-          "APH",
-          "KLAC",
-          "KLIC",
+          "CMI",
           "KEYS",
           "LITE",
-          "CMI",
+          "AAON",
           "BE",
+          "TSEM",
           "TT",
-          "CGNX",
-          "GMED",
-          "NTAP"
+          "NTAP",
+          "ORCL",
+          "NXT"
         ]
       }
     ],
@@ -3056,7 +3056,7 @@
   },
   "methodology_seam": {
     "date": "2026-11-20",
-    "reason": "Loss quarters and negative EBITDA scored by stand-in instead of blank (Dom 2026-11-20)"
+    "reason": "SEC companyfacts fallback + stand-ins instead of blanked metrics (#365)"
   },
   "methodology_seams_open": [
     {
