@@ -43,6 +43,7 @@ warnings.filterwarnings("ignore")
 import yfinance as yf
 
 import adr_currency
+import eps_growth
 import revenue_cagr
 from openpyxl import load_workbook
 
@@ -304,6 +305,24 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
     eg = info.get("earningsQuarterlyGrowth")
     if eg is not None and not _is_missing(eg):
         inp["eps_yoy"] = round(eg * 100, 2)
+    else:
+        # Yahoo's figure is missing: say why, and fill it from the statements
+        # when both quarters are present and the base is a profit
+        # (eps_growth.py; the 2026-11-20 sticky-blank fix).
+        try:
+            q = t.quarterly_income_stmt
+            name = next((n for n in ("Net Income Common Stockholders", "Net Income")
+                         if q is not None and n in q.index), None)
+            ni = {k: q.loc[name][k] for k in q.loc[name].index} if name else {}
+            mrq = info.get("mostRecentQuarter")
+            latest = (dt.datetime.fromtimestamp(float(mrq), dt.timezone.utc).date()
+                      if mrq and not _is_missing(mrq) else None)
+            v, code, note = eps_growth.eps_yoy_fallback(ni, latest)
+        except Exception as e:
+            v, code, note = None, eps_growth.NO_DATA, f"statement error {e}"
+        inp["eps_yoy"] = v
+        inp["_eps_reason"] = code
+        gaps.append(f"EPS YoY: {note}")
 
     return inp, gaps
 
