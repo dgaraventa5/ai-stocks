@@ -288,3 +288,23 @@ def test_standard_names_never_take_the_financial_path():
     v, flags = roic.statement_roic(_tk())
     assert v == 31.6
     assert not any(f.startswith("FINANCIAL TEMPLATE") for f in flags)
+
+
+def test_annual_fallback_when_no_four_quarters():
+    """Half-yearly filers (HK lines) and OTC ADRs: latest fiscal year, flagged
+    ANNUAL, instead of a blank (Dom 2026-11-20: no blanked metrics)."""
+    t = _tk(op=(100, 100))                              # only two quarters
+    t.income_stmt = _Frame({"Operating Income": [500], "Pretax Income": [500],
+                            "Tax Provision": [100]})
+    t.balance_sheet = _Frame({"Total Assets": [2000.0], "Current Liabilities": [1000.0]})
+    v, flags = roic.statement_roic(t)
+    assert v == 40.0                                    # 500 x 0.8 / 1000
+    assert any(f.startswith("ANNUAL") for f in flags)
+
+
+def test_annual_fallback_still_blank_without_annual_data():
+    t = _tk(op=(100, 100))
+    t.income_stmt = _Frame({})
+    t.balance_sheet = _Frame({})
+    v, flags = roic.statement_roic(t)
+    assert v is None and any("no annual operating income" in f for f in flags)

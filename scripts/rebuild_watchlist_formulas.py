@@ -114,7 +114,13 @@ TIER = ('=IF(AJ{r}="","",IF(AJ{r}>=85,"✓✓✓",IF(AJ{r}>=70,"✓✓",'
 # It is a per-row formula like the score columns, so it must be rebuilt with them:
 # it was omitted until 2026-09-08 and openpyxl row deletions had drifted it by +1
 # on 110 rows while check_drift (which only read col 10) reported clean.
-PEG = '=IF(OR(E{r}="",R{r}="",R{r}<=0,E{r}<0),"",E{r}/R{r})'
+# Stand-in (Dom 2026-11-20, "i don't want blanked metrics"): PEG is undefined
+# when EPS growth is <= 0 (shrinking, or the -100 loss stand-in) or a loss is
+# forecast (P/E < 0). Those used to blank and drop out of Value, flattering the
+# name; they now hold 99, which scores the bottom band. Blank only on no data.
+PEG_STANDIN = 99
+PEG = ('=IF(OR(E{r}="",R{r}=""),"",IF(OR(R{r}<=0,E{r}<0),' + str(PEG_STANDIN)
+       + ',E{r}/R{r}))')
 
 COLS = {9: PEG, 10: VALUE, 15: QUALITY, 19: GROWTH, 25: AI, 30: MOMENTUM,
         35: RISK, 36: TOTAL, 37: TIER}

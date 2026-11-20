@@ -205,8 +205,11 @@ def statement_roic(t, ticker=None) -> tuple[float | None, list[str]]:
     if op is None:
         if inc is not None and not any(
                 k in inc.index for k in _OP_KEYS + (_GAAP_OP_KEY,)):
-            return _financial_template_roic(inc, bs, rate, flags)
-        return None, flags + ["no 4 quarters of operating income"]
+            v, f = _financial_template_roic(inc, bs, rate, flags)
+            if v is not None or any("non-positive" in x for x in f):
+                return v, f          # a meaningless ratio stays blank
+            flags = f
+        return _annual_roic(t, flags + ["no 4 quarters of operating income"])
 
     ta = _latest(bs, ("Total Assets",))
     cl = _latest(bs, ("Current Liabilities",))
@@ -260,3 +263,32 @@ def _financial_template_roic(inc, bs, rate, flags):
     flags.append(f"FINANCIAL TEMPLATE: {basis} / stockholders equity "
                  "(return-on-equity proxy, after interest)")
     return round(op * (1 - rate) / eq * 100, 2), flags
+
+
+def _annual_roic(t, flags):
+    """Latest fiscal year when the quarterly statement can't give four quarters
+    (half-yearly HK filers, OTC ADRs, DRO.AX). Added 2026-11-20 (Dom: no
+    blanked metrics), same order as fcf_source: quarters, else the latest
+    year flagged ANNUAL, else blank."""
+    try:
+        inc, bs = t.income_stmt, t.balance_sheet
+    except Exception:                                         # pragma: no cover
+        return None, flags
+    op = _ttm(inc, _OP_KEYS, n=1)
+    if op is None:
+        return None, flags + ["no annual operating income either"]
+    rate, defaulted = effective_tax_rate(_ttm(inc, ("Pretax Income",), n=1),
+                                         _ttm(inc, ("Tax Provision",), n=1))
+    ta = _latest(bs, ("Total Assets",))
+    cl = _latest(bs, ("Current Liabilities",))
+    if ta is None or cl is None or ta - cl <= 0:
+        return None, flags + ["annual: no usable total assets / current liabilities"]
+    try:
+        year = inc.loc[[k for k in _OP_KEYS if k in inc.index][0]].dropna().index[0].date()
+    except Exception:
+        year = "?"
+    flags = flags + [f"ANNUAL fiscal year {year} (no four quarters in the "
+                     "quarterly statement)"]
+    if defaulted:
+        flags.append(f"effective tax rate unusable/clamped -> {rate:.0%}")
+    return round(op * (1 - rate) / (ta - cl) * 100, 2), flags

@@ -73,16 +73,28 @@ def test_missing_base_year_is_reported_as_missing():
     assert v is None and "2023-10-31" in gaps[0] and "missing" in gaps[0]
 
 
-def test_non_positive_values_keep_their_own_message():
+def test_growth_from_zero_revenue_is_a_top_band_stand_in():
+    # Stand-ins, not blanks (Dom 2026-11-20): from or to zero has no %
     rev = _amat(34_446e6)
     rev[D(2023, 10, 31)] = -5e6
     v, gaps = rc.rev_3y_cagr(rev, {})
-    assert v is None and "non-positive" in gaps[0]
+    assert v == rc.FROM_ZERO_VALUE and "growth from or to zero" in gaps[0]
 
 
-def test_too_few_years():
-    v, gaps = rc.rev_3y_cagr({D(2026, 10, 31): 1e9, D(2025, 10, 31): 9e8}, {})
-    assert v is None and "years" in gaps[0]
+def test_revenue_falling_to_zero_and_pre_revenue_stand_ins():
+    base = {D(2026, 12, 31): 0.0, D(2025, 12, 31): 1e6, D(2024, 12, 31): 1e6,
+            D(2023, 12, 31): 2e6}
+    assert rc.rev_3y_cagr(base, {})[0] == rc.TO_ZERO_VALUE
+    base[D(2023, 12, 31)] = 0.0
+    assert rc.rev_3y_cagr(base, {})[0] == rc.NO_REVENUE_VALUE
+
+
+def test_short_history_is_annualized_and_flagged():
+    # young company: two fiscal years only
+    v, gaps = rc.rev_3y_cagr({D(2026, 10, 31): 1e9, D(2025, 10, 31): 8e8}, {})
+    assert v == 25.02 and "SHORT HISTORY" in gaps[0]   # 365-day year
+    v, gaps = rc.rev_3y_cagr({D(2026, 10, 31): 1e9}, {})
+    assert v is None and "1 year" in gaps[0]
 
 
 def test_accepts_datetime_keys_and_unsorted_input():

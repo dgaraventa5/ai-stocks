@@ -223,7 +223,9 @@ def _is_layer10(layer: str | None) -> bool:
     return bool(layer) and str(layer).strip().startswith("10")
 
 
-ROIC_SKIP_FOREIGN = True   # rule 34; see compute_inputs
+# rule 34. Flipped to False 2026-11-20 (Dom: "i don't want blanked metrics"):
+# ROIC is currency-neutral, and the exclusion left 19 benchmark names blank.
+ROIC_SKIP_FOREIGN = False
 # Negative-EBITDA leverage stand-ins (2026-11-20), see compute_inputs
 ND_EBITDA_NET_DEBT, ND_EBITDA_NET_CASH = 99.0, 0.0
 
@@ -337,6 +339,17 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
         else:
             inp["ev_ebitda"] = None
             gaps.append("EV/FCF (L10): missing EV or statement FCF — left blank")
+    elif inp["ev_ebitda"] is None and not _is_layer9_capacity(layer):
+        # Yahoo leaves enterpriseToEbitda out for some names (AR on
+        # 2026-11-20); compute it. Negative EBITDA gives a negative multiple,
+        # which scores the bottom band (no blanks, 2026-11-20).
+        _eb = info.get("ebitda")
+        if ev and _eb and not _is_missing(_eb):
+            inp["ev_ebitda"] = round(ev / _eb, 1)
+            gaps.append(f"EV/EBITDA: Yahoo ratio missing; computed {inp['ev_ebitda']} "
+                        "from EV and EBITDA")
+        else:
+            gaps.append("EV/EBITDA: Yahoo ratio, EV or EBITDA missing — BLANK, data gap")
     elif _is_layer9_capacity(layer):
         mw = _secured_mw(ticker)
         if ev and mw:
@@ -404,8 +417,15 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
                         f"{'net debt (99, worst band)' if net > 0 else 'net cash (0, best band)'}")
         else:
             gaps.append("ND/EBITDA: EBITDA non-positive and debt/cash missing — left blank")
+    elif (_is_missing(ebitda) and debt is not None and cash is not None
+          and not _is_missing(debt) and not _is_missing(cash) and debt - cash <= 0):
+        # Net cash scores the best band whatever EBITDA is (ratio <= 0 when
+        # EBITDA > 0, the net-cash stand-in when <= 0), so a missing EBITDA
+        # (HOOD, financial template) need not blank it (2026-11-20).
+        inp["nd_ebitda"] = ND_EBITDA_NET_CASH
+        gaps.append("ND/EBITDA: EBITDA missing but net cash — scored as net cash (0, best band)")
     else:
-        gaps.append("ND/EBITDA: missing totalDebt/totalCash/ebitda")
+        gaps.append("ND/EBITDA: missing totalDebt/totalCash/ebitda — BLANK, data gap")
 
     # ----- Growth -----
     try:
@@ -445,6 +465,24 @@ def compute_inputs(ticker: str, t: yf.Ticker, info: dict,
     rg = info.get("revenueGrowth")
     if rg is not None and not _is_missing(rg):
         inp["rev_yoy"] = round(rg * 100, 2)
+    else:
+        # Yahoo gives no growth when the year-ago quarter had no revenue;
+        # compute it, with the from/to-zero stand-ins (no blanks, 2026-11-20).
+        try:
+            qa = t.quarterly_income_stmt.loc["Total Revenue"]
+            qrev = {k: qa[k] for k in qa.index}
+        except Exception:
+            qrev = {}
+        v, why = revenue_cagr.rev_yoy_fallback(qrev, mrq)
+        if v is None and sec is not None and sec.get():
+            sv, swhy = revenue_cagr.rev_yoy_fallback(
+                sec.get()["q"].get("revenue") or {}, mrq)
+            if sv is not None:
+                v, why = sv, f"SEC 10-Q/10-K: {swhy}"
+                gaps.append(f"SEC: rev_yoy {sv} — {swhy}")
+        inp["rev_yoy"] = v
+        gaps.append(f"Rev YoY: Yahoo figure missing; "
+                    + (f"{v} — {why}" if v is not None else f"BLANK, data gap — {why}"))
     eg = info.get("earningsQuarterlyGrowth")
     if eg is not None and not _is_missing(eg):
         inp["eps_yoy"] = round(eg * 100, 2)

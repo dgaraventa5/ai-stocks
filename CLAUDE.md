@@ -412,6 +412,27 @@ names whose multiple implies more growth than their recent revenue trend.
 commodity/cyclical names (nat-gas E&P AR/RRC get dinged on a depressed revenue
 trend) — a candidate refinement, documented not hidden.
 
+**Amendment 2026-11-20 (Dom: "i don't want blanked metrics"): stand-ins, not
+blanks.** A metric that is undefined because the business fails its test now
+scores a band; only a true data gap stays blank (flagged). Same rule as the
+rule-15 EPS and negative-EBITDA ND/EBITDA stand-ins. A blank drops out of its
+category average, which flattered exactly the weak names (AMZN's TTM FCF went
+negative and its Value rose 58 → 69).
+- **P2 reverse-DCF:** FCF ≤ 0 (sheet FCF yield ≤ 0) → bottom band (15); EV ≤ 0
+  on positive FCF → top (100); no 3-yr CAGR → current rev YoY is the grounded
+  growth (`reverse_dcf.value_term`).
+- **PEG:** EPS growth ≤ 0 or forward P/E < 0 → 99 (bottom band), in the
+  Watchlist formula and `recalc` alike.
+- **Revenue growth (CAGR and YoY):** from zero revenue → +100, to zero → −100,
+  zero both → 0; a young company's whole history (≥ 1 yr) is annualized,
+  flagged SHORT HISTORY; YoY is computed from the statement when Yahoo's is
+  missing.
+- **ND/EBITDA:** net cash with EBITDA missing → 0 (best band) whatever EBITDA is.
+- **EV/EBITDA:** computed from EV and EBITDA when Yahoo omits the ratio.
+- **ROIC:** foreign local listings are no longer skipped (`ROIC_SKIP_FOREIGN =
+  False`; the metric is currency-neutral), and a name without four quarters
+  uses its latest fiscal year, flagged ANNUAL.
+
 ### 22. Subjective floor removed: AI Thesis / Risk use (mean−1)×25 (added 2026-07-02, approved by Dom)
 
 **P6 (finding F8).** AI Thesis and Risk map their 1–5 ratings to a subscore via
@@ -965,7 +986,7 @@ tagged standalone). *Built 2026-11-20: `sec_statements.py`, see Data sources §2
 **Scope:** foreign LOCAL listings are excluded (`batch_score.ROIC_SKIP_FOREIGN`)
 by Dom's choice 2026-09-08 — **not** an FX limitation. ROIC is currency-neutral
 (numerator and denominator share the reporting currency), unlike the rule-19
-price-based ratios. Flip the constant to cover them.
+price-based ratios. Flip the constant to cover them. *Flipped 2026-11-20 (no blanked metrics, see rule 21 amendment).*
 
 **Deploy impact (2026-09-08):** 191 of 195 non-foreign names computed (63 blanks
 filled, 126 values corrected; the 4 gaps are ADRs without quarterly statements).

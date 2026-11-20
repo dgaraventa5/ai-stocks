@@ -189,11 +189,21 @@ def tier(t):
     return '✗'
 
 
+PEG_STANDIN = 99   # keep in sync with rebuild_watchlist_formulas.PEG_STANDIN
+
+
 def _read_raw(ws, r):
     """Raw inputs for one row (PEG recomputed like the Watchlist formula)."""
     fwd_pe = ws.cell(row=r, column=5).value
     E, Rv = _num(fwd_pe), _num(ws.cell(row=r, column=18).value)
-    peg = (E / Rv) if (E is not None and Rv is not None and Rv > 0 and E >= 0) else None
+    # Mirrors the PEG formula: undefined growth or a forecast loss holds the
+    # bottom-band stand-in (rebuild_watchlist_formulas.PEG_STANDIN), never blank.
+    if E is None or Rv is None:
+        peg = None
+    elif Rv <= 0 or E < 0:
+        peg = PEG_STANDIN
+    else:
+        peg = E / Rv
     layer = ws.cell(row=r, column=3).value
     return dict(
         ticker=ws.cell(row=r, column=1).value, layer=layer, row=r,
@@ -255,9 +265,9 @@ def _assemble(row, ms, w):
     for the six style-biased metrics and live absolute bands for the rest."""
     value = avg_nonnull([score_fwd_pe(row['fwd_pe']), ms['ev'], ms['fcf_yield'],
                          ms['ps'], score_peg(row['peg']),
-                         reverse_dcf.reverse_dcf_score(
-                             row.get('ev_fcf'), _num(row['rev_cagr']),
-                             rev_yoy_pct=_num(row['rev_yoy']))])
+                         reverse_dcf.value_term(
+                             row.get('ev_fcf'), _num(row.get('fcf_yield')),
+                             _num(row['rev_cagr']), rev_yoy_pct=_num(row['rev_yoy']))])
     quality = avg_nonnull([ms['roic'], ms['gm'], ms['fcf_mgn'],
                            score_nd_ebitda(row['nd_eb'])])
     growth = avg_nonnull([score_rev_cagr(row['rev_cagr']), score_rev_yoy(row['rev_yoy']),
