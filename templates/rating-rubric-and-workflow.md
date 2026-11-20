@@ -306,6 +306,8 @@ This is inverted from the others. **5 means the stock has LOW risk on this dimen
 
 **Government-customer convention (approved by Dom 2026-08-02):** the US Government is a monopsony, not a single counterparty — do not mechanically floor every defense name at 1. Grade on program/branch/geography diversification *within* the government book plus non-USG revenue: single-program dependence (RCAT: one Army program = 56%, top-2 = 75%) → 1; USG ~85% via one dominant service line (AVAV) → 1; USG ~69% across many programs/branches with ~30% intl+commercial (KTOS) → 2.
 
+**Forward-backlog reading (approved by Dom 2026-11-19):** when disclosed contracted backlog (RPO / remaining performance obligations / contracted revenue) is at least 1× trailing-twelve-month revenue, grade R1 on whichever is MORE concentrated: the top customer's share of reported revenue, or its share of the forward revenue the backlog implies (the customer's share of backlog, from a filing or a credible estimate such as a rating agency, spread over the backlog's disclosed delivery period). State both readings and the arithmetic in the audit row. Why: a company booking years of revenue from one buyer carries that dependence before it reaches the income statement; ORCL (OpenAI ≈ half of a $638B backlog, ~27–35% of FY29–30 revenue, while reported revenue shows no customer ≥10%) is the case that raised it. Below the 1× line, reported revenue alone governs.
+
 ---
 
 #### R2. Geographic / Export Risk

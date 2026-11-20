@@ -1156,6 +1156,50 @@
         "SNDK": "\u2713\u2713"
       },
       "cash": -0.05
+    },
+    {
+      "date": "2026-11-19",
+      "reason": "membership: +AMZN",
+      "kind": "membership",
+      "allocations": {
+        "CRDO": 447.01,
+        "VRT": 447.01,
+        "STX": 447.01,
+        "SNDK": 447.01,
+        "TSM": 447.01,
+        "ANET": 447.01,
+        "WDC": 447.01,
+        "FIX": 447.01,
+        "MU": 447.01,
+        "ASML": 447.01,
+        "NVDA": 447.01,
+        "EME": 447.01,
+        "ALAB": 447.01,
+        "PLTR": 447.01,
+        "AVGO": 447.01,
+        "MSFT": 447.01,
+        "AMZN": 447.01
+      },
+      "tiers": {
+        "CRDO": "\u2713\u2713",
+        "VRT": "\u2713\u2713",
+        "STX": "\u2713\u2713",
+        "SNDK": "\u2713\u2713",
+        "TSM": "\u2713\u2713",
+        "ANET": "\u2713\u2713",
+        "WDC": "\u2713\u2713",
+        "FIX": "\u2713\u2713",
+        "MU": "\u2713\u2713\u2713",
+        "ASML": "\u2713\u2713",
+        "NVDA": "\u2713\u2713",
+        "EME": "\u2713\u2713",
+        "ALAB": "\u2713\u2713",
+        "PLTR": "\u2713\u2713",
+        "AVGO": "\u2713\u2713",
+        "MSFT": "\u2713\u2713",
+        "AMZN": "\u2713\u2713"
+      },
+      "cash": -0.03
     }
   ],
   "exit_pending": {},
@@ -1479,6 +1523,26 @@
           "VRT",
           "WDC",
           "EME"
+        ]
+      },
+      {
+        "date": "2026-11-19",
+        "roster": [
+          "MU",
+          "SNDK",
+          "FIX",
+          "TSM",
+          "NVDA",
+          "CRDO",
+          "ANET",
+          "MSFT",
+          "AVGO",
+          "PLTR",
+          "ASML",
+          "AMZN",
+          "ALAB",
+          "VRT",
+          "WDC"
         ]
       }
     ],
@@ -1826,6 +1890,21 @@
           "AMZN",
           "ONTO",
           "GMED"
+        ]
+      },
+      {
+        "date": "2026-11-19",
+        "roster": [
+          "EME",
+          "STX",
+          "RDDT",
+          "NVT",
+          "APH",
+          "RMBS",
+          "GOOGL",
+          "VST",
+          "APP",
+          "ORCL"
         ]
       }
     ],
@@ -2228,6 +2307,26 @@
           "PWR",
           "MKSI",
           "TT"
+        ]
+      },
+      {
+        "date": "2026-11-19",
+        "roster": [
+          "META",
+          "SNPS",
+          "TER",
+          "LRCX",
+          "AAON",
+          "CGNX",
+          "KLAC",
+          "BE",
+          "PWR",
+          "CMI",
+          "GMED",
+          "ONTO",
+          "MKSI",
+          "TT",
+          "NTAP"
         ]
       }
     ],
@@ -2758,6 +2857,47 @@
           "VRT": 0.046104,
           "WDC": 0.04719
         }
+      },
+      {
+        "date": "2026-11-19",
+        "roster": [
+          "ALAB",
+          "AMZN",
+          "ANET",
+          "ASML",
+          "AVGO",
+          "CRDO",
+          "EME",
+          "FIX",
+          "MSFT",
+          "MU",
+          "NVDA",
+          "PLTR",
+          "SNDK",
+          "STX",
+          "TSM",
+          "VRT",
+          "WDC"
+        ],
+        "weights": {
+          "ALAB": 0.032465,
+          "AMZN": 0.095873,
+          "ANET": 0.053974,
+          "ASML": 0.06907,
+          "AVGO": 0.064737,
+          "CRDO": 0.031325,
+          "EME": 0.072454,
+          "FIX": 0.044698,
+          "MSFT": 0.115416,
+          "MU": 0.045994,
+          "NVDA": 0.073978,
+          "PLTR": 0.064974,
+          "SNDK": 0.035238,
+          "STX": 0.042485,
+          "TSM": 0.072846,
+          "VRT": 0.041212,
+          "WDC": 0.043261
+        }
       }
     ]
   },
@@ -2765,17 +2905,7 @@
     "last_resize_check": "2026-11"
   },
   "methodology_seam": {
-    "date": "2026-10-17",
-    "reason": "rule 34 amendment: financial-template ROIC (LMND, UPST)"
-  },
-  "methodology_seams_open": [
-    {
-      "date": "2026-10-11",
-      "reason": "rule 36 (forward P/E on a common calendar year), ad-platform D1 convention, and mechanical M2 re-measure, deployed with the 2026-10-06..11 review"
-    },
-    {
-      "date": "2026-10-16",
-      "reason": "rule 38: Layer-10 D5 re-rated on the AI-adoption lens (25 names) + 5 refreshed names, 2026-10-16; + rule 34 amendment: GAAP operating income for SHOP (PR 162)"
-    }
-  ]
+    "date": "2026-11-19",
+    "reason": "R1 forward-backlog rubric amendment + Layer-1 D5 absolute-lens pass (Dom-approved inbox review 2026-11-19)"
+  }
 }

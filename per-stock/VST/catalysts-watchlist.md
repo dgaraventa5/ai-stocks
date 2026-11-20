@@ -12,3 +12,5 @@ Forward-looking events that could move the thesis. Use the thesis.md §8 table a
 | 2027+ | Meta PPA revenue contribution begins | ~2,600 MW currently excluded from guidance; upside to 2027 EBITDA |
 | 2028 | Comanche Peak nuclear uprate (>200 MW) | Incremental carbon-free capacity at already-contracted site |
 | By 2028 | ~4,500 MW organic development pipeline online | Coal-to-gas conversions, Permian builds, PJM nuclear uprates |
+| 2026-12 | Texas data-center grid-approval audit result | Decides whether Abbott's pause lifts before Hinojosa takes office; a denial of the Comanche Peak load would re-open D1/D5/R4 |
+| 2027-01-12 / 01-19 | Texas legislative session opens; Hinojosa inaugurated | SB 296 two-year moratorium and any executive order on data-center approvals; 2028 is only 78% hedged |

@@ -86,20 +86,20 @@
   "audit_row": "Rating Audit 2026-09-08 EPS YoY (objective) — earnings sentinel"
  },
  "AMZN": {
-  "quarter_end": "2026-06-30",
-  "value": null,
-  "basis": "GAAP diluted EPS $5.75 vs $1.68 (+242%) dominated by $53,415M other income, of which $50,486M is upward adjustments on private-company equity, primarily Anthropic nonvoting preferred; operating income +43%",
-  "source": "10-Q q/e 2026-06-30, Note 1 Other Income (Expense), Net (acc. 0001018724-26-000026); 8-K Ex-99.1 filed 2026-07-30",
-  "ruled": "2026-08-02",
-  "audit_row": "Rating Audit 2026-08-02 EPS YoY (objective)"
+  "quarter_end": "2026-09-30",
+  "value": 53.3,
+  "basis": "GAAP net income $20,685M vs $21,187M (-2.4%) is dominated by Q3 2025 Anthropic gains: other income (expense), net $10,186M a year ago vs -$703M now. Pretax income excluding other income (expense), net: $27,572M vs $17,984M = +53.3% (pretax proxy, SHOP standard); operating income +61.2%.",
+  "source": "8-K Ex-99.1 filed 2026-10-29 (acc. 0001018724-26-000038); 10-Q filed 2026-10-30, Statements of Operations + Note Other Income (Expense), Net (acc. 0001018724-26-000040)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
  },
  "GMED": {
-  "quarter_end": "2026-06-30",
-  "value": null,
-  "basis": "GAAP EPS YoY -25.3% dominated by prior-year one-time items: Q2 2025 net income $202.8M included a $110.561M Nevro bargain purchase gain and a $34.815M valuation-allowance tax benefit; operating income +139.7%",
-  "source": "10-Q filed 2026-08-06, Statements of Income, MD&A Bargain Purchase Gain, Note 14; 8-K Ex-99.1",
-  "ruled": "2026-10-06",
-  "audit_row": "Rating Audit 2026-10-06 EPS YoY (objective)"
+  "quarter_end": "2026-09-30",
+  "value": 18.7,
+  "basis": "Ruling confirms the GAAP figure: net income $141.171M vs $118.966M (+18.7%; diluted EPS $1.04 vs $0.88). Most of the rise is the litigation provision in SG&A falling ($3.665M vs $28.261M); GMED books such provisions every year in uneven amounts, so it is treated as recurring operating cost, not a rule-15 one-off. Ex-litigation alternative +5.3% (non-GAAP EPS +4.4%) flagged for Dom.",
+  "source": "10-Q filed 2026-11-05, MD&A SG&A + Statements of Income (acc. 0001628280-26-071165); 8-K Ex-99.1 filed 2026-11-05 (acc. 0001628280-26-071042)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
  },
  "WDC": {
   "quarter_end": "2026-10-02",
@@ -196,5 +196,117 @@
   "source": "8-K Ex-99.1 filed 2026-10-21 (acc. 0001628280-26-066700); 8-K Ex-99.1 filed 2025-10-29 (acc. 0001628280-25-047114)",
   "ruled": "2026-10-30",
   "audit_row": "Rating Audit 2026-10-30 EPS YoY (objective)"
+ },
+ "SNDK": {
+  "quarter_end": "2026-10-02",
+  "value": 7133.0,
+  "basis": "OPERATIONAL, ruling confirms the GAAP figure. Q1 FY27 net income $8,101M vs $112M (+7133.0%; diluted EPS $52.60 vs $0.75) on revenue $11,031M vs $2,308M; operating income $8,780M vs $176M. Only non-operating item is a $513M equity-securities gain (5.5% of pretax); ex-gain still ~+6,735%.",
+  "source": "10-Q filed 2026-10-30, Condensed Consolidated Statements of Operations (acc. 0001628280-26-068601); 8-K Ex-99.1 filed 2026-10-29 (acc. 0001628280-26-068243)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "ALAB": {
+  "quarter_end": "2026-09-30",
+  "value": 100.8,
+  "basis": "OPERATIONAL, ruling confirms the GAAP figure. Net income $182.944M vs $91.114M (+100.8%; diluted EPS $0.99 vs $0.50); operating income $179.056M vs $55.406M (+223%). Tax works against the jump ($9.083M provision vs a $24.252M benefit a year ago); interest/other income flat.",
+  "source": "10-Q filed 2026-11-04, Statements of Operations + Income Taxes note (acc. 0001736297-26-000045); 8-K Ex-99.1 filed 2026-11-03 (acc. 0001736297-26-000044)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "ANET": {
+  "quarter_end": "2026-09-30",
+  "value": 82.9,
+  "basis": "OPERATING-LED, ruling confirms the GAAP figure (HPE precedent). Net income $1,560.4M vs $853.0M (+82.9%); income from operations $1,642.4M vs $978.2M (+67.9%). A $134.5M strategic-investment gain (7.0% of pretax) and a $34.6M PY OBBB tax charge account for ~a quarter of the change; ex-both +63.5%, same score band.",
+  "source": "8-K Ex-99.1 filed 2026-11-03 (acc. 0001596532-26-000252); 10-Q filed 2026-11-04, Statements of Income + MD&A Other income (acc. 0001596532-26-000254)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "CMI": {
+  "quarter_end": "2026-09-30",
+  "value": 37.9,
+  "basis": "EPS excluding each year's one-off: $7.71 vs $5.59 (+37.9%). GAAP $8.25 vs $3.86 (+113.7%) is dominated by $240M ($1.73/sh) of Accelera goodwill-impairment and inventory write-downs in Q3 2025 and $75M ($0.54/sh) of favorable discrete tax items in Q3 2026. Same ex-item standard as META.",
+  "source": "8-K Ex-99 filed 2026-11-05 (acc. 0000026172-26-000035); 10-Q filed 2026-11-05, MD&A results summary + Income Tax Expense (acc. 0000026172-26-000037)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "VST": {
+  "quarter_end": "2026-09-30",
+  "value": 74.8,
+  "basis": "Offsetting items, not one-off-dominated - ruling CONFIRMS the GAAP figure. GAAP net income $1,140M vs $652M (+74.8%). Unrealized hedge gains $559M vs $184M are offset in the same quarter by a $269M Moss Landing impairment, a $60M NDT loss (vs a $62M gain), $65M insurance income and $24M swap gains; removing all items from both years gives pretax $1,177M vs $625M (net income +88.4%), so GAAP understates rather than inflates growth. Hedge-only ex-MTM (+46.6% EPS) is one-sided.",
+  "source": "10-Q q/e 2026-09-30 (filed 2026-11-09, acc. 0001692819-26-000025) Stmt of Ops + Adjusted EBITDA reconciliations + derivative note; 8-K Ex-99.1 filed 2026-11-06 (acc. 0001692819-26-000023)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "NRG": {
+  "quarter_end": "2026-09-30",
+  "value": 68.5,
+  "basis": "GAAP net income $561M vs $152M (+269.1%) is dominated by hedge accounting: economic-hedge MTM losses $155M vs $376M, a $172M charge terminating acquired LS Power hedges, rate-hedge gains $13M vs $1M. Ex-items pretax $1,093M vs $613M; at a uniform 28.0% tax, less $17M preferred, over 210M/195M diluted shares: $3.67 vs $2.18 = +68.5% (company Adjusted EPS +68.3% corroborates).",
+  "source": "10-Q q/e 2026-09-30 (filed 2026-11-09, acc. 0001013871-26-000025) Stmt of Ops + derivative table; 8-K Ex-99.1 filed 2026-11-09 (acc. 0001013871-26-000022) Tables A-1/A-2",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "NOVT": {
+  "quarter_end": "2026-10-02",
+  "value": 13.7,
+  "basis": "GAAP net income $2.0M vs $10.7M (-81.1%) is dominated by one-off Riverpoint Medical acquisition costs (acquisition $19.2M, restructuring $3.9M, inventory step-up $0.8M vs $6.7M a year earlier), mostly non-deductible (ETR 68.2% vs 32.4%). Ex-items pretax $30.2M vs $22.4M; per diluted share at a uniform rate on 42.7M vs 36.0M shares: $0.708 vs $0.623 = +13.7%. Amortization kept in. Net-income basis would be +34.8%.",
+  "source": "10-Q q/e 2026-10-02 (filed 2026-11-09, acc. 0001193125-26-453802) Stmt of Ops, Note 3, tax note; 8-K Ex-99.1 filed 2026-11-09 (acc. 0001193125-26-453760)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "CEG": {
+  "quarter_end": "2026-09-30",
+  "value": 97.3,
+  "basis": "Operational with non-operating items largely cancelling - ruling CONFIRMS the GAAP figure. Net income to common $1,835M vs $930M (+97.3%); after-tax items net -$43M vs +$22M (fair value, NDT, tax benefit, Calpine merger costs, contract amortization). Adjusted operating earnings $1,792M vs $952M (+88.2%); operating income $2,492M vs $1,086M with Calpine added. Per-share +74.7% on 13% more shares.",
+  "source": "10-Q q/e 2026-09-30 (filed 2026-11-09, acc. 0001868275-26-000119) Stmt of Ops; 8-K Ex-99.1 filed 2026-11-09 (acc. 0001868275-26-000116) Adjusted Operating Earnings reconciliation",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "BW": {
+  "quarter_end": "2026-09-30",
+  "value": null,
+  "basis": "GAAP net income $93.9M vs $35.1M (+167.6%) is dominated by an $85.1M customer-warrant fair-value gain (90% of $94.9M continuing pretax); prior year carried by $41.2M discontinued-operations income. Continuing ex-warrant ~$8.4M vs a $6.2M loss: ratio undefined.",
+  "source": "10-Q q/e 2026-09-30 (filed 2026-11-09, acc. 0001630805-26-000082) Stmt of Ops; 8-K Ex-99.1 filed 2026-11-09 (acc. 0001630805-26-000080)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "HIVE": {
+  "quarter_end": "2026-09-30",
+  "value": null,
+  "basis": "GAAP loss both periods: net loss $(78.7)M vs $(15.8)M; diluted EPS $(0.29) vs $(0.07). Ratio undefined. Gross profit before digital-currency gains was $(24.7)M vs $4.1M, and the quarter includes a $31.2M non-cash equipment impairment.",
+  "source": "10-Q q/e 2026-09-30 (fiscal Q2 FY27), filed 2026-11-09, Condensed Interim Consolidated Statements of Income and Comprehensive Income, acc. 0001062993-26-005842 (https://www.sec.gov/Archives/edgar/data/1720424/000106299326005842/form10q.htm)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "ONDS": {
+  "quarter_end": "2026-09-30",
+  "value": null,
+  "basis": "GAAP loss both periods: net loss attributable to Ondas $(62.6)M vs $(8.8)M; diluted EPS $(0.10) vs $(0.03). Ratio undefined. Operating loss was $(189.5)M vs $(15.5)M, partly offset by a $125.1M warrant fair-value gain.",
+  "source": "10-Q q/e 2026-09-30, filed 2026-11-12, Condensed Consolidated Statements of Operations + Other income note, acc. 0001193125-26-458517 (https://www.sec.gov/Archives/edgar/data/1646188/000119312526458517/onds-20260930.htm)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "PDYN": {
+  "quarter_end": "2026-09-30",
+  "value": null,
+  "basis": "GAAP loss both periods: net loss $(12.0)M vs $(3.7)M; diluted EPS $(0.25) vs $(0.09). Ratio undefined. Loss from operations was $(13.4)M vs $(8.1)M; warrant gains were $1.1M vs $3.8M.",
+  "source": "10-Q q/e 2026-09-30, filed 2026-11-10, Condensed Consolidated Statements of Operations p.6, acc. 0001193125-26-454426 (https://www.sec.gov/Archives/edgar/data/1826681/000119312526454426/pdyn-20260930.htm)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "PLUG": {
+  "quarter_end": "2026-09-30",
+  "value": null,
+  "basis": "Loss-to-profit ($99.8M vs $(361.9)M net income attributable; basic EPS $0.07 vs $(0.31), diluted $(0.00) vs $(0.31)): ratio undefined. The profit is non-operating: $108.3M convertible-debt fair-value gain plus $84.2M on warrants against an operating loss of $(75.3)M (vs $(348.8)M).",
+  "source": "10-Q q/e 2026-09-30, filed 2026-11-09, Condensed Consolidated Statements of Operations p.4, acc. 0001104659-26-124578 (https://www.sec.gov/Archives/edgar/data/1093691/000110465926124578/plug-20260930x10q.htm)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
+ },
+ "TE": {
+  "quarter_end": "2026-09-30",
+  "value": null,
+  "basis": "GAAP loss both periods: net loss attributable to common $(41.6)M vs $(140.8)M; EPS $(0.14) vs $(0.87). Ratio undefined. Operating loss from continuing operations $(54.5)M vs $(94.9)M; prior year included a $53.3M intangible impairment.",
+  "source": "10-Q q/e 2026-09-30, filed 2026-11-12, Condensed Consolidated Statements of Operations and Comprehensive Loss, acc. 0001992243-26-000032 (https://www.sec.gov/Archives/edgar/data/1992243/000199224326000032/t1-20260930.htm)",
+  "ruled": "2026-11-19",
+  "audit_row": "Rating Audit 2026-11-19 EPS YoY (objective)"
  }
 }

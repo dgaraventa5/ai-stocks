@@ -4,7 +4,9 @@
     "seeded": "2026-11-17 from the 2026-10-27..11-15 run reports"
   },
   "data_fix:AMAT:rev-cagr": {
+    "closed": "2026-11-19",
     "kind": "data_fix",
+    "note": "Fixed 2026-11-19 (Rating Audit row, sources cited).",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "3-year revenue CAGR of 3.23% looks wrong.",
@@ -12,7 +14,9 @@
     "urgent": false
   },
   "data_fix:CRWV:capacity-mw": {
+    "closed": "2026-11-19",
     "kind": "data_fix",
+    "note": "Fixed 2026-11-19 (Rating Audit row, sources cited).",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "capacity-mw.json needs a refresh (rule 13); runs may not edit it.",
@@ -20,7 +24,9 @@
     "urgent": false
   },
   "data_fix:HIVE:capacity-mw": {
+    "closed": "2026-11-19",
     "kind": "data_fix",
+    "note": "Fixed 2026-11-19 (Rating Audit row, sources cited).",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "capacity-mw.json needs a refresh (rule 13); runs may not edit it.",
@@ -28,7 +34,9 @@
     "urgent": false
   },
   "eps_ruling:ALAB": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-07",
     "source": "tracking/weekly-news-scan-2026-11-07.md (Needs Dom)",
     "text": "Asked in the 2026-11-07 weekly scan; no ruling on file yet.",
@@ -36,7 +44,9 @@
     "urgent": false
   },
   "eps_ruling:AMZN": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-02",
     "source": "tracking/scheduled-run-log.md (2026-11-02)",
     "text": "The ruling on file is for the June quarter, so it is STALE.",
@@ -44,7 +54,9 @@
     "urgent": false
   },
   "eps_ruling:ANET": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-07",
     "source": "tracking/weekly-news-scan-2026-11-07.md (Needs Dom)",
     "text": "Asked in the 2026-11-07 weekly scan; no ruling on file yet.",
@@ -52,7 +64,9 @@
     "urgent": false
   },
   "eps_ruling:BW": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "Cell is blank with no ruling on file for the current quarter.",
@@ -60,7 +74,9 @@
     "urgent": false
   },
   "eps_ruling:CEG": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "Cell is blank with no ruling on file for the current quarter.",
@@ -68,7 +84,9 @@
     "urgent": false
   },
   "eps_ruling:CMI": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-07",
     "source": "tracking/weekly-news-scan-2026-11-07.md (Needs Dom)",
     "text": "Asked in the 2026-11-07 weekly scan; no ruling on file yet.",
@@ -76,7 +94,9 @@
     "urgent": false
   },
   "eps_ruling:GMED": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-15",
     "source": "tracking/rating-proposals.md (2026-11-15 GMED summary)",
     "text": "June-quarter ruling is STALE; Q3 GAAP EPS $1.04 vs $0.88 looks clean.",
@@ -84,7 +104,9 @@
     "urgent": false
   },
   "eps_ruling:HIVE": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "Cell is blank with no ruling on file for the current quarter.",
@@ -92,7 +114,9 @@
     "urgent": false
   },
   "eps_ruling:NOVT": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "−81% with no ruling on file.",
@@ -100,7 +124,9 @@
     "urgent": false
   },
   "eps_ruling:NRG": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "+269% was written with no ruling on file.",
@@ -108,7 +134,9 @@
     "urgent": false
   },
   "eps_ruling:ONDS": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "Cell is blank with no ruling on file for the current quarter.",
@@ -116,7 +144,9 @@
     "urgent": false
   },
   "eps_ruling:PDYN": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "Cell is blank with no ruling on file for the current quarter.",
@@ -124,7 +154,9 @@
     "urgent": false
   },
   "eps_ruling:PLUG": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "Cell is blank with no ruling on file for the current quarter.",
@@ -132,7 +164,9 @@
     "urgent": false
   },
   "eps_ruling:SNDK": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-02",
     "source": "tracking/scheduled-run-log.md (2026-11-02)",
     "text": "+7133% withheld; the briefing calls the change operational.",
@@ -140,7 +174,9 @@
     "urgent": false
   },
   "eps_ruling:TE": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-14",
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "Cell is blank with no ruling on file for the current quarter.",
@@ -148,7 +184,9 @@
     "urgent": false
   },
   "eps_ruling:VST": {
+    "closed": "2026-11-19",
     "kind": "eps_ruling",
+    "note": "Ruled 2026-11-19 (eps-yoy-overrides.json)",
     "raised": "2026-11-09",
     "source": "tracking/rating-proposals.md (2026-11-09 VST entry)",
     "text": "Cell blank, no ruling; Q3 EPS (+85% YoY) includes $559M of unrealized hedge gains.",
@@ -156,7 +194,9 @@
     "urgent": false
   },
   "hold_candidate:GMED": {
+    "closed": "2026-11-19",
     "kind": "hold_candidate",
+    "note": "Hold added 2026-11-19, expires 2027-03-01.",
     "raised": "2026-11-15",
     "source": "tracking/rating-proposals.md (2026-11-15 GMED summary)",
     "text": "Revenue guidance cut 2026-11-05; suggested expiry just after the Q4 report (~late Feb 2027). Not held.",
@@ -164,7 +204,9 @@
     "urgent": false
   },
   "hold_candidate:LITE": {
+    "closed": "2026-11-19",
     "kind": "hold_candidate",
+    "note": "Hold added 2026-11-19, expires 2027-02-09.",
     "raised": "2026-11-08",
     "source": "tracking/rating-proposals.md (2026-11-08 summary)",
     "text": "Marvell all-stock deal signed 2026-11-01 (a transformative transaction since the last reported quarter). Scheduled runs may not add this hold.",
@@ -172,7 +214,9 @@
     "urgent": false
   },
   "question:-:layer1-d5": {
+    "closed": "2026-11-19",
     "kind": "question",
+    "note": "Ran 2026-11-19 in session; 14 D5 changes approved and applied (VST, CEG, NEE 5->3 among them).",
     "raised": "2026-11-14",
     "source": "tracking/rating-proposals.md (2026-11-14 VST D5, deferred)",
     "text": "Layer-1 D5 pass you deferred VST D5 to (CEG, NEE, TLN carry the same gap): when should it run?",
@@ -180,7 +224,9 @@
     "urgent": false
   },
   "question:AVGO:r3-backstop": {
+    "closed": "2026-11-19",
     "kind": "question",
+    "note": "Researched 2026-11-19: R3 holds at 4 (every scenario with any rack resale stays under 2x ND/EBITDA); concentration routed to the R1 forward-backlog re-check. per-stock/AVGO/news-log.md 2026-11-19.",
     "raised": "2026-10-27",
     "source": "tracking/scheduled-run-log.md (2026-10-27)",
     "text": "New AI-rack residual-value backstop (8-K Item 2.03, max ~$43B). The run held R3 at 4; does it change R3?",
@@ -188,7 +234,9 @@
     "urgent": false
   },
   "question:ORCL:r1-backlog": {
+    "closed": "2026-11-19",
     "kind": "question",
+    "note": "Dom 2026-11-19: yes, read R1 off the forward backlog when backlog >= 1x TTM revenue; rubric amended; ORCL 4->3, RIOT 3->1, HUT 3->1, CIFR 3->2 applied.",
     "raised": "2026-11-14",
     "source": "tracking/rating-proposals.md (2026-11-14 ORCL R1, declined)",
     "text": "Rubric question you asked to raise separately: should R1 be read off the forward backlog rather than reported revenue?",
@@ -196,7 +244,9 @@
     "urgent": false
   },
   "question:VST:texas-pledge": {
+    "closed": "2026-11-19",
     "kind": "question",
+    "note": "Researched 2026-11-19: no rating change (D1 2, R4 4 hold; D5 in the Layer-1 pass). Watch dates in per-stock/VST/catalysts-watchlist.md.",
     "raised": "2026-11-09",
     "source": "tracking/rating-proposals.md (2026-11-09 VST entry)",
     "text": "Texas governor-elect's pledge to halt new data centers (secondary sources only). Research it? It bears on D1/D5 and the Texas leg of the thesis.",

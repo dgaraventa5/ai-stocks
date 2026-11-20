@@ -3,35 +3,35 @@
   "definition": "Rule-35 entry holds. A ticker listed here may not ENTER the portfolio while its hold is live (expires is inclusive; a missing or unreadable expiry fails closed). Holds never affect scores, ranks, or names already held. Human-written in the session that writes the briefing recording the event; the scripts never edit this file.",
   "when_to_add": "The context briefing records an unresolved event the score cannot see: a new government enforcement action, a securities case filed in the last 90 days, a guidance cut, or a transformative transaction announced since the last reported quarter.",
   "expiry": "A set date, normally just after the next earnings report or other resolving event. An expired hold is simply inactive; replace or remove the entry when re-ruling.",
-  "updated": "2026-10-16"
+  "updated": "2026-11-19"
  },
  "APP": {
-  "reason": "San Diego County enforcement action filed 2026-10-05 (People v. AppLovin, seeks an injunction on data collection) and securities class action Talbot v. AppLovin, 3:26-cv-10584 (N.D. Cal., filed 2026-09-16); growth decelerating with Q3 uplift untested",
-  "source": "per-stock/APP/context-2026-10-06.md; reviewed per-stock/APP/context-2026-10-16.md (no resolution)",
-  "set": "2026-10-06",
-  "expires": "2026-11-15",
-  "review_event": "Q3 2026 results 2026-11-04 after close (confirmed, AppLovin IR release 2026-10-07); Talbot stays inside the 90-day window until 2026-12-15"
+  "reason": "San Diego County enforcement action filed 2026-10-05 (People v. AppLovin, San Diego Superior Court; UCL/FAL, seeks injunction on data collection, restitution, penalties; adds an advertiser-billing allegation) - no response or docket progress found and not described in the Q3 10-Q; securities class action Talbot v. AppLovin, 3:26-cv-10584 (N.D. Cal., filed 2026-09-16; 90-day window to 2026-12-15) plus Patel derivative suit (filed 2026-10-07). Q3 beat and above-consensus Q4 guide resolved the growth leg",
+  "source": "per-stock/APP/context-2026-11-08.md; 10-Q acc. 0001751008-26-000069",
+  "set": "2026-11-19",
+  "expires": "2027-02-17",
+  "review_event": "Q4 2026 results (expected ~2027-02-10/12, unconfirmed; Q4 2025 printed 2026-02-11) and the FY2026 10-K legal section; Talbot leaves the 90-day window 2026-12-15"
  },
  "GOOGL": {
-  "reason": "Securities class action Stewart v. Alphabet, 3:26-cv-11290 (N.D. Cal., filed 2026-10-02), alleging the Gemini 3.5 Pro delay was not disclosed - an allegation only",
-  "source": "per-stock/GOOGL/context-2026-10-06.md",
-  "set": "2026-10-11",
-  "expires": "2026-11-05",
-  "review_event": "Q3 2026 results (expected late October 2026)"
+  "reason": "Securities class action Stewart v. Alphabet, 3:26-cv-11290 (N.D. Cal., filed 2026-10-02; inside the 90-day window to 2026-12-31) alleging the Gemini 3.5 Pro delay was not disclosed - allegation only; complaint stage, lead-plaintiff motions due 2026-12-01. Not counted: California DMV Waymo freeway order (eff. 2026-11-11) and EU Advocate General opinion reviving the EUR1.49B AdSense fine (2026-11-12), both immaterial at Alphabet scale",
+  "source": "per-stock/GOOGL/context-2026-11-01.md; per-stock/GOOGL/news-log.md 2026-11-17",
+  "set": "2026-11-19",
+  "expires": "2026-12-31",
+  "review_event": "Stewart turns 90 days 2026-12-31; lead-plaintiff appointment after 2026-12-01; Q4 2026 results expected ~2027-02-03 (unconfirmed)"
  },
  "SPCX": {
-  "reason": "Transformative transactions since the last reported quarter: $60B all-stock Cursor acquisition closed 2026-08-14 (not yet in any reported quarter), ~$8B spectrum purchase and ~$40B debt talks; OpenAI withdrawing models from Cursor 2026-11-12",
-  "source": "per-stock/SPCX/context-2026-10-12.md",
-  "set": "2026-10-12",
-  "expires": "2026-11-10",
-  "review_event": "Q3 2026 results (listed for 2026-11-05, unconfirmed)"
+  "reason": "Transactions since the last reported quarter (Q3, q/e 2026-09-30): binding ~$40B Apollo GPU master finance lease commitment 2026-10-24, and ~$8B Grain 800 MHz spectrum purchase (~2026-10-08, FCC approval pending) absent from the Q3 10-Q; SpaceX-Tesla combination under special-committee review with talks reported progressing (no terms filed); Virginia AG notice of violation over Grok (2026-10-19); OpenAI model withdrawal from Cursor (proposed 2026-11-12, effect unconfirmed). Cursor itself is now in a reported quarter (consolidated from 2026-08-14)",
+  "source": "8-K Item 8.01 acc. 0001104659-26-118614; 10-Q acc. 0001628280-26-066880 Notes 16, 20; per-stock/SPCX/context-2026-11-01.md",
+  "set": "2026-11-19",
+  "expires": "2027-02-16",
+  "review_event": "Q4 2026 results (expected early-to-mid February 2027, unconfirmed: Yahoo 2027-02-09); any signed Tesla merger agreement or 8-K naming terms"
  },
  "INTU": {
-  "reason": "Securities class actions Baldwin v. Intuit, 3:26-cv-07086 (N.D. Cal., filed 2026-07-10) and Bruce v. Intuit, 5:26-cv-08518 (N.D. Cal., filed 2026-08-17; inside the 90-day window) over TurboTax pricing claims - allegations only; Ontario class certified 2026-07-24",
-  "source": "per-stock/INTU/context-2026-10-16.md",
-  "set": "2026-10-16",
-  "expires": "2026-11-21",
-  "review_event": "Q1 FY27 results (expected 2026-11-19, unconfirmed)"
+  "reason": "Guidance cut 2026-11-19 with Q1 FY27 results: FY27 revenue guide lowered to $23.081-23.365B (from $23.279-23.512B) on Credit Karma (+3-7%, from +11-13%); EPS guide held. Same day agreed to sell Mailchimp to Bending Spoons for ~$3.68B ($3.31B cash + ~$368M Bending Spoons stock), close early CY2027, excluded from guidance. Securities class actions Baldwin (3:26-cv-07086) and Bruce (5:26-cv-08518) still pending, both now outside the 90-day window - allegations only",
+  "source": "8-K Item 2.02 acc. 0000896878-26-000043 (Ex-99.01); 8-K Item 1.01 acc. 0001193125-26-468834; per-stock/INTU/context-2026-11-15.md",
+  "set": "2026-11-19",
+  "expires": "2027-03-01",
+  "review_event": "Q2 FY27 results (expected ~2027-02-24/26, unconfirmed; Q2 FY26 printed 2026-02-26); Mailchimp close (early CY2027) when Intuit updates guidance"
  },
  "NBIS": {
   "reason": "Guidance cut 2026-11-12 with Q3 results: FY26 revenue narrowed to $3.0-3.2B (from $3.0-3.4B) on third-party data-center delays (Vineland, NJ), year-end ARR target pushed to February 2027 and ARR guidance withdrawn; ~33% of Q3 revenue was non-recurring partnership revenue",
@@ -39,5 +39,19 @@
   "set": "2026-11-14",
   "expires": "2027-02-26",
   "review_event": "Q4 2026 results (expected mid-February 2027, unconfirmed)"
+ },
+ "LITE": {
+  "reason": "Transformative transaction since the last reported quarter: merger agreement signed 2026-11-01 for Marvell to acquire Lumentum in an all-stock deal at a fixed 4.500 MRVL shares per LITE share (headline implied EV $115B, ~$1,132/sh, 23.9% premium to 2026-10-28; ~$771 implied after the 11-02 MRVL drop); LITE holders ~33% of the combined company; close expected 1H CY2028 subject to both shareholder votes, HSR/other approvals and S-4 effectiveness; termination fees $5.8B (Marvell) / $2.9B (LITE) / $3.2B regulatory reverse fee. LITE now trades as a MRVL-linked arb",
+  "source": "8-K Items 1.01/5.02/7.01 acc. 0001193125-26-442758 (Ex-99.1); per-stock/LITE/context-2026-11-08.md",
+  "set": "2026-11-19",
+  "expires": "2027-02-09",
+  "review_event": "FQ2 FY27 results (expected ~2027-02-03, unconfirmed; FQ2 FY26 printed 2026-02-03), the first reported quarter containing the signing; then S-4 effectiveness and the shareholder votes"
+ },
+ "GMED": {
+  "reason": "Guidance cut 2026-11-05 with Q3 results: FY2026 revenue guide lowered to $3.09B from $3.18-3.22B (implied Q4 ~-6% YoY); non-GAAP EPS guide $4.95-5.05 reaffirmed. No securities case found (docket check not run)",
+  "source": "8-K Item 2.02 acc. 0001628280-26-071042 (Ex-99.1); per-stock/GMED/context-2026-11-15.md",
+  "set": "2026-11-19",
+  "expires": "2027-03-01",
+  "review_event": "Q4 2026 results (expected ~2027-02-23/25, unconfirmed; Q4 2025 printed 2026-02-24); possible preliminary revenue at the January 2027 JPM conference (as on 2026-01-07)"
  }
 }
