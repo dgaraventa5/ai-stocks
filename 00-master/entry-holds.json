@@ -3,7 +3,7 @@
   "definition": "Rule-35 entry holds. A ticker listed here may not ENTER the portfolio while its hold is live (expires is inclusive; a missing or unreadable expiry fails closed). Holds never affect scores, ranks, or names already held. Human-written in the session that writes the briefing recording the event; the scripts never edit this file.",
   "when_to_add": "The context briefing records an unresolved event the score cannot see: a new government enforcement action, a securities case filed in the last 90 days, a guidance cut, or a transformative transaction announced since the last reported quarter.",
   "expiry": "A set date, normally just after the next earnings report or other resolving event. An expired hold is simply inactive; replace or remove the entry when re-ruling.",
-  "updated": "2026-11-19"
+  "updated": "2026-11-21"
  },
  "APP": {
   "reason": "San Diego County enforcement action filed 2026-10-05 (People v. AppLovin, San Diego Superior Court; UCL/FAL, seeks injunction on data collection, restitution, penalties; adds an advertiser-billing allegation) - no response or docket progress found and not described in the Q3 10-Q; securities class action Talbot v. AppLovin, 3:26-cv-10584 (N.D. Cal., filed 2026-09-16; 90-day window to 2026-12-15) plus Patel derivative suit (filed 2026-10-07). Q3 beat and above-consensus Q4 guide resolved the growth leg",
@@ -53,5 +53,12 @@
   "set": "2026-11-19",
   "expires": "2027-03-01",
   "review_event": "Q4 2026 results (expected ~2027-02-23/25, unconfirmed; Q4 2025 printed 2026-02-24); possible preliminary revenue at the January 2027 JPM conference (as on 2026-01-07)"
+ },
+ "ANT": {
+  "reason": "Unresolved government action and transformative recapitalization since the last reported quarter (Q3, q/e 2026-09-30): D.C. Circuit upheld the Department of War Section 4713 (FASCSA) supply-chain-risk designation 2-1 on 2026-09-25, rehearing en banc petition pending, government appealing the N.D. Cal. judgment for Anthropic; FTC civil investigative demand issued Oct 2026 (no claims asserted); IPO 2026-11-19 ($81.3B + $26.0B Class N placement) with ~1.55B Amazon rollover-note shares still converting quarterly. No 10-Q/10-K yet",
+  "source": "per-stock/ANT/context-2026-11-21.md; 424B4 acc. 0001628280-26-074944 (Legal Proceedings p.249-250; Liquidity p.169-172)",
+  "set": "2026-11-21",
+  "expires": "2027-03-15",
+  "review_event": "FY2026 results / first 10-K (date unconfirmed, expected Feb-Mar 2027); D.C. Circuit en banc decision"
  }
 }
