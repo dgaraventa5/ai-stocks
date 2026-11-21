@@ -1,3 +1,4 @@
 # SHAZ — News log
 
 - **2026-06-12** — Situational Awareness LP 13F-HR Q1 2026 (period 2026-03-31, filed 2026-05-18, acc 0002045724-26-000008): NEW position $18.1M (796K sh, CUSIP 778920306 — ticker resolved SHAZ, fka Roth CH de-SPAC). Added to watchlist UNSCOREABLE/✗ — $1.05B mcap on $1.5M TTM rev, ~2 MW live, Bleecker St short report on ESDS anchor.
+- **2026-11-16** ⚠️ (weekly scan 2026-11-21; 8-K Items 2.02/7.01/9.01, acc. 0001493152-26-052409) — Q3 2026: revenue $9.9M (+414% QoQ), net loss $43.8M, adj. EBITDA −$25.8M; cash $1.3B, PP&E $1.7B. TCV ~$9.6B over 5.5 yrs ($2.5B since Q2) incl. $1.32B 5-yr take-or-pay with a global AI lab, plus post-quarter ~$1.0B (global services co.) and $170M (US inference platform) contracts; ARR $50M guided to $400–450M by Jan 2027; capacity 212MW expected in 2027 (+80MW added); $356M GPU-backed debt facility (Goldman + private credit); new CFO (Anuj Goel), CLO and COO.

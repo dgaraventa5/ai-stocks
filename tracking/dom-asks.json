@@ -13,6 +13,14 @@
     "ticker": "AMAT",
     "urgent": false
   },
+  "data_fix:CLSK:ev-mw-stale": {
+    "kind": "data_fix",
+    "raised": "2026-11-21",
+    "source": "refresh_objective_inputs.py all, weekly scan 2026-11-21",
+    "text": "EV/MW input stale: capacity-mw.json as-of 2026-06-30 (144 days); needs a MW refresh from CLSK's latest filing (runs may not edit capacity-mw.json)",
+    "ticker": "CLSK",
+    "urgent": false
+  },
   "data_fix:CRWV:capacity-mw": {
     "closed": "2026-11-19",
     "kind": "data_fix",
@@ -31,6 +39,14 @@
     "source": "tracking/weekly-news-scan-2026-11-14.md (Needs Dom)",
     "text": "capacity-mw.json needs a refresh (rule 13); runs may not edit it.",
     "ticker": "HIVE",
+    "urgent": false
+  },
+  "data_fix:SHAZ:capacity-mw": {
+    "kind": "data_fix",
+    "raised": "2026-11-21",
+    "source": "8-K Items 2.02/7.01, filed 2026-11-16; per-stock/SHAZ/news-log.md",
+    "text": "Q3 8-K (11-16): ~$9.6B contract value incl. $1.32B 5-yr take-or-pay with an AI lab, 212MW expected in 2027 - capacity-mw.json entry likely out of date (rule 13)",
+    "ticker": "SHAZ",
     "urgent": false
   },
   "eps_ruling:ALAB": {
@@ -231,6 +247,14 @@
     "source": "tracking/scheduled-run-log.md (2026-10-27)",
     "text": "New AI-rack residual-value backstop (8-K Item 2.03, max ~$43B). The run held R3 at 4; does it change R3?",
     "ticker": "AVGO",
+    "urgent": false
+  },
+  "question:NVT:thesis-trigger": {
+    "kind": "question",
+    "raised": "2026-11-21",
+    "source": "thesis_watch.py exit 1, weekly scan 2026-11-21",
+    "text": "NVT (held) has no thesis-break trigger in thesis_watch.py; write one in an attended session",
+    "ticker": "NVT",
     "urgent": false
   },
   "question:ORCL:r1-backlog": {

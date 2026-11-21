@@ -11,3 +11,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 - **2026-10-28** (weekly scan, 8-K, acc. 0000866374-26-000039) — FQ2 revenue $8.5B +25%; FY raised to $34.9-35.9B, adj EPS $4.84-5.16; EPC Power acquired; planned spin-off named Axiom.
 
 - **2026-11-05** (weekly scan 2026-11-07, SEC EDGAR) — 8-K 5.07: shareholders approved spin-off of the cloud/power infrastructure business as Axiom Solutions International. Source: https://www.sec.gov/Archives/edgar/data/866374/000086637426000045/flex-20261102.htm
+- **2026-11-17** (weekly scan 2026-11-21; 8-K Items 1.01/2.03/9.01, acc. 0001193125-26-465504) — Axiom Solutions (spin-co) signed a Citibank-led senior secured credit agreement: $1.265B revolver plus $1.65B 3-yr and $1.65B 5-yr term loans, unfunded until the spin-off closes (commitments lapse if not closed by 2027-06-30).

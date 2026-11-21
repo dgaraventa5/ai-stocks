@@ -6,3 +6,4 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 |---|---|---|
 
 - **2026-10-17** (weekly scan, SEC EDGAR) — 8-K 2026-10-15: employment terms for Interim CEO Dev Ittycheria ($15M RSUs through 2027-10-01, committed through at least 2028-04-01); CFO Michael Berry granted $10M retention RSUs. Permanent CEO search still open.
+- **2026-11-17** ⚠️ (weekly scan 2026-11-21; 8-K Ex-99.1, acc. 0001628280-26-074373) — Acquired Firebolt Analytics (real-time analytics engine for operational data and AI agents) into Atlas; terms not disclosed.

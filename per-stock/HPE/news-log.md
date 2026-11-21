@@ -9,3 +9,5 @@ Per CLAUDE.md §6: append every material development with date, source, and a on
 | 2026-05-28 | 8-K (Item 7.01) | Closed sale of additional 5.2% of H3C to Unisplendour (~$370M); ongoing China-stake monetization. |
 | 2026-05-29 | 8-K (Items 1.01/5.02) | Elliott cooperation agreement amended (board capped at 14); Christopher P. Hsu appointed to board — activist governance factor. |
 | 2026-06-18 | HPE Discover 2026 | First unified AI-networking stack post-Juniper: Marvis self-driving AI on Aruba Central, QFX switches w/ UALink (non-NVLink) interconnect; ~$450M synergy target by end-2026. |
+
+- **2026-11-18** (weekly scan 2026-11-21; 8-K Items 1.01/5.02/7.01/9.01, acc. 0001645590-26-000092) — Second amendment to the Elliott cooperation agreement: board capped at 15 until the 2027 annual meeting, then 13 until expiry; Jennifer Nason (ex-JPMorgan Global Chair of Investment Banking) appointed director.
