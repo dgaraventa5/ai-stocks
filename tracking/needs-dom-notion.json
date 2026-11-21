@@ -1,1 +1,14 @@
-{}
+{
+  "ask:data_fix:CLSK:ev-mw-stale": {
+    "page": "41fb69da-11c0-8181-ba34-d7b91b39a4d8",
+    "priority": 3
+  },
+  "ask:data_fix:SHAZ:capacity-mw": {
+    "page": "41fb69da-11c0-819d-bbe3-c5f9e1d8cee4",
+    "priority": 3
+  },
+  "ask:question:NVT:thesis-trigger": {
+    "page": "41fb69da-11c0-819f-a441-e7d882ffb5f4",
+    "priority": 2
+  }
+}

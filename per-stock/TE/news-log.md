@@ -4,3 +4,5 @@
 - **2026-07-28/30** ⚠️ (weekly scan (GlobeNewswire)) — T1 Energy guided a preliminary Q2 net loss of $34-37M; the solar-ITC 'safe harbor' grace period expired 7/4, raising order-book risk at the Dallas G1 fab; Section 232 polysilicon-tariff investigation and IEEPA tax-refund proceedings cited as swing factors. Stock down >35% over 30 days.
 
 - **2026-11-12** (weekly scan 2026-11-14, 8-K Ex-99.1 ⚠️) — Q3 net loss $34.7M, GM 8.5%, adj. EBITDA -$16.4M; ~1.58 GW new offtake; 2026 production guide 4.0-4.2 GW; G2_Austin debt financing unresolved and may need equity or equity-linked issuance. Source: https://www.sec.gov/Archives/edgar/data/1992243/000121390026118327/ea0311994-8k_t1energy.htm
+- **2026-11-16** ⚠️ (weekly scan 2026-11-21; 8-K, acc. 0001213900-26-120101) — Entered a $100M at-the-market equity program with Roth Capital, the equity funding flagged with Q3 results.
+- **2026-11-18** (weekly scan 2026-11-21; 8-K, acc. 0001213900-26-121846) — CFO Evan Calio also named President (eff. 2026-11-12); resale registration of 18,858,524 shares issued/issuable to Evervolt Green Energy as part of an IP purchase.

@@ -1991,6 +1991,21 @@
           "APH",
           "KLIC"
         ]
+      },
+      {
+        "date": "2026-11-21",
+        "roster": [
+          "ALAB",
+          "WDC",
+          "STX",
+          "POWL",
+          "RDDT",
+          "TER",
+          "RMBS",
+          "APP",
+          "APH",
+          "GEV"
+        ]
       }
     ],
     "BAND_TAIL": [
@@ -2432,6 +2447,26 @@
           "NTAP",
           "ORCL",
           "NXT"
+        ]
+      },
+      {
+        "date": "2026-11-21",
+        "roster": [
+          "KEYS",
+          "KLIC",
+          "VST",
+          "LRCX",
+          "KLAC",
+          "SNPS",
+          "CMI",
+          "BE",
+          "LITE",
+          "AAON",
+          "TSEM",
+          "CGNX",
+          "TT",
+          "NXT",
+          "NTAP"
         ]
       }
     ],
