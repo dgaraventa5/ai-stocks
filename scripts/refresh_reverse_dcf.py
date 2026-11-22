@@ -49,6 +49,12 @@ def _ev_over_fcf(ticker):
 
     t = yf.Ticker(ticker)
     info = t.info or {}
+    # Filing override (filing_overrides.py): Yahoo's EV and statement FCF are
+    # wrong for this name until it catches up to the override's quarter.
+    import filing_overrides
+    entry = filing_overrides.load().get(ticker)
+    if entry and filing_overrides.status(entry, info) != "expired":
+        return filing_overrides.ev_fcf(entry, info)
     trading, financial = info.get("currency"), info.get("financialCurrency")
 
     if adr_currency.has_currency_mismatch(trading, financial):
