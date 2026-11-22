@@ -68,7 +68,7 @@ async function renderFooter({ showScored = false } = {}) {
 }
 
 const CHART_COLORS = { model: '#3fb950', SMH: '#58a6ff', QQQ: '#bc8cff', SPY: '#e3b341', EW: '#8b949e',
-  EW_ROSTER: '#56d364', INVVOL_ROSTER: '#f778ba', BAND_TOP: '#1f6feb', BAND_NEXT: '#d29922', BAND_TAIL: '#f85149' };
+  MODEL_TOP25: '#56d364', VQR70_TOP15: '#f778ba', VQR70_TOP25: '#f0883e' };
 
 function lineDataset(label, data, color, emphasized = false) {
   return { label, data, borderColor: color, backgroundColor: color,

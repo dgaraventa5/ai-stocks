@@ -4,10 +4,25 @@ renderFooter();
 (async () => {
   try {
     const perf = await loadJSON('data/performance.json');
+    // Alternative builds (2026-11-21) are recorded forward only, so each starts
+    // mid-history. Re-base each to the Model's value on its first day: the
+    // lines start on the Model line and the gap is the difference in return.
+    const rebase = d => {
+      if (!Array.isArray(d)) return d;
+      const i0 = d.findIndex(v => v !== null);
+      if (i0 < 0 || !perf.model[i0] || !d[i0]) return null;
+      const k = perf.model[i0] / d[i0];
+      return d.map(v => (v === null ? null : v * k));
+    };
+    const alts = [
+      ['Model, top 25', rebase(perf.bench.MODEL_TOP25), CHART_COLORS.MODEL_TOP25,
+        'The same score as the Model, holding the top 25 names instead of 15, equal weight.'],
+      ['V/Q/R floor 70, top 15', rebase(perf.bench.VQR70_TOP15), CHART_COLORS.VQR70_TOP15,
+        'Only names with an AI Thesis score of 70 or more, ranked on Value, Quality and Risk alone; top 15, equal weight.'],
+      ['V/Q/R floor 70, top 25', rebase(perf.bench.VQR70_TOP25), CHART_COLORS.VQR70_TOP25,
+        'The same V/Q/R ranking, holding the top 25.'],
+    ].filter(([, d]) => Array.isArray(d));
     // [label, data, color, emphasized, visible-by-default, one-line description].
-    // The v2 shadow series (sizing null + score-band scouts, spec A4/C1) ship
-    // hidden so the default view stays clean; they start mid-history (null gap
-    // before their deploy date). Filter tolerates data files exported before v2.
     const series = [
       ['Model', perf.model, CHART_COLORS.model, true, true,
         'The live portfolio — the top 15 names by score, every position equally sized (since 2026-09-08; volatility-based sizing before that).'],
@@ -17,16 +32,8 @@ renderFooter();
         'Nasdaq-100 ETF — the big-tech benchmark.'],
       ['S&P 500', perf.bench.SPY, CHART_COLORS.SPY, false, true,
         'The broad US market.'],
-      ['Same picks, equal weight', perf.bench.EW_ROSTER, CHART_COLORS.EW_ROSTER, false, false,
-        'The model’s exact stocks and trades, every position equally sized — the gap vs Model up to 2026-09-08 shows what volatility-based sizing added (or cost); after that the two lines coincide.'],
-      ['Same picks, volatility-sized', perf.bench.INVVOL_ROSTER, CHART_COLORS.INVVOL_ROSTER, false, false,
-        'The model’s exact stocks, sized the old way (steadier stocks bigger) from 2026-09-08 on — the standing check on whether dropping volatility-based sizing was right.'],
-      ['Band 1–15', perf.bench.BAND_TOP, CHART_COLORS.BAND_TOP, false, false,
-        'The score’s top 15 names, equal weight, rebalanced mechanically — the raw picks with no sizing or trading rules.'],
-      ['Band 16–25', perf.bench.BAND_NEXT, CHART_COLORS.BAND_NEXT, false, false,
-        'The next 10 names by score — if this keeps pace with Band 1–15, holding a bigger portfolio would be justified.'],
-      ['Band 26–40', perf.bench.BAND_TAIL, CHART_COLORS.BAND_TAIL, false, false,
-        'Ranks 26–40 — the control group: if these keep up with the top ranks, the score isn’t adding anything.'],
+      ...alts.map(([l, d, c, desc]) => [l, d, c, false, false,
+        `${desc} Re-picked whenever the scores change, with no hold band; tracked from its first day, starting at the Model’s value that day.`]),
     ].filter(([, d]) => Array.isArray(d));
     const chart = new Chart(document.getElementById('chart'), {
       type: 'line',
@@ -56,5 +63,22 @@ renderFooter();
         <td class="num ${pctClass(m.SMH)}">${fmtPct(m.SMH)}</td>
         <td class="num ${pctClass(m.QQQ)}">${fmtPct(m.QQQ)}</td>
         <td class="num ${pctClass(m.SPY)}">${fmtPct(m.SPY)}</td></tr>`).join('');
+
+    const altBox = document.getElementById('alt-builds');
+    if (altBox && alts.length) {
+      const pct = (d, i) => d[d.length - 1] / d[i] - 1;
+      altBox.innerHTML =
+        '<tr><th>Build</th><th>Tracked since</th><th class="num">Build</th>' +
+        '<th class="num">Model</th><th class="num">Difference</th></tr>' +
+        alts.map(([l, d]) => {
+          const i0 = d.findIndex(v => v !== null);
+          const b = pct(d, i0), m = pct(perf.model, i0);
+          return `<tr><td>${esc(l)}</td><td>${esc(perf.dates[i0])}</td>
+            <td class="num ${pctClass(b)}">${fmtPct(b)}</td>
+            <td class="num ${pctClass(m)}">${fmtPct(m)}</td>
+            <td class="num ${pctClass(b - m)}">${fmtPct(b - m)}</td></tr>`;
+        }).join('');
+      altBox.closest('.panel').hidden = false;
+    }
   } catch (e) { showError('main', e.message); }
 })();

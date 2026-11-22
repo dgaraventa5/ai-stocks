@@ -621,6 +621,17 @@ run ahead as scouts.
   backfilled — treat like the site privacy gate). This is the panel all future
   IC/cutoff work requires.
 
+**Amendment 2026-11-21 (Dom): the Performance tab tracks the alternative
+builds under consideration instead of the shadows.** Three forward-only
+trackers, equal weight, re-picked from the tradable universe on every real
+`refresh_targets` run with no hold band or exit clock: `MODEL_TOP25` (live
+score, top 25), `VQR70_TOP15` and `VQR70_TOP25` (only names with AI Thesis
+score >= 70, ranked on Value/Quality/Risk at 20/20/15 rescaled to 100%,
+frozen in `refresh_targets.VQR_WEIGHTS`). On the chart each starts at the
+Model's value on its first day. Started 2026-11-21 from that day's scores.
+EW_ROSTER, INVVOL_ROSTER and BAND_* are no longer shown but are still
+recorded, so the rule-28 and rule-33 comparisons keep their history.
+
 ### 29. Live execution boundary — read-only Claude, one order writer, tracking/live/ privacy (added 2026-08-09, approved by Dom)
 
 Spec: `docs/superpowers/specs/2026-08-09-agentic-execution-pipeline-spec.md`.

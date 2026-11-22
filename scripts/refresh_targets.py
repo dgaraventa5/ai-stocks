@@ -277,19 +277,12 @@ def _update_invvol_shadow(cfg: dict, roster: list[str], siz: dict,
     return True
 
 
-def _update_band_shadows(cfg: dict, live: list, pcfg: dict, today: str) -> bool:
-    """Refresh BAND_TOP/NEXT/TAIL rosters from today's ranks (v2 spec C1).
-    Pure-score ranking (no incumbency tie-break): the bands are unsized
-    scouts, not the book. Appends a shadow event only when a roster actually
-    changed; same-day re-runs replace, prior days are never rewritten;
-    forward-only (first event = first real run after deploy). Returns True
-    when anything changed (caller persists cfg)."""
-    sh = pcfg['shadows']
-    ranked = [x['ticker'] for x in
-              sorted(live, key=lambda x: (-x['TOTAL'], x['ticker']))]
-    rosters = {'BAND_TOP': ranked[:sh['top']],
-               'BAND_NEXT': ranked[sh['top']:sh['next']],
-               'BAND_TAIL': ranked[sh['next']:sh['tail']]}
+def _log_shadow_rosters(cfg: dict, rosters: dict[str, list[str]],
+                        today: str) -> bool:
+    """Append a {date, roster} shadow event for each roster that changed.
+    Same-day re-runs replace; prior days are never rewritten; forward-only
+    (first event = first real run after deploy). Returns True when anything
+    changed (caller persists cfg)."""
     events = cfg.setdefault('shadow_events', {})
     changed = False
     for name, roster in rosters.items():
@@ -305,6 +298,63 @@ def _update_band_shadows(cfg: dict, live: list, pcfg: dict, today: str) -> bool:
         changed = True
         flag(f'shadow {name}: roster refreshed ({len(roster)} names)')
     return changed
+
+
+def _update_band_shadows(cfg: dict, live: list, pcfg: dict, today: str) -> bool:
+    """Refresh BAND_TOP/NEXT/TAIL rosters from today's ranks (v2 spec C1).
+    Pure-score ranking (no incumbency tie-break): the bands are unsized
+    scouts, not the book. No longer shown on the site (2026-11-21, Dom);
+    still recorded so the rule-28 band comparison keeps its history."""
+    sh = pcfg['shadows']
+    ranked = [x['ticker'] for x in
+              sorted(live, key=lambda x: (-x['TOTAL'], x['ticker']))]
+    return _log_shadow_rosters(cfg, {
+        'BAND_TOP': ranked[:sh['top']],
+        'BAND_NEXT': ranked[sh['top']:sh['next']],
+        'BAND_TAIL': ranked[sh['next']:sh['tail']]}, today)
+
+
+# Alternative portfolio builds under consideration (Dom, 2026-11-21), tracked
+# forward on the site's Performance tab. The V/Q/R score is Value, Quality and
+# Risk only, at their live weights rescaled to 100% (20/20/15 -> 36.4/36.4/27.3,
+# the definition backtested 2026-11-09..15). FROZEN here, not read from the
+# Weights sheet, so a future category reweight cannot silently change what an
+# existing tracker measures. Only names with an AI Thesis score >= 70 (average
+# D-rating 3.8) qualify.
+VQR_WEIGHTS = {'Value': 20 / 55, 'Quality': 20 / 55, 'Risk': 15 / 55}
+VQR_AI_FLOOR = 70.0
+
+
+def vqr_score(x: dict) -> float | None:
+    """V/Q/R score for one recalc row, renormalised over the categories it
+    has (a blank category doesn't sink a name); None when it has none."""
+    have = {k: w for k, w in VQR_WEIGHTS.items() if x.get(k) is not None}
+    if not have:
+        return None
+    return sum(x[k] * w for k, w in have.items()) / sum(have.values())
+
+
+def alt_build_rosters(live: list, excluded: set[str] = frozenset()) -> dict:
+    """Rosters for the alternative builds. `live` is the selection universe
+    (tradable names when the rule-30 filter is on); `excluded` drops names
+    the live book can never hold (manual EXCLUDE overrides). Pure top-N
+    re-picks with no hold band or exit clock -- the same way the builds were
+    backtested."""
+    pool = [x for x in live if x['ticker'] not in excluded]
+    by_total = [x['ticker'] for x in
+                sorted(pool, key=lambda x: (-x['TOTAL'], x['ticker']))]
+    vqr = sorted(((vqr_score(x), x['ticker']) for x in pool
+                  if x.get('AI') is not None and x['AI'] >= VQR_AI_FLOOR),
+                 key=lambda p: (p[0] is None, -(p[0] or 0), p[1]))
+    vqr = [t for s, t in vqr if s is not None]
+    return {'MODEL_TOP25': by_total[:25],
+            'VQR70_TOP15': vqr[:15],
+            'VQR70_TOP25': vqr[:25]}
+
+
+def _update_alt_build_shadows(cfg: dict, live: list, excluded: set[str],
+                              today: str) -> bool:
+    return _log_shadow_rosters(cfg, alt_build_rosters(live, excluded), today)
 
 
 def refresh(dry_run: bool = False, resize: bool = False,
@@ -631,6 +681,10 @@ def refresh(dry_run: bool = False, resize: bool = False,
     # not — the scouts track today's ranks regardless of the book.
     shadows_changed = False if dry_run else _update_band_shadows(
         cfg, sel_live, pcfg, today)
+    if not dry_run:
+        shadows_changed = _update_alt_build_shadows(
+            cfg, sel_live, {t for t, v in overrides.items() if v == 'EXCLUDE'},
+            today) or shadows_changed
     # INVVOL_ROSTER (2026-09-08): with equal-weight live, record what
     # inverse-vol WOULD size at every event and monthly pass — MODEL minus
     # this shadow is the standing sizing audit (spec A4, roles swapped).

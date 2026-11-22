@@ -3084,6 +3084,92 @@
           "WDC": 0.037678
         }
       }
+    ],
+    "MODEL_TOP25": [
+      {
+        "date": "2026-11-21",
+        "roster": [
+          "MU",
+          "SNDK",
+          "FIX",
+          "TSM",
+          "NVDA",
+          "CRDO",
+          "MSFT",
+          "ANET",
+          "AVGO",
+          "META",
+          "PLTR",
+          "VRT",
+          "NVT",
+          "EME",
+          "ASML",
+          "ALAB",
+          "WDC",
+          "STX",
+          "POWL",
+          "RDDT",
+          "TER",
+          "RMBS",
+          "APP",
+          "APH",
+          "GEV"
+        ]
+      }
+    ],
+    "VQR70_TOP15": [
+      {
+        "date": "2026-11-21",
+        "roster": [
+          "MU",
+          "FIX",
+          "EME",
+          "MSFT",
+          "TSM",
+          "CRDO",
+          "VRT",
+          "META",
+          "NVDA",
+          "ASML",
+          "TER",
+          "WDC",
+          "VST",
+          "ANET",
+          "AVGO"
+        ]
+      }
+    ],
+    "VQR70_TOP25": [
+      {
+        "date": "2026-11-21",
+        "roster": [
+          "MU",
+          "FIX",
+          "EME",
+          "MSFT",
+          "TSM",
+          "CRDO",
+          "VRT",
+          "META",
+          "NVDA",
+          "ASML",
+          "TER",
+          "WDC",
+          "VST",
+          "ANET",
+          "AVGO",
+          "NVT",
+          "GEV",
+          "TT",
+          "KLIC",
+          "PLTR",
+          "STX",
+          "KLAC",
+          "GOOGL",
+          "CAMT",
+          "FORM"
+        ]
+      }
     ]
   },
   "sizing_state": {
