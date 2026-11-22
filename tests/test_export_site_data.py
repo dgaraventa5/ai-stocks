@@ -341,3 +341,21 @@ def test_scores_as_of_exports_only_a_date(tmp_path):
         '2026-99-99,BBB\n2026-13-45,CCC\n٢٠٢٧-٠١-٠١,DDD\n2026-12-31<script>,EEE\n'
         '20270101,FFF\n2027-W01-1,GGG\n')
     assert ex.scores_as_of(tmp_path) == '2026-11-02'
+
+
+def test_performance_rebuilt_until_marks_backfilled_trackers(repo):
+    """Backfilled tracker events (rebuilt: true) export the date live
+    tracking began, so the chart can draw the rebuilt stretch dashed."""
+    import json
+    cp = repo / 'tracking' / 'performance-config.json'
+    cfg = json.loads(cp.read_text())
+    cfg['shadow_events'] = {
+        'VQR70_TOP15': [
+            {'date': '2026-08-12', 'roster': ['AAA'], 'rebuilt': True},
+            {'date': '2026-11-21', 'roster': ['AAA', 'BBB']}],
+        'BAND_TOP': [{'date': '2026-08-11', 'roster': ['AAA']}]}
+    cp.write_text(json.dumps(cfg))
+
+    perf = ex.export_performance(repo)
+
+    assert perf['rebuilt_until'] == {'VQR70_TOP15': '2026-11-21'}

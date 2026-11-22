@@ -96,3 +96,43 @@ def test_dry_run_logs_nothing(monkeypatch, tmp_path):
     monkeypatch.setattr(rt, 'load_pcfg', _rank_pcfg)
     rt.refresh(dry_run=True, portfolio=str(path))
     assert 'shadow_events' not in cfg
+
+
+# ---- backfill (scripts/backfill_alt_builds.py, 2026-11-21) ------------------
+
+import backfill_alt_builds as bf  # noqa: E402
+
+
+def test_merge_keeps_live_events_and_replaces_old_rebuilt_ones():
+    live = {'date': '2026-11-21', 'roster': ['A']}
+    cfg = {'shadow_events': {'VQR70_TOP15': [
+        {'date': '2026-08-01', 'roster': ['OLD'], 'rebuilt': True}, live]}}
+    new = {'VQR70_TOP15': [{'date': '2026-08-12', 'roster': ['B'],
+                            'rebuilt': True}]}
+    bf.merge(cfg, new)
+    assert cfg['shadow_events']['VQR70_TOP15'] == new['VQR70_TOP15'] + [live]
+
+
+def test_merge_refuses_overlap_with_live_tracking():
+    cfg = {'shadow_events': {'VQR70_TOP15': [
+        {'date': '2026-11-21', 'roster': ['A']}]}}
+    with pytest.raises(SystemExit):
+        bf.merge(cfg, {'VQR70_TOP15': [{'date': '2026-11-21', 'roster': ['B'],
+                                        'rebuilt': True}]})
+
+
+def test_build_events_next_day_effective_and_collapsed(monkeypatch):
+    monkeypatch.setattr(bf, 'score_dates',
+                        lambda first: ['2026-08-11', '2026-08-13', '2026-11-20'])
+    lists = {'2026-08-11': ['A', 'B'], '2026-08-13': ['B', 'A'],
+             '2026-11-20': ['C']}
+    monkeypatch.setattr(bf, 'model_top25', lambda day: lists[day])
+    monkeypatch.setattr(bf, 'vqr_rosters', lambda day, ref, tmp, cache: {
+        'VQR70_TOP15': lists[day], 'VQR70_TOP25': lists[day]})
+    ev = bf.build_events('2026-11-21', 'origin/main')
+    got = [(e['scored'], e['date'], e['roster']) for e in ev['MODEL_TOP25']]
+    # same names in another order is not a new roster; each takes effect the
+    # day after its scoring date; a roster effective on the live start date
+    # would overlap live tracking and is dropped
+    assert got == [('2026-08-11', '2026-08-12', ['A', 'B'])]
+    assert all(e['rebuilt'] for evs in ev.values() for e in evs)

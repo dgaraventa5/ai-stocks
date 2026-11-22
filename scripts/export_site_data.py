@@ -199,8 +199,18 @@ def export_performance(root: Path) -> dict:
             prev_close[key] = series[last]
         monthly.append(row)
 
+    # Backfilled tracker stretches (shadow events marked rebuilt, 2026-11-21):
+    # the date live tracking took over, so the chart can draw the earlier
+    # part dashed. Dates only — nothing dollar-denominated.
+    rebuilt_until = {}
+    for name, evs in (cfg.get('shadow_events') or {}).items():
+        if any(e.get('rebuilt') for e in evs):
+            live = [e['date'] for e in evs if not e.get('rebuilt')]
+            rebuilt_until[name] = min(live) if live else raw['as_of']
+
     return {'dates': raw['dates'], 'model': model, 'bench': bench,
-            'summary': summary, 'monthly': monthly, 'as_of': raw['as_of']}
+            'summary': summary, 'monthly': monthly, 'as_of': raw['as_of'],
+            'rebuilt_until': rebuilt_until}
 
 
 def export_changes(root: Path) -> list[dict]:
