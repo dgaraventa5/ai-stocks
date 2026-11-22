@@ -190,15 +190,17 @@ def test_refresh_tolerates_missing_recon_and_positions(monkeypatch, tmp_path):
 
 def _seed_cfg(exit_pending=None):
     """Two-name steady state (tiers match live) so only the exit path moves.
-    shadow_events pre-seeded to the rosters _update_band_shadows would compute
-    for the two-name live list, so band upkeep is a no-op in these tests and
+    shadow_events pre-seeded to the rosters the band and alt-build upkeep
+    would compute for the two-name live list, so shadow upkeep is a no-op in these tests and
     the save assertions isolate the pending-clock behavior."""
     cfg = {'inception': '2026-05-26', 'events': [{
         'date': '2026-06-18', 'reason': 'seed',
         'allocations': {'NVDA': 500.0, 'TSM': 500.0}, 'cash': 0.0,
         'tiers': {'NVDA': '✓✓✓', 'TSM': '✓✓'}}],
         'shadow_events': {'BAND_TOP': [
-            {'date': '2026-07-30', 'roster': ['NVDA', 'TSM']}]}}
+            {'date': '2026-07-30', 'roster': ['NVDA', 'TSM']}],
+            'MODEL_TOP25': [
+            {'date': '2026-11-21', 'roster': ['NVDA', 'TSM']}]}}
     if exit_pending is not None:
         cfg['exit_pending'] = exit_pending
     return cfg
