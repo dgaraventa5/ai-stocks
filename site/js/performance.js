@@ -7,8 +7,10 @@ renderFooter();
     // Alternative builds (2026-11-21) are recorded forward only, so each starts
     // mid-history. Re-base each to the Model's value on its first day: the
     // lines start on the Model line and the gap is the difference in return.
+    // A build with no prices yet still gets a (disabled) toggle, so the page
+    // shows what is being tracked from day one.
     const rebase = d => {
-      if (!Array.isArray(d)) return d;
+      if (!Array.isArray(d)) return null;
       const i0 = d.findIndex(v => v !== null);
       if (i0 < 0 || !perf.model[i0] || !d[i0]) return null;
       const k = perf.model[i0] / d[i0];
@@ -21,8 +23,10 @@ renderFooter();
         'Only names with an AI Thesis score of 70 or more, ranked on Value, Quality and Risk alone; top 15, equal weight.'],
       ['V/Q/R floor 70, top 25', rebase(perf.bench.VQR70_TOP25), CHART_COLORS.VQR70_TOP25,
         'The same V/Q/R ranking, holding the top 25.'],
-    ].filter(([, d]) => Array.isArray(d));
-    // [label, data, color, emphasized, visible-by-default, one-line description].
+    ];
+    const started = alts.filter(([, d]) => Array.isArray(d));
+    const PENDING = 'starts after the next close';
+    // [label, data, color, emphasized, visible-by-default, description, pending].
     const series = [
       ['Model', perf.model, CHART_COLORS.model, true, true,
         'The live portfolio — the top 15 names by score, every position equally sized (since 2026-09-08; volatility-based sizing before that).'],
@@ -32,8 +36,9 @@ renderFooter();
         'Nasdaq-100 ETF — the big-tech benchmark.'],
       ['S&P 500', perf.bench.SPY, CHART_COLORS.SPY, false, true,
         'The broad US market.'],
-      ...alts.map(([l, d, c, desc]) => [l, d, c, false, false,
-        `${desc} Re-picked whenever the scores change, with no hold band; tracked from its first day, starting at the Model’s value that day.`]),
+      ...alts.map(([l, d, c, desc]) => [l, d || perf.dates.map(() => null), c, false, false,
+        `${desc} Re-picked whenever the scores change, with no hold band; tracked from its first day, starting at the Model’s value that day.` +
+        (d ? '' : ` Tracking ${PENDING}.`), !d]),
     ].filter(([, d]) => Array.isArray(d));
     const chart = new Chart(document.getElementById('chart'), {
       type: 'line',
@@ -44,8 +49,10 @@ renderFooter();
         plugins: { legend: { display: false } } },
     });
 
-    document.getElementById('toggles').innerHTML = series.map(([l, , , , vis], i) =>
-      `<label><input type="checkbox" data-i="${i}" ${vis ? 'checked' : ''}> ${l}</label>`).join('');
+    document.getElementById('toggles').innerHTML = series.map(([l, , , , vis, , pending], i) =>
+      pending
+        ? `<label title="Tracking ${PENDING}"><input type="checkbox" data-i="${i}" disabled> ${esc(l)} (${PENDING})</label>`
+        : `<label><input type="checkbox" data-i="${i}" ${vis ? 'checked' : ''}> ${esc(l)}</label>`).join('');
     document.getElementById('toggles').addEventListener('change', e => {
       const i = Number(e.target.dataset.i);
       chart.setDatasetVisibility(i, e.target.checked);
@@ -65,12 +72,12 @@ renderFooter();
         <td class="num ${pctClass(m.SPY)}">${fmtPct(m.SPY)}</td></tr>`).join('');
 
     const altBox = document.getElementById('alt-builds');
-    if (altBox && alts.length) {
+    if (altBox && started.length) {
       const pct = (d, i) => d[d.length - 1] / d[i] - 1;
       altBox.innerHTML =
         '<tr><th>Build</th><th>Tracked since</th><th class="num">Build</th>' +
         '<th class="num">Model</th><th class="num">Difference</th></tr>' +
-        alts.map(([l, d]) => {
+        started.map(([l, d]) => {
           const i0 = d.findIndex(v => v !== null);
           const b = pct(d, i0), m = pct(perf.model, i0);
           return `<tr><td>${esc(l)}</td><td>${esc(perf.dates[i0])}</td>
