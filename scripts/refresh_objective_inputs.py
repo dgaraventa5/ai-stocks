@@ -28,6 +28,7 @@ except ModuleNotFoundError:          # pure + yfinance-free either way
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import eps_growth  # noqa: E402  (pure, stdlib-only)
+import filing_overrides  # noqa: E402  (pure, stdlib-only)
 from layer_cohorts import is_layer9_capacity as _is_layer9_capacity
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -349,7 +350,7 @@ def _layer_of(ws, row):
 
 
 def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
-            dma_fetcher=None, today=None):
+            dma_fetcher=None, today=None, overrides_path=None):
     """Orchestrate fetch → guards → (write|stage) for each target ticker.
 
     Args:
@@ -362,6 +363,9 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
                      pct_days_above_50dma. Injectable for tests.
         today: date object for Last Updated and staleness checks. Defaults
                to dt.date.today().
+        overrides_path: filing-overrides.json (default 00-master/). Per-ticker
+               filing values that replace Yahoo's while Yahoo is still on the
+               override's quarter (filing_overrides.py).
 
     Returns:
         dict with keys: mode_count, rows, flags, wrote.
@@ -371,6 +375,7 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
         from momentum_50dma import pct_days_above_50dma
         dma_fetcher = pct_days_above_50dma
     today = today or dt.date.today()
+    overrides = filing_overrides.load(overrides_path)
 
     wb = load_workbook(scoring_path, data_only=False)
     ws = wb["Watchlist"]
@@ -404,14 +409,22 @@ def refresh(targets, dry_run, scoring_path=SCORING_PATH, fetcher=None,
             continue
         existing = read_existing(ws, row)
         writes, flags = apply_guards(info, fresh, existing)
+        overridden = (ticker in overrides and filing_overrides.status(
+            overrides[ticker], info) != "expired")
+        if ticker in overrides:                     # Yahoo wrong, filing right
+            writes, oflags = filing_overrides.apply(overrides[ticker], info, writes)
+            flags.extend(oflags)
 
         mwf = mw_staleness_flag(ticker, layer, today)
         if mwf:
             flags.append(mwf)
         flags.extend(info.get("_pe_flags") or [])   # rule 36: kept-raw reasons
-        if info.get("_fcf_note"):                   # annual fallback or no FCF
+        # Yahoo's FCF and ND/EBITDA notes describe values an active filing
+        # override has just replaced; printing them would contradict the write.
+        if info.get("_fcf_note") and not overridden:  # annual fallback or no FCF
             flags.append(f"FCF: {info['_fcf_note']}")
-        flags.extend(info.get("_nd_flags") or [])  # negative-EBITDA stand-ins
+        if not overridden:
+            flags.extend(info.get("_nd_flags") or [])  # negative-EBITDA stand-ins
         flags.extend(info.get("_sec_flags") or [])  # SEC fallback source flags
         flags.extend(info.get("_fill_flags") or [])  # stand-ins replacing blanks
 

@@ -1,0 +1,16 @@
+{
+ "_meta": {
+  "definition": "Objective inputs taken from a filing where Yahoo is wrong. Read by refresh_objective_inputs.py and refresh_reverse_dcf.py via scripts/filing_overrides.py. 'fixed' values replace Yahoo's; FCF yield and EV/FCF are recomputed from the 'ev' block at the current market cap every run.",
+  "expiry": "An entry applies only while Yahoo's mostRecentQuarter equals period_end. When a newer quarter is reported the refresh writes Yahoo's values and flags FILING OVERRIDE EXPIRED: check them against the new filing, then update or remove the entry.",
+  "when_to_add": "A fresh listing or capital-structure change where Yahoo's statements lag the filing or misread it (cite the filing and show the arithmetic in the name's briefing).",
+  "updated": "2026-11-21"
+ },
+ "ANT": {
+  "period_end": "2026-09-30",
+  "source": "424B4 acc. 0001628280-26-074944",
+  "set": "2026-11-21",
+  "basis": "TTM Q4'25-Q3'26 from the prospectus. ROIC: op. income -$4,096M x (1-0.21) / (TA $154,320M - CL $11,671M). Gross margin: functional cost of revenue $5,789M on revenue $35,282M. FCF: OCF $5,956M - PP&E $945M - leased-asset prepayments $1,958M = $3,053M. ND/EBITDA: EBITDA <= 0 with net cash after the IPO -> 0 (rule 15 stand-in). EV: cash $244,552M (pro forma as adjusted $232,351M + greenshoe $12,201M); Amazon rollover notes valued as 1,547,676,309 shares at market; revolver undrawn. Arithmetic in per-stock/ANT/context-2026-11-21.md.",
+  "fixed": {"roic": -2.27, "gross_mgn": 83.59, "fcf_mgn": 8.65, "nd_ebitda": 0},
+  "ev": {"fcf_ttm": 3053000000, "cash": 244552000000, "debt": 0, "extra_shares": 1547676309}
+ }
+}
