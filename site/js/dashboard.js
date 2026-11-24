@@ -3,7 +3,6 @@ renderFooter();
 
 const TIER_CLASS = { '✓✓✓': 'tier-3', '✓✓': 'tier-2', '✓': 'tier-1',
   '?': 'tier-q', '✗': 'tier-x' };
-const INTRO_CLOSED_KEY = 'dashboard-intro-closed';
 
 // Optional data: the dashboard still renders if one of these is missing.
 const loadOptional = path => loadJSON(path).catch(() => null);
@@ -14,20 +13,9 @@ function fmtLongDate(iso) {
     : d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-// "What is this?" panel for first-time visitors. Open by default; once a
-// visitor closes it, it stays closed for them (per-browser, best effort).
+// "What is this?" panel for first-time visitors. Closed by default
+// (index.html); a visitor opens it with the summary toggle.
 function renderIntro(meta, perf) {
-  const intro = document.getElementById('intro');
-  try {
-    if (localStorage.getItem(INTRO_CLOSED_KEY) === '1') intro.removeAttribute('open');
-  } catch (e) { /* storage blocked: leave it open */ }
-  intro.addEventListener('toggle', () => {
-    try {
-      if (intro.open) localStorage.removeItem(INTRO_CLOSED_KEY);
-      else localStorage.setItem(INTRO_CLOSED_KEY, '1');
-    } catch (e) { /* storage blocked: nothing to remember */ }
-  });
-
   const scored = meta.scored ? `About ${esc(meta.scored)}` : 'About 200';
   const start = perf.dates && perf.dates.length ? fmtLongDate(perf.dates[0]) : null;
   const steps = [
